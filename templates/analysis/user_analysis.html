@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis for {{ username }} - Chess Analysis{% endblock %}
+
+{% block content %}
+<h2>Games Downloaded for {{ username }}</h2>
+
+<div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3>✅ Successfully Downloaded {{ games_count }} Games</h3>
+    <p>We've fetched your recent games from Lichess. Ready to generate your analysis report?</p>
+</div>
+
+<h3>What's Next?</h3>
+<p>Our analysis engine will:</p>
+<ul>
+    <li>📊 Analyze your game statistics and patterns</li>
+    <li>♟️ Review your opening repertoire and success rates</li>
+    <li>🎯 Calculate accuracy metrics using existing Lichess analysis</li>
+    <li>🔍 Run Stockfish analysis on games without existing evaluation data</li>
+    <li>📈 Generate insights and recommendations for improvement</li>
+</ul>
+
+<p><strong>Note:</strong> Analysis may take a few minutes for large game collections, especially when running Stockfish analysis on games without existing evaluation data.</p>
+
+<div style="margin: 30px 0;">
+    <a href="{% url 'analysis:generate_report' username %}" class="btn" style="background: #28a745; font-size: 18px; padding: 15px 30px;">
+        Generate Analysis Report
+    </a>
+</div>
+
+<h3>Game Collection Summary:</h3>
+<ul>
+    <li><strong>Total Games:</strong> {{ games_count }}</li>
+    <li><strong>Downloaded:</strong> {{ game_dataset.created_at|date:"F j, Y g:i A" }}</li>
+    <li><strong>Data Size:</strong> {{ game_dataset.raw_data|length }} characters</li>
+</ul>
+
+<p><small>
+    <em>Analysis reports are saved to your account so you can view them later.
+    You can also generate new reports as you play more games.</em>
+</small></p>
+{% endblock %}

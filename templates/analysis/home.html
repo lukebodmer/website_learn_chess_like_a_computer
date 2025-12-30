@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Chess Analysis{% endblock %}
+
+{% block content %}
+<h2>Welcome to Chess Analysis</h2>
+
+<p>Analyze your chess games with powerful computer analysis and get insights to improve your play.</p>
+
+<h3>Features:</h3>
+<ul>
+    <li>📊 <strong>Comprehensive Game Analysis</strong> - Get detailed statistics about your games</li>
+    <li>🎯 <strong>Accuracy Analysis</strong> - See how accurately you play and where you can improve</li>
+    <li>♟️ <strong>Opening Analysis</strong> - Analyze your opening repertoire and success rates</li>
+    <li>🔍 <strong>Stockfish Analysis</strong> - Deep computer analysis for games without existing evaluation</li>
+    <li>📈 <strong>Progress Tracking</strong> - Save and compare analysis reports over time</li>
+</ul>
+
+{% if user.is_authenticated %}
+    <h3>Get Started:</h3>
+    <p>Connect your Lichess account to start analyzing your games!</p>
+    <a href="{% url 'analysis:lichess_login' %}" class="btn">Connect Lichess Account</a>
+
+    {% if user.userprofile.lichess_username %}
+        <p>✅ Connected as: <strong>{{ user.userprofile.lichess_username }}</strong></p>
+        <a href="{% url 'analysis:user_analysis' user.userprofile.lichess_username %}" class="btn">Analyze My Games</a>
+    {% endif %}
+{% else %}
+    <h3>Get Started:</h3>
+    <p>Create an account or login to start analyzing your chess games!</p>
+    <a href="/auth/login/" class="btn">Login</a>
+    <a href="/auth/signup/" class="btn">Sign Up</a>
+{% endif %}
+
+<h3>How it works:</h3>
+<ol>
+    <li>Create an account and connect your Lichess account</li>
+    <li>We'll fetch your recent games (up to 5,000)</li>
+    <li>Our analysis engine will process your games with Stockfish</li>
+    <li>Get a comprehensive report with insights and recommendations</li>
+</ol>
+{% endblock %}

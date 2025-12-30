@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Chess Analysis{% endblock %}
+
+{% block content %}
+<h2>Login</h2>
+
+<form method="post" style="max-width: 400px;">
+    {% csrf_token %}
+    <div style="margin: 15px 0;">
+        <label for="{{ form.username.id_for_label }}">Username:</label><br>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div style="color: red; font-size: 14px;">{{ form.username.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div style="margin: 15px 0;">
+        <label for="{{ form.password.id_for_label }}">Password:</label><br>
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div style="color: red; font-size: 14px;">{{ form.password.errors }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="color: red; margin: 15px 0;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div style="margin: 20px 0;">
+        <button type="submit" class="btn">Login</button>
+    </div>
+</form>
+
+<p>Don't have an account? <a href="{% url 'analysis:home' %}">Sign up here</a></p>
+
+<style>
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Report for {{ username }} - Chess Analysis{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'analysis:user_reports' %}" class="btn" style="background: #6c757d;">
+        ← Back to My Reports
+    </a>
+</div>
+
+<!-- Insert the HTML report content directly -->
+{{ report_html|safe }}
+{% endblock %}

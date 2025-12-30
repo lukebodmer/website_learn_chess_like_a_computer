@@ -25,6 +25,7 @@
             packages = [
             # General packages
               # pkgs.hello-nix
+	      pkgs.stockfish
 
             # Python packages
               (python.withPackages (ps: with ps; [
@@ -34,6 +35,9 @@
                 flake8
 
               #  # packages for code
+		chess
+		django
+		djangorestframework
 		flask
 		requests
               #  matplotlib
