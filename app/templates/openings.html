@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Opening Analysis - Learn Chess Like a Computer{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Chess Opening Analysis</h1>
+    <p>Statistical analysis and computational insights for popular chess openings</p>
+</div>
+
+<div class="container">
+    <div class="openings-grid">
+        <div class="opening-card">
+            <h3>Sicilian Defense</h3>
+            <p>Deep statistical analysis of the most popular chess opening</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='sicilian-defense') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+
+        <div class="opening-card">
+            <h3>Queen's Gambit</h3>
+            <p>Computational breakdown of this classic positional opening</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='queens-gambit') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+
+        <div class="opening-card">
+            <h3>King's Indian Defense</h3>
+            <p>Pattern recognition and statistical insights for dynamic play</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='kings-indian-defense') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+
+        <div class="opening-card">
+            <h3>French Defense</h3>
+            <p>Algorithmic analysis of structure and strategic themes</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='french-defense') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+
+        <div class="opening-card">
+            <h3>English Opening</h3>
+            <p>Computer-driven insights into flexible opening systems</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='english-opening') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+
+        <div class="opening-card">
+            <h3>Caro-Kann Defense</h3>
+            <p>Statistical breakdown of solid defensive structures</p>
+            <a href="{{ url_for('main.opening_analysis', opening_name='caro-kann-defense') }}" class="btn btn-primary">View Analysis</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
