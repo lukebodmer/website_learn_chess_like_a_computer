@@ -3,58 +3,40 @@
 {% block title %}My Reports - Chess Analysis{% endblock %}
 
 {% block content %}
-<h2>My Analysis Reports</h2>
+<div class="reports-page-header">
+    <h2>My Analysis Reports</h2>
+    <a href="{% url 'analysis:lichess_login' %}" class="lichess-button-small">
+        {% load static %}
+        <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="lichess-logo">
+        Generate Lichess Report
+    </a>
+</div>
 
 {% if reports %}
     <p>Here are all your chess analysis reports:</p>
 
     {% for report in reports %}
-    <div style="background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #667eea;">
-        <h3>Report for {{ report.game_dataset.lichess_username }}</h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 15px 0;">
+    <a href="{% url 'analysis:view_report' report.id %}" class="report-card">
+        <div class="report-stats-inline">
             <div>
-                <strong>Games Analyzed:</strong><br>
-                {{ report.total_games }}
+                <strong>{{ report.game_dataset.lichess_username }}</strong>
+                <span class="report-card-platform">{{ report.platform }}</span>
             </div>
             <div>
-                <strong>Average Accuracy:</strong><br>
-                {% if report.average_accuracy %}{{ report.average_accuracy }}%{% else %}N/A{% endif %}
+                <strong>{{ report.total_games }} Games</strong>
             </div>
             <div>
-                <strong>Stockfish Games:</strong><br>
-                {{ report.stockfish_games_analyzed }}
-            </div>
-            <div>
-                <strong>Generated:</strong><br>
                 {{ report.created_at|date:"M j, Y" }}<br>
                 <small>{{ report.created_at|time:"g:i A" }}</small>
             </div>
         </div>
-
-        {% if report.analysis_duration %}
-        <p><small><strong>Analysis took:</strong> {{ report.analysis_duration.total_seconds|floatformat:1 }} seconds</small></p>
-        {% endif %}
-
-        <div style="margin-top: 15px;">
-            <a href="{% url 'analysis:generate_report' report.game_dataset.lichess_username %}" class="btn">
-                View Report
-            </a>
-        </div>
-    </div>
+    </a>
     {% endfor %}
 
 {% else %}
-    <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px;">
+    <div class="empty-state">
         <h3>No Reports Yet</h3>
-        <p>You haven't generated any analysis reports yet.</p>
-        <a href="{% url 'analysis:lichess_login' %}" class="btn">Connect Lichess to Get Started</a>
+        <p>You haven't generated any analysis reports yet. Use the button above to get started!</p>
     </div>
 {% endif %}
-
-<div style="margin-top: 30px; padding: 20px; background: #e8f4f8; border-radius: 8px;">
-    <h3>Generate New Report</h3>
-    <p>Connect your Lichess account and download fresh game data for a new analysis report.</p>
-    <a href="{% url 'analysis:lichess_login' %}" class="btn">Connect Lichess Account</a>
-</div>
 {% endblock %}

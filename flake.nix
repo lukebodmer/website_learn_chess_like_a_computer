@@ -26,6 +26,8 @@
             # General packages
               # pkgs.hello-nix
 	      pkgs.stockfish
+	      pkgs.postgresql
+	      pkgs.zstd
 
             # Python packages
               (python.withPackages (ps: with ps; [
@@ -36,10 +38,13 @@
 
               #  # packages for code
 		chess
+		chess_com
 		django
 		djangorestframework
 		flask
 		requests
+		pycountry
+		psycopg2
               #  matplotlib
               #  numpy
               ]))
@@ -49,6 +54,12 @@
 
             shellHook = ''
               export VIRTUAL_ENV="Custom Environment"
+
+              # PostgreSQL configuration
+              export PGDATA="$PWD/postgres_data"
+              export PGHOST="$PWD/postgres_data"
+              export PGPORT="5433"
+              export PGDATABASE="chess_analysis"
             '';
           };
         };

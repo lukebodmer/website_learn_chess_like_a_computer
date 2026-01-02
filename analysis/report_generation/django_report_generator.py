@@ -1,4 +1,6 @@
 from typing import Dict, Any
+import json
+from html import escape as html_escape
 
 
 def generate_report_content(analysis_data: Dict[str, Any]) -> str:
@@ -10,104 +12,9 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
     accuracy_analysis = analysis_data.get("accuracy_analysis", {})
 
     html = f"""
-    <style>
-        .section {{
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
-        .section h2 {{
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }}
-        .stats-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }}
-        .stat-card {{
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }}
-        .stat-number {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }}
-        .stat-label {{
-            color: #666;
-            font-size: 0.9em;
-        }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }}
-        th, td {{
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }}
-        th {{
-            background-color: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-        }}
-        tr:hover {{
-            background-color: #f5f5f5;
-        }}
-        .success-rate {{
-            font-weight: bold;
-        }}
-        .success-good {{ color: #28a745; }}
-        .success-ok {{ color: #ffc107; }}
-        .success-poor {{ color: #dc3545; }}
-        .opening-row {{
-            cursor: pointer;
-            background-color: #f8f9fa;
-        }}
-        .opening-row:hover {{
-            background-color: #e9ecef;
-        }}
-        .variations-row {{
-            display: none;
-            background-color: #fff;
-        }}
-        .variation-table {{
-            margin: 0;
-            width: 100%;
-        }}
-        .variation-table td {{
-            padding: 8px 12px;
-            border: none;
-            font-size: 0.9em;
-        }}
-        .variation-name {{
-            padding-left: 30px;
-            font-style: italic;
-            color: #666;
-        }}
-        .show-more-row {{
-            text-align: center;
-            background-color: #e9ecef;
-            cursor: pointer;
-        }}
-        .show-more-row:hover {{
-            background-color: #dee2e6;
-        }}
-        .additional-openings {{
-            display: none;
-        }}
-    </style>
+    <!-- Report content - styling handled by main.css -->
 
-    <div class="section" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="section report-header">
         <h1>Chess Analysis Report</h1>
         <h2>{username}</h2>
         <p>Comprehensive analysis of your chess games</p>
@@ -134,56 +41,36 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
     <div class="section">
         <h2>⚡ Game Terminations</h2>
         <p>How your games end and your success rate in each scenario:</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Termination Type</th>
-                    <th>Total Games</th>
-                    <th>Wins</th>
-                    <th>Draws</th>
-                    <th>Losses</th>
-                    <th>Win Rate</th>
-                    <th>Success Rate</th>
-                </tr>
-            </thead>
-            <tbody>
-"""
 
-    # Add termination statistics with win/loss breakdown (sorted by total games)
-    sorted_terminations = sorted(
-        terminations.items(), key=lambda x: x[1]["total"], reverse=True
-    )
-    for termination, stats in sorted_terminations:
-        win_rate = stats.get("win_rate", 0)
-        draw_rate = stats.get("draw_rate", 0)
-        loss_rate = stats.get("loss_rate", 0)
+        <div class="terminations-charts">
+            <div class="chart-container">
+                <h4>How I Win as White</h4>
+                <canvas id="whiteWins" width="300" height="300"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>How I Lose as White</h4>
+                <canvas id="whiteLosses" width="300" height="300"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>How I Win as Black</h4>
+                <canvas id="blackWins" width="300" height="300"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>How I Lose as Black</h4>
+                <canvas id="blackLosses" width="300" height="300"></canvas>
+            </div>
+        </div>
 
-        # Calculate success rate (wins + 0.5 * draws)
-        success_rate = round(win_rate + (draw_rate * 0.5), 1)
-
-        # Color code success rates
-        success_class = (
-            "success-good"
-            if success_rate >= 60
-            else "success-ok" if success_rate >= 45 else "success-poor"
-        )
-
-        html += f"""
-                <tr>
-                    <td>{termination}</td>
-                    <td>{stats['total']}</td>
-                    <td>{stats['wins']}</td>
-                    <td>{stats['draws']}</td>
-                    <td>{stats['losses']}</td>
-                    <td>{win_rate}%</td>
-                    <td class="success-rate {success_class}">{success_rate}%</td>
-                </tr>"""
-
-    html += """
-            </tbody>
-        </table>
+        <script type="application/json" id="terminationsData">
+{json.dumps({
+    "whiteWins": {term: stats.get('white_wins', 0) for term, stats in terminations.items()},
+    "whiteLosses": {term: stats.get('white_losses', 0) for term, stats in terminations.items()},
+    "blackWins": {term: stats.get('black_wins', 0) for term, stats in terminations.items()},
+    "blackLosses": {term: stats.get('black_losses', 0) for term, stats in terminations.items()}
+}, indent=2)}
+        </script>
     </div>
-"""
+    """
 
     # Calculate total games in opening analysis
     total_opening_games = sum(stats["total"] for stats in openings.values())
@@ -197,24 +84,22 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
             <thead>
                 <tr>
                     <th>Opening</th>
-                    <th>Games Played</th>
-                    <th>Wins</th>
-                    <th>Draws</th>
-                    <th>Losses</th>
-                    <th>Win Rate</th>
+                    <th>Games</th>
+                    <th>Results</th>
                     <th>Success Rate</th>
+                    <th>Board</th>
                 </tr>
             </thead>
             <tbody>
 """
 
-    # Add opening statistics (show top 15, then collapsible "show more")
+    # Add opening statistics (show top 4, then collapsible "show more")
     opening_id = 0
     opening_list = list(openings.items())
-    top_openings = opening_list[:15]
-    additional_openings = opening_list[15:]
+    top_openings = opening_list[:4]
+    additional_openings = opening_list[4:]
 
-    # Show top 15 openings
+    # Show top 5 openings
     for main_opening, stats in top_openings:
         opening_id += 1
         win_rate = stats.get("win_rate", 0)
@@ -229,55 +114,146 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
             else "success-ok" if success_rate >= 45 else "success-poor"
         )
 
+        # Clean opening name for use as CSS class/ID
+        clean_opening_name = main_opening.replace(" ", "_").replace("'", "").replace(",", "").replace(":", "").replace("-", "_")
+
+        # Get data and calculate percentages for bar chart
+        wins = stats['wins']
+        draws = stats['draws']
+        losses = stats['losses']
+        total_games = stats['total']
+
+        # Calculate percentages ensuring they total exactly 100%
+        if total_games > 0:
+            # Calculate exact percentages
+            win_pct = (wins / total_games) * 100
+            draw_pct = (draws / total_games) * 100
+
+            # Force the last percentage to fill remaining space to avoid gaps
+            loss_pct = 100 - win_pct - draw_pct
+
+            # Ensure no negative percentages
+            win_pct = max(0, win_pct)
+            draw_pct = max(0, draw_pct)
+            loss_pct = max(0, loss_pct)
+        else:
+            win_pct = draw_pct = loss_pct = 0
+
         # Main opening row (clickable)
         html += f"""
                 <tr class="opening-row" onclick="toggleVariations('variations-{opening_id}')">
-                    <td><strong>{main_opening}</strong> {f'({variation_count} variations)' if variation_count > 1 else ''}</td>
+                    <td>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>{main_opening}</strong> {f'({variation_count} variations)' if variation_count > 1 else ''}</span>
+                            <button onclick="event.stopPropagation(); window.loadBuddyBoardByOpening && window.loadBuddyBoardByOpening('{main_opening.replace("'", "\\'")}')"
+                                    class="buddy-load-btn" title="Load games in Buddy Board">♞</button>
+                        </div>
+                    </td>
                     <td><strong>{stats['total']}</strong></td>
-                    <td>{stats['wins']}</td>
-                    <td>{stats['draws']}</td>
-                    <td>{stats['losses']}</td>
-                    <td>{win_rate}%</td>
+                    <td class="results-bar-cell">
+                        <div class="results-bar-container">
+                            <div class="results-bar-simple" style="width: 150px; height: 16px;">
+                                <div class="bar-win" style="width: {win_pct}%; background: #28a745;" title="Wins: {wins}"></div>
+                                <div class="bar-draw" style="width: {draw_pct}%; background: #fd7e14;" title="Draws: {draws}"></div>
+                                <div class="bar-loss" style="width: {loss_pct}%; background: #dc3545;" title="Losses: {losses}"></div>
+                            </div>
+                            <div class="results-text">{wins}W {draws}D {losses}L</div>
+                        </div>
+                    </td>
                     <td class="success-rate {success_class}"><strong>{success_rate}%</strong></td>
+                    <td class="chess-board-cell">
+                        <div class="chess-board-container">
+                            <div id="board-{clean_opening_name}-{opening_id}" class="chess-board-small" data-opening="{main_opening}"></div>
+                            <div class="board-controls">
+                                <button onclick="event.stopPropagation(); previousMove('board-{clean_opening_name}-{opening_id}')" class="board-btn">←</button>
+                                <button onclick="event.stopPropagation(); nextMove('board-{clean_opening_name}-{opening_id}')" class="board-btn">→</button>
+                                <button onclick="event.stopPropagation(); resetBoard('board-{clean_opening_name}-{opening_id}')" class="board-btn">↺</button>
+                            </div>
+                        </div>
+                    </td>
                 </tr>"""
 
-        # Variations rows (collapsible)
+        # Variation dropdown (collapsible)
         if variation_count > 1:  # Only show variations if there's more than one
+            # Store variation data as JSON for JavaScript access
+            variation_data = {}
+            for variation, var_stats in variations.items():
+                variation_data[variation] = {
+                    'wins': var_stats['wins'],
+                    'draws': var_stats['draws'],
+                    'losses': var_stats['losses'],
+                    'total': var_stats['total'],
+                    'success_rate': var_stats.get('success_rate', 0)
+                }
+
+            variation_data_json = html_escape(json.dumps(variation_data))
+
             html += f"""
                 <tr id="variations-{opening_id}" class="variations-row">
-                    <td colspan="7">
-                        <table class="variation-table">"""
+                    <td colspan="5">
+                        <div class="variant-selector-container">
+                            <div class="variant-options" data-opening-id="{opening_id}"
+                                 data-board-id="board-{clean_opening_name}-{opening_id}"
+                                 data-variations='{variation_data_json}'>
+                                <div class="variant-option active" data-variant="{main_opening}" onclick="selectVariant(this)">
+                                    <span class="variant-label">All Variations Combined</span>
+                                    <div class="variant-chart">
+                                        <div class="variant-bar" style="width: 80px; height: 8px;">
+                                            <div class="bar-win" style="width: {win_pct}%; background: #28a745;" title="Wins: {wins}"></div>
+                                            <div class="bar-draw" style="width: {draw_pct}%; background: #fd7e14;" title="Draws: {draws}"></div>
+                                            <div class="bar-loss" style="width: {loss_pct}%; background: #dc3545;" title="Losses: {losses}"></div>
+                                        </div>
+                                    </div>
+                                </div>"""
 
-            for variation, var_stats in variations.items():
-                var_win_rate = var_stats.get("win_rate", 0)
-                var_success_rate = var_stats.get("success_rate", 0)
-                var_success_class = (
-                    "success-good"
-                    if var_success_rate >= 60
-                    else "success-ok" if var_success_rate >= 45 else "success-poor"
-                )
+            for variation in variations.keys():
+                # Escape quotes in variation names for data attribute
+                escaped_variation = variation.replace('"', '&quot;').replace("'", "&#39;")
+                var_stats = variations[variation]
+                var_wins = var_stats['wins']
+                var_draws = var_stats['draws']
+                var_losses = var_stats['losses']
+                var_total = var_stats['total']
+
+                # Calculate percentages ensuring they total exactly 100%
+                if var_total > 0:
+                    # Calculate exact percentages
+                    var_win_pct = (var_wins / var_total) * 100
+                    var_draw_pct = (var_draws / var_total) * 100
+
+                    # Force the last percentage to fill remaining space to avoid gaps
+                    var_loss_pct = 100 - var_win_pct - var_draw_pct
+
+                    # Ensure no negative percentages
+                    var_win_pct = max(0, var_win_pct)
+                    var_draw_pct = max(0, var_draw_pct)
+                    var_loss_pct = max(0, var_loss_pct)
+                else:
+                    var_win_pct = var_draw_pct = var_loss_pct = 0
 
                 html += f"""
-                            <tr>
-                                <td class="variation-name">{variation}</td>
-                                <td>{var_stats['total']}</td>
-                                <td>{var_stats['wins']}</td>
-                                <td>{var_stats['draws']}</td>
-                                <td>{var_stats['losses']}</td>
-                                <td>{var_win_rate}%</td>
-                                <td class="success-rate {var_success_class}">{var_success_rate}%</td>
-                            </tr>"""
+                                <div class="variant-option" data-variant="{escaped_variation}" onclick="selectVariant(this)">
+                                    <span class="variant-label">{variation}</span>
+                                    <div class="variant-chart">
+                                        <div class="variant-bar" style="width: 80px; height: 8px;">
+                                            <div class="bar-win" style="width: {var_win_pct}%; background: #28a745;" title="Wins: {var_wins}"></div>
+                                            <div class="bar-draw" style="width: {var_draw_pct}%; background: #fd7e14;" title="Draws: {var_draws}"></div>
+                                            <div class="bar-loss" style="width: {var_loss_pct}%; background: #dc3545;" title="Losses: {var_losses}"></div>
+                                        </div>
+                                    </div>
+                                </div>"""
 
             html += """
-                        </table>
+                            </div>
+                        </div>
                     </td>
                 </tr>"""
 
     # Add "Show More" row if there are additional openings
     if additional_openings:
         html += f"""
-                <tr class="show-more-row" onclick="toggleAdditionalOpenings()">
-                    <td colspan="7"><strong>Show {len(additional_openings)} more openings...</strong></td>
+                <tr class="show-more-row">
+                    <td colspan="5"><strong>Show {len(additional_openings)} more openings...</strong></td>
                 </tr>"""
 
         # Additional openings (initially hidden)
@@ -295,49 +271,146 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
                 else "success-ok" if success_rate >= 45 else "success-poor"
             )
 
+            # Clean opening name for use as CSS class/ID
+            clean_opening_name = main_opening.replace(" ", "_").replace("'", "").replace(",", "").replace(":", "").replace("-", "_")
+
+            # Get data and calculate percentages for bar chart
+            wins = stats['wins']
+            draws = stats['draws']
+            losses = stats['losses']
+            total_games = stats['total']
+
+            # Calculate percentages ensuring they total exactly 100%
+            if total_games > 0:
+                # Calculate exact percentages
+                win_pct = (wins / total_games) * 100
+                draw_pct = (draws / total_games) * 100
+
+                # Force the last percentage to fill remaining space to avoid gaps
+                loss_pct = 100 - win_pct - draw_pct
+
+                # Ensure no negative percentages
+                win_pct = max(0, win_pct)
+                draw_pct = max(0, draw_pct)
+                loss_pct = max(0, loss_pct)
+            else:
+                win_pct = draw_pct = loss_pct = 0
+
             # Main opening row (clickable)
             html += f"""
                     <tr class="opening-row additional-openings" onclick="toggleVariations('variations-{opening_id}')">
-                        <td><strong>{main_opening}</strong> {f'({variation_count} variations)' if variation_count > 1 else ''}</td>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><strong>{main_opening}</strong> {f'({variation_count} variations)' if variation_count > 1 else ''}</span>
+                                <button onclick="event.stopPropagation(); window.loadBuddyBoardByOpening && window.loadBuddyBoardByOpening('{main_opening.replace("'", "\\'")}')"
+                                        class="buddy-load-btn" title="Load games in Buddy Board">♞</button>
+                            </div>
+                        </td>
                         <td><strong>{stats['total']}</strong></td>
-                        <td>{stats['wins']}</td>
-                        <td>{stats['draws']}</td>
-                        <td>{stats['losses']}</td>
-                        <td>{win_rate}%</td>
+                        <td class="results-bar-cell">
+                            <div class="results-bar-container">
+                                <div class="results-bar-simple" style="width: 150px; height: 16px;">
+                                    <div class="bar-win" style="width: {win_pct}%; background: #28a745;" title="Wins: {wins}"></div>
+                                    <div class="bar-draw" style="width: {draw_pct}%; background: #fd7e14;" title="Draws: {draws}"></div>
+                                    <div class="bar-loss" style="width: {loss_pct}%; background: #dc3545;" title="Losses: {losses}"></div>
+                                </div>
+                                <div class="results-text">{wins}W {draws}D {losses}L</div>
+                            </div>
+                        </td>
                         <td class="success-rate {success_class}"><strong>{success_rate}%</strong></td>
-                    </tr>"""
-
-            # Variations rows (collapsible)
-            if variation_count > 1:  # Only show variations if there's more than one
-                html += f"""
-                    <tr id="variations-{opening_id}" class="variations-row additional-openings">
-                        <td colspan="7">
-                            <table class="variation-table">"""
-
-                for variation, var_stats in variations.items():
-                    var_win_rate = var_stats.get("win_rate", 0)
-                    var_success_rate = var_stats.get("success_rate", 0)
-                    var_success_class = (
-                        "success-good"
-                        if var_success_rate >= 60
-                        else "success-ok" if var_success_rate >= 45 else "success-poor"
-                    )
-
-                    html += f"""
-                                <tr>
-                                    <td class="variation-name">{variation}</td>
-                                    <td>{var_stats['total']}</td>
-                                    <td>{var_stats['wins']}</td>
-                                    <td>{var_stats['draws']}</td>
-                                    <td>{var_stats['losses']}</td>
-                                    <td>{var_win_rate}%</td>
-                                    <td class="success-rate {var_success_class}">{var_success_rate}%</td>
-                                </tr>"""
-
-                html += """
-                            </table>
+                        <td class="chess-board-cell">
+                            <div class="chess-board-container">
+                                <div id="board-{clean_opening_name}-{opening_id}" class="chess-board-small" data-opening="{main_opening}"></div>
+                                <div class="board-controls">
+                                    <button onclick="event.stopPropagation(); previousMove('board-{clean_opening_name}-{opening_id}')" class="board-btn">←</button>
+                                    <button onclick="event.stopPropagation(); nextMove('board-{clean_opening_name}-{opening_id}')" class="board-btn">→</button>
+                                    <button onclick="event.stopPropagation(); resetBoard('board-{clean_opening_name}-{opening_id}')" class="board-btn">↺</button>
+                                </div>
+                            </div>
                         </td>
                     </tr>"""
+
+            # Variation dropdown (collapsible)
+            if variation_count > 1:  # Only show variations if there's more than one
+                # Store variation data as JSON for JavaScript access
+                variation_data = {}
+                for variation, var_stats in variations.items():
+                    variation_data[variation] = {
+                        'wins': var_stats['wins'],
+                        'draws': var_stats['draws'],
+                        'losses': var_stats['losses'],
+                        'total': var_stats['total'],
+                        'success_rate': var_stats.get('success_rate', 0)
+                    }
+
+                variation_data_json = html_escape(json.dumps(variation_data))
+
+                html += f"""
+                    <tr id="variations-{opening_id}" class="variations-row additional-openings">
+                        <td colspan="5">
+                            <div class="variant-selector-container">
+                                <div class="variant-options" data-opening-id="{opening_id}"
+                                     data-board-id="board-{clean_opening_name}-{opening_id}"
+                                     data-variations='{variation_data_json}'>
+                                    <div class="variant-option active" data-variant="{main_opening}" onclick="selectVariant(this)">
+                                        <span class="variant-label">All Variations Combined</span>
+                                        <div class="variant-chart">
+                                            <div class="variant-bar" style="width: 80px; height: 8px;">
+                                                <div class="bar-win" style="width: {win_pct}%; background: #28a745;" title="Wins: {wins}"></div>
+                                                <div class="bar-draw" style="width: {draw_pct}%; background: #fd7e14;" title="Draws: {draws}"></div>
+                                                <div class="bar-loss" style="width: {loss_pct}%; background: #dc3545;" title="Losses: {losses}"></div>
+                                            </div>
+                                        </div>
+                                    </div>"""
+
+                for variation in variations.keys():
+                    # Escape quotes in variation names for data attribute
+                    escaped_variation = variation.replace('"', '&quot;').replace("'", "&#39;")
+                    var_stats = variations[variation]
+                    var_wins = var_stats['wins']
+                    var_draws = var_stats['draws']
+                    var_losses = var_stats['losses']
+                    var_total = var_stats['total']
+
+                    # Calculate percentages ensuring they total exactly 100%
+                    if var_total > 0:
+                        # Calculate exact percentages
+                        var_win_pct = (var_wins / var_total) * 100
+                        var_draw_pct = (var_draws / var_total) * 100
+
+                        # Force the last percentage to fill remaining space to avoid gaps
+                        var_loss_pct = 100 - var_win_pct - var_draw_pct
+
+                        # Ensure no negative percentages
+                        var_win_pct = max(0, var_win_pct)
+                        var_draw_pct = max(0, var_draw_pct)
+                        var_loss_pct = max(0, var_loss_pct)
+                    else:
+                        var_win_pct = var_draw_pct = var_loss_pct = 0
+
+                    html += f"""
+                                    <div class="variant-option" data-variant="{escaped_variation}" onclick="selectVariant(this)">
+                                        <span class="variant-label">{variation}</span>
+                                        <div class="variant-chart">
+                                            <div class="variant-bar" style="width: 80px; height: 8px;">
+                                                <div class="bar-win" style="width: {var_win_pct}%; background: #28a745;" title="Wins: {var_wins}"></div>
+                                                <div class="bar-draw" style="width: {var_draw_pct}%; background: #fd7e14;" title="Draws: {var_draws}"></div>
+                                                <div class="bar-loss" style="width: {var_loss_pct}%; background: #dc3545;" title="Losses: {var_losses}"></div>
+                                            </div>
+                                        </div>
+                                    </div>"""
+
+                html += """
+                                </div>
+                            </div>
+                        </td>
+                    </tr>"""
+
+        # Add "Show Fewer" row at the end of additional openings (initially hidden)
+        html += f"""
+                <tr class="show-fewer-row additional-openings" style="display: none;">
+                    <td colspan="5"><strong>Show fewer openings...</strong></td>
+                </tr>"""
 
     html += """
             </tbody>
@@ -481,44 +554,12 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
         </ul>
     </div>
 
-    <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <div class="report-footer">
         <p>Generated by <strong>Learn Chess Like a Computer</strong></p>
         <p><small>This analysis is based on your game data and provides insights to help improve your chess performance.</small></p>
     </div>
 
-    <script>
-        function toggleVariations(id) {
-            var element = document.getElementById(id);
-            if (element.style.display === 'none' || element.style.display === '') {
-                element.style.display = 'table-row';
-            } else {
-                element.style.display = 'none';
-            }
-        }
-
-        function toggleAdditionalOpenings() {
-            var openingRows = document.querySelectorAll('.additional-openings.opening-row');
-            var variationRows = document.querySelectorAll('.additional-openings.variations-row');
-            var showMoreRow = document.querySelector('.show-more-row');
-            var isHidden = openingRows[0].style.display === 'none' || openingRows[0].style.display === '';
-
-            // Show/hide the main opening rows
-            openingRows.forEach(function(element) {
-                element.style.display = isHidden ? 'table-row' : 'none';
-            });
-
-            // Always hide variation rows when toggling (keep them collapsed)
-            variationRows.forEach(function(element) {
-                element.style.display = 'none';
-            });
-
-            if (isHidden) {
-                showMoreRow.innerHTML = '<td colspan="7"><strong>Show fewer openings...</strong></td>';
-            } else {
-                showMoreRow.innerHTML = '<td colspan="7"><strong>Show ' + openingRows.length + ' more openings...</strong></td>';
-            }
-        }
-    </script>
+    <!-- JavaScript functionality handled by external report.js -->
 """
 
     return html

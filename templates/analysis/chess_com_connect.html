@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Connect Chess.com Account{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Connect Your Chess.com Account</h2>
+
+    {% if player_profile %}
+        <div class="player-profile-card">
+            <div class="profile-header">
+                <img src="{{ player_profile.avatar|default:'https://www.chess.com/bundles/web/images/noavatar_l.84a92436.gif' }}" alt="Avatar" class="player-avatar">
+                <div class="profile-info">
+                    <h3>{{ player_profile.name|default:player_profile.username }}</h3>
+                    {% if player_profile.title %}
+                        <span class="player-title">{{ player_profile.title }}</span>
+                    {% endif %}
+                    <p class="username">@{{ player_profile.username }}</p>
+                </div>
+            </div>
+
+            <div class="profile-details">
+                <div class="detail-row">
+                    <span class="label">Followers:</span>
+                    <span class="value">{{ player_profile.followers|default:"N/A" }}</span>
+                </div>
+
+                {% if player_profile.country_name %}
+                <div class="detail-row">
+                    <span class="label">Country:</span>
+                    <span class="value">{{ player_profile.country_name }}</span>
+                </div>
+                {% endif %}
+
+                {% if player_profile.location %}
+                <div class="detail-row">
+                    <span class="label">Location:</span>
+                    <span class="value">{{ player_profile.location }}</span>
+                </div>
+                {% endif %}
+
+                {% if player_profile.verified %}
+                <div class="detail-row">
+                    <span class="label">Verified:</span>
+                    <span class="value verified">✓ Verified</span>
+                </div>
+                {% endif %}
+
+                {% if player_profile.is_streamer %}
+                <div class="detail-row">
+                    <span class="label">Streamer:</span>
+                    <span class="value streamer">📺 Streamer</span>
+                </div>
+                {% endif %}
+
+                <div class="detail-row">
+                    <span class="label">Joined:</span>
+                    <span class="value">{{ player_profile.joined_datetime|date:"F Y" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="label">Last Online:</span>
+                    <span class="value">{{ player_profile.last_online_datetime|date:"M j, Y" }}</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <form method="post" action="{% url 'analysis:chess_com_save' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="chess_com_username" value="{{ player_profile.username }}">
+                    <button type="submit" class="btn btn-primary">Save This Account</button>
+                </form>
+                <a href="{% url 'analysis:home' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="chess-com-connect-form">
+            <p>Enter your Chess.com username to connect your account:</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="chess_com_username">Chess.com Username:</label>
+                    <input type="text"
+                           id="chess_com_username"
+                           name="chess_com_username"
+                           placeholder="Enter your chess.com username"
+                           required
+                           value="{{ form_data.chess_com_username|default:'' }}">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Verify Account</button>
+                    <a href="{% url 'analysis:home' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.player-profile-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.player-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.player-title {
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.username {
+    margin: 5px 0 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.profile-details {
+    margin-bottom: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+
+.value {
+    color: var(--text-primary);
+}
+
+.value.verified {
+    color: var(--success-color);
+}
+
+.value.streamer {
+    color: var(--primary-color);
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.chess-com-connect-form {
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--focus-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+</style>
+{% endblock %}

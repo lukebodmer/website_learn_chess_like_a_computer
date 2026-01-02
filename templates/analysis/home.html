@@ -3,33 +3,98 @@
 {% block title %}Home - Chess Analysis{% endblock %}
 
 {% block content %}
-<h2>Welcome to Chess Analysis</h2>
-
-<p>Analyze your chess games with powerful computer analysis and get insights to improve your play.</p>
-
-<h3>Features:</h3>
-<ul>
-    <li>📊 <strong>Comprehensive Game Analysis</strong> - Get detailed statistics about your games</li>
-    <li>🎯 <strong>Accuracy Analysis</strong> - See how accurately you play and where you can improve</li>
-    <li>♟️ <strong>Opening Analysis</strong> - Analyze your opening repertoire and success rates</li>
-    <li>🔍 <strong>Stockfish Analysis</strong> - Deep computer analysis for games without existing evaluation</li>
-    <li>📈 <strong>Progress Tracking</strong> - Save and compare analysis reports over time</li>
-</ul>
-
 {% if user.is_authenticated %}
-    <h3>Get Started:</h3>
-    <p>Connect your Lichess account to start analyzing your games!</p>
-    <a href="{% url 'analysis:lichess_login' %}" class="btn">Connect Lichess Account</a>
+    <div class="home-top-row">
+        <div class="account-status-column">
+            <div class="section">
+                <h3>Account Status</h3>
 
-    {% if user.userprofile.lichess_username %}
-        <p>✅ Connected as: <strong>{{ user.userprofile.lichess_username }}</strong></p>
-        <a href="{% url 'analysis:user_analysis' user.userprofile.lichess_username %}" class="btn">Analyze My Games</a>
+                <!-- Lichess Status -->
+                {% if user.userprofile.lichess_username %}
+                    <div class="status-indicator connected">
+                        <p><strong>✅ Lichess Connected:</strong> {{ user.userprofile.lichess_username }}</p>
+                    </div>
+                {% else %}
+                    <div class="status-indicator not-connected">
+                        <p><strong>⚠️ Lichess Not Connected</strong></p>
+                        <p>Connect your Lichess account to start analyzing your games.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Chess.com Status -->
+                {% if user.userprofile.chess_com_username %}
+                    <div class="status-indicator connected">
+                        <p><strong>✅ Chess.com Connected:</strong> {{ user.userprofile.chess_com_username }}</p>
+                    </div>
+                {% else %}
+                    <div class="status-indicator not-connected">
+                        <p><strong>⚠️ Chess.com Not Connected</strong></p>
+                        <a href="{% url 'analysis:chess_com_connect' %}" class="chess-com-connect-btn">Connect Chess.com</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="generate-button-column">
+            <a href="{% url 'analysis:lichess_login' %}" class="lichess-button">
+                {% load static %}
+                <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="lichess-logo">
+                {% if user.userprofile.lichess_username %}Generate Lichess Report{% else %}Connect Lichess Account{% endif %}
+            </a>
+
+            {% if user.userprofile.chess_com_username %}
+            <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="chess-com-button">
+                <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="chess-com-logo">
+                Generate Chess.com Report
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if reports %}
+        <div class="section">
+            <div class="reports-page-header">
+                <h3>Recent Reports</h3>
+                <a href="{% url 'analysis:user_reports' %}" class="btn btn-secondary">View All Reports</a>
+            </div>
+            <p>Your latest analysis reports:</p>
+
+            {% for report in reports %}
+            <a href="{% url 'analysis:view_report' report.id %}" class="report-card">
+                <div class="report-stats-inline">
+                    <div>
+                        <strong>{{ report.game_dataset.lichess_username }}</strong>
+                        <span class="report-card-platform">{{ report.platform }}</span>
+                    </div>
+                    <div>
+                        <strong>{{ report.total_games }} Games</strong>
+                    </div>
+                    <div>
+                        {{ report.created_at|date:"M j, Y" }}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+
+            <div class="view-all-reports-container">
+                <a href="{% url 'analysis:user_reports' %}" class="btn btn-secondary">View All Reports</a>
+            </div>
+        </div>
+    {% elif user.userprofile.lichess_username %}
+        <div class="section">
+            <h3>Ready to Start!</h3>
+            <div class="empty-state">
+                <p>Your Lichess account is connected. Click the button above to generate your first analysis report!</p>
+            </div>
+        </div>
     {% endif %}
 {% else %}
-    <h3>Get Started:</h3>
-    <p>Create an account or login to start analyzing your chess games!</p>
-    <a href="/auth/login/" class="btn">Login</a>
-    <a href="/auth/signup/" class="btn">Sign Up</a>
+    <div class="section">
+        <h3>Get Started</h3>
+        <p>Create an account or login to start analyzing your chess games!</p>
+        <a href="/auth/login/" class="btn">Login</a>
+        <a href="/auth/signup/" class="btn btn-secondary">Sign Up</a>
+    </div>
 {% endif %}
 
 <h3>How it works:</h3>

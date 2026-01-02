@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Chess.com Analysis - {{ username }}{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Chess.com Game Analysis - {{ username }}</h2>
+
+    <div class="status-container">
+        <div class="status-header">
+            <h3>🔍 Finding your most recent Chess.com games...</h3>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar">
+                <div class="progress-fill completed"></div>
+            </div>
+            <div class="progress-text">✅ Found {{ games_count }} games</div>
+        </div>
+
+        <div class="games-summary">
+            <p>Successfully retrieved your {{ games_count }} most recent Chess.com games!</p>
+            <p>Click the button below to generate your comprehensive analysis report.</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'analysis:generate_report' username %}" class="btn btn-primary">
+                Generate Analysis Report
+            </a>
+            <a href="{% url 'analysis:home' %}" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.status-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+}
+
+.status-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.status-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 24px;
+}
+
+.progress-bar-container {
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--background-tertiary);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    transition: width 0.3s ease;
+    width: 100%;
+}
+
+.progress-fill.completed {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+}
+
+.progress-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.games-summary {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.games-summary p {
+    color: var(--text-primary);
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.chess-com-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.chess-com-button:hover {
+    background: var(--primary-color-hover);
+}
+
+.chess-com-logo {
+    height: 20px;
+    width: auto;
+}
+</style>
+{% endblock %}

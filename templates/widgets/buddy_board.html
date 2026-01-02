@@ -1,0 +1,100 @@
+<!-- Buddy Board Widget - Floating Chess Game Analyzer -->
+
+<!-- Floating Widget Button (Minimized State) -->
+<div id="buddy-board-widget" class="buddy-board-minimized">
+    <button id="buddy-board-toggle" class="buddy-board-btn" title="Open Buddy Board">
+        <span class="buddy-board-icon">♞</span>
+        <span class="buddy-board-text">Board</span>
+    </button>
+</div>
+
+<!-- Expanded Board Panel -->
+<div id="buddy-board-panel" class="buddy-board-expanded" style="display: none;">
+    <!-- Panel Header -->
+    <div class="buddy-board-header">
+        <h4 class="buddy-board-title">
+            <span class="buddy-board-icon">♞</span>
+            Buddy Board
+            <span class="buddy-board-status" id="buddy-status-text">Ready to load a game</span>
+        </h4>
+        <div class="buddy-board-controls">
+            <button id="buddy-board-minimize" class="buddy-board-control-btn" title="Minimize">
+                <span>−</span>
+            </button>
+            <button id="buddy-board-close" class="buddy-board-control-btn" title="Close">
+                <span>×</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Selector -->
+    <div class="buddy-board-game-selector">
+        <div class="game-selector-row">
+            <label for="buddy-game-select" class="game-selector-label">Load Game:</label>
+            <select id="buddy-game-select" class="game-selector-dropdown">
+                <option value="">Select a game...</option>
+                <!-- Games will be populated via JavaScript -->
+            </select>
+        </div>
+        <div class="game-info" id="buddy-game-info" style="display: none;">
+            <span class="game-details" id="buddy-game-details"></span>
+            <span class="game-result" id="buddy-game-result"></span>
+        </div>
+    </div>
+
+    <!-- Board and Analysis Container -->
+    <div class="buddy-board-main">
+        <!-- Moves List (Left Side) -->
+        <div class="buddy-board-moves" id="buddy-board-moves">
+            <div class="moves-header">
+                <h6>Moves</h6>
+            </div>
+            <div class="moves-content">
+                <div class="moves-list" id="buddy-moves-list">
+                    <!-- Moves will be populated via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Bar (Left Side) -->
+        <div class="buddy-evaluation-sidebar" id="buddy-evaluation-sidebar">
+            <div class="evaluation-bar-container">
+                <div class="evaluation-bar" id="buddy-eval-bar">
+                    <div class="eval-white" style="height: 50%"></div>
+                    <div class="eval-black" style="height: 50%"></div>
+                </div>
+                <div class="evaluation-text" id="buddy-eval-text">0.0</div>
+            </div>
+        </div>
+
+        <!-- Chess Board Container -->
+        <div class="buddy-board-container">
+            <div id="buddy-chess-board" class="buddy-chess-board" data-position="start">
+                <!-- Chessboard.js will render here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Board Controls -->
+    <div class="buddy-board-navigation">
+        <div class="move-controls">
+            <button id="buddy-first-move" class="buddy-nav-btn" title="First Move">⏮</button>
+            <button id="buddy-prev-move" class="buddy-nav-btn" title="Previous Move">◀</button>
+            <button id="buddy-next-move" class="buddy-nav-btn" title="Next Move">▶</button>
+            <button id="buddy-last-move" class="buddy-nav-btn" title="Last Move">⏭</button>
+        </div>
+        <div class="move-info">
+            <span id="buddy-move-counter">Move 0 of 0</span>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Buddy Board Overlay (for mobile/small screens) -->
+<div id="buddy-board-overlay" class="buddy-board-overlay" style="display: none;"></div>
+
+<!-- Game Data Storage (populated by Django context) -->
+<script type="application/json" id="buddy-board-games-data">
+    {{ buddy_board_games|default:"[]"|safe }}
+</script>

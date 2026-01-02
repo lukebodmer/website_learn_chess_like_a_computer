@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     lichess_username = models.CharField(max_length=100, blank=True, null=True)
     lichess_access_token = models.TextField(blank=True, null=True)
+    chess_com_username = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -17,18 +18,20 @@ class UserProfile(models.Model):
 
 
 class GameDataSet(models.Model):
-    """Stores raw game data from Lichess"""
+    """Stores raw game data from Lichess or Chess.com"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    lichess_username = models.CharField(max_length=100)
+    lichess_username = models.CharField(max_length=100, blank=True, null=True)
+    chess_com_username = models.CharField(max_length=100, blank=True, null=True)
     total_games = models.IntegerField(default=0)
-    raw_data = models.TextField()  # NDJSON data from Lichess
+    raw_data = models.TextField()  # NDJSON data from Lichess or Chess.com
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.lichess_username} - {self.total_games} games ({self.created_at.strftime('%Y-%m-%d')})"
+        platform = self.lichess_username or self.chess_com_username or 'Unknown'
+        return f"{platform} - {self.total_games} games ({self.created_at.strftime('%Y-%m-%d')})"
 
 
 class AnalysisReport(models.Model):

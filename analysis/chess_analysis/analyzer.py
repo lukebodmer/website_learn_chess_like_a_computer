@@ -72,32 +72,35 @@ class ChessAnalyzer:
         # Map status to detailed descriptions
         if status == "mate":
             if winner == "white":
-                return "White wins by checkmate"
+                return "Checkmate"
             elif winner == "black":
-                return "Black wins by checkmate"
+                return "Checkmate"
             else:
                 return "Checkmate"
         elif status == "resign":
             if winner == "white":
-                return "Black resigns"
+                return "Resignation"
             elif winner == "black":
-                return "White resigns"
+                return "Resignation"
             else:
                 return "Resignation"
-        elif status == "timeout":
+        elif status == "timeout" or status == "outoftime":
             if winner == "white":
-                return "Black wins on time"
+                return "Time forfeit"
             elif winner == "black":
-                return "White wins on time"
+                return "Time forfeit"
             else:
                 return "Time forfeit"
         elif status == "draw":
-            return "The game is a draw"
+            return "Draw"
         elif status == "stalemate":
-            return "Draw by stalemate"
+            return "Stalemate"
         elif status == "aborted":
             return "Game aborted"
         else:
+            # Handle any other time-related statuses
+            if "time" in status.lower() or "timeout" in status.lower():
+                return "Time forfeit"
             return status.title()
 
     def analyze_basic_stats(self, username: str) -> Dict[str, Any]:
@@ -144,6 +147,10 @@ class ChessAnalyzer:
                     "wins": 0,
                     "draws": 0,
                     "losses": 0,
+                    "white_wins": 0,
+                    "white_losses": 0,
+                    "black_wins": 0,
+                    "black_losses": 0,
                 }
 
             termination_stats[detailed_ending]["total"] += 1
@@ -155,10 +162,18 @@ class ChessAnalyzer:
 
             if user_won:
                 termination_stats[detailed_ending]["wins"] += 1
+                if is_white:
+                    termination_stats[detailed_ending]["white_wins"] += 1
+                else:
+                    termination_stats[detailed_ending]["black_wins"] += 1
             elif draw:
                 termination_stats[detailed_ending]["draws"] += 1
             elif user_lost:
                 termination_stats[detailed_ending]["losses"] += 1
+                if is_white:
+                    termination_stats[detailed_ending]["white_losses"] += 1
+                else:
+                    termination_stats[detailed_ending]["black_losses"] += 1
 
         # Calculate percentages
         for ending in termination_stats:

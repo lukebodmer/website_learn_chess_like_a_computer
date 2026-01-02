@@ -1,2 +1,16 @@
 .envrc
 .direnv/
+data/lichess_evals/*.jsonl.zst
+data/lichess_evals/*.jsonl
+data/processed/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+
+

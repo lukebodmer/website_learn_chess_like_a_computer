@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Account Settings</h2>
+    <p>Manage your account information and preferences</p>
+
+    <div class="settings-container">
+        <!-- Profile Information Section -->
+        <div class="settings-section">
+            <h3>Profile Information</h3>
+            <form method="post" class="settings-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="{{ user.username }}" disabled>
+                    <small class="form-help">Username cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ user.email|default:'' }}"
+                           placeholder="Enter your email address">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name"
+                               value="{{ user.first_name|default:'' }}" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name"
+                               value="{{ user.last_name|default:'' }}" placeholder="Last name">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Connected Accounts Section -->
+        <div class="settings-section">
+            <h3>Connected Chess Accounts</h3>
+
+            <!-- Lichess Account -->
+            <div class="connected-account">
+                <div class="account-info">
+                    <img src="{% load static %}{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="account-logo">
+                    <div class="account-details">
+                        <h4>Lichess</h4>
+                        {% if profile.lichess_username %}
+                            <p class="connected">✅ Connected as: <strong>{{ profile.lichess_username }}</strong></p>
+                        {% else %}
+                            <p class="not-connected">⚠️ Not connected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="account-actions">
+                    {% if profile.lichess_username %}
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="unlink_lichess">
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to unlink your Lichess account?')">
+                                Unlink Account
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'analysis:lichess_login' %}" class="btn btn-primary">
+                            Connect Lichess
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chess.com Account -->
+            <div class="connected-account">
+                <div class="account-info">
+                    <img src="{% load static %}{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="account-logo">
+                    <div class="account-details">
+                        <h4>Chess.com</h4>
+                        {% if profile.chess_com_username %}
+                            <p class="connected">✅ Connected as: <strong>{{ profile.chess_com_username }}</strong></p>
+                        {% else %}
+                            <p class="not-connected">⚠️ Not connected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="account-actions">
+                    {% if profile.chess_com_username %}
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="unlink_chess_com">
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to unlink your Chess.com account?')">
+                                Unlink Account
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'analysis:chess_com_connect' %}" class="btn btn-primary">
+                            Connect Chess.com
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="settings-section">
+            <h3>Change Password</h3>
+            <form method="post" class="settings-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_password">
+
+                <div class="form-group">
+                    <label for="{{ password_form.old_password.id_for_label }}">Current Password</label>
+                    {{ password_form.old_password }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ password_form.new_password1.id_for_label }}">New Password</label>
+                    {{ password_form.new_password1 }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ password_form.new_password2.id_for_label }}">Confirm New Password</label>
+                    {{ password_form.new_password2 }}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Theme Preferences Section -->
+        <div class="settings-section">
+            <h3>Theme Preferences</h3>
+            <div class="theme-selector">
+                <p>Choose your preferred theme:</p>
+
+                <div class="theme-options">
+                    <label class="theme-option">
+                        <input type="radio" name="theme_preference" value="light" id="theme-light">
+                        <div class="theme-preview light-preview">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Light Theme</span>
+                    </label>
+
+                    <label class="theme-option">
+                        <input type="radio" name="theme_preference" value="dark" id="theme-dark">
+                        <div class="theme-preview dark-preview">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Dark Theme</span>
+                    </label>
+
+                    <label class="theme-option">
+                        <input type="radio" name="theme_preference" value="system" id="theme-system" checked>
+                        <div class="theme-preview system-preview">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>System Default</span>
+                    </label>
+                </div>
+
+                <p class="theme-help">
+                    <small>Your theme preference is automatically saved and will persist across sessions.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settings-section {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.settings-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.settings-form {
+    max-width: 500px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:disabled {
+    background: var(--background-tertiary);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--focus-color);
+}
+
+.form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+/* Connected Accounts Styling */
+.connected-account {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.account-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.account-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+}
+
+.account-details h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+}
+
+.account-details p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.account-details .connected {
+    color: var(--success-color);
+}
+
+.account-details .not-connected {
+    color: var(--warning-color);
+}
+
+/* Theme Selector Styling */
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-option:hover {
+    border-color: var(--primary-light);
+    background: var(--hover-background);
+}
+
+.theme-option input[type="radio"] {
+    margin: 0;
+}
+
+.theme-option input[type="radio"]:checked + .theme-preview {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--focus-color);
+}
+
+.theme-preview {
+    width: 60px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.light-preview {
+    background: #f8f9fa;
+}
+
+.light-preview .preview-header {
+    height: 15px;
+    background: #2c4a7a;
+}
+
+.light-preview .preview-content {
+    height: 25px;
+    background: #ffffff;
+}
+
+.dark-preview {
+    background: #2a2520;
+}
+
+.dark-preview .preview-header {
+    height: 15px;
+    background: #4a90e2;
+}
+
+.dark-preview .preview-content {
+    height: 25px;
+    background: #352f28;
+}
+
+.system-preview {
+    background: linear-gradient(45deg, #f8f9fa 50%, #2a2520 50%);
+}
+
+.system-preview .preview-header {
+    height: 15px;
+    background: linear-gradient(45deg, #2c4a7a 50%, #4a90e2 50%);
+}
+
+.system-preview .preview-content {
+    height: 25px;
+    background: linear-gradient(45deg, #ffffff 50%, #352f28 50%);
+}
+
+.theme-help {
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .connected-account {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .theme-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Theme switching functionality for settings page
+(function() {
+    const themeRadios = document.querySelectorAll('input[name="theme_preference"]');
+    const body = document.body;
+
+    // Get current theme from localStorage
+    const savedTheme = localStorage.getItem('theme') || 'system';
+
+    // Set the correct radio button
+    const currentRadio = document.getElementById(`theme-${savedTheme}`);
+    if (currentRadio) {
+        currentRadio.checked = true;
+    }
+
+    // Listen for theme changes
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const theme = this.value;
+
+                if (theme === 'system') {
+                    // Remove manual theme setting to use system default
+                    localStorage.removeItem('theme');
+                    body.removeAttribute('data-theme');
+                } else {
+                    // Set manual theme
+                    localStorage.setItem('theme', theme);
+                    body.setAttribute('data-theme', theme);
+                }
+
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

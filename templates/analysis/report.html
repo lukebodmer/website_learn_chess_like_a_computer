@@ -3,12 +3,24 @@
 {% block title %}Analysis Report for {{ username }} - Chess Analysis{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 20px;">
-    <a href="{% url 'analysis:user_reports' %}" class="btn" style="background: #6c757d;">
-        ← Back to My Reports
-    </a>
-</div>
-
 <!-- Insert the HTML report content directly -->
 {{ report_html|safe }}
+
+<!-- Buddy Board Widget -->
+{% include 'widgets/buddy_board.html' %}
+
+{% load static %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+
+<!-- Chess board libraries -->
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.12.1/chess.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+<!-- Buddy Board Assets -->
+<link rel="stylesheet" href="{% static 'css/buddy_board.css' %}">
+<script src="{% static 'js/buddy_board.js' %}"></script>
+
+<script src="{% static 'js/report.js' %}"></script>
 {% endblock %}
