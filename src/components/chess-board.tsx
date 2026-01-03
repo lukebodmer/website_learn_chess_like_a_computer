@@ -17,6 +17,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
   }[]>([])
   const [chess] = useState(new Chess())
   const [pieceImages, setPieceImages] = useState<{[key: string]: HTMLImageElement}>({})
+  const [symbolImages, setSymbolImages] = useState<{[key: string]: HTMLImageElement}>({})
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [legalMoves, setLegalMoves] = useState<string[]>([])
   const [draggedPiece, setDraggedPiece] = useState<{square: string, piece: any} | null>(null)
@@ -69,7 +70,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
 
   const getLegalMovesForSquare = (square: string): string[] => {
     const moves = chess.moves({ square, verbose: true })
-    return moves.map(move => move.to)
+    // Remove duplicates in case of pawn promotion (multiple promotion options for same square)
+    const uniqueSquares = Array.from(new Set(moves.map(move => move.to)))
+    return uniqueSquares
   }
 
   const canSelectPiece = (piece: any): boolean => {
@@ -80,6 +83,35 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
 
   const isInCheck = (): boolean => {
     return chess.inCheck()
+  }
+
+  const isCheckmate = (): boolean => {
+    return chess.isCheckmate()
+  }
+
+  const getGameResult = (): { winner: 'w' | 'b' | null, isCheckmate: boolean, isDraw: boolean, drawReason?: string } => {
+    if (chess.isCheckmate()) {
+      // The player who is in checkmate loses, so the winner is the opposite color
+      const currentTurn = chess.turn()
+      const winner = currentTurn === 'w' ? 'b' : 'w'
+      return { winner, isCheckmate: true, isDraw: false }
+    }
+
+    // Check for various draw conditions
+    if (chess.isStalemate()) {
+      return { winner: null, isCheckmate: false, isDraw: true, drawReason: 'stalemate' }
+    }
+    if (chess.isInsufficientMaterial()) {
+      return { winner: null, isCheckmate: false, isDraw: true, drawReason: 'insufficient material' }
+    }
+    if (chess.isThreefoldRepetition()) {
+      return { winner: null, isCheckmate: false, isDraw: true, drawReason: 'threefold repetition' }
+    }
+    if (chess.isDraw()) {
+      return { winner: null, isCheckmate: false, isDraw: true, drawReason: 'fifty-move rule or other draw' }
+    }
+
+    return { winner: null, isCheckmate: false, isDraw: false }
   }
 
   const getKingSquare = (color: 'w' | 'b'): string | null => {
@@ -416,12 +448,13 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
     }
   }
 
-  // Load piece images
+  // Load piece and symbol images
   useEffect(() => {
     const loadImages = async () => {
       const images: {[key: string]: HTMLImageElement} = {}
       const loadPromises: Promise<void>[] = []
 
+      // Load piece images
       for (const [piece, filename] of Object.entries(pieceToFilename)) {
         const promise = new Promise<void>((resolve) => {
           const img = new Image()
@@ -436,7 +469,28 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
       setPieceImages(images)
     }
 
+    const loadSymbols = async () => {
+      const symbols: {[key: string]: HTMLImageElement} = {}
+      const symbolPromises: Promise<void>[] = []
+
+      // Load win, lose, and tie symbols
+      const symbolFiles = ['win', 'lose', 'tie']
+      for (const symbol of symbolFiles) {
+        const promise = new Promise<void>((resolve) => {
+          const img = new Image()
+          img.onload = () => resolve()
+          img.src = `/static/images/symbols/default/${symbol}.svg`
+          symbols[symbol] = img
+        })
+        symbolPromises.push(promise)
+      }
+
+      await Promise.all(symbolPromises)
+      setSymbolImages(symbols)
+    }
+
     loadImages()
+    loadSymbols()
   }, [])
 
   // Draw board and pieces
@@ -622,6 +676,50 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
         }
       }
     }
+
+    // Draw game result symbols
+    const gameResult = getGameResult()
+    const symbolSize = squareSize * 0.4
+
+    if (gameResult.isCheckmate && gameResult.winner) {
+      const winnerKingSquare = getKingSquare(gameResult.winner)
+      const loserKingSquare = getKingSquare(gameResult.winner === 'w' ? 'b' : 'w')
+
+      // Draw win symbol on winner's king right shoulder
+      if (winnerKingSquare && symbolImages.win && symbolImages.win.complete) {
+        const winnerCoords = getSquareCoords(winnerKingSquare)
+        const winSymbolX = winnerCoords.x + squareSize - symbolSize - (squareSize * 0.1)
+        const winSymbolY = winnerCoords.y + (squareSize * 0.1)
+        ctx.drawImage(symbolImages.win, winSymbolX, winSymbolY, symbolSize, symbolSize)
+      }
+
+      // Draw lose symbol on loser's king right shoulder
+      if (loserKingSquare && symbolImages.lose && symbolImages.lose.complete) {
+        const loserCoords = getSquareCoords(loserKingSquare)
+        const loseSymbolX = loserCoords.x + squareSize - symbolSize - (squareSize * 0.1)
+        const loseSymbolY = loserCoords.y + (squareSize * 0.1)
+        ctx.drawImage(symbolImages.lose, loseSymbolX, loseSymbolY, symbolSize, symbolSize)
+      }
+    } else if (gameResult.isDraw) {
+      // Draw tie symbols on both kings' right shoulders
+      const whiteKingSquare = getKingSquare('w')
+      const blackKingSquare = getKingSquare('b')
+
+      if (whiteKingSquare && symbolImages.tie && symbolImages.tie.complete) {
+        const whiteKingCoords = getSquareCoords(whiteKingSquare)
+        const tieSymbolX = whiteKingCoords.x + squareSize - symbolSize - (squareSize * 0.1)
+        const tieSymbolY = whiteKingCoords.y + (squareSize * 0.1)
+        ctx.drawImage(symbolImages.tie, tieSymbolX, tieSymbolY, symbolSize, symbolSize)
+      }
+
+      if (blackKingSquare && symbolImages.tie && symbolImages.tie.complete) {
+        const blackKingCoords = getSquareCoords(blackKingSquare)
+        const tieSymbolX = blackKingCoords.x + squareSize - symbolSize - (squareSize * 0.1)
+        const tieSymbolY = blackKingCoords.y + (squareSize * 0.1)
+        ctx.drawImage(symbolImages.tie, tieSymbolX, tieSymbolY, symbolSize, symbolSize)
+      }
+    }
+
     // Draw promotion popup
     if (promotionData) {
       // Semi-transparent overlay
@@ -669,7 +767,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ size = 400 }) => {
       ctx.textAlign = 'center'
       ctx.fillText('Choose promotion piece:', displaySize / 2, popupY - displaySize / 40)
     }
-  }, [size, pieceImages, chess, selectedSquare, legalMoves, isDragging, draggedPiece, mousePos, animatingPiece, animationProgress, promotionData])
+  }, [size, pieceImages, symbolImages, chess, selectedSquare, legalMoves, isDragging, draggedPiece, mousePos, animatingPiece, animationProgress, promotionData])
 
   // Cleanup animation on unmount
   useEffect(() => {
