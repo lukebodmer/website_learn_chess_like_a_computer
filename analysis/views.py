@@ -19,9 +19,11 @@ import requests
 import json
 import tempfile
 import pycountry
+import pytz
 
 from .models import UserProfile, GameDataSet, AnalysisReport, ChessGame
-from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client
+from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
+from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
 from .report_generation import generate_html_report
 from .report_generation.django_report_generator import generate_report_content
@@ -63,7 +65,8 @@ def get_lichess_user(access_token):
     return response.json()
 
 
-def get_lichess_user_games(access_token, username):
+def get_lichess_user_games(access_token, username, max_games=50):
+    """Fetch recent games from Lichess API with date range tracking"""
     response = requests.get(
         f"https://lichess.org/api/games/user/{username}",
         headers={
@@ -71,7 +74,7 @@ def get_lichess_user_games(access_token, username):
             "Accept": "application/x-ndjson",
         },
         params={
-            "max": 5000,
+            "max": max_games,  # Limit to exactly what we need
             "moves": "true",
             "tags": "true",
             "clocks": "true",
@@ -80,11 +83,48 @@ def get_lichess_user_games(access_token, username):
             "opening": "true",
             "division": "true",
             "finished": "true",
+            "sort": "dateDesc",  # Ensure most recent first
         },
     )
     if response.status_code == 200:
-        return response.text
-    return ""
+        ndjson_data = response.text
+
+        # Parse games to extract date range
+        lines = [line for line in ndjson_data.strip().split('\n') if line.strip()]
+        games = []
+        oldest_date = None
+        newest_date = None
+
+        for line in lines:
+            try:
+                game = json.loads(line)
+                games.append(game)
+
+                # Track date range using createdAt timestamp
+                if 'createdAt' in game:
+                    game_date = datetime.fromtimestamp(game['createdAt'] / 1000, tz=timezone.utc)
+
+                    if newest_date is None or game_date > newest_date:
+                        newest_date = game_date
+                    if oldest_date is None or game_date < oldest_date:
+                        oldest_date = game_date
+
+            except json.JSONDecodeError:
+                continue
+
+        return {
+            'ndjson_data': ndjson_data,
+            'games_count': len(games),
+            'oldest_game_date': oldest_date,
+            'newest_game_date': newest_date
+        }
+
+    return {
+        'ndjson_data': '',
+        'games_count': 0,
+        'oldest_game_date': None,
+        'newest_game_date': None
+    }
 
 
 def home(request):
@@ -116,6 +156,13 @@ def home(request):
         context['reports'] = enriched_reports
 
     return render(request, 'analysis/home.html', context)
+
+
+def games(request):
+    """Games page with interactive chess mini-games"""
+    return render(request, 'analysis/games.html')
+
+
 
 
 def lichess_login(request):
@@ -210,7 +257,7 @@ def lichess_callback(request):
 
 @login_required
 def user_analysis(request, username):
-    """Fetch user games and prepare for analysis"""
+    """Render Lichess analysis page immediately, then fetch games asynchronously"""
     # Get access token
     profile = get_object_or_404(UserProfile, user=request.user, lichess_username=username)
     access_token = profile.lichess_access_token
@@ -219,28 +266,75 @@ def user_analysis(request, username):
         messages.error(request, "No valid Lichess authentication found")
         return redirect('analysis:lichess_login')
 
-    try:
-        ndjson_data = get_lichess_user_games(access_token, username)
+    # Render page immediately without waiting for games
+    return render(request, 'analysis/user_analysis.html', {
+        'username': username,
+        'loading': True  # Indicate we're in loading state
+    })
 
-        # Count games
-        games_count = len([line for line in ndjson_data.strip().split('\n') if line.strip()])
+@login_required
+def fetch_lichess_games(request, username):
+    """AJAX endpoint to fetch Lichess games asynchronously"""
+    # Get access token
+    profile = get_object_or_404(UserProfile, user=request.user, lichess_username=username)
+    access_token = profile.lichess_access_token
+
+    if not access_token:
+        return JsonResponse({
+            'success': False,
+            'error': 'No valid Lichess authentication found'
+        })
+
+    try:
+        # Fetch exactly 50 most recent games with date range tracking
+        game_data = get_lichess_user_games(access_token, username, max_games=50)
+
+        if game_data['games_count'] == 0:
+            return JsonResponse({
+                'success': False,
+                'error': 'No games found for this account'
+            })
 
         # Create GameDataSet
         game_dataset = GameDataSet.objects.create(
             user=request.user,
             lichess_username=username,
-            total_games=games_count,
-            raw_data=ndjson_data
+            total_games=game_data['games_count'],
+            raw_data=game_data['ndjson_data'],
+            oldest_game_date=game_data['oldest_game_date'],
+            newest_game_date=game_data['newest_game_date']
         )
 
-        return render(request, 'analysis/user_analysis.html', {
-            'username': username,
-            'games_count': games_count,
-            'game_dataset': game_dataset
+        # Format date range for display
+        oldest_date_str = None
+        newest_date_str = None
+        date_range_str = None
+
+        if game_data['oldest_game_date'] and game_data['newest_game_date']:
+            oldest_date_str = game_data['oldest_game_date'].strftime("%B %d, %Y")
+            newest_date_str = game_data['newest_game_date'].strftime("%B %d, %Y")
+
+            if oldest_date_str == newest_date_str:
+                date_range_str = oldest_date_str  # Same day
+            else:
+                date_range_str = f"{oldest_date_str} - {newest_date_str}"
+
+        return JsonResponse({
+            'success': True,
+            'games_count': game_data['games_count'],
+            'game_dataset_id': game_dataset.id,
+            'created_at': game_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
+            'data_size': len(game_data['ndjson_data']),
+            'date_range': date_range_str,
+            'oldest_game_date': oldest_date_str,
+            'newest_game_date': newest_date_str
         })
 
     except Exception as e:
-        return HttpResponse(f"Error fetching games: {str(e)}", status=500)
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
 
 
 @login_required
@@ -466,20 +560,24 @@ def user_reports(request):
         user=request.user
     ).select_related('game_dataset').order_by('-created_at')
 
-    # Add date range information for each report
+    # Add platform and date range information for each report
     enriched_reports = []
     for report in reports:
-        # Get date range from games in this dataset
-        games = ChessGame.objects.filter(
-            game_dataset=report.game_dataset
-        ).aggregate(
-            earliest_game=models.Min('played_at'),
-            latest_game=models.Max('played_at')
-        )
+        # Use stored date range from GameDataSet model
+        report.date_range_start = report.game_dataset.oldest_game_date
+        report.date_range_end = report.game_dataset.newest_game_date
 
-        report.date_range_start = games['earliest_game']
-        report.date_range_end = games['latest_game']
-        report.platform = 'Lichess'  # For now, all are Lichess
+        # Determine platform based on GameDataSet
+        if report.game_dataset.lichess_username:
+            report.platform = 'Lichess'
+            report.username = report.game_dataset.lichess_username
+        elif report.game_dataset.chess_com_username:
+            report.platform = 'Chess.com'
+            report.username = report.game_dataset.chess_com_username
+        else:
+            report.platform = 'Unknown'
+            report.username = 'Unknown'
+
         enriched_reports.append(report)
 
     return render(request, 'analysis/user_reports.html', {'reports': enriched_reports})
@@ -697,7 +795,19 @@ def chess_com_disconnect(request):
 
 @login_required
 def chess_com_analysis(request, username):
-    """Fetch Chess.com games and prepare for analysis"""
+    """Render Chess.com analysis page immediately, then fetch games asynchronously"""
+    # Verify this is the user's chess.com account
+    profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
+
+    # Render page immediately without waiting for games
+    return render(request, 'analysis/chess_com_analysis.html', {
+        'username': username,
+        'loading': True  # Indicate we're in loading state
+    })
+
+@login_required
+def fetch_chess_com_games(request, username):
+    """AJAX endpoint to fetch Chess.com games asynchronously"""
     # Verify this is the user's chess.com account
     profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
 
@@ -712,8 +822,10 @@ def chess_com_analysis(request, username):
         archives_response = get_player_game_archives(username)
 
         if not archives_response.archives:
-            messages.error(request, "No game archives found for this Chess.com account.")
-            return redirect('analysis:home')
+            return JsonResponse({
+                'success': False,
+                'error': 'No game archives found for this Chess.com account.'
+            })
 
         # Smart fetching strategy to minimize API calls while getting 50 games
         all_games = []
@@ -747,6 +859,16 @@ def chess_com_analysis(request, username):
                         total_fetched += 1
 
                     print(f"Fetched {games_to_add} games from {year}/{month} (Total: {total_fetched})")
+
+                    # Return progress update
+                    if request.GET.get('stream') == 'true':
+                        return JsonResponse({
+                            'success': True,
+                            'progress': True,
+                            'games_fetched': total_fetched,
+                            'archives_checked': api_calls_made,
+                            'current_period': f"{year}/{month}"
+                        })
                 else:
                     print(f"No games found in {year}/{month}")
 
@@ -758,46 +880,64 @@ def chess_com_analysis(request, username):
         print(f"Final result: {total_fetched} games fetched using {api_calls_made} API calls")
 
         if not all_games:
-            messages.error(request, "No games found in recent archives.")
-            return redirect('analysis:home')
+            return JsonResponse({
+                'success': False,
+                'error': 'No games found in recent archives.'
+            })
 
-        # Convert games to NDJSON format similar to Lichess
+        # Convert games to NDJSON format similar to Lichess and track date range
         ndjson_lines = []
+        oldest_date = None
+        newest_date = None
+
         for game in all_games:
-            # Chess.com API returns games in JSON format, access as dictionary
+            # Chess.com API returns Game objects, access attributes directly
             try:
+                # Extract and track date from Chess.com game
+                end_time = getattr(game, 'end_time', 0)
+                if end_time > 0:
+                    game_date = datetime.fromtimestamp(end_time, tz=timezone.utc)
+                    if newest_date is None or game_date > newest_date:
+                        newest_date = game_date
+                    if oldest_date is None or game_date < oldest_date:
+                        oldest_date = game_date
+
                 # Convert Chess.com game format to a compatible format
+                white_data = getattr(game, 'white', None) or {}
+                black_data = getattr(game, 'black', None) or {}
+
                 game_data = {
-                    'url': game.get('url', ''),
-                    'pgn': game.get('pgn', ''),
-                    'time_control': str(game.get('time_control', '')),
-                    'end_time': game.get('end_time', 0),
-                    'rated': game.get('rated', True),
-                    'uuid': game.get('uuid', ''),
-                    'initial_setup': game.get('initial_setup', ''),
-                    'fen': game.get('fen', ''),
-                    'time_class': game.get('time_class', ''),
-                    'rules': game.get('rules', 'chess'),
+                    'url': getattr(game, 'url', ''),
+                    'pgn': getattr(game, 'pgn', ''),
+                    'time_control': str(getattr(game, 'time_control', '')),
+                    'end_time': getattr(game, 'end_time', 0),
+                    'rated': getattr(game, 'rated', True),
+                    'uuid': getattr(game, 'uuid', ''),
+                    'initial_setup': getattr(game, 'initial_setup', ''),
+                    'fen': getattr(game, 'fen', ''),
+                    'time_class': getattr(game, 'time_class', ''),
+                    'rules': getattr(game, 'rules', 'chess'),
                     'white': {
-                        'rating': game.get('white', {}).get('rating', 0),
-                        'result': game.get('white', {}).get('result', ''),
-                        'username': game.get('white', {}).get('username', ''),
-                        'uuid': game.get('white', {}).get('uuid', '')
+                        'rating': getattr(white_data, 'rating', 0),
+                        'result': getattr(white_data, 'result', ''),
+                        'username': getattr(white_data, 'username', ''),
+                        'uuid': getattr(white_data, 'uuid', '')
                     },
                     'black': {
-                        'rating': game.get('black', {}).get('rating', 0),
-                        'result': game.get('black', {}).get('result', ''),
-                        'username': game.get('black', {}).get('username', ''),
-                        'uuid': game.get('black', {}).get('uuid', '')
+                        'rating': getattr(black_data, 'rating', 0),
+                        'result': getattr(black_data, 'result', ''),
+                        'username': getattr(black_data, 'username', ''),
+                        'uuid': getattr(black_data, 'uuid', '')
                     },
-                    'eco': game.get('eco', '')
+                    'eco': getattr(game, 'eco', '')
                 }
 
                 # Add accuracies if available
-                if 'accuracies' in game and game['accuracies']:
+                accuracies = getattr(game, 'accuracies', None)
+                if accuracies:
                     game_data['accuracies'] = {
-                        'white': game['accuracies'].get('white'),
-                        'black': game['accuracies'].get('black')
+                        'white': getattr(accuracies, 'white', 0),
+                        'black': getattr(accuracies, 'black', 0)
                     }
             except Exception as e:
                 print(f"Error processing game: {e}")
@@ -811,21 +951,31 @@ def chess_com_analysis(request, username):
         game_dataset = GameDataSet.objects.create(
             user=request.user,
             lichess_username='',  # Empty for chess.com datasets
-            chess_com_username=username,  # We'll need to add this field
+            chess_com_username=username,
             total_games=len(all_games),
-            raw_data=ndjson_data
+            raw_data=ndjson_data,
+            oldest_game_date=oldest_date,
+            newest_game_date=newest_date
         )
 
-        return render(request, 'analysis/chess_com_analysis.html', {
-            'username': username,
+        # Format date range for display
+        date_range_str = game_dataset.date_range_display if oldest_date and newest_date else "Date range unavailable"
+
+        return JsonResponse({
+            'success': True,
             'games_count': len(all_games),
-            'game_dataset': game_dataset
+            'game_dataset_id': game_dataset.id,
+            'date_range': date_range_str,
+            'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
+            'data_size': len(ndjson_data)
         })
 
     except Exception as e:
         print(f"Error fetching Chess.com games: {e}")
-        messages.error(request, f"Error fetching games: {str(e)}")
-        return redirect('analysis:home')
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
 
 
 @login_required
@@ -883,6 +1033,16 @@ def settings(request):
             profile.save()
             messages.success(request, "Chess.com account unlinked successfully.")
 
+        elif action == 'update_board_theme':
+            # Update board theme preference
+            board_theme = request.POST.get('board_theme', 'blue')
+            if board_theme in ['blue', 'green', 'brown']:
+                profile.board_theme = board_theme
+                profile.save()
+                messages.success(request, f"Board theme updated to {board_theme}.")
+            else:
+                messages.error(request, "Invalid board theme selected.")
+
         elif action == 'update_theme':
             # Update theme preference
             theme = request.POST.get('theme', 'system')
@@ -901,3 +1061,338 @@ def settings(request):
     }
 
     return render(request, 'analysis/settings.html', context)
+
+
+def get_daily_puzzle_data():
+    """
+    Fetch daily puzzle from Chess.com with caching
+    Cache expires at 12:05 AM EST to align with Chess.com's daily puzzle release
+    Returns dict with puzzle data or None if failed
+    """
+    from django.utils import timezone
+    import pytz
+    from datetime import datetime, timedelta
+
+    # Create cache key that includes the date to ensure daily refresh
+    est = pytz.timezone('US/Eastern')
+    now_est = timezone.now().astimezone(est)
+    current_date = now_est.strftime('%Y-%m-%d')
+    cache_key = f'daily_puzzle_{current_date}'
+
+    puzzle_data = cache.get(cache_key)
+
+    if puzzle_data:
+        return puzzle_data
+
+    try:
+        # Configure User-Agent for Chess.com API
+        Client.request_config["headers"]["User-Agent"] = (
+            "Learn Chess Like a Computer - Chess Analysis Tool. "
+            "Contact: admin@learnchesslikeacomputer.com"
+        )
+
+        # Fetch daily puzzle from Chess.com
+        response = get_current_daily_puzzle()
+
+        if response and response.puzzle:
+            puzzle = response.puzzle
+
+            # Extract solution moves from PGN
+            solution_moves = extract_solution_from_pgn(puzzle.pgn)
+
+            puzzle_data = {
+                'title': puzzle.title or 'Chess.com Daily Puzzle',
+                'fen': puzzle.fen,
+                'pgn': puzzle.pgn,
+                'url': puzzle.url,
+                'image': puzzle.image,
+                'solution': solution_moves,
+                'publish_time': puzzle.publish_time,
+                'publish_datetime': getattr(puzzle, 'publish_datetime', None),
+                'source': 'chess.com'
+            }
+
+            # Cache until next 12:05 AM EST (when new puzzle is released)
+            cache_timeout = get_seconds_until_next_puzzle_release()
+            cache.set(cache_key, puzzle_data, cache_timeout)
+
+            return puzzle_data
+
+    except Exception as e:
+        print(f"Error fetching daily puzzle: {e}")
+
+    # Return fallback puzzle if API fails
+    return get_fallback_puzzle()
+
+
+def get_lichess_puzzle_data():
+    """
+    Fetch daily puzzle from Lichess with caching
+    Returns dict with puzzle data or None if failed
+    """
+    from django.utils import timezone
+    import pytz
+
+    # Create cache key that includes the date
+    est = pytz.timezone('US/Eastern')
+    now_est = timezone.now().astimezone(est)
+    current_date = now_est.strftime('%Y-%m-%d')
+    cache_key = f'lichess_puzzle_{current_date}'
+
+    puzzle_data = cache.get(cache_key)
+
+    if puzzle_data:
+        return puzzle_data
+
+    try:
+        # Fetch daily puzzle from Lichess API
+        response = requests.get('https://lichess.org/api/puzzle/daily', timeout=10)
+        response.raise_for_status()
+
+        lichess_data = response.json()
+
+        if lichess_data and 'puzzle' in lichess_data and 'game' in lichess_data:
+            puzzle = lichess_data['puzzle']
+            game = lichess_data['game']
+
+            # Extract solution moves from UCI format to algebraic notation
+            solution_moves = convert_uci_to_algebraic(puzzle['solution'], game['pgn'], puzzle['initialPly'])
+
+            # Calculate FEN position at the puzzle start
+            puzzle_fen = get_position_fen_from_pgn(game['pgn'], puzzle['initialPly'])
+
+            puzzle_data = {
+                'id': puzzle['id'],
+                'title': f"Lichess Daily Puzzle - Rating {puzzle['rating']}",
+                'fen': puzzle_fen,
+                'solution': solution_moves,
+                'url': f"https://lichess.org/training/{puzzle['id']}",
+                'rating': puzzle['rating'],
+                'plays': puzzle['plays'],
+                'themes': puzzle['themes'],
+                'source': 'lichess'
+            }
+
+            # Cache until next puzzle (same logic as Chess.com)
+            cache_timeout = get_seconds_until_next_puzzle_release()
+            cache.set(cache_key, puzzle_data, cache_timeout)
+
+            return puzzle_data
+
+    except Exception as e:
+        print(f"Error fetching Lichess puzzle: {e}")
+
+    # Return fallback puzzle if API fails
+    return get_lichess_fallback_puzzle()
+
+
+def convert_uci_to_algebraic(uci_moves, pgn, initial_ply):
+    """
+    Convert UCI moves to algebraic notation using the game position
+    """
+    try:
+        import chess
+        import chess.pgn
+        from io import StringIO
+
+        # Parse the PGN to get the position at initialPly
+        pgn_io = StringIO(pgn)
+        game = chess.pgn.read_game(pgn_io)
+
+        if not game:
+            return []
+
+        board = game.board()
+        moves = list(game.mainline_moves())
+
+        # Play moves up to initial_ply
+        for i in range(min(initial_ply, len(moves))):
+            board.push(moves[i])
+
+        # Convert UCI moves to algebraic
+        algebraic_moves = []
+        for uci_move in uci_moves:
+            try:
+                move = chess.Move.from_uci(uci_move)
+                if move in board.legal_moves:
+                    algebraic = board.san(move)
+                    algebraic_moves.append(algebraic)
+                    board.push(move)
+                else:
+                    break
+            except:
+                break
+
+        return algebraic_moves
+
+    except Exception as e:
+        print(f"Error converting UCI to algebraic: {e}")
+        return []
+
+
+def get_position_fen_from_pgn(pgn, initial_ply):
+    """
+    Get FEN position from PGN at a specific ply
+    """
+    try:
+        import chess
+        import chess.pgn
+        from io import StringIO
+
+        pgn_io = StringIO(pgn)
+        game = chess.pgn.read_game(pgn_io)
+
+        if not game:
+            return chess.STARTING_FEN
+
+        board = game.board()
+        moves = list(game.mainline_moves())
+
+        # Play moves up to initial_ply
+        for i in range(min(initial_ply, len(moves))):
+            board.push(moves[i])
+
+        return board.fen()
+
+    except Exception as e:
+        print(f"Error getting FEN from PGN: {e}")
+        return chess.STARTING_FEN
+
+
+def get_lichess_fallback_puzzle():
+    """
+    Return a fallback Lichess puzzle when API fails
+    """
+    return {
+        'id': 'fallback',
+        'title': 'Lichess Puzzle (Fallback)',
+        'fen': 'r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
+        'solution': ['Bxf7+', 'Kxf7', 'Ng5+'],
+        'url': 'https://lichess.org/training',
+        'rating': 1500,
+        'plays': 0,
+        'themes': ['tactics'],
+        'source': 'lichess',
+        'fallback': True
+    }
+
+
+def get_seconds_until_next_puzzle_release():
+    """
+    Calculate seconds until next 12:05 AM EST (when Chess.com releases new daily puzzle)
+    Returns number of seconds to cache the puzzle
+    """
+    from django.utils import timezone
+    import pytz
+    from datetime import datetime, timedelta
+
+    est = pytz.timezone('US/Eastern')
+    now_est = timezone.now().astimezone(est)
+
+    # Find next 12:05 AM EST
+    next_release = now_est.replace(hour=0, minute=5, second=0, microsecond=0)
+
+    # If it's already past 12:05 AM today, move to tomorrow
+    if now_est >= next_release:
+        next_release += timedelta(days=1)
+
+    # Calculate seconds until next release
+    delta = next_release - now_est
+    seconds_until_release = int(delta.total_seconds())
+
+    # Add 5 minute buffer to avoid race conditions
+    return seconds_until_release + 300  # 5 minutes buffer
+
+
+def extract_solution_from_pgn(pgn):
+    """
+    Extract solution moves from PGN string
+    Returns list of moves in algebraic notation
+    """
+    if not pgn:
+        return []
+
+    try:
+        # Remove headers and comments from PGN
+        # PGN format: "1. Move1 Move2 2. Move3 Move4 ..."
+        import re
+
+        # Remove everything in brackets and headers
+        clean_pgn = re.sub(r'\[.*?\]', '', pgn)
+        clean_pgn = re.sub(r'\{.*?\}', '', clean_pgn)
+
+        # Extract just the moves
+        moves = []
+
+        # Split by move numbers and extract moves
+        parts = re.split(r'\d+\.', clean_pgn)
+
+        for part in parts:
+            if part.strip():
+                # Split moves in this part
+                move_part = part.strip().split()
+                for move in move_part:
+                    move = move.strip()
+                    if move and not move.startswith('(') and not move.endswith(')'):
+                        # Remove result indicators like 1-0, 0-1, 1/2-1/2
+                        if move not in ['1-0', '0-1', '1/2-1/2', '*']:
+                            moves.append(move)
+
+        return moves[:10]  # Limit to reasonable number of moves
+
+    except Exception as e:
+        print(f"Error parsing PGN: {e}")
+        return []
+
+
+def get_fallback_puzzle():
+    """
+    Return a fallback puzzle when API fails
+    """
+    return {
+        'title': 'Chess.com Puzzle (Fallback)',
+        'fen': 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 4 4',
+        'pgn': '1. Bxf7+ Kf8 2. Qh5',
+        'url': 'https://chess.com/puzzles',
+        'image': None,
+        'solution': ['Bxf7+', 'Kf8', 'Qh5'],
+        'publish_time': None,
+        'publish_datetime': None,
+        'source': 'chess.com',
+        'fallback': True
+    }
+
+
+def daily_puzzle_api(request):
+    """
+    API endpoint to fetch daily puzzle data from both Chess.com and Lichess
+    Returns JSON with both puzzle sources
+    """
+    # Get requested source (default to both)
+    source = request.GET.get('source', 'both')
+
+    result = {'success': True, 'puzzles': {}}
+
+    if source in ['both', 'chess.com']:
+        chess_puzzle = get_daily_puzzle_data()
+        if chess_puzzle:
+            result['puzzles']['chess.com'] = chess_puzzle
+
+    if source in ['both', 'lichess']:
+        lichess_puzzle = get_lichess_puzzle_data()
+        if lichess_puzzle:
+            result['puzzles']['lichess'] = lichess_puzzle
+
+    if result['puzzles']:
+        # Set default puzzle (Chess.com if available, otherwise Lichess)
+        if 'chess.com' in result['puzzles']:
+            result['defaultPuzzle'] = result['puzzles']['chess.com']
+        elif 'lichess' in result['puzzles']:
+            result['defaultPuzzle'] = result['puzzles']['lichess']
+
+        return JsonResponse(result)
+    else:
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to load daily puzzles from both sources'
+        }, status=500)

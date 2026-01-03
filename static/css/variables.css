@@ -1,0 +1,204 @@
+/* Chess Analysis CSS Variables and Theme System */
+
+/* Color Scheme for Chess Players (18-40, Male Demographic) */
+:root {
+    /* Primary Colors - Nord Frost colors for modern sophistication */
+    --primary-color: #5E81AC;           /* Nord10 - frost blue */
+    --primary-light: #81A1C1;          /* Nord9 - light frost blue */
+    --primary-dark: #5E81AC;           /* Nord10 - darker frost variant */
+
+    /* Secondary Colors - Nord Aurora colors for accents */
+    --secondary-color: #88C0D0;        /* Nord8 - frost teal */
+    --secondary-light: #8FBCBB;        /* Nord7 - lighter frost teal */
+    --secondary-dark: #5E81AC;         /* Nord10 - darker accent */
+
+    /* Neutral Colors - Nord Snow Storm colors */
+    --background-primary: #ECEFF4;     /* Nord6 - light snow storm */
+    --background-secondary: #ECEFF4;   /* Nord6 - snow storm white */
+    --background-tertiary: #E5E9F0;    /* Nord5 - darker snow storm */
+
+    /* Text Colors - Nord Polar Night colors */
+    --text-primary: #2E3440;           /* Nord0 - polar night */
+    --text-secondary: #3B4252;         /* Nord1 - secondary polar night */
+    --text-muted: #434C5E;             /* Nord2 - muted polar night */
+    --text-on-primary: #ECEFF4;        /* Nord6 - snow storm on dark backgrounds */
+
+    /* Success/Status Colors */
+    --success-color: #28a745;          /* Green for positive outcomes */
+    --success-light: #5dbe5d;          /* Light green */
+    --success-background: #d4edda;     /* Light green background for success messages */
+    --success-text: #155724;           /* Dark green text for success messages */
+    --success-border: #28a745;         /* Green border for success messages */
+    --warning-color: #fd7e14;          /* Orange for warnings */
+    --danger-color: #dc3545;           /* Red for negative outcomes */
+    --info-color: #17a2b8;             /* Teal for information */
+
+    /* Border and Shadow Colors */
+    --border-color: #D8DEE9;           /* Nord4 - light borders */
+    --border-dark: #4C566A;            /* Nord3 - darker borders */
+    --shadow-light: rgba(46, 52, 64, 0.1); /* Subtle shadows */
+    --shadow-medium: rgba(46, 52, 64, 0.15); /* Medium shadows */
+
+    /* Interactive Elements */
+    --hover-background: rgba(94, 129, 172, 0.1); /* Nord10 hover */
+    --focus-color: rgba(94, 129, 172, 0.25);     /* Nord10 focus outline */
+}
+
+/* Dark Mode Colors */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Primary Colors - Nord Frost for dark backgrounds */
+        --primary-color: #81A1C1;
+        --primary-light: #88C0D0;
+        --primary-dark: #5E81AC;
+
+        /* Secondary Colors - Nord Aurora for dark mode */
+        --secondary-color: #8FBCBB;
+        --secondary-light: #88C0D0;
+        --secondary-dark: #5E81AC;
+
+        /* Dark Background Colors - Nord Polar Night */
+        --background-primary: #2E3440;
+        --background-secondary: #3B4252;
+        --background-tertiary: #434C5E;
+
+        /* Dark Mode Text Colors - Nord Snow Storm */
+        --text-primary: #ECEFF4;
+        --text-secondary: #E5E9F0;
+        --text-muted: #D8DEE9;
+        --text-on-primary: #2E3440;
+
+        /* Adjusted Status Colors for Dark Mode */
+        --success-background: #1e4d26;
+        --success-text: #7fb069;
+
+        /* Dark Mode Borders and Shadows */
+        --border-color: #4C566A;
+        --border-dark: #5E81AC;
+        --shadow-light: rgba(46, 52, 64, 0.3);
+        --shadow-medium: rgba(46, 52, 64, 0.5);
+
+        /* Dark Mode Interactive Elements */
+        --hover-background: rgba(129, 161, 193, 0.15);
+        --focus-color: rgba(129, 161, 193, 0.3);
+    }
+}
+
+/* Manual Dark Mode Override */
+[data-theme="dark"] {
+    --primary-color: #81A1C1;
+    --primary-light: #88C0D0;
+    --primary-dark: #5E81AC;
+
+    --secondary-color: #8FBCBB;
+    --secondary-light: #88C0D0;
+    --secondary-dark: #5E81AC;
+
+    --background-primary: #2E3440;
+    --background-secondary: #3B4252;
+    --background-tertiary: #434C5E;
+
+    --text-primary: #ECEFF4;
+    --text-secondary: #E5E9F0;
+    --text-muted: #D8DEE9;
+    --text-on-primary: #2E3440;
+
+    --success-background: #1e4d26;
+    --success-text: #7fb069;
+
+    --border-color: #4C566A;
+    --border-dark: #5E81AC;
+    --shadow-light: rgba(46, 52, 64, 0.3);
+    --shadow-medium: rgba(46, 52, 64, 0.5);
+
+    --hover-background: rgba(129, 161, 193, 0.15);
+    --focus-color: rgba(129, 161, 193, 0.3);
+}
+
+/* Manual Light Mode Override */
+[data-theme="light"] {
+    --primary-color: #5E81AC;
+    --primary-light: #81A1C1;
+    --primary-dark: #5E81AC;
+
+    --secondary-color: #88C0D0;
+    --secondary-light: #8FBCBB;
+    --secondary-dark: #5E81AC;
+
+    --background-primary: #ECEFF4;
+    --background-secondary: #ECEFF4;
+    --background-tertiary: #E5E9F0;
+
+    --text-primary: #2E3440;
+    --text-secondary: #3B4252;
+    --text-muted: #434C5E;
+    --text-on-primary: #ECEFF4;
+
+    --success-background: #d4edda;
+    --success-text: #155724;
+
+    --border-color: #D8DEE9;
+    --border-dark: #4C566A;
+    --shadow-light: rgba(46, 52, 64, 0.1);
+    --shadow-medium: rgba(46, 52, 64, 0.15);
+
+    --hover-background: rgba(94, 129, 172, 0.1);
+    --focus-color: rgba(94, 129, 172, 0.25);
+}
+
+/* Theme Toggle Switch */
+.theme-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.theme-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.theme-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--background-secondary);
+    transition: 0.4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .theme-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .theme-slider:before {
+    transform: translateX(26px);
+}
+
+.theme-slider:hover {
+    background-color: var(--primary-light);
+}
+
+input:checked + .theme-slider:hover {
+    background-color: var(--primary-dark);
+}

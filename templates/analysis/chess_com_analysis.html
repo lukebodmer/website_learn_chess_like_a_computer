@@ -8,31 +8,130 @@
 
     <div class="status-container">
         <div class="status-header">
-            <h3>🔍 Finding your most recent Chess.com games...</h3>
+            <h3 id="status-text">🔍 Finding your most recent Chess.com games...</h3>
         </div>
 
         <div class="progress-bar-container">
             <div class="progress-bar">
-                <div class="progress-fill completed"></div>
+                <div class="progress-fill" id="progress-bar"></div>
             </div>
-            <div class="progress-text">✅ Found {{ games_count }} games</div>
+            <div class="progress-text" id="progress-text">Fetching games...</div>
         </div>
 
-        <div class="games-summary">
-            <p>Successfully retrieved your {{ games_count }} most recent Chess.com games!</p>
+        <div class="games-summary" id="games-summary" style="display: none;">
+            <p id="summary-text"></p>
             <p>Click the button below to generate your comprehensive analysis report.</p>
         </div>
 
-        <div class="action-buttons">
-            <a href="{% url 'analysis:generate_report' username %}" class="btn btn-primary">
+        <div class="analysis-info" id="analysis-info" style="display: none;">
+            <h3>What's Next?</h3>
+            <p>Our analysis engine will:</p>
+            <ul>
+                <li>📊 Analyze your game statistics and patterns</li>
+                <li>♟️ Review your opening repertoire and success rates</li>
+                <li>🎯 Calculate accuracy metrics using existing Chess.com analysis</li>
+                <li>🔍 Run Stockfish analysis on games without existing evaluation data</li>
+                <li>📈 Generate insights and recommendations for improvement</li>
+            </ul>
+            <p><strong>Note:</strong> Analysis may take a few minutes for large game collections, especially when running Stockfish analysis on games without existing evaluation data.</p>
+        </div>
+
+        <div class="game-details" id="game-details" style="display: none;">
+            <h3>Game Collection Summary:</h3>
+            <ul>
+                <li><strong>Total Games:</strong> <span id="total-games"></span></li>
+                <li><strong>Date Range:</strong> <span id="date-range"></span></li>
+                <li><strong>Downloaded:</strong> <span id="downloaded-date"></span></li>
+                <li><strong>Data Size:</strong> <span id="data-size"></span> characters</li>
+            </ul>
+            <p><small>
+                <em>Analysis reports are saved to your account so you can view them later.
+                You can also generate new reports as you play more games.</em>
+            </small></p>
+        </div>
+
+        <div class="action-buttons" id="action-buttons" style="display: none;">
+            <a href="#" id="generate-report-btn" class="btn btn-primary">
                 Generate Analysis Report
             </a>
             <a href="{% url 'analysis:home' %}" class="btn btn-secondary">
                 Back to Home
             </a>
         </div>
+
+        <div class="error-message" id="error-message" style="display: none;">
+            <p id="error-text"></p>
+            <a href="{% url 'analysis:home' %}" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const username = '{{ username }}';
+    const statusText = document.getElementById('status-text');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const gamesSummary = document.getElementById('games-summary');
+    const summaryText = document.getElementById('summary-text');
+    const actionButtons = document.getElementById('action-buttons');
+    const generateBtn = document.getElementById('generate-report-btn');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+
+    // Start fetching games immediately
+    fetch(`{% url 'analysis:fetch_chess_com_games' username %}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Success - show completed state
+                statusText.innerHTML = '✅ Games Retrieved Successfully';
+                progressBar.style.width = '100%';
+                progressBar.style.animation = 'none';
+                progressBar.classList.add('completed');
+                progressText.innerHTML = `✅ Found ${data.games_count} games`;
+
+                // Show summary and details
+                summaryText.innerHTML = `Successfully retrieved your ${data.games_count} most recent Chess.com games!`;
+                gamesSummary.style.display = 'block';
+                document.getElementById('analysis-info').style.display = 'block';
+                actionButtons.style.display = 'flex';
+                document.getElementById('game-details').style.display = 'block';
+
+                // Fill in game details
+                document.getElementById('total-games').textContent = data.games_count;
+                document.getElementById('date-range').textContent = data.date_range || 'Date range unavailable';
+                document.getElementById('downloaded-date').textContent = data.created_at;
+                document.getElementById('data-size').textContent = data.data_size.toLocaleString();
+
+                // Update generate report button URL
+                generateBtn.href = `{% url 'analysis:generate_report' username %}`;
+            } else {
+                // Error - show error state
+                statusText.innerHTML = '❌ Error Fetching Games';
+                progressBar.style.width = '100%';
+                progressBar.style.background = 'linear-gradient(90deg, #f44336, #d32f2f)';
+                progressText.innerHTML = '❌ Failed to fetch games';
+
+                // Show error message
+                errorText.innerHTML = data.error || 'Unknown error occurred';
+                errorMessage.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusText.innerHTML = '❌ Network Error';
+            progressBar.style.width = '100%';
+            progressBar.style.background = 'linear-gradient(90deg, #f44336, #d32f2f)';
+            progressText.innerHTML = '❌ Network error';
+
+            errorText.innerHTML = 'Network error occurred. Please try again.';
+            errorMessage.style.display = 'block';
+        });
+});
+</script>
 
 <style>
 .status-container {
@@ -70,9 +169,16 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #4CAF50, #45a049);
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
     transition: width 0.3s ease;
-    width: 100%;
+    width: 0%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { width: 0%; }
+    50% { width: 60%; }
+    100% { width: 0%; }
 }
 
 .progress-fill.completed {
@@ -86,15 +192,27 @@
     font-size: 16px;
 }
 
-.games-summary {
+.games-summary, .analysis-info, .game-details {
     text-align: center;
     margin-bottom: 30px;
 }
 
-.games-summary p {
+.games-summary p, .analysis-info p, .game-details p {
     color: var(--text-primary);
     margin: 10px 0;
     font-size: 16px;
+}
+
+.analysis-info ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.game-details ul {
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto 20px auto;
 }
 
 .action-buttons {

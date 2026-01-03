@@ -1,61 +1,69 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - Chess Analysis{% endblock %}
 
 {% block content %}
+
 {% if user.is_authenticated %}
-    <div class="home-top-row">
-        <div class="account-status-column">
-            <div class="section">
-                <h3>Account Status</h3>
+    <div class="home-cards-grid">
+        <div class="section">
+            <h3>Account Status</h3>
 
-                <!-- Lichess Status -->
-                {% if user.userprofile.lichess_username %}
-                    <div class="status-indicator connected">
-                        <p><strong>✅ Lichess Connected:</strong> {{ user.userprofile.lichess_username }}</p>
-                    </div>
-                {% else %}
-                    <div class="status-indicator not-connected">
-                        <p><strong>⚠️ Lichess Not Connected</strong></p>
-                        <p>Connect your Lichess account to start analyzing your games.</p>
-                    </div>
-                {% endif %}
+            <!-- Lichess Status -->
+            {% if user.userprofile.lichess_username %}
+                <div class="status-indicator connected lichess-status">
+                    <p><strong>✅ Lichess Connected:</strong> {{ user.userprofile.lichess_username }}</p>
+                </div>
+            {% else %}
+                <div class="status-indicator not-connected lichess-status">
+                    <p><strong>⚠️ Lichess Not Connected</strong></p>
+                    <p>Connect your Lichess account to start analyzing your games.</p>
+                </div>
+            {% endif %}
 
-                <!-- Chess.com Status -->
+            <!-- Chess.com Status -->
+            {% if user.userprofile.chess_com_username %}
+                <div class="status-indicator connected chess-com-status">
+                    <p><strong>✅ Chess.com Connected:</strong> {{ user.userprofile.chess_com_username }}</p>
+                </div>
+            {% else %}
+                <div class="status-indicator not-connected chess-com-status">
+                    <p><strong>⚠️ Chess.com Not Connected</strong></p>
+                    <a href="{% url 'analysis:chess_com_connect' %}" class="chess-com-connect-btn">Connect Chess.com</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>Generate Reports</h3>
+            <div class="generate-buttons-grid">
+                <a href="{% url 'analysis:lichess_login' %}" class="generate-report-card lichess-card">
+                    <div class="report-button-content">
+                        <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="report-logo">
+                        <span class="report-label">Lichess</span>
+                    </div>
+                </a>
+
                 {% if user.userprofile.chess_com_username %}
-                    <div class="status-indicator connected">
-                        <p><strong>✅ Chess.com Connected:</strong> {{ user.userprofile.chess_com_username }}</p>
+                <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="generate-report-card chess-com-card">
+                    <div class="report-button-content">
+                        <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="report-logo">
+                        <span class="report-label">Chess.com</span>
                     </div>
-                {% else %}
-                    <div class="status-indicator not-connected">
-                        <p><strong>⚠️ Chess.com Not Connected</strong></p>
-                        <a href="{% url 'analysis:chess_com_connect' %}" class="chess-com-connect-btn">Connect Chess.com</a>
-                    </div>
+                </a>
                 {% endif %}
             </div>
         </div>
-
-        <div class="generate-button-column">
-            <a href="{% url 'analysis:lichess_login' %}" class="lichess-button">
-                {% load static %}
-                <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="lichess-logo">
-                {% if user.userprofile.lichess_username %}Generate Lichess Report{% else %}Connect Lichess Account{% endif %}
-            </a>
-
-            {% if user.userprofile.chess_com_username %}
-            <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="chess-com-button">
-                <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="chess-com-logo">
-                Generate Chess.com Report
-            </a>
-            {% endif %}
-        </div>
     </div>
+
+<!-- Daily puzzles will be implemented using the React chess engine in the future -->
 
     {% if reports %}
         <div class="section">
-            <div class="reports-page-header">
+            <div class="reports-header-with-button">
                 <h3>Recent Reports</h3>
-                <a href="{% url 'analysis:user_reports' %}" class="btn btn-secondary">View All Reports</a>
+                <a href="{% url 'analysis:user_reports' %}" class="btn btn-secondary view-all-btn">View All Reports</a>
             </div>
             <p>Your latest analysis reports:</p>
 
@@ -76,9 +84,6 @@
             </a>
             {% endfor %}
 
-            <div class="view-all-reports-container">
-                <a href="{% url 'analysis:user_reports' %}" class="btn btn-secondary">View All Reports</a>
-            </div>
         </div>
     {% elif user.userprofile.lichess_username %}
         <div class="section">
@@ -95,6 +100,9 @@
         <a href="/auth/login/" class="btn">Login</a>
         <a href="/auth/signup/" class="btn btn-secondary">Sign Up</a>
     </div>
+
+<!-- Daily puzzles will be implemented using the React chess engine in the future -->
+
 {% endif %}
 
 <h3>How it works:</h3>
@@ -104,4 +112,6 @@
     <li>Our analysis engine will process your games with Stockfish</li>
     <li>Get a comprehensive report with insights and recommendations</li>
 </ol>
+
+<!-- Daily puzzle logic now handled by React component via main.js -->
 {% endblock %}

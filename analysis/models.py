@@ -6,10 +6,23 @@ import json
 
 class UserProfile(models.Model):
     """Extended user profile with chess-specific information"""
+
+    BOARD_THEME_CHOICES = [
+        ('blue', 'Blue Theme'),
+        ('green', 'Green Theme'),
+        ('brown', 'Brown Theme'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     lichess_username = models.CharField(max_length=100, blank=True, null=True)
     lichess_access_token = models.TextField(blank=True, null=True)
     chess_com_username = models.CharField(max_length=100, blank=True, null=True)
+    board_theme = models.CharField(
+        max_length=20,
+        choices=BOARD_THEME_CHOICES,
+        default='blue',
+        help_text="Choose your preferred chessboard theme"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -24,6 +37,11 @@ class GameDataSet(models.Model):
     chess_com_username = models.CharField(max_length=100, blank=True, null=True)
     total_games = models.IntegerField(default=0)
     raw_data = models.TextField()  # NDJSON data from Lichess or Chess.com
+
+    # Date range of games in this dataset
+    oldest_game_date = models.DateTimeField(null=True, blank=True)
+    newest_game_date = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -32,6 +50,30 @@ class GameDataSet(models.Model):
     def __str__(self):
         platform = self.lichess_username or self.chess_com_username or 'Unknown'
         return f"{platform} - {self.total_games} games ({self.created_at.strftime('%Y-%m-%d')})"
+
+    @property
+    def date_range_display(self):
+        """Return formatted date range for display"""
+        if not self.oldest_game_date or not self.newest_game_date:
+            return "Date range unavailable"
+
+        oldest = self.oldest_game_date.strftime("%B %d, %Y")
+        newest = self.newest_game_date.strftime("%B %d, %Y")
+
+        if oldest == newest:
+            return oldest  # Same day
+        else:
+            return f"{oldest} - {newest}"
+
+    @property
+    def platform(self):
+        """Return the platform name for this dataset"""
+        if self.lichess_username:
+            return 'Lichess'
+        elif self.chess_com_username:
+            return 'Chess.com'
+        else:
+            return 'Unknown'
 
 
 class AnalysisReport(models.Model):
@@ -64,6 +106,72 @@ class AnalysisReport(models.Model):
     @property
     def average_accuracy(self):
         return self.accuracy_analysis.get('average_accuracy', 0)
+
+
+class PositionEvaluation(models.Model):
+    """Chess position evaluation data from Lichess database"""
+    fen = models.CharField(max_length=200, unique=True, db_index=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'evaluations_position'
+        ordering = ['fen']
+        indexes = [
+            models.Index(fields=['fen']),
+        ]
+
+    def __str__(self):
+        return f"Position: {self.fen[:50]}..."
+
+
+class EvaluationData(models.Model):
+    """Individual evaluation for a position (multiple per position possible)"""
+    position = models.ForeignKey(PositionEvaluation, on_delete=models.CASCADE, related_name='evals')
+    knodes = models.BigIntegerField()  # Number of kilanodes searched
+    depth = models.IntegerField()      # Search depth
+    pv_count = models.IntegerField()   # Number of principal variations
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'evaluations_data'
+        ordering = ['-pv_count', '-knodes']
+        indexes = [
+            models.Index(fields=['position', '-pv_count']),
+            models.Index(fields=['knodes']),
+            models.Index(fields=['depth']),
+        ]
+
+    def __str__(self):
+        return f"Eval for {self.position.fen[:30]}... - {self.pv_count}PVs, {self.knodes}kN, depth {self.depth}"
+
+
+class PrincipalVariation(models.Model):
+    """Individual principal variation (line of play) within an evaluation"""
+    evaluation = models.ForeignKey(EvaluationData, on_delete=models.CASCADE, related_name='pvs')
+    pv_index = models.IntegerField()  # Order within this evaluation (0-based)
+
+    # Evaluation score
+    cp = models.IntegerField(null=True, blank=True)    # Centipawn evaluation
+    mate = models.IntegerField(null=True, blank=True)  # Mate in N moves
+
+    line = models.TextField()  # UCI move sequence
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'evaluations_pv'
+        ordering = ['pv_index']
+        unique_together = ['evaluation', 'pv_index']
+        indexes = [
+            models.Index(fields=['evaluation', 'pv_index']),
+            models.Index(fields=['cp']),
+            models.Index(fields=['mate']),
+        ]
+
+    def __str__(self):
+        score = f"cp:{self.cp}" if self.cp is not None else f"mate:{self.mate}"
+        return f"PV {self.pv_index}: {score} - {self.line[:30]}..."
 
 
 class ChessGame(models.Model):

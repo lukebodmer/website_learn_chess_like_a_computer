@@ -24,7 +24,8 @@
                
             packages = [
             # General packages
-              # pkgs.hello-nix
+	      pkgs.typescript
+	      pkgs.nodejs_24
 	      pkgs.stockfish
 	      pkgs.postgresql
 	      pkgs.zstd
@@ -43,8 +44,10 @@
 		djangorestframework
 		flask
 		requests
-		pycountry
 		psycopg2
+		pycountry
+		pytz
+		zstandard
               #  matplotlib
               #  numpy
               ]))
@@ -53,13 +56,14 @@
             # ENVIRONMENT_VARIABLE_EXAMPLE = "${pkgs.hello-nix}";
 
             shellHook = ''
-              export VIRTUAL_ENV="Custom Environment"
+              export VIRTUAL_ENV="LCLC website"
 
               # PostgreSQL configuration
               export PGDATA="$PWD/postgres_data"
               export PGHOST="$PWD/postgres_data"
-              export PGPORT="5433"
+              export PGPORT="5432"
               export PGDATABASE="chess_analysis"
+	      echo python manage.py runserver to start Django server
             '';
           };
         };

@@ -5,6 +5,7 @@ data/lichess_evals/*.jsonl
 data/processed/
 __pycache__/
 *.py[cod]
+*.pyc
 *$py.class
 *.so
 .Python
@@ -12,5 +13,14 @@ env/
 venv/
 ENV/
 .env
+postgres_data/
 
+# Node.js / npm / Vite
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.vite/
+*.tsbuildinfo
 

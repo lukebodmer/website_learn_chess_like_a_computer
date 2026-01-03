@@ -2,10 +2,10 @@
 
 /* Color Scheme for Chess Players (18-40, Male Demographic) */
 :root {
-    /* Primary Colors - Deep blues and golds for sophistication and focus */
-    --primary-color: #2c4a7a;           /* Deep blue - strategy and intelligence */
-    --primary-light: #4a6ba3;          /* Lighter blue for hover states */
-    --primary-dark: #1e3355;           /* Dark blue for depth */
+    /* Primary Colors - Denim blues for sophistication and focus */
+    --primary-color: #6F8FAF;           /* Denim blue - strategy and intelligence */
+    --primary-light: #8FA5C4;          /* Lighter denim for hover states */
+    --primary-dark: #5A7491;           /* Dark denim for depth */
 
     /* Secondary Colors - Warm golds for chess royalty theme */
     --secondary-color: #d4af37;        /* Gold - victory and excellence */
@@ -92,10 +92,10 @@
 
 /* Manual Dark Mode Override */
 [data-theme="dark"] {
-    /* Primary Colors - Lighter blues for dark backgrounds */
-    --primary-color: #4a90e2;           /* Lighter blue for dark mode */
-    --primary-light: #6ba3f5;          /* Even lighter for hover */
-    --primary-dark: #357abd;           /* Darker blue for contrast */
+    /* Primary Colors - Lighter denim for dark backgrounds */
+    --primary-color: #2a6f97;           /* Lighter blue for dark mode */
+    --primary-light: #2c7da0;          /* Even lighter denim for hover */
+    --primary-dark: #01497c;           /* Medium denim for contrast */
 
     /* Secondary Colors - Brighter golds for visibility */
     --secondary-color: #ffb347;        /* Warm gold for dark mode */
@@ -136,10 +136,10 @@
 
 /* Manual Light Mode Override */
 [data-theme="light"] {
-    /* Primary Colors - Deep blues and golds for sophistication and focus */
-    --primary-color: #2c4a7a;           /* Deep blue - strategy and intelligence */
-    --primary-light: #4a6ba3;          /* Lighter blue for hover states */
-    --primary-dark: #1e3355;           /* Dark blue for depth */
+    /* Primary Colors - Denim blues for sophistication and focus */
+    --primary-color: #6F8FAF;           /* Denim blue - strategy and intelligence */
+    --primary-light: #8FA5C4;          /* Lighter denim for hover states */
+    --primary-dark: #5A7491;           /* Dark denim for depth */
 
     /* Secondary Colors - Warm golds for chess royalty theme */
     --secondary-color: #d4af37;        /* Gold - victory and excellence */
@@ -255,7 +255,7 @@
 
 /* Base Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
@@ -266,32 +266,35 @@ body {
 
 /* Header */
 .header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: var(--text-on-primary);
-    padding: 30px;
-    border-radius: 10px;
-    margin-bottom: 30px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
 
 .header h1 {
-    margin: 0 0 10px 0;
-    font-size: 2.5em;
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: 500;
 }
 
 .header h2 {
-    margin: 0 0 10px 0;
-    font-size: 1.8em;
+    margin: 0 0 5px 0;
+    font-size: 1.5em;
     opacity: 0.9;
 }
 
 .header p {
-    margin: 10px 0 0 0;
+    margin: 5px 0 0 0;
     opacity: 0.8;
+    font-size: 0.95em;
 }
 
 .user-info {
-    float: right;
     color: var(--text-on-primary);
     font-size: 0.9em;
     display: flex;
@@ -393,6 +396,23 @@ body {
 
 .btn-success:hover {
     background: var(--success-light);
+}
+
+.btn-puzzle {
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--primary-color);
+    margin: 5px 2px;
+}
+
+.btn-puzzle:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+    color: var(--text-on-primary);
+    text-decoration: none;
 }
 
 /* Stats Grid */
@@ -762,8 +782,8 @@ label {
 
 .report-card {
     background: var(--background-primary);
-    padding: 20px;
-    margin: 15px 0;
+    padding: 15px;
+    margin: 10px 0;
     border-radius: 8px;
     border-left: 4px solid var(--primary-color);
     cursor: pointer;
@@ -782,7 +802,7 @@ label {
 }
 
 .report-card h4 {
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
     color: var(--text-primary);
     font-size: 1.2em;
 }
@@ -824,6 +844,15 @@ label {
 
 .report-stats-inline > div:last-child {
     text-align: right;
+}
+
+.report-date-range {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 8px;
+    font-style: italic;
+    border-top: 1px solid var(--border-light);
+    padding-top: 8px;
 }
 
 .report-actions {
@@ -896,6 +925,41 @@ label {
     margin: 0;
 }
 
+.generate-buttons-reports {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.reports-header-with-button {
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+    margin-bottom: 8px;
+}
+
+.reports-header-with-button h3 {
+    margin: 0;
+}
+
+.view-all-btn {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    background: var(--accent-color);
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+}
+
+.view-all-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
 .lichess-button-small {
     display: inline-flex;
     align-items: center;
@@ -944,6 +1008,19 @@ label {
 
 .status-indicator.not-connected {
     border-left: 4px solid var(--warning-color);
+}
+
+/* Platform-specific status indicators */
+.status-indicator.lichess-status.connected {
+    border-left: 4px solid #d85c0d;
+    border-color: #d85c0d;
+    background: linear-gradient(135deg, rgba(216, 92, 13, 0.03) 0%, rgba(243, 156, 18, 0.03) 100%);
+}
+
+.status-indicator.chess-com-status.connected {
+    border-left: 4px solid #769656;
+    border-color: #769656;
+    background: linear-gradient(135deg, rgba(118, 150, 86, 0.03) 0%, rgba(143, 188, 143, 0.03) 100%);
 }
 
 .status-indicator p {
@@ -1020,37 +1097,97 @@ label {
 }
 
 /* Home Page Layout */
-.home-top-row {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 30px;
-    align-items: center;
-    margin-bottom: 30px;
-    width: 100%;
-    min-height: 150px;
+.home-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
-.account-status-column {
-    display: flex;
-    flex-direction: column;
+.generate-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 10px;
 }
 
-.generate-button-column {
+.generate-report-card {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 25px 15px;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-height: 80px;
+}
+
+.report-button-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.generate-report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px var(--shadow-medium);
+    border-color: var(--accent-color);
+}
+
+.generate-report-card.lichess-card:hover {
+    border-color: #d85c0d;
+    background: linear-gradient(135deg, rgba(216, 92, 13, 0.05) 0%, rgba(243, 156, 18, 0.05) 100%);
+}
+
+.generate-report-card.lichess-card:hover .report-label {
+    color: #d85c0d;
+}
+
+.generate-report-card.chess-com-card:hover {
+    border-color: #769656;
+    background: linear-gradient(135deg, rgba(118, 150, 86, 0.05) 0%, rgba(143, 188, 143, 0.05) 100%);
+}
+
+.generate-report-card.chess-com-card:hover .report-label {
+    color: #769656;
+}
+
+.report-logo {
+    width: 48px;
+    height: 48px;
+    transition: transform 0.3s ease;
+}
+
+.generate-report-card:hover .report-logo {
+    transform: scale(1.1);
 }
 
 /* Mobile responsiveness for home page */
 @media (max-width: 768px) {
-    .home-top-row {
+    .home-cards-grid {
         grid-template-columns: 1fr;
         gap: 20px;
         text-align: center;
     }
 
-    .generate-button-column {
-        order: -1; /* Put button first on mobile */
+    .generate-buttons-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .generate-report-card {
+        padding: 30px;
+        min-height: 100px;
     }
 }
 
@@ -1199,15 +1336,15 @@ label {
     }
 
     .header {
-        padding: 20px;
+        padding: 15px;
     }
 
     .header h1 {
-        font-size: 2em;
+        font-size: 1.75em;
     }
 
     .header h2 {
-        font-size: 1.5em;
+        font-size: 1.3em;
     }
 
     .user-info {
@@ -1310,24 +1447,542 @@ label {
 /* Settings Icon Styling */
 .settings-icon {
     color: var(--text-on-primary);
-    text-decoration: none;
+    text-decoration: none !important;
     font-size: 16px;
     margin-left: 8px;
     margin-right: 12px;
     padding: 4px 6px;
     border-radius: 4px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     display: inline-block;
     vertical-align: middle;
 }
 
 .settings-icon:hover {
     background: rgba(255, 255, 255, 0.15);
-    transform: rotate(45deg);
-    text-decoration: none;
+    text-decoration: none !important;
     color: var(--text-on-primary);
 }
 
-.settings-icon:active {
+.gear-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.settings-icon:hover .gear-icon {
+    transform: rotate(45deg);
+}
+
+.settings-icon:active .gear-icon {
     transform: rotate(90deg) scale(0.95);
 }
+
+/* Board Theme Styles */
+.board-theme-blue .white-1e1d7 {
+    background-color: #f0f0f0;
+}
+
+.board-theme-blue .black-3c85d {
+    background-color: #8b9dc3;
+}
+
+.board-theme-green .white-1e1d7 {
+    background-color: #f0f0f0;
+}
+
+.board-theme-green .black-3c85d {
+    background-color: #769656;
+}
+
+.board-theme-brown .white-1e1d7 {
+    background-color: #f0d9b5;
+}
+
+.board-theme-brown .black-3c85d {
+    background-color: #b58863;
+}
+
+/* Board theme preview styles for settings */
+.board-preview {
+    width: 60px;
+    height: 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.board-preview-square {
+    background: #f0f0f0;
+}
+
+.board-preview-square.dark {
+    background: #8b9dc3;
+}
+
+.board-preview.green .board-preview-square.dark {
+    background: #769656;
+}
+
+.board-preview.brown .board-preview-square {
+    background: #f0d9b5;
+}
+
+.board-preview.brown .board-preview-square.dark {
+    background: #b58863;
+}
+
+/* Daily Puzzle Styles */
+.daily-puzzle-section {
+    margin-bottom: 30px;
+}
+
+.daily-puzzle-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    transition: all 0.2s ease;
+}
+
+
+.puzzle-header {
+    margin-bottom: 20px;
+}
+
+.puzzle-header h3 {
+    color: var(--text-primary);
+    margin: 0 0 15px 0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+
+.puzzle-source-switcher {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.source-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--background-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.source-btn:hover {
+    background: var(--hover-background);
+    border-color: var(--primary-light);
+}
+
+.source-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+
+.source-logo {
+    width: 20px;
+    height: 20px;
+}
+
+.puzzle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.puzzle-title {
+    font-weight: bold;
+    color: var(--text-primary);
+    font-size: 1.1em;
+}
+
+.puzzle-status {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.puzzle-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+.puzzle-board-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.daily-puzzle-board {
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.puzzle-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-primary);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    border-radius: 8px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.puzzle-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.puzzle-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.puzzle-controls .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+.puzzle-feedback {
+    min-height: 60px;
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    display: none;
+}
+
+.puzzle-feedback.success {
+    background: var(--success-bg, #d4edda);
+    border-color: var(--success-color, #28a745);
+    color: var(--success-text, #155724);
+    display: block;
+}
+
+.puzzle-feedback.error {
+    background: var(--error-bg, #f8d7da);
+    border-color: var(--danger-color, #dc3545);
+    color: var(--error-text, #721c24);
+    display: block;
+}
+
+.puzzle-feedback.hint {
+    background: var(--info-bg, #d1ecf1);
+    border-color: var(--info-color, #17a2b8);
+    color: var(--info-text, #0c5460);
+    display: block;
+}
+
+.puzzle-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.puzzle-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* Desktop dual puzzle layout */
+.desktop-puzzle-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 30px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Ensure grid layout works on larger screens */
+@media (min-width: 769px) {
+    .desktop-puzzle-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 30px;
+    }
+}
+
+.puzzle-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.puzzle-column-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.1em;
+    color: var(--text-primary);
+    justify-content: center;
+    padding: 10px;
+    background: var(--background-primary);
+    border-radius: 6px;
+}
+
+.puzzle-column .puzzle-board-container {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+}
+
+.puzzle-column .puzzle-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.puzzle-column .puzzle-controls .btn {
+    flex: 1;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+.puzzle-column .puzzle-controls .btn-puzzle {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin: 2px;
+}
+
+.puzzle-column .puzzle-feedback {
+    min-height: 50px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.puzzle-column .puzzle-footer {
+    text-align: center;
+}
+
+/* Show/hide based on screen size */
+.desktop-only {
+    display: block !important;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+/* Exception for desktop puzzle container - needs to be grid, not block */
+.desktop-puzzle-container.desktop-only {
+    display: grid !important;
+}
+
+/* Mobile Responsiveness for Daily Puzzle */
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: block !important;
+    }
+
+    .puzzle-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .puzzle-board-container {
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+    }
+
+    .puzzle-controls {
+        justify-content: center;
+    }
+
+    .puzzle-controls .btn {
+        flex: none;
+        min-width: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .puzzle-board-container {
+        width: 250px;
+        height: 250px;
+    }
+
+    .daily-puzzle-card {
+        padding: 20px;
+    }
+
+    .puzzle-controls {
+        flex-direction: column;
+    }
+
+    .puzzle-controls .btn {
+        width: 100%;
+    }
+}
+
+
+
+
+
+
+
+
+/* Games Page Specific Styles */
+.games-page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: var(--text-on-primary);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px var(--shadow-medium);
+}
+
+.games-page-header h1 {
+    margin: 0 0 15px 0;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.page-description {
+    font-size: 1.1em;
+    margin: 0;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+
+
+.rules-content li {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.rules-content strong {
+    color: var(--text-primary);
+}
+
+
+/* Quick Link Card for Home Page */
+.quick-link-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border-radius: 15px;
+    padding: 25px;
+    color: var(--text-on-primary);
+    box-shadow: 0 6px 20px var(--shadow-medium);
+    transition: all 0.3s ease;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--shadow-medium);
+}
+
+.quick-link-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.quick-link-info h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.quick-link-info p {
+    margin: 0;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.quick-link-btn {
+    background: var(--secondary-color);
+    color: var(--text-on-primary);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.quick-link-btn:hover {
+    background: var(--secondary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: var(--text-on-primary);
+    text-decoration: none;
+}
+
+
+/* Mobile responsive for quick link */
+@media (max-width: 768px) {
+    .quick-link-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .quick-link-btn {
+        width: 100%;
+    }
+
+    .preview-game {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+}
+
+
+
+

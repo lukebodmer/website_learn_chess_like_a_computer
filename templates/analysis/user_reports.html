@@ -5,11 +5,19 @@
 {% block content %}
 <div class="reports-page-header">
     <h2>My Analysis Reports</h2>
-    <a href="{% url 'analysis:lichess_login' %}" class="lichess-button-small">
-        {% load static %}
-        <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="lichess-logo">
-        Generate Lichess Report
-    </a>
+    <div class="generate-buttons-reports">
+        <a href="{% url 'analysis:lichess_login' %}" class="lichess-button-small">
+            {% load static %}
+            <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" class="lichess-logo">
+            Generate Lichess Report
+        </a>
+        {% if user.userprofile.chess_com_username %}
+        <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="chess-com-button-small">
+            <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="chess-com-logo">
+            Generate Chess.com Report
+        </a>
+        {% endif %}
+    </div>
 </div>
 
 {% if reports %}
@@ -19,7 +27,7 @@
     <a href="{% url 'analysis:view_report' report.id %}" class="report-card">
         <div class="report-stats-inline">
             <div>
-                <strong>{{ report.game_dataset.lichess_username }}</strong>
+                <strong>{{ report.username }}</strong>
                 <span class="report-card-platform">{{ report.platform }}</span>
             </div>
             <div>
@@ -29,6 +37,13 @@
                 {{ report.created_at|date:"M j, Y" }}<br>
                 <small>{{ report.created_at|time:"g:i A" }}</small>
             </div>
+        </div>
+        <div class="report-date-range">
+            {% if report.date_range_start and report.date_range_end %}
+                Games from {{ report.date_range_start|date:"M j, Y" }}{% if report.date_range_start|date:"M j, Y" != report.date_range_end|date:"M j, Y" %} to {{ report.date_range_end|date:"M j, Y" }}{% endif %}
+            {% else %}
+                Date range unavailable
+            {% endif %}
         </div>
     </a>
     {% endfor %}

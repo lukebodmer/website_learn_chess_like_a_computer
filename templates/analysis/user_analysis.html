@@ -3,40 +3,230 @@
 {% block title %}Analysis for {{ username }} - Chess Analysis{% endblock %}
 
 {% block content %}
-<h2>Games Downloaded for {{ username }}</h2>
+<div class="section">
+    <h2>Lichess Game Analysis - {{ username }}</h2>
 
-<div class="success-message">
-    <h3>✅ Successfully Downloaded {{ games_count }} Games</h3>
-    <p>We've fetched your recent games from Lichess. Ready to generate your analysis report?</p>
+    <div class="status-container">
+        <div class="status-header">
+            <h3 id="status-text">🔍 Finding your most recent Lichess games...</h3>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">Fetching games...</div>
+        </div>
+
+        <div class="games-summary" id="games-summary" style="display: none;">
+            <p id="summary-text"></p>
+            <p>Click the button below to generate your comprehensive analysis report.</p>
+        </div>
+
+        <div class="analysis-info" id="analysis-info" style="display: none;">
+            <h3>What's Next?</h3>
+            <p>Our analysis engine will:</p>
+            <ul>
+                <li>📊 Analyze your game statistics and patterns</li>
+                <li>♟️ Review your opening repertoire and success rates</li>
+                <li>🎯 Calculate accuracy metrics using existing Lichess analysis</li>
+                <li>🔍 Run Stockfish analysis on games without existing evaluation data</li>
+                <li>📈 Generate insights and recommendations for improvement</li>
+            </ul>
+            <p><strong>Note:</strong> Analysis may take a few minutes for large game collections, especially when running Stockfish analysis on games without existing evaluation data.</p>
+        </div>
+
+        <div class="action-buttons" id="action-buttons" style="display: none;">
+            <a href="#" id="generate-report-btn" class="btn btn-primary" style="background: #28a745; font-size: 18px; padding: 15px 30px;">
+                Generate Analysis Report
+            </a>
+            <a href="{% url 'analysis:home' %}" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
+
+        <div class="game-details" id="game-details" style="display: none;">
+            <h3>Game Collection Summary:</h3>
+            <ul>
+                <li><strong>Total Games:</strong> <span id="total-games"></span></li>
+                <li><strong>Date Range:</strong> <span id="date-range"></span></li>
+                <li><strong>Downloaded:</strong> <span id="downloaded-date"></span></li>
+                <li><strong>Data Size:</strong> <span id="data-size"></span> characters</li>
+            </ul>
+            <p><small>
+                <em>Analysis reports are saved to your account so you can view them later.
+                You can also generate new reports as you play more games.</em>
+            </small></p>
+        </div>
+
+        <div class="error-message" id="error-message" style="display: none;">
+            <p id="error-text"></p>
+            <a href="{% url 'analysis:home' %}" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
+    </div>
 </div>
 
-<h3>What's Next?</h3>
-<p>Our analysis engine will:</p>
-<ul>
-    <li>📊 Analyze your game statistics and patterns</li>
-    <li>♟️ Review your opening repertoire and success rates</li>
-    <li>🎯 Calculate accuracy metrics using existing Lichess analysis</li>
-    <li>🔍 Run Stockfish analysis on games without existing evaluation data</li>
-    <li>📈 Generate insights and recommendations for improvement</li>
-</ul>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const username = '{{ username }}';
+    const statusText = document.getElementById('status-text');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const gamesSummary = document.getElementById('games-summary');
+    const summaryText = document.getElementById('summary-text');
+    const analysisInfo = document.getElementById('analysis-info');
+    const actionButtons = document.getElementById('action-buttons');
+    const gameDetails = document.getElementById('game-details');
+    const generateBtn = document.getElementById('generate-report-btn');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
 
-<p><strong>Note:</strong> Analysis may take a few minutes for large game collections, especially when running Stockfish analysis on games without existing evaluation data.</p>
+    // Start fetching games immediately
+    fetch(`{% url 'analysis:fetch_lichess_games' username %}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Success - show completed state
+                statusText.innerHTML = '✅ Games Retrieved Successfully';
+                progressBar.style.width = '100%';
+                progressBar.style.animation = 'none';
+                progressBar.classList.add('completed');
+                progressText.innerHTML = `✅ Found ${data.games_count} games`;
 
-<div style="margin: 30px 0;">
-    <a href="{% url 'analysis:generate_report' username %}" class="btn" style="background: #28a745; font-size: 18px; padding: 15px 30px;">
-        Generate Analysis Report
-    </a>
-</div>
+                // Show summary and details
+                summaryText.innerHTML = `Successfully retrieved your ${data.games_count} most recent Lichess games!`;
+                gamesSummary.style.display = 'block';
+                analysisInfo.style.display = 'block';
+                actionButtons.style.display = 'flex';
+                gameDetails.style.display = 'block';
 
-<h3>Game Collection Summary:</h3>
-<ul>
-    <li><strong>Total Games:</strong> {{ games_count }}</li>
-    <li><strong>Downloaded:</strong> {{ game_dataset.created_at|date:"F j, Y g:i A" }}</li>
-    <li><strong>Data Size:</strong> {{ game_dataset.raw_data|length }} characters</li>
-</ul>
+                // Fill in game details
+                document.getElementById('total-games').textContent = data.games_count;
+                document.getElementById('date-range').textContent = data.date_range || 'Date range unavailable';
+                document.getElementById('downloaded-date').textContent = data.created_at;
+                document.getElementById('data-size').textContent = data.data_size.toLocaleString();
 
-<p><small>
-    <em>Analysis reports are saved to your account so you can view them later.
-    You can also generate new reports as you play more games.</em>
-</small></p>
+                // Update generate report button URL
+                generateBtn.href = `{% url 'analysis:generate_report' username %}`;
+            } else {
+                // Error - show error state
+                statusText.innerHTML = '❌ Error Fetching Games';
+                progressBar.style.width = '100%';
+                progressBar.style.background = 'linear-gradient(90deg, #f44336, #d32f2f)';
+                progressText.innerHTML = '❌ Failed to fetch games';
+
+                // Show error message
+                errorText.innerHTML = data.error || 'Unknown error occurred';
+                errorMessage.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusText.innerHTML = '❌ Network Error';
+            progressBar.style.width = '100%';
+            progressBar.style.background = 'linear-gradient(90deg, #f44336, #d32f2f)';
+            progressText.innerHTML = '❌ Network error';
+
+            errorText.innerHTML = 'Network error occurred. Please try again.';
+            errorMessage.style.display = 'block';
+        });
+});
+</script>
+
+<style>
+.status-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+}
+
+.status-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.status-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 24px;
+}
+
+.progress-bar-container {
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--background-tertiary);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    transition: width 0.3s ease;
+    width: 0%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { width: 0%; }
+    50% { width: 60%; }
+    100% { width: 0%; }
+}
+
+.progress-fill.completed {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+}
+
+.progress-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.games-summary, .analysis-info, .game-details {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.games-summary p, .analysis-info p, .game-details p {
+    color: var(--text-primary);
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.analysis-info ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.game-details ul {
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto 20px auto;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.error-message {
+    text-align: center;
+    color: var(--danger-color);
+}
+</style>
 {% endblock %}

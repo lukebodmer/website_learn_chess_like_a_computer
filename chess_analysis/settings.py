@@ -79,8 +79,22 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+    },
+    "evaluations": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "chess_evaluations",
+        "USER": "chess_user",
+        "PASSWORD": "chess_password",
+        "HOST": BASE_DIR / "postgres_data",  # Unix socket connection
+        "PORT": "",  # Empty for Unix socket
+        "OPTIONS": {
+            "sslmode": "prefer",
+        },
     }
 }
+
+# Database routing
+DATABASE_ROUTERS = ['chess_analysis.db_router.EvaluationsDatabaseRouter']
 
 
 # Password validation

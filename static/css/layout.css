@@ -1,0 +1,320 @@
+/* Chess Analysis Layout Styles - Header, Navigation, and Main Layout */
+
+/* Header */
+.header {
+    background: var(--primary-color);
+    color:white; 
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header h1 {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -0.01em;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.user-info a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.user-info a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.settings-icon {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none !important;
+    font-size: 16px;
+    padding: 4px;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-icon:hover {
+    color: white;
+}
+
+.settings-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    text-decoration: none !important;
+    color: white;
+}
+
+.gear-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 1.1em;
+}
+
+.settings-icon:hover .gear-icon {
+    transform: rotate(45deg);
+}
+
+.settings-icon:active .gear-icon {
+    transform: rotate(90deg) scale(0.95);
+}
+
+/* Clear floats in header */
+.header::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Navigation */
+.nav {
+    background: var(--background-secondary);
+    border-bottom: 2px solid var(--primary-color);
+    padding: 0;
+    box-shadow: 0 2px 4px var(--shadow-light);
+}
+
+.nav a {
+    display: inline-block;
+    padding: 15px 25px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.nav a:hover {
+    background: var(--hover-background);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    text-decoration: none;
+}
+
+.nav a.active {
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    border-bottom-color: var(--primary-dark);
+}
+
+/* Messages and Alerts */
+.messages {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border-left: 5px solid;
+    font-weight: 500;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-success {
+    background-color: var(--success-background);
+    color: var(--success-text);
+    border-left-color: var(--success-color);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left-color: var(--warning-color);
+}
+
+.alert-error,
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left-color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left-color: var(--info-color);
+}
+
+.alert .close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.alert .close:hover {
+    opacity: 1;
+}
+
+/* Status Indicators */
+.status-indicator {
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border: 1px solid;
+    transition: all 0.3s ease;
+}
+
+.status-indicator.connected {
+    background-color: var(--success-background);
+    border-color: var(--success-border);
+    color: var(--success-text);
+}
+
+.status-indicator.not-connected {
+    background-color: #fff3cd;
+    border-color: var(--warning-color);
+    color: #856404;
+}
+
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    background: var(--background-tertiary);
+    border-radius: 8px;
+    border: 2px dashed var(--border-color);
+}
+
+.empty-state h3 {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+/* Footer (if needed) */
+.footer {
+    background: var(--background-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 20px;
+    margin-top: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Mobile Layout Responsiveness */
+@media (max-width: 768px) {
+    .header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .user-info {
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .user-info a {
+        font-size: 0.85rem;
+    }
+
+    .settings-icon {
+        font-size: 14px;
+    }
+
+    .user-info {
+        float: none;
+        text-align: center;
+        margin-top: 0;
+        font-size: 0.8em;
+    }
+
+    .nav {
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .nav a {
+        padding: 12px 15px;
+        font-size: 0.9em;
+        display: inline-block;
+        margin: 0 5px;
+    }
+
+    .messages {
+        padding: 0 15px;
+        margin: 15px auto;
+    }
+
+    .alert {
+        padding: 12px 15px;
+        font-size: 0.9em;
+    }
+
+    .status-indicator {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+    }
+
+    .empty-state {
+        padding: 30px 15px;
+    }
+}
+
+/* Tablet Layout */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .nav a {
+        padding: 12px 20px;
+    }
+
+    .header h1 {
+        font-size: 1.6em;
+    }
+}
+
+/* Large Screen Layout */
+@media (min-width: 1200px) {
+    .header,
+    .nav {
+        padding-left: calc(50% - 600px);
+        padding-right: calc(50% - 600px);
+    }
+}

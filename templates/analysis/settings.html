@@ -141,6 +141,99 @@
             </form>
         </div>
 
+        <!-- Board Theme Preferences Section -->
+        <div class="settings-section">
+            <h3>Chessboard Theme</h3>
+            <form method="post" class="settings-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_board_theme">
+
+                <p>Choose your preferred chessboard color scheme:</p>
+
+                <div class="board-theme-options">
+                    <label class="board-theme-option">
+                        <input type="radio" name="board_theme" value="blue"
+                               {% if profile.board_theme == 'blue' %}checked{% endif %}>
+                        <div class="board-preview blue">
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                        </div>
+                        <span>Blue (Default)</span>
+                    </label>
+
+                    <label class="board-theme-option">
+                        <input type="radio" name="board_theme" value="green"
+                               {% if profile.board_theme == 'green' %}checked{% endif %}>
+                        <div class="board-preview green">
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                        </div>
+                        <span>Green</span>
+                    </label>
+
+                    <label class="board-theme-option">
+                        <input type="radio" name="board_theme" value="brown"
+                               {% if profile.board_theme == 'brown' %}checked{% endif %}>
+                        <div class="board-preview brown">
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                            <div class="board-preview-square dark"></div>
+                            <div class="board-preview-square"></div>
+                        </div>
+                        <span>Brown</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Board Theme</button>
+                </div>
+
+                <p class="theme-help">
+                    <small>Your board theme will be applied to all chessboards throughout the site.</small>
+                </p>
+            </form>
+        </div>
+
         <!-- Theme Preferences Section -->
         <div class="settings-section">
             <h3>Theme Preferences</h3>
@@ -395,6 +488,54 @@
     margin-top: 15px;
 }
 
+/* Board Theme Options Styling */
+.board-theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.board-theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.board-theme-option:hover {
+    border-color: var(--primary-light);
+    background: var(--hover-background);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.board-theme-option input[type="radio"] {
+    margin: 0;
+    accent-color: var(--primary-color);
+}
+
+.board-theme-option input[type="radio"]:checked {
+    transform: scale(1.2);
+}
+
+.board-theme-option input[type="radio"]:checked ~ .board-preview {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--focus-color);
+}
+
+.board-theme-option span {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .form-row {
@@ -409,6 +550,11 @@
 
     .theme-options {
         grid-template-columns: 1fr;
+    }
+
+    .board-theme-options {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 }
 </style>
@@ -444,6 +590,27 @@
                     body.setAttribute('data-theme', theme);
                 }
 
+            }
+        });
+    });
+})();
+
+// Board theme preview functionality
+(function() {
+    const boardThemeRadios = document.querySelectorAll('input[name="board_theme"]');
+    const html = document.documentElement;
+
+    // Listen for board theme changes to preview immediately
+    boardThemeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const boardTheme = this.value;
+
+                // Remove any existing board theme classes
+                html.classList.remove('board-theme-blue', 'board-theme-green', 'board-theme-brown');
+
+                // Add new board theme class
+                html.classList.add(`board-theme-${boardTheme}`);
             }
         });
     });
