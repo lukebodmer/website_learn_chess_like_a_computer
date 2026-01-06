@@ -17,6 +17,7 @@ urlpatterns = [
     path('report/<str:username>/', views.generate_analysis_report, name='generate_report'),
     path('stream-analysis/<str:username>/', views.stream_analysis_progress, name='stream_analysis'),
     path('report/view/<int:report_id>/', views.view_report, name='view_report'),
+    path('report-data/<int:report_id>/', views.get_report_data, name='get_report_data'),
     path('reports/', views.user_reports, name='user_reports'),
     path('settings/', views.settings, name='settings'),
     path('logout/', views.custom_logout, name='logout'),

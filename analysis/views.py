@@ -20,8 +20,9 @@ import json
 import tempfile
 import pycountry
 import pytz
+import time
 
-from .models import UserProfile, GameDataSet, AnalysisReport, ChessGame
+from .models import UserProfile, GameDataSet, AnalysisReport, ChessGame, ReportGenerationTask
 from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
 from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
@@ -67,7 +68,7 @@ def get_lichess_user(access_token):
     return response.json()
 
 
-def get_lichess_user_games(access_token, username, max_games=50):
+def get_lichess_user_games(access_token, username, max_games=10):
     """Fetch recent games from Lichess API with date range tracking"""
     response = requests.get(
         f"https://lichess.org/api/games/user/{username}",
@@ -289,7 +290,7 @@ def fetch_lichess_games(request, username):
 
     try:
         # Fetch exactly 50 most recent games with date range tracking
-        game_data = get_lichess_user_games(access_token, username, max_games=50)
+        game_data = get_lichess_user_games(access_token, username, max_games=10)
 
         if game_data['games_count'] == 0:
             return JsonResponse({
@@ -341,7 +342,7 @@ def fetch_lichess_games(request, username):
 
 @login_required
 def generate_analysis_report(request, username):
-    """Generate and display analysis report with live streaming updates"""
+    """Generate and display analysis report with background task processing"""
     # Get the most recent game dataset for this user
     game_dataset = GameDataSet.objects.filter(
         user=request.user,
@@ -351,22 +352,51 @@ def generate_analysis_report(request, username):
     if not game_dataset:
         return HttpResponse("No games data found. Please connect your Lichess account first.", status=404)
 
-    # Always show live streaming report page (skip existing report check)
-    # Get first 10 games from raw data for display
-    first_games_raw = "Loading..."
+    # Check if there's already a pending or running task for this dataset
+    existing_task = ReportGenerationTask.objects.filter(
+        user=request.user,
+        game_dataset=game_dataset,
+        status__in=['pending', 'running']
+    ).first()
+
+    if not existing_task:
+        # Check if there's already a completed report
+        existing_report = AnalysisReport.objects.filter(
+            user=request.user,
+            game_dataset=game_dataset
+        ).first()
+
+        if not existing_report:
+            # Create a new background task
+            task = ReportGenerationTask.objects.create(
+                user=request.user,
+                game_dataset=game_dataset,
+                status='pending'
+            )
+            print(f"📊 Created new report generation task {task.id} for {username}")
+
+            # Start the task processor if not running
+            from .task_processor import start_task_processor
+            start_task_processor()
+        else:
+            print(f"📊 Report already exists for {username}, showing existing report")
+
+    # Get ALL games from raw data for display
+    all_games_raw = "Loading..."
     try:
         if game_dataset.raw_data:
             lines = game_dataset.raw_data.strip().split('\n')
-            games = []
-            all_games = []  # Store all games for debugging
-            for i, line in enumerate(lines):  # Process ALL games
+            all_games = []  # Store all games for display
+            for line in lines:  # Process ALL games
                 if line.strip():
-                    game_data = json.loads(line)
-                    all_games.append(game_data)
-                    if i < 10:  # Only first 10 for display
-                        games.append(game_data)
-            if games:
-                first_games_raw = json.dumps(games, indent=2)
+                    try:
+                        game_data = json.loads(line)
+                        all_games.append(game_data)
+                    except json.JSONDecodeError:
+                        continue
+
+            if all_games:
+                all_games_raw = json.dumps(all_games, indent=2)
 
                 # DEBUG: Save raw Lichess data to file (ALL games)
                 import time
@@ -379,15 +409,13 @@ def generate_analysis_report(request, username):
                 except Exception as debug_e:
                     print(f"DEBUG: Failed to save raw data: {debug_e}")
     except Exception as e:
-        first_games_raw = f"Error parsing game data: {e}"
+        all_games_raw = f"Error parsing game data: {e}"
 
     # Show the live report page immediately
     return render(request, 'analysis/report.html', {
         'username': username,
-        'first_game_raw': first_games_raw,
-        'enriched_data': json.dumps({"status": "Analysis starting..."}, indent=2),
-        'enriched_games': json.dumps({"status": "Waiting for analysis..."}, indent=2),
-        'database_stats': json.dumps({"status": "Analysis will begin momentarily..."}, indent=2),
+        'all_games_raw': all_games_raw,
+        'enriched_games': json.dumps({"status": "Waiting for analysis to complete..."}, indent=2),
         'auto_start': True  # Tell template to auto-start streaming
     })
 
@@ -519,7 +547,7 @@ def generate_analysis_report_old(request, username):
 
 @login_required
 def stream_analysis_progress(request, username):
-    """Stream real-time analysis progress via Server-Sent Events"""
+    """Stream real-time analysis progress by monitoring background task"""
     try:
         # Get the game dataset
         game_dataset = GameDataSet.objects.filter(
@@ -532,30 +560,76 @@ def stream_analysis_progress(request, username):
 
         def event_stream():
             try:
-                # Parse games from dataset
-                games = []
-                for line in game_dataset.raw_data.strip().split('\n'):
-                    if line.strip():
-                        try:
-                            game_json = json.loads(line)
-                            # Parse into our game format
-                            players = game_json.get("players", {})
-                            game_data = {
-                                "white_player": players.get("white", {}).get("user", {}).get("name", "Unknown"),
-                                "black_player": players.get("black", {}).get("user", {}).get("name", "Unknown"),
-                                "opening": game_json.get("opening", {}).get("name", "Unknown"),
-                                "raw_json": game_json,
+                # Find the task for this dataset
+                task = ReportGenerationTask.objects.filter(
+                    user=request.user,
+                    game_dataset=game_dataset
+                ).order_by('-created_at').first()
+
+                if not task:
+                    # No task found, send error
+                    error_data = {"type": "error", "error": "No analysis task found"}
+                    yield f"data: {json.dumps(error_data)}\n\n"
+                    return
+
+                # Send initial status
+                init_data = {
+                    "type": "init",
+                    "total_games": task.total_games if task.total_games > 0 else "calculating...",
+                    "games_found": task.total_games if task.total_games > 0 else "calculating...",
+                    "task_status": task.status
+                }
+                yield f"data: {json.dumps(init_data)}\n\n"
+
+                # Monitor task progress
+                last_progress = -1
+                last_status = task.status
+
+                while not task.is_complete:
+                    # Refresh task from database
+                    task.refresh_from_db()
+
+                    # Send progress updates
+                    if task.progress != last_progress or task.status != last_status:
+                        if task.status == 'running':
+                            # Send game progress updates
+                            progress_data = {
+                                "type": "game_progress",
+                                "progress": task.progress,
+                                "completed_games": task.completed_games,
+                                "total_games": task.total_games,
+                                "current_game": task.current_game
                             }
-                            games.append(game_data)
-                        except json.JSONDecodeError:
-                            continue
+                            yield f"data: {json.dumps(progress_data)}\n\n"
 
-                # Create enricher and stream results
-                enricher = GameEnricher(games)
+                        last_progress = task.progress
+                        last_status = task.status
 
-                for update in enricher.enrich_games_with_stockfish_streaming(username):
-                    # Send Server-Sent Event
-                    yield f"data: {json.dumps(update)}\n\n"
+                    time.sleep(1)  # Poll every second
+
+                # Task completed, send final result
+                if task.status == 'completed' and task.analysis_report:
+                    # Send completion data with report summary
+                    report = task.analysis_report
+                    completion_data = {
+                        "type": "complete",
+                        "report_id": report.id,
+                        "summary": {
+                            "total_games_analyzed": report.stockfish_analysis.get('total_games_analyzed', 0),
+                            "database_evaluations_used": report.stockfish_analysis.get('database_evaluations_used', 0),
+                            "stockfish_evaluations_used": report.stockfish_analysis.get('stockfish_evaluations_used', 0),
+                            "existing_evaluations_used": report.stockfish_analysis.get('existing_evaluations_used', 0),
+                        },
+                        "enriched_games_count": len(report.enriched_games) if report.enriched_games else 0
+                    }
+                    yield f"data: {json.dumps(completion_data)}\n\n"
+
+                elif task.status == 'failed':
+                    error_data = {
+                        "type": "error",
+                        "error": f"Analysis failed: {task.error_message}"
+                    }
+                    yield f"data: {json.dumps(error_data)}\n\n"
 
             except Exception as e:
                 error_data = {"type": "error", "error": str(e)}
@@ -568,6 +642,27 @@ def stream_analysis_progress(request, username):
 
     except Exception as e:
         return HttpResponse(f"Error starting stream: {str(e)}", status=500)
+
+
+@login_required
+def get_report_data(request, report_id):
+    """API endpoint to fetch enriched games data from a completed report"""
+    try:
+        # Get the report and verify it belongs to the user
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        return JsonResponse({
+            'report_id': report.id,
+            'enriched_games': report.enriched_games,
+            'games_count': len(report.enriched_games) if report.enriched_games else 0,
+            'created_at': report.created_at.isoformat(),
+            'analysis_summary': report.stockfish_analysis
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Failed to fetch report data: {str(e)}'
+        }, status=500)
 
 
 @login_required
@@ -605,37 +700,34 @@ def view_report(request, report_id):
     """View an existing analysis report"""
     report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
 
-    # Get first 10 games from raw data for display
-    first_games_raw = "No game data available"
+    # Get ALL games from raw data for display
+    all_games_raw = "No game data available"
     try:
         dataset = report.game_dataset
         if dataset.raw_data:
             lines = dataset.raw_data.strip().split('\n')
             games = []
-            for i, line in enumerate(lines[:10]):  # First 10 games
+            for line in lines:  # ALL games
                 if line.strip():
-                    games.append(json.loads(line))
+                    try:
+                        games.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
             if games:
-                first_games_raw = json.dumps(games, indent=2)
+                all_games_raw = json.dumps(games, indent=2)
     except Exception as e:
-        first_games_raw = f"Error parsing game data: {e}"
+        all_games_raw = f"Error parsing game data: {e}"
 
-    # Get first 10 enriched games for display
+    # Get ALL enriched games for display
     enriched_games_display = "No enriched game data available"
     if report.enriched_games:
-        enriched_games_display = json.dumps(report.enriched_games[:10], indent=2)
+        enriched_games_display = json.dumps(report.enriched_games, indent=2)
 
     return render(request, 'analysis/report.html', {
         'username': report.game_dataset.lichess_username,
-        'first_game_raw': first_games_raw,
-        'enriched_data': json.dumps(report.stockfish_analysis, indent=2),
+        'all_games_raw': all_games_raw,
         'enriched_games': enriched_games_display,
-        'database_stats': json.dumps({
-            'database_evaluations_used': report.stockfish_analysis.get('database_evaluations_used', 0),
-            'stockfish_evaluations_used': report.stockfish_analysis.get('stockfish_evaluations_used', 0),
-            'existing_evaluations_used': report.stockfish_analysis.get('existing_evaluations_used', 0),
-            'total_games_analyzed': report.stockfish_analysis.get('total_games_analyzed', 0)
-        }, indent=2)
+        'auto_start': False  # Don't auto-start streaming for existing reports
     })
 
 

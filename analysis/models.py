@@ -225,3 +225,47 @@ class ChessGame(models.Model):
         elif self.user_color == 'black':
             return self.result == '1-0'
         return False
+
+
+class ReportGenerationTask(models.Model):
+    """Background task for generating analysis reports"""
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed')
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    game_dataset = models.ForeignKey(GameDataSet, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    progress = models.IntegerField(default=0)  # 0-100 percentage
+    current_game = models.CharField(max_length=200, blank=True)
+    total_games = models.IntegerField(default=0)
+    completed_games = models.IntegerField(default=0)
+    error_message = models.TextField(blank=True)
+
+    # Result
+    analysis_report = models.ForeignKey(AnalysisReport, on_delete=models.CASCADE, null=True, blank=True)
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Report Task for {self.user.username} - {self.status}"
+
+    @property
+    def is_complete(self):
+        return self.status in ['completed', 'failed']
+
+    @property
+    def duration(self):
+        if self.started_at and self.completed_at:
+            return self.completed_at - self.started_at
+        return None

@@ -7,3 +7,7 @@ class AnalysisConfig(AppConfig):
 
     def ready(self):
         import analysis.signals  # Connect signals when app is ready
+
+        # Start the report task processor
+        from .task_processor import start_task_processor
+        start_task_processor()

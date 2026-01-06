@@ -402,8 +402,8 @@ class GameEnricher:
         if not games_needing_analysis:
             return
 
-        hard_limit_for_debugging = 5
-        selected_games = games_needing_analysis[:hard_limit_for_debugging]
+        # Process all games needing analysis
+        selected_games = games_needing_analysis
 
         # Start concurrent processing for all games
         import concurrent.futures
@@ -413,7 +413,7 @@ class GameEnricher:
         gcp_client = GCPStockfishClient()
 
         # Use ThreadPoolExecutor to process games concurrently (reduced to avoid API overload)
-        max_workers = min(2, len(selected_games))  # Reduced from 3 to 2
+        max_workers = min(3, len(selected_games))  # Scale with number of games, max 3
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all games for processing simultaneously
             future_to_game = {}
@@ -573,8 +573,8 @@ class GameEnricher:
             self._debug_save_enrichment_data(games_needing_analysis, "before_enrichment")
 
         try:
-            hard_limit_for_debugging = 5
-            selected_games = games_needing_analysis[:hard_limit_for_debugging]
+            # Process all games needing analysis
+            selected_games = games_needing_analysis
 
             if not selected_games:
                 return enrichment_results

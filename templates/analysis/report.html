@@ -18,22 +18,15 @@
     </div>
     {% endif %}
 
-    <h2>Raw Lichess Data (First 10 Games):</h2>
-    <pre style="background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ first_game_raw|safe }}</pre>
+    <h2>Raw Lichess Data (All Games):</h2>
+    <pre style="background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ all_games_raw|safe }}</pre>
 
-    <h2>Enriched Analysis Data (Live Updates):</h2>
-    <pre id="enriched-data" style="background: #1a1a2e; color: #eee; padding: 20px; overflow: auto; max-height: 400px;">{{ enriched_data|safe }}</pre>
-
-    <h2>Database Usage Statistics (Live Updates):</h2>
-    <pre id="database-stats" style="background: #0f3460; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ database_stats|safe }}</pre>
-
-    <h2>Enriched Games Data (Live Updates):</h2>
+    <h2>Enriched Games Data:</h2>
     <pre id="enriched-games" style="background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px;">{{ enriched_games|safe }}</pre>
 </div>
 
 <script>
 let eventSource;
-let analysisData = [];
 let totalGames = 0;
 let completedGames = 0;
 
@@ -41,12 +34,11 @@ function startStreaming() {
     const username = "{{ username }}";
 
     // Reset data
-    analysisData = [];
     completedGames = 0;
 
-    document.getElementById('progress-status').innerText = 'Connecting to analysis stream...';
+    document.getElementById('progress-status').innerText = 'Connecting to analysis monitor...';
 
-    // Start Server-Sent Events
+    // Start Server-Sent Events to monitor background task
     eventSource = new EventSource(`/stream-analysis/${username}/`);
 
     eventSource.onmessage = function(event) {
@@ -75,64 +67,60 @@ function handleAnalysisUpdate(data) {
     switch (data.type) {
         case 'init':
             totalGames = data.total_games;
-            progressStatus.innerText = `Found ${data.games_found} games needing analysis`;
+            progressStatus.innerText = `Task started - ${data.task_status}`;
+            if (data.total_games !== "calculating...") {
+                progressStatus.innerText += ` - ${data.total_games} games to analyze`;
+            }
             break;
 
-        case 'game_start':
-            const gameInfo = data.game_info;
-            progressStatus.innerText = `Analyzing game ${data.game_index}/${data.total_games}`;
-            currentGame.innerHTML = `
-                <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 5px;">
-                    <strong>Game ${data.game_index}:</strong> ${gameInfo.white_player} vs ${gameInfo.black_player}<br>
-                    <em>Opening:</em> ${gameInfo.opening}
-                </div>
-            `;
-            break;
-
-        case 'game_complete':
-            completedGames++;
-            const progress = (completedGames / totalGames) * 100;
+        case 'game_progress':
+            totalGames = data.total_games;
+            completedGames = data.completed_games;
+            const progress = data.progress || 0;
             progressFill.style.width = progress + '%';
 
-            // Add to analysis data
-            analysisData.push({
-                game: data.enriched_game,
-                analysis: data.analysis_result
-            });
+            progressStatus.innerText = `Analyzing... ${completedGames}/${totalGames} games (${progress}%)`;
 
-            // Update the JSON displays
-            updateJsonDisplays();
-
-            progressStatus.innerText = `Completed ${completedGames}/${totalGames} games`;
-
-            // Show completed game info
-            currentGame.innerHTML = `
-                <div style="margin: 10px 0; padding: 10px; background: #d4edda; border-radius: 5px;">
-                    <strong>✅ Game ${data.game_index} Complete!</strong><br>
-                    <em>Analysis:</em> ${JSON.stringify(data.analysis_result, null, 2).substring(0, 100)}...
-                </div>
-            `;
-            break;
-
-        case 'game_error':
-            progressStatus.innerText = `Error in game ${data.game_index}: ${data.error}`;
-            currentGame.innerHTML = `
-                <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 5px;">
-                    <strong>❌ Game ${data.game_index} Error:</strong> ${data.error}
-                </div>
-            `;
+            if (data.current_game) {
+                currentGame.innerHTML = `
+                    <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                        <strong>Current:</strong> ${data.current_game}<br>
+                        <em>Progress:</em> ${progress}% complete
+                    </div>
+                `;
+            }
             break;
 
         case 'complete':
-            progressStatus.innerText = `✅ Analysis complete! ${completedGames} games processed`;
+            progressStatus.innerText = `✅ Analysis complete! Report saved to database.`;
             progressFill.style.width = '100%';
+
+            if (data.summary) {
+                currentGame.innerHTML = `
+                    <div style="margin: 10px 0; padding: 10px; background: #d4edda; border-radius: 5px;">
+                        <strong>✅ Complete!</strong><br>
+                        <em>Games analyzed:</em> ${data.summary.total_games_analyzed}<br>
+                        <em>Database hits:</em> ${data.summary.database_evaluations_used}<br>
+                        <em>Stockfish calls:</em> ${data.summary.stockfish_evaluations_used}<br>
+                        <em>Games enriched:</em> ${data.enriched_games_count}
+                    </div>
+                `;
+
+                updateDisplaysWithResults(data);
+            }
+
             if (eventSource) {
                 eventSource.close();
             }
             break;
 
         case 'error':
-            progressStatus.innerText = `❌ Analysis error: ${data.error}`;
+            progressStatus.innerText = `❌ Error: ${data.error}`;
+            currentGame.innerHTML = `
+                <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                    <strong>❌ Failed:</strong> ${data.error}
+                </div>
+            `;
             if (eventSource) {
                 eventSource.close();
             }
@@ -140,42 +128,36 @@ function handleAnalysisUpdate(data) {
     }
 }
 
-function updateJsonDisplays() {
-    // Update enriched analysis data
-    const enrichedDataEl = document.getElementById('enriched-data');
-    if (analysisData.length > 0) {
-        const combinedAnalysis = {
-            total_games_analyzed: analysisData.length,
-            games: analysisData.map(item => item.analysis)
-        };
-        enrichedDataEl.textContent = JSON.stringify(combinedAnalysis, null, 2);
-    }
-
-    // Update database stats
-    const dbStatsEl = document.getElementById('database-stats');
-    let totalDbEvals = 0;
-    let totalGcpEvals = 0;
-    let totalExistingEvals = 0;
-
-    analysisData.forEach(item => {
-        if (item.analysis.database_evaluations) totalDbEvals += item.analysis.database_evaluations;
-        if (item.analysis.stockfish_evaluations) totalGcpEvals += item.analysis.stockfish_evaluations;
-        if (item.analysis.existing_evaluations) totalExistingEvals += item.analysis.existing_evaluations;
-    });
-
-    const statsData = {
-        database_evaluations_used: totalDbEvals,
-        stockfish_evaluations_used: totalGcpEvals,
-        existing_evaluations_used: totalExistingEvals,
-        total_games_analyzed: analysisData.length
-    };
-    dbStatsEl.textContent = JSON.stringify(statsData, null, 2);
-
-    // Update enriched games
-    const enrichedGamesEl = document.getElementById('enriched-games');
-    const enrichedGames = analysisData.slice(0, 10).map(item => item.game); // First 10 games
-    enrichedGamesEl.textContent = JSON.stringify(enrichedGames, null, 2);
+function updateDisplaysWithResults(data) {
+    // Fetch the actual enriched games data from the completed report
+    fetchEnrichedGamesData(data.report_id);
 }
+
+function fetchEnrichedGamesData(reportId) {
+    // Make a request to get the enriched games data from the completed report
+    fetch(`/report-data/${reportId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const enrichedGamesEl = document.getElementById('enriched-games');
+            if (data.enriched_games && data.enriched_games.length > 0) {
+                enrichedGamesEl.textContent = JSON.stringify(data.enriched_games, null, 2);
+            } else {
+                enrichedGamesEl.textContent = JSON.stringify({
+                    status: "No enriched games data available",
+                    report_id: reportId
+                }, null, 2);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching enriched games:', error);
+            const enrichedGamesEl = document.getElementById('enriched-games');
+            enrichedGamesEl.textContent = JSON.stringify({
+                error: "Failed to load enriched games data",
+                details: error.message
+            }, null, 2);
+        });
+}
+
 </script>
 
 {% load static %}
