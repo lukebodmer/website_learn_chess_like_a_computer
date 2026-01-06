@@ -216,5 +216,5 @@ class ChessAnalyzer:
             "openings": opening_analyzer.analyze_openings(username),
             "accuracy_analysis": accuracy_analyzer.analyze_accuracy(username),
             "stockfish_analysis": enrichment_results,
-            "enriched_games": self.games,  # Include enriched games data
+            "enriched_games": [game.get("raw_json", {}) for game in self.games],  # Include only raw_json to match Lichess structure
         }

@@ -2,6 +2,7 @@ from typing import Dict, List, Any, Tuple
 from .hybrid_analyzer import HybridStockfishAnalyzer
 from .database_evaluator import DatabaseEvaluator
 from .gcp_evaluator import GCPStockfishClient
+from .lichess_accuracy import LichessAccuracyCalculator
 import chess
 import re
 import time
@@ -792,66 +793,100 @@ class GameEnricher:
 
         # Determine user's color
         is_white_player = game["white_player"].lower() == username.lower()
-        color = "white" if is_white_player else "black"
+        user_color = "white" if is_white_player else "black"
 
-        # Calculate accuracy from Stockfish evaluations
-        stockfish_accuracy = analyzer.analyze_accuracy_from_evaluations(
-            analysis_result["evaluations"], color
-        )
-
-        # Count mistakes from analysis result (only for this user's color)
+        # Count mistakes for both players first
         mistakes = analysis_result.get("mistakes", [])
-        user_mistakes = [m for m in mistakes if m.get("color") == color]
+        white_mistakes = [m for m in mistakes if m.get("color") == "white"]
+        black_mistakes = [m for m in mistakes if m.get("color") == "black"]
 
-        inaccuracy_count = len([m for m in user_mistakes if m["type"] == "inaccuracies"])
-        mistake_count = len([m for m in user_mistakes if m["type"] == "mistakes"])
-        blunder_count = len([m for m in user_mistakes if m["type"] == "blunders"])
+        # Calculate accuracy for BOTH players using Lichess algorithm
+        # Extract eval values using the SAME logic as mistake detection
+        eval_values = []
+        for ev in analysis_result["evaluations"]:
+            eval_values.append(self._get_centipawn_value(ev))
 
-        # Calculate ACPL (Average Centipawn Loss) - simplified calculation
-        # Extract moves for this user (every other move starting from their first)
-        user_moves = [ev for i, ev in enumerate(analysis_result["evaluations"])
-                     if (i % 2 == 0 and color == "white") or (i % 2 == 1 and color == "black")]
+        accuracy_calculator = LichessAccuracyCalculator()
 
-        total_cp_loss = 0
-        move_count = 0
-        for i in range(len(user_moves) - 1):  # Don't count the last move
-            current_eval = user_moves[i].get("eval", 0)
-            next_eval = user_moves[i + 1].get("eval", 0)
+        # DEBUG: Print evaluation values to see what we're working with
+        print(f"DEBUG: Evaluation values for accuracy calculation: {eval_values[:10]}...")  # First 10 values
+        print(f"DEBUG: Total evaluations: {len(eval_values)}")
+        print(f"DEBUG: White mistakes: {len(white_mistakes)}, Black mistakes: {len(black_mistakes)}")
 
-            # Calculate centipawn loss from player perspective
-            # Stockfish evals are always from White's perspective
-            if color == "white":
-                # For White: losing evaluation = eval goes down
-                cp_loss = max(0, current_eval - next_eval)
+        # DEBUG: Check if mistakes are detected with large eval swings
+        if len(white_mistakes) > 5 or len(black_mistakes) > 5:
+            print("DEBUG: Many mistakes detected, but checking if eval swings are captured...")
+            # Check consecutive eval differences
+            big_swings = []
+            for i in range(1, len(eval_values)):
+                diff = abs(eval_values[i] - eval_values[i-1])
+                if diff > 200:  # Should be blunder-level
+                    big_swings.append(f"Move {i}: {eval_values[i-1]} → {eval_values[i]} (swing: {diff})")
+
+            if big_swings:
+                print(f"DEBUG: Found {len(big_swings)} large eval swings:")
+                for swing in big_swings[:5]:  # Show first 5
+                    print(f"  {swing}")
             else:
-                # For Black: losing evaluation = eval goes up (more positive = worse for Black)
-                cp_loss = max(0, next_eval - current_eval)
+                print("DEBUG: WARNING - No large eval swings found despite many mistakes!")
+                print(f"DEBUG: Max eval swing: {max(abs(eval_values[i] - eval_values[i-1]) for i in range(1, len(eval_values))) if len(eval_values) > 1 else 0}")
 
-            total_cp_loss += cp_loss
-            move_count += 1
+        # Calculate accuracy for both White and Black
+        white_accuracy = accuracy_calculator.calculate_game_accuracy(eval_values, "white") or 0.0
+        black_accuracy = accuracy_calculator.calculate_game_accuracy(eval_values, "black") or 0.0
 
-        acpl = round(total_cp_loss / move_count) if move_count > 0 else 0
+        print(f"DEBUG: Calculated accuracies - White: {white_accuracy}%, Black: {black_accuracy}%")
 
-        # Update the raw_json with user-specific analysis
+        # Calculate ACPL for both players
+        white_acpl = accuracy_calculator.calculate_acpl(eval_values, "white")
+        black_acpl = accuracy_calculator.calculate_acpl(eval_values, "black")
+
+        # Count mistake types for White
+        white_inaccuracies = len([m for m in white_mistakes if m["type"] == "inaccuracies"])
+        white_mistakes_count = len([m for m in white_mistakes if m["type"] == "mistakes"])
+        white_blunders = len([m for m in white_mistakes if m["type"] == "blunders"])
+
+        # Count mistake types for Black
+        black_inaccuracies = len([m for m in black_mistakes if m["type"] == "inaccuracies"])
+        black_mistakes_count = len([m for m in black_mistakes if m["type"] == "mistakes"])
+        black_blunders = len([m for m in black_mistakes if m["type"] == "blunders"])
+
+        # Update the raw_json with analysis for BOTH players
         raw_json = game.get("raw_json", {})
         if "players" not in raw_json:
             raw_json["players"] = {}
-        if color not in raw_json["players"]:
-            raw_json["players"][color] = {}
 
-        # Inject analysis stats for this user only
-        raw_json["players"][color]["analysis"] = {
-            "inaccuracy": inaccuracy_count,
-            "mistake": mistake_count,
-            "blunder": blunder_count,
-            "acpl": acpl,
-            "accuracy": stockfish_accuracy
+        # Ensure both player objects exist
+        if "white" not in raw_json["players"]:
+            raw_json["players"]["white"] = {}
+        if "black" not in raw_json["players"]:
+            raw_json["players"]["black"] = {}
+
+        # Inject analysis stats for White
+        raw_json["players"]["white"]["analysis"] = {
+            "inaccuracy": white_inaccuracies,
+            "mistake": white_mistakes_count,
+            "blunder": white_blunders,
+            "acpl": white_acpl,
+            "accuracy": white_accuracy
+        }
+
+        # Inject analysis stats for Black
+        raw_json["players"]["black"]["analysis"] = {
+            "inaccuracy": black_inaccuracies,
+            "mistake": black_mistakes_count,
+            "blunder": black_blunders,
+            "acpl": black_acpl,
+            "accuracy": black_accuracy
         }
 
         game["raw_json"] = raw_json
 
-        print(f"Injected {color} analysis - accuracy: {stockfish_accuracy}%, "
-              f"inaccuracy: {inaccuracy_count}, mistakes: {mistake_count}, blunders: {blunder_count}, acpl: {acpl}")
+        print(f"Injected analysis for both players:")
+        print(f"  White: accuracy={white_accuracy}%, acpl={white_acpl}, "
+              f"inaccuracies={white_inaccuracies}, mistakes={white_mistakes_count}, blunders={white_blunders}")
+        print(f"  Black: accuracy={black_accuracy}%, acpl={black_acpl}, "
+              f"inaccuracies={black_inaccuracies}, mistakes={black_mistakes_count}, blunders={black_blunders}")
 
     def _debug_save_enrichment_data(self, games_data: List[Dict], prefix: str = "debug"):
         """Save enrichment data for debugging purposes"""

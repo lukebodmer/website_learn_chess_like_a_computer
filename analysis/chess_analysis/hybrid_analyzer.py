@@ -12,6 +12,7 @@ import re
 from typing import Dict, List, Any, Optional
 from .database_evaluator import DatabaseEvaluator
 from .gcp_evaluator import GCPStockfishClient
+from .lichess_accuracy import LichessAccuracyCalculator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -209,7 +210,7 @@ class HybridStockfishAnalyzer:
 
     def analyze_accuracy_from_evaluations(self, evaluations: List[Dict], color: str) -> float:
         """
-        Calculate accuracy percentage for a player
+        Calculate accuracy percentage for a player using Lichess algorithm
 
         Args:
             evaluations: List of move evaluations
@@ -218,43 +219,14 @@ class HybridStockfishAnalyzer:
         Returns:
             Accuracy percentage (0-100)
         """
-        player_moves = []
-
-        for i, evaluation in enumerate(evaluations):
-            move_number = evaluation.get("move_number", i + 1)
-            is_white_move = move_number % 2 == 1
-
-            if (color == "white" and is_white_move) or (color == "black" and not is_white_move):
-                player_moves.append(evaluation)
-
-        if len(player_moves) < 2:
+        if len(evaluations) < 2:
             return 100.0  # Default for very short games
 
-        # Calculate accuracy based on centipawn loss
-        total_loss = 0
-        move_count = 0
+        # Extract evaluation values for Lichess calculator
+        eval_values = [ev.get("eval", 0) for ev in evaluations]
 
-        for i in range(1, len(player_moves)):
-            current_eval = player_moves[i].get("eval", 0)
-            prev_eval = player_moves[i - 1].get("eval", 0)
+        # Use Lichess accuracy calculator
+        accuracy_calculator = LichessAccuracyCalculator()
+        accuracy = accuracy_calculator.calculate_game_accuracy(eval_values, color)
 
-            # Calculate centipawn loss from player perspective
-            # Stockfish evals are always from White's perspective
-            if color == "white":
-                # For White: losing evaluation = eval goes down
-                loss = max(0, prev_eval - current_eval)
-            else:
-                # For Black: losing evaluation = eval goes up (more positive = worse for Black)
-                loss = max(0, current_eval - prev_eval)
-
-            total_loss += loss
-            move_count += 1
-
-        if move_count == 0:
-            return 100.0
-
-        # Convert to accuracy percentage (Lichess-style calculation)
-        average_loss = total_loss / move_count
-        accuracy = max(0, 100 - (average_loss / 10))  # Rough approximation
-
-        return round(accuracy, 1)
+        return round(accuracy, 1) if accuracy is not None else 100.0
