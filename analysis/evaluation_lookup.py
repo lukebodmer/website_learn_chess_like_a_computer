@@ -241,13 +241,14 @@ class GameEnricher:
         cp_before = get_cp_value(eval_before)
         cp_after = get_cp_value(eval_after)
 
-        # Adjust for player perspective (black's evaluations are flipped)
+        # NO PERSPECTIVE CONVERSION - keep raw Stockfish evaluations
+        # Calculate centipawn loss based on player perspective without flipping evals
         if color == 'black':
-            cp_before = -cp_before
-            cp_after = -cp_after
-
-        # Calculate centipawn loss
-        cp_loss = cp_before - cp_after
+            # For Black: losing evaluation = eval increases (since evals are from White's perspective)
+            cp_loss = cp_after - cp_before
+        else:
+            # For White: losing evaluation = eval decreases
+            cp_loss = cp_before - cp_after
 
         # Classify move quality
         if cp_loss <= 10:

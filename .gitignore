@@ -16,6 +16,9 @@ ENV/
 postgres_data/
 logfile
 
+# GCP deployment (tracked in separate directory)
+# GCP_DEPLOYMENT.md - keeping this file for architecture documentation
+
 # Node.js / npm / Vite
 node_modules/
 npm-debug.log*

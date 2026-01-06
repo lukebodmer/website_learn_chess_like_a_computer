@@ -15,9 +15,12 @@ urlpatterns = [
     path('analyze/<str:username>/', views.user_analysis, name='user_analysis'),
     path('fetch-games/<str:username>/', views.fetch_lichess_games, name='fetch_lichess_games'),
     path('report/<str:username>/', views.generate_analysis_report, name='generate_report'),
+    path('stream-analysis/<str:username>/', views.stream_analysis_progress, name='stream_analysis'),
     path('report/view/<int:report_id>/', views.view_report, name='view_report'),
     path('reports/', views.user_reports, name='user_reports'),
     path('settings/', views.settings, name='settings'),
     path('logout/', views.custom_logout, name='logout'),
     path('games/', views.games, name='games'),
+    path('api/daily-puzzle/', views.daily_puzzle_api, name='daily_puzzle_api'),
+    path('export/<str:username>/unified-games.json', views.export_unified_games_json, name='export_unified_games'),
 ]

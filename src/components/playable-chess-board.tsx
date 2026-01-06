@@ -40,6 +40,7 @@ const PlayableChessBoard: React.FC<PlayableChessBoardProps> = ({
     position,
     selectedSquare,
     legalMoves,
+    lastMove,
     makeMove,
     handleSquareClick,
     handlePieceDrag,
@@ -137,6 +138,7 @@ const PlayableChessBoard: React.FC<PlayableChessBoardProps> = ({
         interactive={!promotionData} // Disable interaction during promotion
         selectedSquare={draggedSquare || selectedSquare}
         legalMoves={draggedSquare ? dragLegalMoves : legalMoves}
+        lastMove={lastMove}
         currentTurn={getCurrentTurn()}
         gameResult={gameResult}
         animationData={animationData}

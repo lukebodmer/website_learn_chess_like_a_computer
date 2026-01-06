@@ -10,6 +10,7 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
     terminations = analysis_data["terminations"]
     openings = analysis_data["openings"]
     accuracy_analysis = analysis_data.get("accuracy_analysis", {})
+    stockfish_analysis = analysis_data.get("stockfish_analysis", {})
 
     html = f"""
     <!-- Report content - styling handled by main.css -->
@@ -513,6 +514,33 @@ def generate_report_content(analysis_data: Dict[str, Any]) -> str:
         html += """
             </tbody>
         </table>
+    </div>
+"""
+
+    # Add database analysis statistics section if available
+    if stockfish_analysis:
+        html += f"""
+    <div class="section">
+        <h2>🔍 Analysis Details</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{stockfish_analysis.get('total_games_analyzed', 0)}</div>
+                <div class="stat-label">Games Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{stockfish_analysis.get('database_evaluations_used', 0)}</div>
+                <div class="stat-label">Database Evaluations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{stockfish_analysis.get('stockfish_evaluations_used', 0)}</div>
+                <div class="stat-label">Stockfish Evaluations</div>
+            </div>
+        </div>
+        <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+            🗃️ <strong>{stockfish_analysis.get('database_evaluations_used', 0)}</strong> positions found in our 300M position database,
+            saving significant computation time. <strong>{stockfish_analysis.get('stockfish_evaluations_used', 0)}</strong> positions
+            required fresh Stockfish analysis.
+        </p>
     </div>
 """
 

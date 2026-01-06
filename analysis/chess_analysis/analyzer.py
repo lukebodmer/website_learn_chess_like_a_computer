@@ -216,4 +216,5 @@ class ChessAnalyzer:
             "openings": opening_analyzer.analyze_openings(username),
             "accuracy_analysis": accuracy_analyzer.analyze_accuracy(username),
             "stockfish_analysis": enrichment_results,
+            "enriched_games": self.games,  # Include enriched games data
         }

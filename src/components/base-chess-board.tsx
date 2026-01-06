@@ -11,6 +11,7 @@ export interface BaseChessBoardProps {
   interactive?: boolean
   selectedSquare?: string
   legalMoves?: string[]
+  lastMove?: { from: string, to: string } | null
   highlightedSquares?: { square: string, color: string }[]
   arrows?: { from: string, to: string, color: string }[]
   showGameEndSymbols?: boolean
@@ -47,6 +48,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   interactive = true,
   selectedSquare,
   legalMoves = [],
+  lastMove,
   highlightedSquares = [],
   arrows = [],
   showGameEndSymbols = true,
@@ -77,6 +79,10 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const [animatingPiece, setAnimatingPiece] = useState<AnimationData | null>(null)
   const [animationProgress, setAnimationProgress] = useState(0)
+  const [rightClickHighlights, setRightClickHighlights] = useState<Set<string>>(new Set())
+  const [rightClickDragging, setRightClickDragging] = useState<{from: string} | null>(null)
+  const [rightClickStart, setRightClickStart] = useState<{square: string, pos: {x: number, y: number}} | null>(null)
+  const [userArrows, setUserArrows] = useState<{ from: string, to: string, color: string }[]>([])
 
   // Update chess position when position prop changes
   useEffect(() => {
@@ -258,43 +264,107 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     const square = getSquareFromCoords(e.clientX, e.clientY)
     if (!square) return
 
-    const piece = chess.get(square)
-    if (piece && canSelectPiece(piece)) {
-      setDraggedPiece({ square, piece })
+    if (e.button === 2) {
+      // Right mouse button - prepare for potential arrow drawing
+      setRightClickStart({ square, pos: { x: e.clientX, y: e.clientY } })
       setMousePos({ x: e.clientX, y: e.clientY })
-      setIsDragging(true)
+    } else if (e.button === 0) {
+      // Left mouse button - piece dragging
+      const piece = chess.get(square)
+      if (piece && canSelectPiece(piece)) {
+        setDraggedPiece({ square, piece })
+        setMousePos({ x: e.clientX, y: e.clientY })
+        setIsDragging(true)
 
-      // Notify parent that drag has started
-      if (onPieceDragStart) {
-        onPieceDragStart(square)
+        // Notify parent that drag has started
+        if (onPieceDragStart) {
+          onPieceDragStart(square)
+        }
       }
     }
   }, [interactive, getSquareFromCoords, chess, canSelectPiece, onPieceDragStart])
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isDragging) {
+    if (isDragging || rightClickDragging) {
+      setMousePos({ x: e.clientX, y: e.clientY })
+    } else if (rightClickStart) {
+      // Check if we've moved enough to start arrow dragging
+      const distance = Math.sqrt(
+        Math.pow(e.clientX - rightClickStart.pos.x, 2) +
+        Math.pow(e.clientY - rightClickStart.pos.y, 2)
+      )
+
+      if (distance > 10) {
+        // Start arrow dragging
+        setRightClickDragging({ from: rightClickStart.square })
+        setRightClickStart(null)
+      }
       setMousePos({ x: e.clientX, y: e.clientY })
     }
-  }, [isDragging])
+  }, [isDragging, rightClickDragging, rightClickStart])
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!interactive || !isDragging || !draggedPiece) return
+    if (!interactive) return
 
-    const targetSquare = getSquareFromCoords(e.clientX, e.clientY)
-    if (targetSquare && targetSquare !== draggedPiece.square) {
-      if (onPieceDrag) {
-        onPieceDrag(draggedPiece.square, targetSquare)
+    if (rightClickStart && !rightClickDragging) {
+      // Simple right-click without dragging - toggle highlight
+      const square = rightClickStart.square
+      setRightClickHighlights(prev => {
+        const newHighlights = new Set(prev)
+        if (newHighlights.has(square)) {
+          newHighlights.delete(square)
+        } else {
+          newHighlights.add(square)
+        }
+        return newHighlights
+      })
+
+      // Also call the prop callback if provided
+      if (onSquareRightClick) {
+        onSquareRightClick(square)
+      }
+
+      setRightClickStart(null)
+    } else if (rightClickDragging) {
+      // Handle arrow creation/deletion
+      const targetSquare = getSquareFromCoords(e.clientX, e.clientY)
+      if (targetSquare && targetSquare !== rightClickDragging.from) {
+        // Check if arrow already exists
+        const existingArrowIndex = userArrows.findIndex(
+          arrow => arrow.from === rightClickDragging.from && arrow.to === targetSquare
+        )
+
+        if (existingArrowIndex >= 0) {
+          // Remove existing arrow
+          setUserArrows(prev => prev.filter((_, index) => index !== existingArrowIndex))
+        } else {
+          // Add new arrow
+          setUserArrows(prev => [...prev, {
+            from: rightClickDragging.from,
+            to: targetSquare,
+            color: '#ff0000' // Red arrows
+          }])
+        }
+      }
+      setRightClickDragging(null)
+    } else if (isDragging && draggedPiece) {
+      // Handle piece dragging
+      const targetSquare = getSquareFromCoords(e.clientX, e.clientY)
+      if (targetSquare && targetSquare !== draggedPiece.square) {
+        if (onPieceDrag) {
+          onPieceDrag(draggedPiece.square, targetSquare)
+        }
+      }
+
+      setIsDragging(false)
+      setDraggedPiece(null)
+
+      // Notify parent that drag has ended
+      if (onPieceDragEnd) {
+        onPieceDragEnd()
       }
     }
-
-    setIsDragging(false)
-    setDraggedPiece(null)
-
-    // Notify parent that drag has ended
-    if (onPieceDragEnd) {
-      onPieceDragEnd()
-    }
-  }, [interactive, isDragging, draggedPiece, getSquareFromCoords, onPieceDrag, onPieceDragEnd])
+  }, [interactive, isDragging, draggedPiece, rightClickDragging, rightClickStart, userArrows, getSquareFromCoords, onPieceDrag, onPieceDragEnd, onSquareRightClick])
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!interactive || isDragging) return
@@ -307,13 +377,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
 
   const handleRightClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault()
-    if (!interactive) return
-
-    const square = getSquareFromCoords(e.clientX, e.clientY)
-    if (square && onSquareRightClick) {
-      onSquareRightClick(square)
-    }
-  }, [interactive, getSquareFromCoords, onSquareRightClick])
+    // Right-click handling is now done in handleMouseUp
+  }, [])
 
   // Load images
   useEffect(() => {
@@ -395,20 +460,31 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
 
     // Draw coordinate labels if enabled
     if (coordinates) {
-      ctx.fillStyle = '#000'
       ctx.font = `${displaySize / 40}px Arial`
+
+      // Define square colors
+      const lightSquareColor = '#f0d9b5'
+      const darkSquareColor = '#b58863'
 
       // File labels (a-h)
       for (let col = 0; col < 8; col++) {
         const file = orientation === 'white'
           ? String.fromCharCode(97 + col)
           : String.fromCharCode(97 + (7 - col))
+
+        // Bottom row is row 7, check if the square at (col, 7) is light or dark
+        const isLightSquare = (7 + col) % 2 === 0
+        ctx.fillStyle = isLightSquare ? darkSquareColor : lightSquareColor
         ctx.fillText(file, col * squareSize + squareSize * 0.05, displaySize - squareSize * 0.05)
       }
 
       // Rank labels (1-8)
       for (let row = 0; row < 8; row++) {
         const rank = orientation === 'white' ? (8 - row).toString() : (row + 1).toString()
+
+        // Right column is col 7, check if the square at (7, row) is light or dark
+        const isLightSquare = (row + 7) % 2 === 0
+        ctx.fillStyle = isLightSquare ? darkSquareColor : lightSquareColor
         ctx.fillText(rank, displaySize - squareSize * 0.15, row * squareSize + squareSize * 0.2)
       }
     }
@@ -420,11 +496,31 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       ctx.fillRect(coords.x, coords.y, squareSize, squareSize)
     }
 
+    // Draw right-click highlights
+    for (const square of rightClickHighlights) {
+      const coords = getSquareCoords(square)
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.4)' // Red highlight with transparency
+      ctx.fillRect(coords.x, coords.y, squareSize, squareSize)
+    }
+
     // Draw selected square
     if (selectedSquare) {
       const coords = getSquareCoords(selectedSquare)
       ctx.fillStyle = 'rgba(255, 255, 0, 0.5)'
       ctx.fillRect(coords.x, coords.y, squareSize, squareSize)
+    }
+
+    // Draw last move highlight
+    if (lastMove) {
+      // Highlight the "from" square
+      const fromCoords = getSquareCoords(lastMove.from)
+      ctx.fillStyle = 'rgba(255, 255, 100, 0.4)'
+      ctx.fillRect(fromCoords.x, fromCoords.y, squareSize, squareSize)
+
+      // Highlight the "to" square
+      const toCoords = getSquareCoords(lastMove.to)
+      ctx.fillStyle = 'rgba(255, 255, 100, 0.4)'
+      ctx.fillRect(toCoords.x, toCoords.y, squareSize, squareSize)
     }
 
     // Draw check highlight with glowing circle
@@ -606,8 +702,9 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       }
     }
 
-    // Draw arrows
-    for (const arrow of arrows) {
+    // Draw arrows (both prop arrows and user-created arrows)
+    const allArrows = [...arrows, ...userArrows]
+    for (const arrow of allArrows) {
       const fromCoords = getSquareCoords(arrow.from)
       const toCoords = getSquareCoords(arrow.to)
 
@@ -643,11 +740,54 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       ctx.stroke()
     }
 
+    // Draw preview arrow while right-click dragging
+    if (rightClickDragging) {
+      const canvas = canvasRef.current
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect()
+        const fromCoords = getSquareCoords(rightClickDragging.from)
+        const fromX = fromCoords.x + squareSize / 2
+        const fromY = fromCoords.y + squareSize / 2
+        const toX = mousePos.x - rect.left
+        const toY = mousePos.y - rect.top
+
+        // Only draw if we've moved a reasonable distance
+        const distance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2))
+        if (distance > 20) {
+          ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)' // Semi-transparent red
+          ctx.lineWidth = 6
+          ctx.lineCap = 'round'
+
+          ctx.beginPath()
+          ctx.moveTo(fromX, fromY)
+          ctx.lineTo(toX, toY)
+          ctx.stroke()
+
+          // Draw arrowhead
+          const angle = Math.atan2(toY - fromY, toX - fromX)
+          const headLength = 15
+
+          ctx.beginPath()
+          ctx.moveTo(toX, toY)
+          ctx.lineTo(
+            toX - headLength * Math.cos(angle - Math.PI / 6),
+            toY - headLength * Math.sin(angle - Math.PI / 6)
+          )
+          ctx.moveTo(toX, toY)
+          ctx.lineTo(
+            toX - headLength * Math.cos(angle + Math.PI / 6),
+            toY - headLength * Math.sin(angle + Math.PI / 6)
+          )
+          ctx.stroke()
+        }
+      }
+    }
+
   }, [
-    size, position, chess, selectedSquare, legalMoves, highlightedSquares, arrows,
+    size, position, chess, selectedSquare, legalMoves, lastMove, highlightedSquares, arrows,
     pieceImages, symbolImages, isDragging, draggedPiece, mousePos, animatingPiece,
     animationProgress, coordinates, orientation, showGameEndSymbols, showCheckHighlight,
-    getSquareCoords, getKingSquare, getGameResult
+    gameResult, rightClickHighlights, userArrows, rightClickDragging, rightClickStart, getSquareCoords, getKingSquare, getGameResult
   ])
 
   // Cleanup animation on unmount

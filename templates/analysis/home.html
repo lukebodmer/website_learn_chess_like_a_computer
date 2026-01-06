@@ -55,9 +55,14 @@
                 {% endif %}
             </div>
         </div>
-    </div>
 
-<!-- Daily puzzles will be implemented using the React chess engine in the future -->
+        <div class="section">
+            <h3>Daily Puzzle</h3>
+            <div class="daily-puzzle-card">
+                <div id="daily-puzzle-container"></div>
+            </div>
+        </div>
+    </div>
 
     {% if reports %}
         <div class="section">
@@ -101,7 +106,13 @@
         <a href="/auth/signup/" class="btn btn-secondary">Sign Up</a>
     </div>
 
-<!-- Daily puzzles will be implemented using the React chess engine in the future -->
+    <div class="section">
+        <h3>Daily Puzzle</h3>
+        <p>Try today's puzzle from Chess.com:</p>
+        <div class="daily-puzzle-card">
+            <div id="daily-puzzle-container"></div>
+        </div>
+    </div>
 
 {% endif %}
 
@@ -113,5 +124,4 @@
     <li>Get a comprehensive report with insights and recommendations</li>
 </ol>
 
-<!-- Daily puzzle logic now handled by React component via main.js -->
 {% endblock %}

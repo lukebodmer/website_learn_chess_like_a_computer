@@ -1,0 +1,7 @@
+# GCP Stockfish API Requirements
+Flask==3.0.0
+chess==1.11.2
+gunicorn==21.2.0
+
+# For production deployment
+Werkzeug==3.0.1

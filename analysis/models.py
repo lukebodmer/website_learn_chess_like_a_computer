@@ -87,6 +87,7 @@ class AnalysisReport(models.Model):
     openings = models.JSONField(default=dict)
     accuracy_analysis = models.JSONField(default=dict)
     stockfish_analysis = models.JSONField(default=dict)
+    enriched_games = models.JSONField(default=list)  # Store enriched games data
 
     # Report metadata
     created_at = models.DateTimeField(auto_now_add=True)

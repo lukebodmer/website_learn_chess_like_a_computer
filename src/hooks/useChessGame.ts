@@ -19,6 +19,7 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
   const [gameResult, setGameResult] = useState<any>(null)
   const [animationData, setAnimationData] = useState<{ piece: any, from: string, to: string } | null>(null)
   const [pendingPositionUpdate, setPendingPositionUpdate] = useState<string | null>(null)
+  const [lastMove, setLastMove] = useState<{ from: string, to: string } | null>(null)
 
   // Get legal moves for a square
   const getLegalMovesForSquare = useCallback((square: string): string[] => {
@@ -76,6 +77,7 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
       setMoveHistory(prev => [...prev, move])
       setSelectedSquare(null)
       setLegalMoves([])
+      setLastMove({ from, to })
 
       // Check for game end
       const result = getGameResult()
@@ -178,6 +180,7 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
     setLegalMoves([])
     setMoveHistory([])
     setGameResult(null)
+    setLastMove(null)
   }, [])
 
   // Load position
@@ -187,6 +190,7 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
       setPosition(fen)
       setSelectedSquare(null)
       setLegalMoves([])
+      setLastMove(null)
 
       // Reset move history when loading new position
       setMoveHistory([])
@@ -229,6 +233,7 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
     position,
     selectedSquare,
     legalMoves,
+    lastMove,
     moveHistory,
     gameResult,
     animationData,

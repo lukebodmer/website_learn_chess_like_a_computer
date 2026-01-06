@@ -156,6 +156,10 @@ REST_FRAMEWORK = {
 # Lichess OAuth settings
 LICHESS_CLIENT_ID = 'chess-analysis-app'
 
+# GCP Stockfish API settings
+# Set this to your deployed GCP Cloud Run URL
+GCP_STOCKFISH_URL = 'https://stockfish-api-552342702662.us-west1.run.app'
+
 # Login/logout URLs
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'

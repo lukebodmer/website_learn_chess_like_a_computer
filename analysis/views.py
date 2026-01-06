@@ -25,6 +25,8 @@ from .models import UserProfile, GameDataSet, AnalysisReport, ChessGame
 from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
 from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
+from .chess_analysis.game_enricher import GameEnricher
+from django.http import StreamingHttpResponse
 from .report_generation import generate_html_report
 from .report_generation.django_report_generator import generate_report_content
 
@@ -339,7 +341,59 @@ def fetch_lichess_games(request, username):
 
 @login_required
 def generate_analysis_report(request, username):
-    """Generate and display analysis report"""
+    """Generate and display analysis report with live streaming updates"""
+    # Get the most recent game dataset for this user
+    game_dataset = GameDataSet.objects.filter(
+        user=request.user,
+        lichess_username=username
+    ).first()
+
+    if not game_dataset:
+        return HttpResponse("No games data found. Please connect your Lichess account first.", status=404)
+
+    # Always show live streaming report page (skip existing report check)
+    # Get first 10 games from raw data for display
+    first_games_raw = "Loading..."
+    try:
+        if game_dataset.raw_data:
+            lines = game_dataset.raw_data.strip().split('\n')
+            games = []
+            all_games = []  # Store all games for debugging
+            for i, line in enumerate(lines):  # Process ALL games
+                if line.strip():
+                    game_data = json.loads(line)
+                    all_games.append(game_data)
+                    if i < 10:  # Only first 10 for display
+                        games.append(game_data)
+            if games:
+                first_games_raw = json.dumps(games, indent=2)
+
+                # DEBUG: Save raw Lichess data to file (ALL games)
+                import time
+                timestamp = int(time.time())
+                raw_filename = f"raw_lichess_data_complete_{timestamp}.json"
+                try:
+                    with open(raw_filename, 'w') as f:
+                        json.dump(all_games, f, indent=2)
+                    print(f"DEBUG: Saved complete raw Lichess data to {raw_filename} ({len(all_games)} games)")
+                except Exception as debug_e:
+                    print(f"DEBUG: Failed to save raw data: {debug_e}")
+    except Exception as e:
+        first_games_raw = f"Error parsing game data: {e}"
+
+    # Show the live report page immediately
+    return render(request, 'analysis/report.html', {
+        'username': username,
+        'first_game_raw': first_games_raw,
+        'enriched_data': json.dumps({"status": "Analysis starting..."}, indent=2),
+        'enriched_games': json.dumps({"status": "Waiting for analysis..."}, indent=2),
+        'database_stats': json.dumps({"status": "Analysis will begin momentarily..."}, indent=2),
+        'auto_start': True  # Tell template to auto-start streaming
+    })
+
+@login_required
+def generate_analysis_report_old(request, username):
+    """OLD VERSION - Generate analysis report synchronously (kept for reference)"""
     # Get the most recent game dataset for this user
     game_dataset = GameDataSet.objects.filter(
         user=request.user,
@@ -356,85 +410,36 @@ def generate_analysis_report(request, username):
     ).first()
 
     if existing_report:
-        # Use existing report
-        report_html = generate_report_content({
-            'username': username,
-            'basic_stats': existing_report.basic_stats,
-            'terminations': existing_report.terminations,
-            'openings': existing_report.openings,
-            'accuracy_analysis': existing_report.accuracy_analysis,
-            'stockfish_analysis': existing_report.stockfish_analysis,
-        })
-
-        # Get user's games for buddy board from raw NDJSON data
-        buddy_board_games = []
+        # Get first 10 games from raw data for display
+        first_games_raw = "No game data available"
         try:
-            # Parse games directly from the raw NDJSON data in the dataset
             if game_dataset.raw_data:
                 lines = game_dataset.raw_data.strip().split('\n')
-
-                for i, line in enumerate(lines):
-                    if not line.strip() or i >= 100:  # Limit to 100 games for performance
-                        break
-
-                    try:
-                        game_data = json.loads(line)
-
-                        # Extract game information
-                        white_player = game_data.get('players', {}).get('white', {}).get('user', {}).get('name', 'Unknown')
-                        black_player = game_data.get('players', {}).get('black', {}).get('user', {}).get('name', 'Unknown')
-
-                        # Extract opening information
-                        opening_info = game_data.get('opening', {})
-                        opening_name = opening_info.get('name', 'Unknown Opening')
-
-                        # Extract moves
-                        moves = game_data.get('moves')
-                        pgn = game_data.get('pgn')
-
-                        # Skip games without moves
-                        if not moves and not pgn:
-                            continue
-
-                        # Extract game result
-                        result = game_data.get('status')
-                        if game_data.get('winner') == 'white':
-                            result = '1-0'
-                        elif game_data.get('winner') == 'black':
-                            result = '0-1'
-                        else:
-                            result = '1/2-1/2'
-
-                        # Extract date
-                        created_at = game_data.get('createdAt')
-                        date = 'Unknown'
-                        if created_at:
-                            try:
-                                dt = datetime.fromtimestamp(created_at / 1000, tz=timezone.utc)
-                                date = dt.strftime('%Y-%m-%d')
-                            except:
-                                pass
-
-                        buddy_board_games.append({
-                            'white': white_player,
-                            'black': black_player,
-                            'date': date,
-                            'result': result,
-                            'opening': opening_name,
-                            'moves': moves,
-                            'pgn': pgn
-                        })
-
-                    except json.JSONDecodeError:
-                        continue
-
+                games = []
+                for i, line in enumerate(lines[:10]):  # First 10 games
+                    if line.strip():
+                        games.append(json.loads(line))
+                if games:
+                    first_games_raw = json.dumps(games, indent=2)
         except Exception as e:
-            print(f"Error loading buddy board games: {e}")
+            first_games_raw = f"Error parsing game data: {e}"
+
+        # Get first 10 enriched games for display
+        enriched_games_display = "No enriched game data available"
+        if existing_report.enriched_games:
+            enriched_games_display = json.dumps(existing_report.enriched_games[:10], indent=2)
 
         return render(request, 'analysis/report.html', {
             'username': username,
-            'report_html': report_html,
-            'buddy_board_games': json.dumps(buddy_board_games)
+            'first_game_raw': first_games_raw,
+            'enriched_data': json.dumps(existing_report.stockfish_analysis, indent=2),
+            'enriched_games': enriched_games_display,
+            'database_stats': json.dumps({
+                'database_evaluations_used': existing_report.stockfish_analysis.get('database_evaluations_used', 0),
+                'stockfish_evaluations_used': existing_report.stockfish_analysis.get('stockfish_evaluations_used', 0),
+                'existing_evaluations_used': existing_report.stockfish_analysis.get('existing_evaluations_used', 0),
+                'total_games_analyzed': existing_report.stockfish_analysis.get('total_games_analyzed', 0)
+            }, indent=2)
         })
 
     # Generate new analysis
@@ -462,6 +467,7 @@ def generate_analysis_report(request, username):
             openings=analysis_data['openings'],
             accuracy_analysis=analysis_data['accuracy_analysis'],
             stockfish_analysis=analysis_data['stockfish_analysis'],
+            enriched_games=analysis_data['enriched_games'],  # Store enriched games
             analysis_duration=duration,
             stockfish_games_analyzed=analysis_data['stockfish_analysis'].get('total_games_analyzed', 0)
         )
@@ -469,78 +475,36 @@ def generate_analysis_report(request, username):
         # Clean up temporary file
         os.unlink(tmp_file_path)
 
-        # Generate HTML report
-        report_html = generate_report_content(analysis_data)
-
-        # Get user's games for buddy board from raw NDJSON data
-        buddy_board_games = []
+        # Get first 10 games from raw data for display
+        first_games_raw = "No game data available"
         try:
-            # Parse games directly from the raw NDJSON data in the dataset
             if game_dataset.raw_data:
                 lines = game_dataset.raw_data.strip().split('\n')
-
-                for i, line in enumerate(lines):
-                    if not line.strip() or i >= 100:  # Limit to 100 games for performance
-                        break
-
-                    try:
-                        game_data = json.loads(line)
-
-                        # Extract game information
-                        white_player = game_data.get('players', {}).get('white', {}).get('user', {}).get('name', 'Unknown')
-                        black_player = game_data.get('players', {}).get('black', {}).get('user', {}).get('name', 'Unknown')
-
-                        # Extract opening information
-                        opening_info = game_data.get('opening', {})
-                        opening_name = opening_info.get('name', 'Unknown Opening')
-
-                        # Extract moves
-                        moves = game_data.get('moves')
-                        pgn = game_data.get('pgn')
-
-                        # Skip games without moves
-                        if not moves and not pgn:
-                            continue
-
-                        # Extract game result
-                        result = game_data.get('status')
-                        if game_data.get('winner') == 'white':
-                            result = '1-0'
-                        elif game_data.get('winner') == 'black':
-                            result = '0-1'
-                        else:
-                            result = '1/2-1/2'
-
-                        # Extract date
-                        created_at = game_data.get('createdAt')
-                        date = 'Unknown'
-                        if created_at:
-                            try:
-                                dt = datetime.fromtimestamp(created_at / 1000, tz=timezone.utc)
-                                date = dt.strftime('%Y-%m-%d')
-                            except:
-                                pass
-
-                        buddy_board_games.append({
-                            'white': white_player,
-                            'black': black_player,
-                            'date': date,
-                            'result': result,
-                            'opening': opening_name,
-                            'moves': moves,
-                            'pgn': pgn
-                        })
-
-                    except json.JSONDecodeError:
-                        continue
-
+                games = []
+                for i, line in enumerate(lines[:10]):  # First 10 games
+                    if line.strip():
+                        games.append(json.loads(line))
+                if games:
+                    first_games_raw = json.dumps(games, indent=2)
         except Exception as e:
-            print(f"Error loading buddy board games: {e}")
+            first_games_raw = f"Error parsing game data: {e}"
+
+        # Get first 10 enriched games for display
+        enriched_games_display = "No enriched game data available"
+        if analysis_data.get('enriched_games'):
+            enriched_games_display = json.dumps(analysis_data['enriched_games'][:10], indent=2)
 
         return render(request, 'analysis/report.html', {
             'username': username,
-            'report_html': report_html,
-            'buddy_board_games': json.dumps(buddy_board_games)
+            'first_game_raw': first_games_raw,
+            'enriched_data': json.dumps(analysis_data['stockfish_analysis'], indent=2),
+            'enriched_games': enriched_games_display,
+            'database_stats': json.dumps({
+                'database_evaluations_used': analysis_data['stockfish_analysis'].get('database_evaluations_used', 0),
+                'stockfish_evaluations_used': analysis_data['stockfish_analysis'].get('stockfish_evaluations_used', 0),
+                'existing_evaluations_used': analysis_data['stockfish_analysis'].get('existing_evaluations_used', 0),
+                'total_games_analyzed': analysis_data['stockfish_analysis'].get('total_games_analyzed', 0)
+            }, indent=2)
         })
 
     except Exception as e:
@@ -551,6 +515,59 @@ def generate_analysis_report(request, username):
             except:
                 pass
         return HttpResponse(f"Error generating analysis: {str(e)}", status=500)
+
+
+@login_required
+def stream_analysis_progress(request, username):
+    """Stream real-time analysis progress via Server-Sent Events"""
+    try:
+        # Get the game dataset
+        game_dataset = GameDataSet.objects.filter(
+            user=request.user,
+            lichess_username=username
+        ).first()
+
+        if not game_dataset or not game_dataset.raw_data:
+            return HttpResponse("No games data found", status=404)
+
+        def event_stream():
+            try:
+                # Parse games from dataset
+                games = []
+                for line in game_dataset.raw_data.strip().split('\n'):
+                    if line.strip():
+                        try:
+                            game_json = json.loads(line)
+                            # Parse into our game format
+                            players = game_json.get("players", {})
+                            game_data = {
+                                "white_player": players.get("white", {}).get("user", {}).get("name", "Unknown"),
+                                "black_player": players.get("black", {}).get("user", {}).get("name", "Unknown"),
+                                "opening": game_json.get("opening", {}).get("name", "Unknown"),
+                                "raw_json": game_json,
+                            }
+                            games.append(game_data)
+                        except json.JSONDecodeError:
+                            continue
+
+                # Create enricher and stream results
+                enricher = GameEnricher(games)
+
+                for update in enricher.enrich_games_with_stockfish_streaming(username):
+                    # Send Server-Sent Event
+                    yield f"data: {json.dumps(update)}\n\n"
+
+            except Exception as e:
+                error_data = {"type": "error", "error": str(e)}
+                yield f"data: {json.dumps(error_data)}\n\n"
+
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response['Cache-Control'] = 'no-cache'
+        response['X-Accel-Buffering'] = 'no'
+        return response
+
+    except Exception as e:
+        return HttpResponse(f"Error starting stream: {str(e)}", status=500)
 
 
 @login_required
@@ -588,122 +605,37 @@ def view_report(request, report_id):
     """View an existing analysis report"""
     report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
 
-    # Generate HTML from existing report data
-    report_html = generate_report_content({
-        'username': report.game_dataset.lichess_username,
-        'basic_stats': report.basic_stats,
-        'terminations': report.terminations,
-        'openings': report.openings,
-        'accuracy_analysis': report.accuracy_analysis,
-        'stockfish_analysis': report.stockfish_analysis
-    })
-
-    # Get user's games for buddy board from raw NDJSON data
-    buddy_board_games = []
+    # Get first 10 games from raw data for display
+    first_games_raw = "No game data available"
     try:
-        # Parse games directly from the raw NDJSON data in the dataset
         dataset = report.game_dataset
         if dataset.raw_data:
             lines = dataset.raw_data.strip().split('\n')
-
-            for i, line in enumerate(lines):
-                if not line.strip() or i >= 100:  # Limit to 100 games for performance
-                    break
-
-                try:
-                    game_data = json.loads(line)
-
-                    # Extract game information
-                    white_player = game_data.get('players', {}).get('white', {}).get('user', {}).get('name', 'Unknown')
-                    black_player = game_data.get('players', {}).get('black', {}).get('user', {}).get('name', 'Unknown')
-
-                    # Check which color the user played
-                    user_color = None
-                    if white_player.lower() == dataset.lichess_username.lower():
-                        user_color = 'white'
-                    elif black_player.lower() == dataset.lichess_username.lower():
-                        user_color = 'black'
-
-                    # Extract opening information
-                    opening_info = game_data.get('opening', {})
-                    opening_name = opening_info.get('name', 'Unknown Opening')
-
-                    # Extract moves
-                    moves = game_data.get('moves')
-                    pgn = game_data.get('pgn')
-
-                    # Skip games without moves
-                    if not moves and not pgn:
-                        continue
-
-                    # Extract game result
-                    winner = game_data.get('winner')
-                    if winner == 'white':
-                        result = '1-0'
-                    elif winner == 'black':
-                        result = '0-1'
-                    else:
-                        result = '1/2-1/2'
-
-                    # Extract ratings
-                    white_rating = game_data.get('players', {}).get('white', {}).get('rating', 0)
-                    black_rating = game_data.get('players', {}).get('black', {}).get('rating', 0)
-
-                    # Extract date
-                    created_at = game_data.get('createdAt')
-                    if created_at:
-                        # Convert timestamp to date
-                        from datetime import datetime
-                        game_date = datetime.fromtimestamp(created_at / 1000).strftime('%Y-%m-%d')
-                    else:
-                        game_date = 'Unknown'
-
-                    # Extract speed/time control
-                    speed = game_data.get('speed', 'unknown')
-
-                    # Extract accuracy if available
-                    accuracy = None
-                    if 'analysis' in game_data:
-                        analysis = game_data['analysis']
-                        if user_color == 'white' and 'white' in analysis:
-                            accuracy = analysis['white'].get('accuracy')
-                        elif user_color == 'black' and 'black' in analysis:
-                            accuracy = analysis['black'].get('accuracy')
-
-                    buddy_board_games.append({
-                        'white': white_player,
-                        'black': black_player,
-                        'result': result,
-                        'opening': opening_name,
-                        'date': game_date,
-                        'pgn': pgn,
-                        'moves': moves,
-                        'lichess_id': game_data.get('id', f'game_{i}'),
-                        'user_color': user_color,
-                        'accuracy': accuracy,
-                        'white_rating': white_rating,
-                        'black_rating': black_rating,
-                        'speed': speed
-                    })
-
-                except (json.JSONDecodeError, KeyError, TypeError) as e:
-                    print(f"Error parsing game data line {i}: {e}")
-                    continue
-
-        print(f"Loaded {len(buddy_board_games)} games with move data for buddy board")
-
-        # Debug: Print some opening names to see what we have
-        openings = [game['opening'] for game in buddy_board_games[:10]]
-        print(f"Sample openings: {openings}")
-
+            games = []
+            for i, line in enumerate(lines[:10]):  # First 10 games
+                if line.strip():
+                    games.append(json.loads(line))
+            if games:
+                first_games_raw = json.dumps(games, indent=2)
     except Exception as e:
-        print(f"Error loading buddy board games: {e}")
-        # Continue with empty games list
+        first_games_raw = f"Error parsing game data: {e}"
+
+    # Get first 10 enriched games for display
+    enriched_games_display = "No enriched game data available"
+    if report.enriched_games:
+        enriched_games_display = json.dumps(report.enriched_games[:10], indent=2)
 
     return render(request, 'analysis/report.html', {
         'username': report.game_dataset.lichess_username,
-        'report_html': report_html,
-        'buddy_board_games': json.dumps(buddy_board_games)
+        'first_game_raw': first_games_raw,
+        'enriched_data': json.dumps(report.stockfish_analysis, indent=2),
+        'enriched_games': enriched_games_display,
+        'database_stats': json.dumps({
+            'database_evaluations_used': report.stockfish_analysis.get('database_evaluations_used', 0),
+            'stockfish_evaluations_used': report.stockfish_analysis.get('stockfish_evaluations_used', 0),
+            'existing_evaluations_used': report.stockfish_analysis.get('existing_evaluations_used', 0),
+            'total_games_analyzed': report.stockfish_analysis.get('total_games_analyzed', 0)
+        }, indent=2)
     })
 
 
@@ -1395,4 +1327,103 @@ def daily_puzzle_api(request):
         return JsonResponse({
             'success': False,
             'error': 'Failed to load daily puzzles from both sources'
+        }, status=500)
+
+
+@login_required
+def export_unified_games_json(request, username):
+    """
+    Export all games for a user in unified format (Lichess-evaluated + enriched)
+    Returns a single JSON file with all games in identical format
+    """
+    try:
+        # Get the most recent game dataset for this user
+        game_dataset = GameDataSet.objects.filter(
+            user_profile__lichess_username=username,
+            user_profile__user=request.user
+        ).order_by('-created_at').first()
+
+        if not game_dataset:
+            return JsonResponse({
+                'error': 'No game data found for this user'
+            }, status=404)
+
+        # Get all games from this dataset
+        games = ChessGame.objects.filter(dataset=game_dataset).select_related('dataset')
+
+        unified_games = []
+        lichess_evaluated_count = 0
+        enriched_count = 0
+
+        for game in games:
+            try:
+                raw_json = game.raw_json
+
+                # Check if game already has Lichess evaluation
+                has_lichess_evaluation = False
+                if 'players' in raw_json:
+                    for color in ['white', 'black']:
+                        if (color in raw_json['players'] and
+                            'analysis' in raw_json['players'][color] and
+                            raw_json['players'][color]['analysis'].get('accuracy') is not None):
+                            has_lichess_evaluation = True
+                            break
+
+                # Also check if game has analysis array with judgments
+                if not has_lichess_evaluation and 'analysis' in raw_json:
+                    for move in raw_json['analysis']:
+                        if 'judgment' in move:
+                            has_lichess_evaluation = True
+                            break
+
+                if has_lichess_evaluation:
+                    lichess_evaluated_count += 1
+                else:
+                    enriched_count += 1
+
+                # Add game to unified format (already processed by enricher if needed)
+                unified_game = {
+                    'id': raw_json.get('id', ''),
+                    'white_player': game.white_player,
+                    'black_player': game.black_player,
+                    'opening': game.opening,
+                    'result': raw_json.get('winner', 'unknown'),
+                    'rated': raw_json.get('rated', False),
+                    'speed': raw_json.get('speed', ''),
+                    'time_control': raw_json.get('clock', {}),
+                    'played_at': raw_json.get('createdAt', 0),
+                    'raw_json': raw_json
+                }
+
+                unified_games.append(unified_game)
+
+            except Exception as e:
+                print(f"Error processing game {game.id}: {e}")
+                continue
+
+        # Prepare response
+        response_data = {
+            'metadata': {
+                'username': username,
+                'total_games': len(unified_games),
+                'lichess_evaluated_games': lichess_evaluated_count,
+                'enriched_games': enriched_count,
+                'export_timestamp': timezone.now().isoformat(),
+                'dataset_created': game_dataset.created_at.isoformat()
+            },
+            'games': unified_games
+        }
+
+        # Return as downloadable JSON file
+        response = HttpResponse(
+            json.dumps(response_data, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{username}_chess_games_unified.json"'
+
+        return response
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Failed to export games: {str(e)}'
         }, status=500)
