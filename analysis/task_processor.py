@@ -68,8 +68,8 @@ class ReportTaskProcessor:
                 self._fail_task(task, "No games found in dataset")
                 return
 
-            # Update total games count
-            task.total_games = len(games)
+            # Initialize - total_games will be set to total_positions during init
+            task.total_games = 0
             task.save()
 
             # Create enricher with progress callback
@@ -120,10 +120,22 @@ class ReportTaskProcessor:
     def _parse_games_from_dataset(self, game_dataset):
         """Parse games from GameDataSet raw_data"""
         games = []
+        is_chess_com = bool(game_dataset.chess_com_username)
+
+
         for line in game_dataset.raw_data.strip().split('\n'):
             if line.strip():
                 try:
-                    game_json = json.loads(line)
+                    raw_game_data = json.loads(line)
+
+                    # Convert Chess.com data to Lichess format if needed
+                    if is_chess_com:
+                        # Import the conversion function
+                        from .views import convert_chess_com_to_lichess_format
+                        game_json = convert_chess_com_to_lichess_format(raw_game_data)
+                    else:
+                        game_json = raw_game_data
+
                     # Parse into our game format
                     players = game_json.get("players", {})
                     game_data = {
@@ -133,14 +145,19 @@ class ReportTaskProcessor:
                         "raw_json": game_json,
                     }
                     games.append(game_data)
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as e:
+                    print(f"Error parsing game data: {e}")
                     continue
+                except Exception as e:
+                    print(f"Error converting Chess.com game: {e}")
+                    continue
+
+
         return games
 
     def _run_enrichment_with_progress(self, enricher, task):
-        """Run enrichment and update task progress"""
+        """Run enrichment and update task progress based on API calls"""
         # Get the username from the task
-        # Find the user's username in the dataset
         username = ""
         if task.game_dataset.lichess_username:
             username = task.game_dataset.lichess_username
@@ -161,40 +178,40 @@ class ReportTaskProcessor:
         for update in enricher.enrich_games_with_stockfish_streaming(username):
             # Update task progress based on streaming updates
             if update.get('type') == 'init':
-                task.total_games = update.get('total_games', task.total_games)
+                # Store position count for tracking
+                total_positions = update.get('total_positions', 0)
+                if total_positions > 0:
+                    task.current_game = f"{total_positions} positions to evaluate"
+                    task.total_games = total_positions  # Repurpose for total API calls
                 task.save()
 
-            elif update.get('type') == 'game_start':
-                game_info = update.get('game_info', {})
-                task.current_game = f"{game_info.get('white_player', 'Unknown')} vs {game_info.get('black_player', 'Unknown')}"
+            elif update.get('type') == 'api_progress':
+                # Update progress based on API call completion
+                completed_calls = update.get('completed_calls', 0)
+                total_calls = update.get('total_calls', 1)
+
+                if total_calls > 0:
+                    task.progress = int((completed_calls / total_calls) * 100)
+
+                # Store exact call counts for accurate frontend progress
+                # Using existing fields: completed_games for completed_calls, total_games for total_calls
+                task.completed_games = completed_calls
+                task.total_games = total_calls
+
+                # Update current phase description
+                current_phase = update.get('current_phase', 'Processing...')
+                task.current_game = current_phase
                 task.save()
 
-            elif update.get('type') == 'game_complete':
-                task.completed_games += 1
-                if task.total_games > 0:
-                    task.progress = int((task.completed_games / task.total_games) * 100)
-                task.save()
 
-                # Track analysis statistics
-                if 'analysis_result' in update:
-                    result = update['analysis_result']
-                    analysis_summary['total_games_analyzed'] += 1
-                    analysis_summary['database_evaluations_used'] += result.get('database_evaluations', 0)
-                    analysis_summary['stockfish_evaluations_used'] += result.get('stockfish_evaluations', 0)
-                    analysis_summary['existing_evaluations_used'] += result.get('existing_evaluations', 0)
-
-                    mistakes = result.get('mistakes', [])
-                    analysis_summary['total_mistakes_found'] += len(mistakes)
-                    for mistake in mistakes:
-                        mistake_type = mistake.get('type')
-                        if mistake_type in analysis_summary['mistake_breakdown']:
-                            analysis_summary['mistake_breakdown'][mistake_type] += 1
-
-            elif update.get('type') == 'game_error':
-                print(f"Game error in task {task.id}: {update.get('error')}")
-                # Continue processing other games
+            elif update.get('type') == 'error':
+                print(f"Enrichment error in task {task.id}: {update.get('error')}")
+                break
 
             elif update.get('type') == 'complete':
+                task.progress = 100
+                task.current_game = "Analysis complete"
+                task.save()
                 break
 
         return analysis_summary

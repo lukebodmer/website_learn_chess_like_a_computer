@@ -106,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('downloaded-date').textContent = data.created_at;
                 document.getElementById('data-size').textContent = data.data_size.toLocaleString();
 
-                // Update generate report button URL
-                generateBtn.href = `{% url 'analysis:generate_report' username %}`;
+                // Update generate report button URL with dataset ID (using unified URL pattern)
+                generateBtn.href = `/report/${username}/${data.game_dataset_id}/`;
             } else {
                 // Error - show error state
                 statusText.innerHTML = '❌ Error Fetching Games';

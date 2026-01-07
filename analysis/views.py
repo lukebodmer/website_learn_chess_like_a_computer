@@ -32,6 +32,92 @@ from .report_generation import generate_html_report
 from .report_generation.django_report_generator import generate_report_content
 
 
+# Number of games to analyze (change this to analyze more/fewer games)
+ANALYSIS_GAME_COUNT = 5
+
+
+# Shared utilities for game fetching
+def format_date_range_for_display(oldest_date, newest_date):
+    """Format date range for display"""
+    if not oldest_date or not newest_date:
+        return None
+
+    oldest_str = oldest_date.strftime("%B %d, %Y")
+    newest_str = newest_date.strftime("%B %d, %Y")
+
+    if oldest_str == newest_str:
+        return oldest_str  # Same day
+    else:
+        return f"{oldest_str} - {newest_str}"
+
+
+def track_game_dates(games_data, date_field_extractor):
+    """Track oldest and newest game dates from games data
+
+    Args:
+        games_data: List of games
+        date_field_extractor: Function that takes a game and returns the timestamp
+    """
+    oldest_date = None
+    newest_date = None
+
+    for game in games_data:
+        try:
+            timestamp = date_field_extractor(game)
+            if timestamp:
+                if isinstance(timestamp, (int, float)):
+                    # Convert timestamp to datetime
+                    game_date = datetime.fromtimestamp(timestamp / 1000 if timestamp > 1000000000000 else timestamp, tz=timezone.utc)
+                else:
+                    game_date = timestamp
+
+                if newest_date is None or game_date > newest_date:
+                    newest_date = game_date
+                if oldest_date is None or game_date < oldest_date:
+                    oldest_date = game_date
+        except:
+            continue
+
+    return oldest_date, newest_date
+
+
+def create_game_dataset(user, username, games_data, ndjson_data, platform='lichess'):
+    """Create a GameDataSet with proper date tracking"""
+    # Extract dates based on platform
+    if platform == 'lichess':
+        oldest_date, newest_date = track_game_dates(
+            games_data,
+            lambda game: game.get('createdAt')
+        )
+    else:  # chess.com
+        oldest_date, newest_date = track_game_dates(
+            games_data,
+            lambda game: getattr(game, 'end_time', 0)
+        )
+
+    # Create dataset with proper fields based on platform
+    dataset_kwargs = {
+        'user': user,
+        'total_games': len(games_data),
+        'raw_data': ndjson_data,
+        'oldest_game_date': oldest_date,
+        'newest_game_date': newest_date
+    }
+
+    if platform == 'lichess':
+        dataset_kwargs.update({
+            'lichess_username': username,
+            'chess_com_username': ''
+        })
+    else:  # chess.com
+        dataset_kwargs.update({
+            'lichess_username': '',
+            'chess_com_username': username
+        })
+
+    return GameDataSet.objects.create(**dataset_kwargs)
+
+
 # OAuth helper functions (from Flask version)
 def base64_url_encode(data):
     return base64.urlsafe_b64encode(data).decode().rstrip("=")
@@ -68,8 +154,8 @@ def get_lichess_user(access_token):
     return response.json()
 
 
-def get_lichess_user_games(access_token, username, max_games=10):
-    """Fetch recent games from Lichess API with date range tracking"""
+def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT):
+    """Fetch recent games from Lichess API with configurable game count"""
     response = requests.get(
         f"https://lichess.org/api/games/user/{username}",
         headers={
@@ -77,7 +163,7 @@ def get_lichess_user_games(access_token, username, max_games=10):
             "Accept": "application/x-ndjson",
         },
         params={
-            "max": max_games,  # Limit to exactly what we need
+            "max": max_games,
             "moves": "true",
             "tags": "true",
             "clocks": "true",
@@ -86,36 +172,31 @@ def get_lichess_user_games(access_token, username, max_games=10):
             "opening": "true",
             "division": "true",
             "finished": "true",
-            "sort": "dateDesc",  # Ensure most recent first
+            "sort": "dateDesc",
         },
     )
+
     if response.status_code == 200:
         ndjson_data = response.text
-
-        # Parse games to extract date range
         lines = [line for line in ndjson_data.strip().split('\n') if line.strip()]
         games = []
-        oldest_date = None
-        newest_date = None
 
+        # Parse games
         for line in lines:
             try:
                 game = json.loads(line)
                 games.append(game)
-
-                # Track date range using createdAt timestamp
-                if 'createdAt' in game:
-                    game_date = datetime.fromtimestamp(game['createdAt'] / 1000, tz=timezone.utc)
-
-                    if newest_date is None or game_date > newest_date:
-                        newest_date = game_date
-                    if oldest_date is None or game_date < oldest_date:
-                        oldest_date = game_date
-
             except json.JSONDecodeError:
                 continue
 
+        # Use shared utility to track dates
+        oldest_date, newest_date = track_game_dates(
+            games,
+            lambda game: game.get('createdAt')
+        )
+
         return {
+            'games': games,
             'ndjson_data': ndjson_data,
             'games_count': len(games),
             'oldest_game_date': oldest_date,
@@ -123,6 +204,7 @@ def get_lichess_user_games(access_token, username, max_games=10):
         }
 
     return {
+        'games': [],
         'ndjson_data': '',
         'games_count': 0,
         'oldest_game_date': None,
@@ -289,8 +371,15 @@ def fetch_lichess_games(request, username):
         })
 
     try:
-        # Fetch exactly 50 most recent games with date range tracking
-        game_data = get_lichess_user_games(access_token, username, max_games=10)
+        # Get max_games from request (default to analysis setting)
+        max_games = int(request.GET.get('max_games', ANALYSIS_GAME_COUNT))
+
+        # Validate max_games to prevent abuse
+        if max_games < 1 or max_games > 1000:
+            max_games = ANALYSIS_GAME_COUNT
+
+        # Fetch games with configurable count
+        game_data = get_lichess_user_games(access_token, username, max_games=max_games)
 
         if game_data['games_count'] == 0:
             return JsonResponse({
@@ -298,29 +387,20 @@ def fetch_lichess_games(request, username):
                 'error': 'No games found for this account'
             })
 
-        # Create GameDataSet
-        game_dataset = GameDataSet.objects.create(
+        # Create GameDataSet using shared utility
+        game_dataset = create_game_dataset(
             user=request.user,
-            lichess_username=username,
-            total_games=game_data['games_count'],
-            raw_data=game_data['ndjson_data'],
-            oldest_game_date=game_data['oldest_game_date'],
-            newest_game_date=game_data['newest_game_date']
+            username=username,
+            games_data=game_data['games'],
+            ndjson_data=game_data['ndjson_data'],
+            platform='lichess'
         )
 
-        # Format date range for display
-        oldest_date_str = None
-        newest_date_str = None
-        date_range_str = None
-
-        if game_data['oldest_game_date'] and game_data['newest_game_date']:
-            oldest_date_str = game_data['oldest_game_date'].strftime("%B %d, %Y")
-            newest_date_str = game_data['newest_game_date'].strftime("%B %d, %Y")
-
-            if oldest_date_str == newest_date_str:
-                date_range_str = oldest_date_str  # Same day
-            else:
-                date_range_str = f"{oldest_date_str} - {newest_date_str}"
+        # Format date range using shared utility
+        date_range_str = format_date_range_for_display(
+            game_data['oldest_game_date'],
+            game_data['newest_game_date']
+        )
 
         return JsonResponse({
             'success': True,
@@ -329,8 +409,8 @@ def fetch_lichess_games(request, username):
             'created_at': game_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
             'data_size': len(game_data['ndjson_data']),
             'date_range': date_range_str,
-            'oldest_game_date': oldest_date_str,
-            'newest_game_date': newest_date_str
+            'oldest_game_date': game_data['oldest_game_date'].strftime("%B %d, %Y") if game_data['oldest_game_date'] else None,
+            'newest_game_date': game_data['newest_game_date'].strftime("%B %d, %Y") if game_data['newest_game_date'] else None
         })
 
     except Exception as e:
@@ -340,17 +420,60 @@ def fetch_lichess_games(request, username):
         })
 
 
-@login_required
-def generate_analysis_report(request, username):
-    """Generate and display analysis report with background task processing"""
-    # Get the most recent game dataset for this user
-    game_dataset = GameDataSet.objects.filter(
-        user=request.user,
-        lichess_username=username
-    ).first()
+def _render_completed_report(request, report, platform, username, game_dataset):
+    """Render a completed analysis report"""
+    # Get ALL games from raw data for display
+    all_games_raw = "No game data available"
+    try:
+        if game_dataset.raw_data:
+            lines = game_dataset.raw_data.strip().split('\n')
+            all_games = []
+            for line in lines:  # ALL games
+                if line.strip():
+                    try:
+                        game_data = json.loads(line)
+                        # For Chess.com data, convert to unified format for display
+                        if platform == 'chess.com':
+                            game_data = convert_chess_com_to_lichess_format(game_data)
+                        all_games.append(game_data)
+                    except json.JSONDecodeError:
+                        continue
+            if all_games:
+                all_games_raw = json.dumps(all_games, indent=2)
+    except Exception as e:
+        all_games_raw = f"Error parsing game data: {e}"
+
+    # Get enriched games for display
+    enriched_games_display = "No enriched game data available"
+    if report.enriched_games:
+        enriched_games_display = json.dumps(report.enriched_games, indent=2)
+
+    return render(request, 'analysis/report.html', {
+        'username': username,
+        'dataset_id': game_dataset.id,
+        'all_games_raw': all_games_raw,
+        'enriched_games': enriched_games_display,
+        'auto_start': False,  # Don't auto-start streaming for existing reports
+        'platform': platform
+    })
+
+def _generate_unified_analysis_report(request, username, dataset_id):
+    """Unified report generation for both Lichess and Chess.com data"""
+    # Get the dataset and auto-detect platform
+    game_dataset = get_object_or_404(GameDataSet, id=dataset_id, user=request.user)
+
+    # Verify username matches dataset and determine platform
+    if game_dataset.lichess_username == username:
+        platform = 'lichess'
+        error_message = "No games data found. Please connect your Lichess account first."
+    elif game_dataset.chess_com_username == username:
+        platform = 'chess.com'
+        error_message = "No Chess.com games data found. Please connect your Chess.com account and fetch games first."
+    else:
+        return HttpResponse("Username does not match dataset", status=400)
 
     if not game_dataset:
-        return HttpResponse("No games data found. Please connect your Lichess account first.", status=404)
+        return HttpResponse(error_message, status=404)
 
     # Check if there's already a pending or running task for this dataset
     existing_task = ReportGenerationTask.objects.filter(
@@ -373,13 +496,15 @@ def generate_analysis_report(request, username):
                 game_dataset=game_dataset,
                 status='pending'
             )
-            print(f"📊 Created new report generation task {task.id} for {username}")
+            print(f"📊 Created new report generation task {task.id} for {platform} user {username}")
 
             # Start the task processor if not running
             from .task_processor import start_task_processor
             start_task_processor()
         else:
-            print(f"📊 Report already exists for {username}, showing existing report")
+            print(f"📊 Report already exists for {platform} user {username}, showing existing report")
+            # Return completed report immediately
+            return _render_completed_report(request, existing_report, platform, username, game_dataset)
 
     # Get ALL games from raw data for display
     all_games_raw = "Loading..."
@@ -391,6 +516,9 @@ def generate_analysis_report(request, username):
                 if line.strip():
                     try:
                         game_data = json.loads(line)
+                        # For Chess.com data, convert to unified format for display
+                        if platform == 'chess.com':
+                            game_data = convert_chess_com_to_lichess_format(game_data)
                         all_games.append(game_data)
                     except json.JSONDecodeError:
                         continue
@@ -398,173 +526,49 @@ def generate_analysis_report(request, username):
             if all_games:
                 all_games_raw = json.dumps(all_games, indent=2)
 
-                # DEBUG: Save raw Lichess data to file (ALL games)
-                import time
-                timestamp = int(time.time())
-                raw_filename = f"raw_lichess_data_complete_{timestamp}.json"
-                try:
-                    with open(raw_filename, 'w') as f:
-                        json.dump(all_games, f, indent=2)
-                    print(f"DEBUG: Saved complete raw Lichess data to {raw_filename} ({len(all_games)} games)")
-                except Exception as debug_e:
-                    print(f"DEBUG: Failed to save raw data: {debug_e}")
     except Exception as e:
         all_games_raw = f"Error parsing game data: {e}"
 
-    # Show the live report page immediately
+    # Show the unified report page
     return render(request, 'analysis/report.html', {
         'username': username,
+        'dataset_id': dataset_id,
         'all_games_raw': all_games_raw,
         'enriched_games': json.dumps({"status": "Waiting for analysis to complete..."}, indent=2),
-        'auto_start': True  # Tell template to auto-start streaming
+        'auto_start': True,  # Tell template to auto-start streaming
+        'platform': platform  # Tell template which platform this is
     })
 
 @login_required
-def generate_analysis_report_old(request, username):
-    """OLD VERSION - Generate analysis report synchronously (kept for reference)"""
-    # Get the most recent game dataset for this user
-    game_dataset = GameDataSet.objects.filter(
-        user=request.user,
-        lichess_username=username
-    ).first()
-
-    if not game_dataset:
-        return HttpResponse("No games data found. Please connect your Lichess account first.", status=404)
-
-    # Check if we already have a recent report
-    existing_report = AnalysisReport.objects.filter(
-        user=request.user,
-        game_dataset=game_dataset
-    ).first()
-
-    if existing_report:
-        # Get first 10 games from raw data for display
-        first_games_raw = "No game data available"
-        try:
-            if game_dataset.raw_data:
-                lines = game_dataset.raw_data.strip().split('\n')
-                games = []
-                for i, line in enumerate(lines[:10]):  # First 10 games
-                    if line.strip():
-                        games.append(json.loads(line))
-                if games:
-                    first_games_raw = json.dumps(games, indent=2)
-        except Exception as e:
-            first_games_raw = f"Error parsing game data: {e}"
-
-        # Get first 10 enriched games for display
-        enriched_games_display = "No enriched game data available"
-        if existing_report.enriched_games:
-            enriched_games_display = json.dumps(existing_report.enriched_games[:10], indent=2)
-
-        return render(request, 'analysis/report.html', {
-            'username': username,
-            'first_game_raw': first_games_raw,
-            'enriched_data': json.dumps(existing_report.stockfish_analysis, indent=2),
-            'enriched_games': enriched_games_display,
-            'database_stats': json.dumps({
-                'database_evaluations_used': existing_report.stockfish_analysis.get('database_evaluations_used', 0),
-                'stockfish_evaluations_used': existing_report.stockfish_analysis.get('stockfish_evaluations_used', 0),
-                'existing_evaluations_used': existing_report.stockfish_analysis.get('existing_evaluations_used', 0),
-                'total_games_analyzed': existing_report.stockfish_analysis.get('total_games_analyzed', 0)
-            }, indent=2)
-        })
-
-    # Generate new analysis
-    try:
-        # Write NDJSON data to temporary file for analysis
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.ndjson', delete=False) as tmp_file:
-            tmp_file.write(game_dataset.raw_data)
-            tmp_file_path = tmp_file.name
-
-        start_time = timezone.now()
-
-        # Run analysis
-        analyzer = ChessAnalyzer(tmp_file_path)
-        analysis_data = analyzer.run_analysis(username)
-
-        end_time = timezone.now()
-        duration = end_time - start_time
-
-        # Save analysis report
-        report = AnalysisReport.objects.create(
-            user=request.user,
-            game_dataset=game_dataset,
-            basic_stats=analysis_data['basic_stats'],
-            terminations=analysis_data['terminations'],
-            openings=analysis_data['openings'],
-            accuracy_analysis=analysis_data['accuracy_analysis'],
-            stockfish_analysis=analysis_data['stockfish_analysis'],
-            enriched_games=analysis_data['enriched_games'],  # Store enriched games
-            analysis_duration=duration,
-            stockfish_games_analyzed=analysis_data['stockfish_analysis'].get('total_games_analyzed', 0)
-        )
-
-        # Clean up temporary file
-        os.unlink(tmp_file_path)
-
-        # Get first 10 games from raw data for display
-        first_games_raw = "No game data available"
-        try:
-            if game_dataset.raw_data:
-                lines = game_dataset.raw_data.strip().split('\n')
-                games = []
-                for i, line in enumerate(lines[:10]):  # First 10 games
-                    if line.strip():
-                        games.append(json.loads(line))
-                if games:
-                    first_games_raw = json.dumps(games, indent=2)
-        except Exception as e:
-            first_games_raw = f"Error parsing game data: {e}"
-
-        # Get first 10 enriched games for display
-        enriched_games_display = "No enriched game data available"
-        if analysis_data.get('enriched_games'):
-            enriched_games_display = json.dumps(analysis_data['enriched_games'][:10], indent=2)
-
-        return render(request, 'analysis/report.html', {
-            'username': username,
-            'first_game_raw': first_games_raw,
-            'enriched_data': json.dumps(analysis_data['stockfish_analysis'], indent=2),
-            'enriched_games': enriched_games_display,
-            'database_stats': json.dumps({
-                'database_evaluations_used': analysis_data['stockfish_analysis'].get('database_evaluations_used', 0),
-                'stockfish_evaluations_used': analysis_data['stockfish_analysis'].get('stockfish_evaluations_used', 0),
-                'existing_evaluations_used': analysis_data['stockfish_analysis'].get('existing_evaluations_used', 0),
-                'total_games_analyzed': analysis_data['stockfish_analysis'].get('total_games_analyzed', 0)
-            }, indent=2)
-        })
-
-    except Exception as e:
-        # Clean up temporary file if it exists
-        if 'tmp_file_path' in locals():
-            try:
-                os.unlink(tmp_file_path)
-            except:
-                pass
-        return HttpResponse(f"Error generating analysis: {str(e)}", status=500)
-
+def generate_analysis_report(request, username, dataset_id):
+    """Generate analysis report using unified template (auto-detects platform)"""
+    return _generate_unified_analysis_report(request, username, dataset_id)
 
 @login_required
-def stream_analysis_progress(request, username):
+def stream_analysis_progress(request, username, dataset_id):
     """Stream real-time analysis progress by monitoring background task"""
     try:
-        # Get the game dataset
-        game_dataset = GameDataSet.objects.filter(
-            user=request.user,
-            lichess_username=username
-        ).first()
+        # Get the specific game dataset for this user
+        game_dataset = get_object_or_404(GameDataSet, id=dataset_id, user=request.user)
 
-        if not game_dataset or not game_dataset.raw_data:
-            return HttpResponse("No games data found", status=404)
+        # Verify username matches the dataset
+        if not (game_dataset.lichess_username == username or game_dataset.chess_com_username == username):
+            return HttpResponse("Username does not match dataset", status=400)
+
+        if not game_dataset.raw_data:
+            return HttpResponse("No games data found in dataset", status=404)
 
         def event_stream():
             try:
-                # Find the task for this dataset
+                # Find the task for this specific dataset
                 task = ReportGenerationTask.objects.filter(
                     user=request.user,
                     game_dataset=game_dataset
                 ).order_by('-created_at').first()
+
+                print(f"DEBUG stream_analysis_progress: Using dataset {dataset_id}, found task={task.id if task else None}")
+                if task:
+                    print(f"DEBUG stream_analysis_progress: Task dataset - Lichess: {task.game_dataset.lichess_username}, Chess.com: {task.game_dataset.chess_com_username}")
 
                 if not task:
                     # No task found, send error
@@ -592,13 +596,13 @@ def stream_analysis_progress(request, username):
                     # Send progress updates
                     if task.progress != last_progress or task.status != last_status:
                         if task.status == 'running':
-                            # Send game progress updates
+                            # Send API progress updates (format expected by frontend)
+                            # Use exact call counts stored in task fields
                             progress_data = {
-                                "type": "game_progress",
-                                "progress": task.progress,
-                                "completed_games": task.completed_games,
-                                "total_games": task.total_games,
-                                "current_game": task.current_game
+                                "type": "api_progress",
+                                "completed_calls": task.completed_games,  # Repurposed for completed_calls
+                                "total_calls": task.total_games,          # Repurposed for total_calls
+                                "current_phase": task.current_game or "Processing..."
                             }
                             yield f"data: {json.dumps(progress_data)}\n\n"
 
@@ -611,6 +615,7 @@ def stream_analysis_progress(request, username):
                 if task.status == 'completed' and task.analysis_report:
                     # Send completion data with report summary
                     report = task.analysis_report
+
                     completion_data = {
                         "type": "complete",
                         "report_id": report.id,
@@ -650,6 +655,18 @@ def get_report_data(request, report_id):
     try:
         # Get the report and verify it belongs to the user
         report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Debug: Log report details
+        print(f"DEBUG get_report_data: Fetching report {report_id}")
+        print(f"DEBUG get_report_data: Report dataset - Lichess: {report.game_dataset.lichess_username}, Chess.com: {report.game_dataset.chess_com_username}")
+        print(f"DEBUG get_report_data: Enriched games count: {len(report.enriched_games) if report.enriched_games else 0}")
+
+        if report.enriched_games and len(report.enriched_games) > 0:
+            first_game = report.enriched_games[0]
+            chess_com_data = first_game.get('chess_com_data')
+            game_source = "Chess.com" if chess_com_data else "Lichess"
+            game_id = first_game.get('id', 'unknown')
+            print(f"DEBUG get_report_data: First enriched game - Source: {game_source}, ID: {game_id}")
 
         return JsonResponse({
             'report_id': report.id,
@@ -693,42 +710,6 @@ def user_reports(request):
         enriched_reports.append(report)
 
     return render(request, 'analysis/user_reports.html', {'reports': enriched_reports})
-
-
-@login_required
-def view_report(request, report_id):
-    """View an existing analysis report"""
-    report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
-
-    # Get ALL games from raw data for display
-    all_games_raw = "No game data available"
-    try:
-        dataset = report.game_dataset
-        if dataset.raw_data:
-            lines = dataset.raw_data.strip().split('\n')
-            games = []
-            for line in lines:  # ALL games
-                if line.strip():
-                    try:
-                        games.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        continue
-            if games:
-                all_games_raw = json.dumps(games, indent=2)
-    except Exception as e:
-        all_games_raw = f"Error parsing game data: {e}"
-
-    # Get ALL enriched games for display
-    enriched_games_display = "No enriched game data available"
-    if report.enriched_games:
-        enriched_games_display = json.dumps(report.enriched_games, indent=2)
-
-    return render(request, 'analysis/report.html', {
-        'username': report.game_dataset.lichess_username,
-        'all_games_raw': all_games_raw,
-        'enriched_games': enriched_games_display,
-        'auto_start': False  # Don't auto-start streaming for existing reports
-    })
 
 
 def custom_logout(request):
@@ -829,6 +810,295 @@ def chess_com_analysis(request, username):
         'loading': True  # Indicate we're in loading state
     })
 
+def parse_pgn_moves_and_clocks(pgn_text):
+    """Extract moves and clock times from Chess.com PGN format"""
+    import re
+
+    if not pgn_text:
+        return [], []
+
+    try:
+        # Find the moves section (after headers)
+        moves_section = pgn_text.split('\n\n')[-1] if '\n\n' in pgn_text else pgn_text
+
+        # Extract moves with clock times using regex
+        # Pattern matches: 1. Nf3 {[%clk 0:04:59.8]} 1... e6 {[%clk 0:04:58.9]}
+        # Updated to handle castling (O-O, O-O-O) and other special moves
+        move_pattern = r'([O-]{2,3}|[NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](?:=[NBRQ])?[+#]?)\s*\{\[%clk\s+([0-9:\.]+)\]\}'
+        matches = re.findall(move_pattern, moves_section)
+
+        moves = []
+        clocks = []
+
+
+        for move, clock_str in matches:
+            moves.append(move)
+
+            # Convert Chess.com remaining time to centiseconds (like Lichess)
+            # Chess.com formats: "0:04:59.8", "4:41:00", "1:25:20.9"
+            # These represent REMAINING time on the clock
+            try:
+                time_parts = clock_str.split(':')
+                total_seconds = 0
+
+                if len(time_parts) == 2:
+                    # Format: "59.8" or "04:59.8" (minutes:seconds.decimals)
+                    minutes = int(time_parts[0])
+                    seconds = float(time_parts[1])
+                    total_seconds = minutes * 60 + seconds
+                elif len(time_parts) == 3:
+                    # Format: "4:41:00" (hours:minutes:seconds.decimals)
+                    hours = int(time_parts[0])
+                    minutes = int(time_parts[1])
+                    seconds = float(time_parts[2])
+                    total_seconds = hours * 3600 + minutes * 60 + seconds
+                else:
+                    # Fallback for unusual formats
+                    total_seconds = 0
+
+                # Convert remaining time to centiseconds (Lichess format expects remaining time in centiseconds)
+                total_centiseconds = int(total_seconds * 100)
+                clocks.append(total_centiseconds)
+
+            except Exception as clock_error:
+                clocks.append(0)
+
+        return moves, clocks
+
+    except Exception as e:
+        print(f"Error parsing PGN: {e}")
+        return [], []
+
+
+def extract_opening_name_from_eco_url(eco_url):
+    """Extract opening name from Chess.com ECO URL"""
+    # TODO: Map Chess.com opening URLs to proper ECO codes
+    # For now, extract the name from the URL
+    if not eco_url or not isinstance(eco_url, str):
+        return "Unknown Opening"
+
+    try:
+        # Extract from URL like "https://www.chess.com/openings/Italian-Game-Traxler-Knight-Sacrifice-Line"
+        if '/openings/' in eco_url:
+            name_part = eco_url.split('/openings/')[-1]
+            # Convert URL format to readable name
+            name = name_part.replace('-', ' ').replace('_', ' ')
+            return name
+        return "Unknown Opening"
+    except:
+        return "Unknown Opening"
+
+
+def parse_chess_com_time_control(time_control_str):
+    """Parse Chess.com time control formats into initial/increment seconds"""
+    if not time_control_str:
+        return 300, 0  # Default 5 minutes, no increment
+
+    try:
+        time_control = str(time_control_str).strip()
+
+        # Handle different Chess.com time control formats:
+
+        # Format: "180+2" (3 minutes + 2 second increment)
+        if '+' in time_control:
+            parts = time_control.split('+')
+            initial = int(parts[0])
+            increment = int(parts[1]) if len(parts) > 1 else 0
+            return initial, increment
+
+        # Format: "1/259200" (correspondence - 1 move per 259200 seconds)
+        elif '/' in time_control:
+            # This is correspondence chess - extract the time per move
+            parts = time_control.split('/')
+            if len(parts) == 2:
+                try:
+                    moves = int(parts[0])
+                    seconds_per_move = int(parts[1])
+                    # For correspondence, set initial time to time per move
+                    return seconds_per_move, 0  # No increment in correspondence
+                except ValueError:
+                    pass
+            # Fallback: set to 3 days (standard correspondence time)
+            return 259200, 0  # 3 days per move
+
+        # Format: "300" (just initial time, no increment)
+        else:
+            initial = int(time_control)
+            return initial, 0
+
+    except (ValueError, IndexError):
+        # If parsing fails, return default
+        return 300, 0
+
+
+def convert_chess_com_to_lichess_format(chess_com_game):
+    """Convert Chess.com game data to Lichess format for unified processing"""
+    try:
+        # Extract moves and clocks from PGN
+        moves_list, clocks_list = parse_pgn_moves_and_clocks(chess_com_game.get('pgn', ''))
+
+        # Convert moves list to single string
+        moves_string = ' '.join(moves_list)
+
+        # Extract opening information
+        opening_name = extract_opening_name_from_eco_url(chess_com_game.get('eco', ''))
+
+        # Parse time control
+        initial_time, increment = parse_chess_com_time_control(chess_com_game.get('time_control', '300'))
+
+        # Adjust clocks to match Lichess format
+        if clocks_list:
+            # Calculate starting time in centiseconds (like Lichess: initial + increment)
+            starting_time_cs = (initial_time + increment) * 100
+
+            # Check if this is a correspondence game (very long time controls)
+            is_correspondence = initial_time >= 86400  # 24 hours or more
+
+            if is_correspondence:
+                # For correspondence games, Chess.com clocks don't represent real time pressure
+                # Generate reasonable clock values: start with full time, slight decreases
+                adjusted_clocks = []
+                for i in range(len(clocks_list)):
+                    # Both players start with full time, then slight random decreases
+                    # to simulate the fact that correspondence players don't run out of time
+                    time_remaining = starting_time_cs - (i * 100)  # Small decrease per move
+                    adjusted_clocks.append(max(time_remaining, starting_time_cs * 0.95))
+                clocks_list = adjusted_clocks
+            else:
+                # For regular games, ensure both players start with initial + increment time
+                # but preserve the actual Chess.com remaining time patterns
+                if len(clocks_list) >= 2:
+                    # Ensure first moves start with reasonable time
+                    if clocks_list[0] < starting_time_cs * 0.5:
+                        clocks_list[0] = starting_time_cs
+                    if clocks_list[1] < starting_time_cs * 0.5:
+                        clocks_list[1] = starting_time_cs
+
+        # Determine winner
+        white_result = chess_com_game.get('white', {}).get('result', '')
+        black_result = chess_com_game.get('black', {}).get('result', '')
+
+        winner = None
+        if white_result == 'win':
+            winner = 'white'
+        elif black_result == 'win':
+            winner = 'black'
+
+        # Create Lichess-compatible format
+        lichess_format = {
+            # Lichess-compatible fields
+            "id": chess_com_game.get('uuid', ''),
+            "rated": chess_com_game.get('rated', True),
+            "variant": "standard",
+            "speed": chess_com_game.get('time_class', 'blitz'),  # chess.com: blitz, bullet, rapid
+            "perf": chess_com_game.get('time_class', 'blitz'),
+            "createdAt": int(chess_com_game.get('end_time', 0)) * 1000,  # Convert to milliseconds
+            "lastMoveAt": int(chess_com_game.get('end_time', 0)) * 1000,  # Use end_time as approximation
+            "status": "mate" if "checkmate" in chess_com_game.get('white', {}).get('result', '') or
+                             "checkmate" in chess_com_game.get('black', {}).get('result', '') else "resign",
+            "source": "pool",  # Default for Chess.com
+            "players": {
+                "white": {
+                    "user": {
+                        "name": chess_com_game.get('white', {}).get('username', ''),
+                        "id": chess_com_game.get('white', {}).get('username', '').lower()
+                    },
+                    "rating": chess_com_game.get('white', {}).get('rating', 0),
+                    "ratingDiff": 0  # Chess.com doesn't provide this easily
+                },
+                "black": {
+                    "user": {
+                        "name": chess_com_game.get('black', {}).get('username', ''),
+                        "id": chess_com_game.get('black', {}).get('username', '').lower()
+                    },
+                    "rating": chess_com_game.get('black', {}).get('rating', 0),
+                    "ratingDiff": 0  # Chess.com doesn't provide this easily
+                }
+            },
+            "winner": winner,
+            "opening": {
+                "eco": "Unknown",  # TODO: Map Chess.com URLs to ECO codes
+                "name": opening_name,
+                "ply": 0  # TODO: Calculate from moves
+            },
+            "moves": moves_string,
+            "clocks": clocks_list,
+            "clock": {
+                "initial": initial_time,
+                "increment": increment,
+                "totalTime": initial_time + increment  # Approximate total time
+            },
+
+            # Preserve Chess.com specific data
+            "chess_com_data": {
+                "url": chess_com_game.get('url', ''),
+                "pgn": chess_com_game.get('pgn', ''),
+                "time_control": chess_com_game.get('time_control', ''),
+                "end_time": chess_com_game.get('end_time', 0),
+                "uuid": chess_com_game.get('uuid', ''),
+                "initial_setup": chess_com_game.get('initial_setup', ''),
+                "fen": chess_com_game.get('fen', ''),
+                "time_class": chess_com_game.get('time_class', ''),
+                "rules": chess_com_game.get('rules', 'chess'),
+                "eco_url": chess_com_game.get('eco', ''),
+                "accuracies": chess_com_game.get('accuracies', {})
+            }
+        }
+
+        return lichess_format
+
+    except Exception as e:
+        print(f"Error converting Chess.com game to Lichess format: {e}")
+        # Return minimal format to prevent crashes
+        return {
+            "id": chess_com_game.get('uuid', 'unknown'),
+            "error": f"Conversion failed: {str(e)}",
+            "chess_com_data": chess_com_game
+        }
+
+
+def convert_chess_com_game_to_dict(game):
+    """Convert Chess.com game object to dictionary format"""
+    white_data = getattr(game, 'white', None) or {}
+    black_data = getattr(game, 'black', None) or {}
+
+    game_data = {
+        'url': getattr(game, 'url', ''),
+        'pgn': getattr(game, 'pgn', ''),
+        'time_control': str(getattr(game, 'time_control', '')),
+        'end_time': getattr(game, 'end_time', 0),
+        'rated': getattr(game, 'rated', True),
+        'uuid': getattr(game, 'uuid', ''),
+        'initial_setup': getattr(game, 'initial_setup', ''),
+        'fen': getattr(game, 'fen', ''),
+        'time_class': getattr(game, 'time_class', ''),
+        'rules': getattr(game, 'rules', 'chess'),
+        'white': {
+            'rating': getattr(white_data, 'rating', 0),
+            'result': getattr(white_data, 'result', ''),
+            'username': getattr(white_data, 'username', ''),
+            'uuid': getattr(white_data, 'uuid', '')
+        },
+        'black': {
+            'rating': getattr(black_data, 'rating', 0),
+            'result': getattr(black_data, 'result', ''),
+            'username': getattr(black_data, 'username', ''),
+            'uuid': getattr(black_data, 'uuid', '')
+        },
+        'eco': getattr(game, 'eco', '')
+    }
+
+    # Add accuracies if available
+    accuracies = getattr(game, 'accuracies', None)
+    if accuracies:
+        game_data['accuracies'] = {
+            'white': getattr(accuracies, 'white', 0),
+            'black': getattr(accuracies, 'black', 0)
+        }
+
+    return game_data
+
+
 @login_required
 def fetch_chess_com_games(request, username):
     """AJAX endpoint to fetch Chess.com games asynchronously"""
@@ -836,6 +1106,13 @@ def fetch_chess_com_games(request, username):
     profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
 
     try:
+        # Get max_games from request (default to analysis setting)
+        max_games = int(request.GET.get('max_games', ANALYSIS_GAME_COUNT))
+
+        # Validate max_games to prevent abuse
+        if max_games < 1 or max_games > 1000:
+            max_games = ANALYSIS_GAME_COUNT
+
         # Configure User-Agent for chess.com API
         Client.request_config["headers"]["User-Agent"] = (
             "Learn Chess Like a Computer - Chess Analysis Tool. "
@@ -851,17 +1128,17 @@ def fetch_chess_com_games(request, username):
                 'error': 'No game archives found for this Chess.com account.'
             })
 
-        # Smart fetching strategy to minimize API calls while getting 50 games
+        # Smart fetching strategy to minimize API calls while getting the requested number of games
         all_games = []
         total_fetched = 0
-        max_api_calls = 10  # Limit to prevent hitting rate limits
+        max_api_calls = min(20, max_games // 20 + 5)  # Scale API calls based on requested games
         api_calls_made = 0
 
         # Start from most recent and work backwards
         archives_to_check = list(reversed(archives_response.archives))
 
         for archive_url in archives_to_check:
-            if total_fetched >= 50 or api_calls_made >= max_api_calls:
+            if total_fetched >= max_games or api_calls_made >= max_api_calls:
                 break
 
             # Extract year and month from URL
@@ -877,7 +1154,7 @@ def fetch_chess_com_games(request, username):
                     games_in_month = len(games_response.games)
 
                     # Add games to our collection (most recent first)
-                    games_to_add = min(games_in_month, 50 - total_fetched)
+                    games_to_add = min(games_in_month, max_games - total_fetched)
                     for i in range(games_to_add):
                         all_games.append(games_response.games[i])
                         total_fetched += 1
@@ -909,87 +1186,41 @@ def fetch_chess_com_games(request, username):
                 'error': 'No games found in recent archives.'
             })
 
-        # Convert games to NDJSON format similar to Lichess and track date range
+        # Convert games to NDJSON format and convert to standard format
         ndjson_lines = []
-        oldest_date = None
-        newest_date = None
+        games_dict_format = []
 
         for game in all_games:
-            # Chess.com API returns Game objects, access attributes directly
             try:
-                # Extract and track date from Chess.com game
-                end_time = getattr(game, 'end_time', 0)
-                if end_time > 0:
-                    game_date = datetime.fromtimestamp(end_time, tz=timezone.utc)
-                    if newest_date is None or game_date > newest_date:
-                        newest_date = game_date
-                    if oldest_date is None or game_date < oldest_date:
-                        oldest_date = game_date
-
-                # Convert Chess.com game format to a compatible format
-                white_data = getattr(game, 'white', None) or {}
-                black_data = getattr(game, 'black', None) or {}
-
-                game_data = {
-                    'url': getattr(game, 'url', ''),
-                    'pgn': getattr(game, 'pgn', ''),
-                    'time_control': str(getattr(game, 'time_control', '')),
-                    'end_time': getattr(game, 'end_time', 0),
-                    'rated': getattr(game, 'rated', True),
-                    'uuid': getattr(game, 'uuid', ''),
-                    'initial_setup': getattr(game, 'initial_setup', ''),
-                    'fen': getattr(game, 'fen', ''),
-                    'time_class': getattr(game, 'time_class', ''),
-                    'rules': getattr(game, 'rules', 'chess'),
-                    'white': {
-                        'rating': getattr(white_data, 'rating', 0),
-                        'result': getattr(white_data, 'result', ''),
-                        'username': getattr(white_data, 'username', ''),
-                        'uuid': getattr(white_data, 'uuid', '')
-                    },
-                    'black': {
-                        'rating': getattr(black_data, 'rating', 0),
-                        'result': getattr(black_data, 'result', ''),
-                        'username': getattr(black_data, 'username', ''),
-                        'uuid': getattr(black_data, 'uuid', '')
-                    },
-                    'eco': getattr(game, 'eco', '')
-                }
-
-                # Add accuracies if available
-                accuracies = getattr(game, 'accuracies', None)
-                if accuracies:
-                    game_data['accuracies'] = {
-                        'white': getattr(accuracies, 'white', 0),
-                        'black': getattr(accuracies, 'black', 0)
-                    }
+                game_data = convert_chess_com_game_to_dict(game)
+                games_dict_format.append(game_data)
+                ndjson_lines.append(json.dumps(game_data))
             except Exception as e:
                 print(f"Error processing game: {e}")
                 continue
 
-            ndjson_lines.append(json.dumps(game_data))
-
         ndjson_data = '\n'.join(ndjson_lines)
 
-        # Create GameDataSet for Chess.com
-        game_dataset = GameDataSet.objects.create(
+        # Create GameDataSet using shared utility
+        game_dataset = create_game_dataset(
             user=request.user,
-            lichess_username='',  # Empty for chess.com datasets
-            chess_com_username=username,
-            total_games=len(all_games),
-            raw_data=ndjson_data,
-            oldest_game_date=oldest_date,
-            newest_game_date=newest_date
+            username=username,
+            games_data=all_games,  # Use raw Chess.com objects for date extraction
+            ndjson_data=ndjson_data,
+            platform='chess.com'
         )
 
-        # Format date range for display
-        date_range_str = game_dataset.date_range_display if oldest_date and newest_date else "Date range unavailable"
+        # Format date range using shared utility
+        date_range_str = format_date_range_for_display(
+            game_dataset.oldest_game_date,
+            game_dataset.newest_game_date
+        )
 
         return JsonResponse({
             'success': True,
             'games_count': len(all_games),
             'game_dataset_id': game_dataset.id,
-            'date_range': date_range_str,
+            'date_range': date_range_str or "Date range unavailable",
             'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
             'data_size': len(ndjson_data)
         })
@@ -1000,6 +1231,12 @@ def fetch_chess_com_games(request, username):
             'success': False,
             'error': str(e)
         })
+
+
+@login_required
+def generate_chess_com_analysis_report(request, username, dataset_id):
+    """Generate Chess.com analysis report using unified template (DEPRECATED - use generate_analysis_report)"""
+    return _generate_unified_analysis_report(request, username, dataset_id)
 
 
 @login_required

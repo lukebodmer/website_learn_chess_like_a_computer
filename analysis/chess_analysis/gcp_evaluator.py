@@ -297,11 +297,87 @@ class GCPStockfishClient:
 
         return all_results
 
-    def evaluate_positions_parallel(
+    def evaluate_positions_parallel_streaming(
         self,
         positions: List[str],
         depth: int = 20,
         max_concurrent: int = 20
+    ):
+        """
+        Generator that evaluates positions in parallel and yields progress updates
+
+        Args:
+            positions: List of FEN strings to evaluate
+            depth: Stockfish search depth
+            max_concurrent: Maximum number of concurrent requests
+
+        Yields:
+            Progress updates and final results
+        """
+        if not positions:
+            return {}
+
+        if len(positions) == 1:
+            result = self.evaluate_positions_batch(positions, depth)
+            yield {"type": "progress", "completed": 1, "total": 1}
+            yield {"type": "complete", "results": result}
+            return
+
+        logger.info(f"Parallel streaming evaluation of {len(positions)} positions with max {max_concurrent} concurrent requests")
+
+        import concurrent.futures
+
+        start_time = time.time()
+        results = {}
+
+        # Use ThreadPoolExecutor for concurrent HTTP requests
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent) as executor:
+            # Submit all positions as individual requests
+            future_to_position = {
+                executor.submit(self.evaluate_single_position_async, position, depth): position
+                for position in positions
+            }
+
+            completed = 0
+            for future in concurrent.futures.as_completed(future_to_position):
+                position = future_to_position[future]
+                try:
+                    result = future.result()
+                    if position in result:
+                        results[position] = result[position]
+                    else:
+                        results[position] = {"error": "Position not found in response"}
+
+                except Exception as e:
+                    logger.error(f"Parallel evaluation failed for {position}: {e}")
+                    results[position] = {"error": f"Evaluation failed: {str(e)}"}
+
+                completed += 1
+
+                # Yield progress update for every completed evaluation
+                yield {
+                    "type": "progress",
+                    "completed": completed,
+                    "total": len(positions)
+                }
+
+                if completed % 10 == 0 or completed == len(positions):
+                    logger.info(f"Parallel evaluation progress: {completed}/{len(positions)}")
+
+        elapsed = time.time() - start_time
+        success_count = len([r for r in results.values() if "error" not in r])
+
+        logger.info(f"Parallel evaluation complete in {elapsed:.2f}s - {success_count}/{len(positions)} successful")
+        print(f"🚀 PARALLEL: {len(positions)} positions in {elapsed:.2f}s ({elapsed/len(positions):.2f}s per position)")
+
+        yield {"type": "complete", "results": results}
+
+    def evaluate_positions_parallel(
+        self,
+        positions: List[str],
+        depth: int = 20,
+        max_concurrent: int = 20,
+        progress_callback=None
     ) -> Dict[str, Dict]:
         """
         Evaluate positions in parallel using individual API calls for maximum throughput
@@ -310,6 +386,7 @@ class GCPStockfishClient:
             positions: List of FEN strings to evaluate
             depth: Stockfish search depth
             max_concurrent: Maximum number of concurrent requests
+            progress_callback: Optional callback function called with (completed, total)
 
         Returns:
             Dict mapping FEN to evaluation result
@@ -352,6 +429,10 @@ class GCPStockfishClient:
                 completed += 1
                 if completed % 10 == 0 or completed == len(positions):
                     logger.info(f"Parallel evaluation progress: {completed}/{len(positions)}")
+
+                # Call progress callback if provided
+                if progress_callback:
+                    progress_callback(completed, len(positions))
 
         elapsed = time.time() - start_time
         success_count = len([r for r in results.values() if "error" not in r])

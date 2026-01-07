@@ -73,9 +73,19 @@ class GameEnricher:
             existing_analysis = raw_json.get("analysis", [])
             # A game has sufficient analysis if it has analysis for most moves
             # analysis array should be roughly equal to number of moves
-            if len(existing_analysis) >= len(moves) * 0.8:
-                game_data.append({"skipped": "Game already has analysis", "positions": []})
-                continue
+
+            chess_com_data = raw_json.get("chess_com_data")
+
+
+            #if len(existing_analysis) >= len(moves) * 0.8:
+            #    # TEMPORARY DEBUG: Force Chess.com games to be processed anyway
+            #    if chess_com_data:
+            #        pass
+            #    else:
+            #        game_data.append({"skipped": "Game already has analysis", "positions": []})
+            #        continue
+            #else:
+            #    pass
 
             # Generate positions for this game
             game_positions = self.generate_positions_for_game(moves)
@@ -385,81 +395,99 @@ class GameEnricher:
         return mistakes
 
     def enrich_games_with_stockfish_streaming(self, username: str):
-        """Generator that yields individual game analysis results as they complete"""
+        """Generator that yields API call progress updates"""
         games_needing_analysis = self._find_games_needing_analysis(username)
         total_games = len(games_needing_analysis)
 
-        # DEBUG: Save original data before enrichment
-        if games_needing_analysis:
-            self._debug_save_enrichment_data(games_needing_analysis, "streaming_before_enrichment")
-
-        yield {
-            "type": "init",
-            "total_games": total_games,
-            "games_found": total_games
-        }
 
         if not games_needing_analysis:
+            yield {
+                "type": "init",
+                "total_positions": 0,
+                "message": f"No analysis needed - {total_games} games already have complete analysis"
+            }
             return
 
         # Process all games needing analysis
         selected_games = games_needing_analysis
 
-        # Start concurrent processing for all games
-        import concurrent.futures
-        import threading
+        # Step 1: Collect all game data and unique positions for progress tracking
+        unique_positions, game_data_list = self.collect_all_game_data(selected_games)
 
-        # Create shared GCP client to avoid auth token conflicts
-        gcp_client = GCPStockfishClient()
+        if not unique_positions:
+            yield {
+                "type": "init",
+                "total_games": total_games,
+                "games_found": total_games
+            }
+            return
 
-        # Use ThreadPoolExecutor to process games concurrently (reduced to avoid API overload)
-        max_workers = min(3, len(selected_games))  # Scale with number of games, max 3
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all games for processing simultaneously
-            future_to_game = {}
-            for i, game in enumerate(selected_games):
-                yield {
-                    "type": "game_start",
-                    "game_index": i + 1,
-                    "total_games": len(selected_games),
-                    "game_info": {
-                        "white_player": game["white_player"],
-                        "black_player": game["black_player"],
-                        "opening": game["opening"]
-                    }
-                }
+        total_positions = len(unique_positions)
 
-                future = executor.submit(self._process_single_game_with_shared_client, game, username, gcp_client)
-                future_to_game[future] = (i + 1, game)
+        yield {
+            "type": "init",
+            "total_positions": total_positions,
+            "message": f"Found {total_games} games with {total_positions} positions to evaluate"
+        }
 
-            # Yield results as they complete
-            for future in concurrent.futures.as_completed(future_to_game):
-                game_index, game = future_to_game[future]
+        # Step 2: Database lookups (fast, no progress tracking needed)
+        db_evaluator = DatabaseEvaluator()
+        db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
 
-                try:
-                    game_result = future.result()
+        # Step 3: GCP API calls with progress tracking
+        positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
+        completed_api_calls = len(db_results)  # Database hits count as "completed"
 
+        yield {
+            "type": "api_progress",
+            "completed_calls": completed_api_calls,
+            "total_calls": total_positions,
+            "current_phase": f"Database: {len(db_results)} hits, {len(positions_for_gcp)} API calls needed"
+        }
+
+        gcp_results = {}
+        if positions_for_gcp:
+            # Use the GCP client with streaming progress tracking
+            gcp_client = GCPStockfishClient()
+
+            # Process all positions with real-time progress updates
+            for update in gcp_client.evaluate_positions_parallel_streaming(
+                positions_for_gcp,
+                depth=24,
+                max_concurrent=15
+            ):
+                if update["type"] == "progress":
+                    completed_api_calls = len(db_results) + update["completed"]
                     yield {
-                        "type": "game_complete",
-                        "game_index": game_index,
-                        "total_games": len(selected_games),
-                        "analysis_result": game_result,
-                        "enriched_game": game
+                        "type": "api_progress",
+                        "completed_calls": completed_api_calls,
+                        "total_calls": total_positions,
+                        "current_phase": f"Stockfish API: {update['completed']}/{len(positions_for_gcp)} positions evaluated"
                     }
+                elif update["type"] == "complete":
+                    gcp_results = update["results"]
 
-                except Exception as e:
-                    yield {
-                        "type": "game_error",
-                        "game_index": game_index,
-                        "total_games": len(selected_games),
-                        "error": str(e)
-                    }
+        # Step 4: Build analysis for each game using global evaluations
+        global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
 
-        # DEBUG: Save enriched data after streaming processing
-        self._debug_save_enrichment_data(selected_games, "streaming_after_enrichment")
+        yield {
+            "type": "api_progress",
+            "completed_calls": total_positions,
+            "total_calls": total_positions,
+            "current_phase": "Building game analysis..."
+        }
 
-        # DEBUG: Save the complete enriched games data as it would appear in the report
-        self._debug_save_complete_report_data(selected_games, "complete_enriched_games")
+        # Process each game with the global evaluations
+        for i, game_data in enumerate(game_data_list):
+            if "error" not in game_data and "skipped" not in game_data:
+                analysis_result = self.build_single_game_analysis(game_data, global_evaluations)
+
+                if "error" not in analysis_result and "skipped" not in analysis_result:
+                    # Create the analysis array and inject user stats
+                    self._create_game_analysis_array(analysis_result["game"], analysis_result)
+                    analyzer = HybridStockfishAnalyzer()
+                    self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
+
 
         yield {"type": "complete"}
 
@@ -486,15 +514,6 @@ class GameEnricher:
         # Merge all evaluation sources
         global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
 
-        # DEBUG: Show evaluation source breakdown
-        print(f"DEBUG EVALUATION SOURCES (streaming):")
-        print(f"  Database results: {len(db_results)} positions")
-        print(f"  GCP results: {len(gcp_results)} positions")
-        print(f"  Total global evaluations: {len(global_evaluations)} positions")
-        if global_evaluations:
-            sample_pos = list(global_evaluations.keys())[0]
-            sample_eval = global_evaluations[sample_pos]
-            print(f"  Sample evaluation: {sample_eval.get('evaluation')} from {sample_eval.get('source')}")
 
         # Build analysis for this specific game using global evaluations
         analysis_result = self.build_single_game_analysis(game_data, global_evaluations)
@@ -566,11 +585,7 @@ class GameEnricher:
 
         # Step 1: Find games needing analysis
         games_needing_analysis = self._find_games_needing_analysis(username)
-        print(f"Found {len(games_needing_analysis)} games needing analysis")
 
-        # DEBUG: Save original data before enrichment
-        if games_needing_analysis:
-            self._debug_save_enrichment_data(games_needing_analysis, "before_enrichment")
 
         try:
             # Process all games needing analysis
@@ -579,17 +594,14 @@ class GameEnricher:
             if not selected_games:
                 return enrichment_results
 
-            print(f"Starting optimized batch analysis for {len(selected_games)} games...")
 
             # Step 2: Collect all game data and unique positions (new architecture)
             unique_positions, game_data_list = self.collect_all_game_data(selected_games)
 
             if not unique_positions:
-                print("No positions found to analyze")
                 return enrichment_results
 
             # Step 3: Batch query database for ALL unique positions
-            print(f"Batch querying database for {len(unique_positions)} unique positions...")
             db_evaluator = DatabaseEvaluator()
             db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
 
@@ -597,7 +609,6 @@ class GameEnricher:
             positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
             gcp_results = {}
             if positions_for_gcp:
-                print(f"Parallel querying GCP for {len(positions_for_gcp)} positions...")
                 gcp_client = GCPStockfishClient()
                 gcp_results = gcp_client.evaluate_positions_parallel(positions_for_gcp, depth=24, max_concurrent=15)
 
@@ -612,12 +623,9 @@ class GameEnricher:
                 if "error" in game_data or "skipped" in game_data:
                     if "error" in game_data:
                         enrichment_results["analysis_errors"] += 1
-                        print(f"Game {i+1} error: {game_data['error']}")
                     else:
                         enrichment_results["games_skipped"] += 1
                     continue
-
-                print(f"Processing game {i+1}/{len(game_data_list)}")
                 enrichment_results["total_games_analyzed"] += 1
 
                 # Build analysis for this specific game
@@ -658,10 +666,7 @@ class GameEnricher:
                 # Store detailed analysis for debugging
                 game["stockfish_analysis"] = analysis_result
 
-            print(f"Batch analysis complete: {total_db_count} database hits, {total_gcp_count} GCP evaluations")
 
-            # DEBUG: Save enriched data after processing
-            self._debug_save_enrichment_data(selected_games, "after_enrichment")
 
         except Exception as e:
             enrichment_results["error"] = f"Stockfish analysis failed: {str(e)}"
@@ -672,7 +677,8 @@ class GameEnricher:
         """Find games without comprehensive analysis"""
         games_needing_analysis = []
 
-        for game in self.games:
+
+        for i, game in enumerate(self.games):
             is_user = (
                 game["white_player"].lower() == username.lower()
                 or game["black_player"].lower() == username.lower()
@@ -684,6 +690,9 @@ class GameEnricher:
             raw_json = game.get("raw_json", {})
             players_data = raw_json.get("players", {})
             user_has_accuracy = False
+
+            chess_com_data = raw_json.get("chess_com_data")
+
 
             if (
                 game["white_player"].lower() == username.lower()
@@ -700,6 +709,7 @@ class GameEnricher:
 
             if not user_has_accuracy:
                 games_needing_analysis.append(game)
+
 
         return games_needing_analysis
 
@@ -808,34 +818,12 @@ class GameEnricher:
 
         accuracy_calculator = LichessAccuracyCalculator()
 
-        # DEBUG: Print evaluation values to see what we're working with
-        print(f"DEBUG: Evaluation values for accuracy calculation: {eval_values[:10]}...")  # First 10 values
-        print(f"DEBUG: Total evaluations: {len(eval_values)}")
-        print(f"DEBUG: White mistakes: {len(white_mistakes)}, Black mistakes: {len(black_mistakes)}")
 
-        # DEBUG: Check if mistakes are detected with large eval swings
-        if len(white_mistakes) > 5 or len(black_mistakes) > 5:
-            print("DEBUG: Many mistakes detected, but checking if eval swings are captured...")
-            # Check consecutive eval differences
-            big_swings = []
-            for i in range(1, len(eval_values)):
-                diff = abs(eval_values[i] - eval_values[i-1])
-                if diff > 200:  # Should be blunder-level
-                    big_swings.append(f"Move {i}: {eval_values[i-1]} → {eval_values[i]} (swing: {diff})")
-
-            if big_swings:
-                print(f"DEBUG: Found {len(big_swings)} large eval swings:")
-                for swing in big_swings[:5]:  # Show first 5
-                    print(f"  {swing}")
-            else:
-                print("DEBUG: WARNING - No large eval swings found despite many mistakes!")
-                print(f"DEBUG: Max eval swing: {max(abs(eval_values[i] - eval_values[i-1]) for i in range(1, len(eval_values))) if len(eval_values) > 1 else 0}")
 
         # Calculate accuracy for both White and Black
         white_accuracy = accuracy_calculator.calculate_game_accuracy(eval_values, "white") or 0.0
         black_accuracy = accuracy_calculator.calculate_game_accuracy(eval_values, "black") or 0.0
 
-        print(f"DEBUG: Calculated accuracies - White: {white_accuracy}%, Black: {black_accuracy}%")
 
         # Calculate ACPL for both players
         white_acpl = accuracy_calculator.calculate_acpl(eval_values, "white")
@@ -882,96 +870,4 @@ class GameEnricher:
 
         game["raw_json"] = raw_json
 
-        print(f"Injected analysis for both players:")
-        print(f"  White: accuracy={white_accuracy}%, acpl={white_acpl}, "
-              f"inaccuracies={white_inaccuracies}, mistakes={white_mistakes_count}, blunders={white_blunders}")
-        print(f"  Black: accuracy={black_accuracy}%, acpl={black_acpl}, "
-              f"inaccuracies={black_inaccuracies}, mistakes={black_mistakes_count}, blunders={black_blunders}")
 
-    def _debug_save_enrichment_data(self, games_data: List[Dict], prefix: str = "debug"):
-        """Save enrichment data for debugging purposes"""
-        import json
-        import time
-
-        timestamp = int(time.time())
-        filename = f"{prefix}_enriched_data_{timestamp}.json"
-
-        # Create a simplified version for debugging
-        debug_data = []
-        for game in games_data:  # Save ALL games
-            raw_json = game.get("raw_json", {})
-            analysis_array = raw_json.get("analysis", [])
-
-            # Show first 10 moves of analysis for debugging
-            first_analysis_moves = []
-            for i, analysis_entry in enumerate(analysis_array[:10]):
-                first_analysis_moves.append({
-                    "move_index": i,
-                    "eval": analysis_entry.get("eval"),
-                    "mate": analysis_entry.get("mate"),
-                    "best": analysis_entry.get("best")
-                })
-
-            debug_game = {
-                "game_id": raw_json.get("id", "unknown"),
-                "white_player": game.get("white_player"),
-                "black_player": game.get("black_player"),
-                "moves": raw_json.get("moves", ""),
-                "moves_list": raw_json.get("moves", "").split()[:10] if raw_json.get("moves") else [],
-                "first_10_analysis": first_analysis_moves,
-                "analysis_count": len(analysis_array),
-                "enrichment_data": game.get("stockfish_analysis", {}),
-                "players_accuracy": raw_json.get("players", {})
-            }
-            debug_data.append(debug_game)
-
-        try:
-            with open(filename, 'w') as f:
-                json.dump(debug_data, f, indent=2)
-            print(f"DEBUG: Saved enrichment data to {filename} ({len(debug_data)} games)")
-
-            # Also print a quick summary for immediate debugging
-            if debug_data:
-                game = debug_data[0]
-                print(f"DEBUG SUMMARY for game {game['game_id']}:")
-                print(f"  Moves: {game['moves_list']}")
-                print(f"  Analysis entries: {game['analysis_count']}")
-                if game['first_10_analysis']:
-                    print("  First 5 evaluations:")
-                    for i, entry in enumerate(game['first_10_analysis'][:5]):
-                        print(f"    Move {i+1}: eval={entry['eval']}, mate={entry['mate']}")
-
-        except Exception as e:
-            print(f"DEBUG: Failed to save enrichment data: {e}")
-
-    def _debug_save_complete_report_data(self, games_data: List[Dict], prefix: str = "complete"):
-        """Save complete games data as it appears in the report"""
-        import json
-        import time
-
-        timestamp = int(time.time())
-
-        # Save complete enriched games data (first 10 as shown in report)
-        enriched_filename = f"{prefix}_enriched_games_{timestamp}.json"
-        try:
-            # Extract the complete raw_json for each game (this is what goes to the report)
-            enriched_games_for_report = []
-            for game in games_data:  # ALL games, not just first 10
-                enriched_games_for_report.append(game.get("raw_json", {}))
-
-            with open(enriched_filename, 'w') as f:
-                json.dump(enriched_games_for_report, f, indent=2)
-            print(f"DEBUG: Saved complete enriched games data to {enriched_filename} ({len(enriched_games_for_report)} games)")
-
-            # Show analysis array samples
-            if enriched_games_for_report:
-                game = enriched_games_for_report[0]
-                analysis = game.get("analysis", [])
-                print(f"DEBUG: First enriched game {game.get('id', 'unknown')} has {len(analysis)} analysis entries")
-                if analysis:
-                    print("First 5 analysis entries:")
-                    for i, entry in enumerate(analysis[:5]):
-                        print(f"  [{i}]: eval={entry.get('eval')}, mate={entry.get('mate')}")
-
-        except Exception as e:
-            print(f"DEBUG: Failed to save complete enriched games data: {e}")

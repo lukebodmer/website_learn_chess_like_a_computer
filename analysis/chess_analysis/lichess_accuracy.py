@@ -43,11 +43,8 @@ class LichessAccuracyCalculator:
         Returns:
             Game accuracy percentage (0-100) or None if calculation fails
         """
-        print(f"DEBUG LICHESS CALC: Starting accuracy calculation for {player_color}")
-        print(f"DEBUG LICHESS CALC: Input evaluations: {evaluations[:10]}... (showing first 10)")
 
         if len(evaluations) < 2:  # Need at least 2 evaluations for meaningful calculation
-            print(f"DEBUG LICHESS CALC: Too few evaluations ({len(evaluations)}), returning None")
             return None
 
         # Step 1: Convert all evaluations to Win%, prepending initial position (like Lichess)
@@ -69,8 +66,6 @@ class LichessAccuracyCalculator:
         player_move_accuracies = []
         player_weighted_accuracies = []
 
-        print(f"DEBUG LICHESS CALC: Processing {len(win_percents)} win percentages for {player_color}")
-        print(f"DEBUG LICHESS CALC: Win percentages: {win_percents[:10]}... (first 10)")
 
         for i in range(len(win_percents) - 1):
             if not self._is_player_move(i + 1, player_color):
@@ -90,10 +85,6 @@ class LichessAccuracyCalculator:
             # Calculate move accuracy
             move_acc = self._move_accuracy_from_win_percents(win_before, win_after)
 
-            # DEBUG: Show a few move calculations
-            if len(player_move_accuracies) < 5:
-                win_loss = win_before - win_after
-                print(f"DEBUG LICHESS CALC: Move {i+1} ({player_color}): {win_before:.1f}% → {win_after:.1f}% (loss: {win_loss:.1f}%) → accuracy: {move_acc:.1f}%")
 
             # Store for harmonic mean
             player_move_accuracies.append(move_acc)
@@ -102,10 +93,6 @@ class LichessAccuracyCalculator:
             if i < len(weights):
                 player_weighted_accuracies.append((move_acc, weights[i]))
 
-        print(f"DEBUG LICHESS CALC: Found {len(player_move_accuracies)} moves for {player_color}")
-        if player_move_accuracies:
-            print(f"DEBUG LICHESS CALC: Move accuracies: {player_move_accuracies[:10]}... (first 10)")
-            print(f"DEBUG LICHESS CALC: Average move accuracy: {sum(player_move_accuracies)/len(player_move_accuracies):.1f}%")
 
         if not player_move_accuracies:
             return None

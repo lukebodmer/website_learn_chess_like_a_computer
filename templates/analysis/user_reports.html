@@ -24,7 +24,7 @@
     <p>Here are all your chess analysis reports:</p>
 
     {% for report in reports %}
-    <a href="{% url 'analysis:view_report' report.id %}" class="report-card">
+    <a href="{% url 'analysis:generate_report' report.username report.game_dataset.id %}" class="report-card">
         <div class="report-stats-inline">
             <div>
                 <strong>{{ report.username }}</strong>

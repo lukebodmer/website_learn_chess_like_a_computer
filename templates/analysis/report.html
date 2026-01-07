@@ -1,24 +1,38 @@
 {% extends 'base.html' %}
 
-{% block title %}Analysis Report for {{ username }} - Chess Analysis{% endblock %}
+{% block title %}
+{% if platform == 'chess.com' %}
+Chess.com Analysis Report for {{ username }} - Chess Analysis
+{% else %}
+Lichess Analysis Report for {{ username }} - Chess Analysis
+{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="simple-report">
-    <h1>Data Dump for {{ username }}</h1>
+    {% load static %}
+    <div class="report-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+        {% if platform == 'chess.com' %}
+            <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" style="height: 40px; width: auto;">
+            <h1>Chess.com Analysis Report for {{ username }}</h1>
+        {% else %}
+            <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" style="height: 40px; width: auto;">
+            <h1>Lichess Analysis Report for {{ username }}</h1>
+        {% endif %}
+    </div>
 
     {% if auto_start %}
-    <!-- Analysis Progress Section (only shown for new report generation) -->
+    <!-- Analysis Progress Section -->
     <div id="analysis-progress" style="margin: 20px 0; padding: 20px; border-left: 4px solid #007bff;">
         <h2>🔄 Analysis Progress</h2>
         <div id="progress-status">Initializing analysis...</div>
         <div id="progress-bar" style="background: #e0e0e0; height: 20px; border-radius: 10px; margin: 10px 0;">
             <div id="progress-fill" style="background: #007bff; height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s;"></div>
         </div>
-        <div id="current-game"></div>
     </div>
     {% endif %}
 
-    <h2>Raw Lichess Data (All Games):</h2>
+    <h2>Raw Game Data (All Games):</h2>
     <pre style="background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ all_games_raw|safe }}</pre>
 
     <h2>Enriched Games Data:</h2>
@@ -27,19 +41,18 @@
 
 <script>
 let eventSource;
-let totalGames = 0;
-let completedGames = 0;
 
 function startStreaming() {
     const username = "{{ username }}";
 
-    // Reset data
-    completedGames = 0;
-
     document.getElementById('progress-status').innerText = 'Connecting to analysis monitor...';
 
     // Start Server-Sent Events to monitor background task
-    eventSource = new EventSource(`/stream-analysis/${username}/`);
+    const platform = "{{ platform|default:'lichess' }}";
+    const datasetId = "{{ dataset_id }}";
+    const streamUrl = `/stream-analysis/${username}/${datasetId}/`;
+
+    eventSource = new EventSource(streamUrl);
 
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
@@ -62,50 +75,37 @@ document.addEventListener('DOMContentLoaded', function() {
 function handleAnalysisUpdate(data) {
     const progressStatus = document.getElementById('progress-status');
     const progressFill = document.getElementById('progress-fill');
-    const currentGame = document.getElementById('current-game');
 
     switch (data.type) {
         case 'init':
-            totalGames = data.total_games;
-            progressStatus.innerText = `Task started - ${data.task_status}`;
-            if (data.total_games !== "calculating...") {
-                progressStatus.innerText += ` - ${data.total_games} games to analyze`;
+            if (data.task_status) {
+                // From task monitoring
+                progressStatus.innerText = `Task started - ${data.task_status}`;
+            } else if (data.message) {
+                // From streaming analysis
+                progressStatus.innerText = data.message;
+            } else {
+                // Fallback
+                const totalPositions = data.total_positions || 0;
+                progressStatus.innerText = `Found ${totalPositions} positions to evaluate`;
             }
             break;
 
-        case 'game_progress':
-            totalGames = data.total_games;
-            completedGames = data.completed_games;
-            const progress = data.progress || 0;
+        case 'api_progress':
+            const completed = data.completed_calls || 0;
+            const total = data.total_calls || 1;
+            const progress = Math.round((completed / total) * 100);
+
             progressFill.style.width = progress + '%';
-
-            progressStatus.innerText = `Analyzing... ${completedGames}/${totalGames} games (${progress}%)`;
-
-            if (data.current_game) {
-                currentGame.innerHTML = `
-                    <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 5px;">
-                        <strong>Current:</strong> ${data.current_game}<br>
-                        <em>Progress:</em> ${progress}% complete
-                    </div>
-                `;
-            }
+            progressStatus.innerText = `${data.current_phase} - ${progress}% (${completed}/${total})`;
             break;
+
 
         case 'complete':
             progressStatus.innerText = `✅ Analysis complete! Report saved to database.`;
             progressFill.style.width = '100%';
 
             if (data.summary) {
-                currentGame.innerHTML = `
-                    <div style="margin: 10px 0; padding: 10px; background: #d4edda; border-radius: 5px;">
-                        <strong>✅ Complete!</strong><br>
-                        <em>Games analyzed:</em> ${data.summary.total_games_analyzed}<br>
-                        <em>Database hits:</em> ${data.summary.database_evaluations_used}<br>
-                        <em>Stockfish calls:</em> ${data.summary.stockfish_evaluations_used}<br>
-                        <em>Games enriched:</em> ${data.enriched_games_count}
-                    </div>
-                `;
-
                 updateDisplaysWithResults(data);
             }
 
@@ -116,11 +116,6 @@ function handleAnalysisUpdate(data) {
 
         case 'error':
             progressStatus.innerText = `❌ Error: ${data.error}`;
-            currentGame.innerHTML = `
-                <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 5px;">
-                    <strong>❌ Failed:</strong> ${data.error}
-                </div>
-            `;
             if (eventSource) {
                 eventSource.close();
             }
