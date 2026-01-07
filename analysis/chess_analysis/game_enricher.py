@@ -11,8 +11,10 @@ import time
 class GameEnricher:
     """Enriches game data with Stockfish analysis for games lacking evaluation data"""
 
-    def __init__(self, games: List[Dict[str, Any]]):
+    def __init__(self, games: List[Dict[str, Any]], max_concurrent: int = 40, stockfish_depth: int = 20):
         self.games = games
+        self.max_concurrent = max_concurrent
+        self.stockfish_depth = stockfish_depth
 
     def parse_moves_string(self, moves_string: str) -> List[str]:
         """Parse moves string into individual moves"""
@@ -73,19 +75,6 @@ class GameEnricher:
             existing_analysis = raw_json.get("analysis", [])
             # A game has sufficient analysis if it has analysis for most moves
             # analysis array should be roughly equal to number of moves
-
-            chess_com_data = raw_json.get("chess_com_data")
-
-
-            #if len(existing_analysis) >= len(moves) * 0.8:
-            #    # TEMPORARY DEBUG: Force Chess.com games to be processed anyway
-            #    if chess_com_data:
-            #        pass
-            #    else:
-            #        game_data.append({"skipped": "Game already has analysis", "positions": []})
-            #        continue
-            #else:
-            #    pass
 
             # Generate positions for this game
             game_positions = self.generate_positions_for_game(moves)
@@ -258,79 +247,6 @@ class GameEnricher:
 
         return global_evaluations
 
-    def build_game_evaluations(self, game_data: Dict, db_results: Dict, gcp_results: Dict) -> Dict[str, Any]:
-        """Build evaluation results for a single game"""
-        if "error" in game_data or "skipped" in game_data:
-            return game_data
-
-        game_positions = game_data["positions"]
-        moves = game_data["moves"]
-        existing_analysis = game_data["existing_analysis"]
-
-        evaluations = []
-        db_count = gcp_count = existing_count = 0
-
-        for i, fen in enumerate(game_positions):
-            if i < len(existing_analysis) and existing_analysis[i].get("eval") is not None:
-                # Use existing evaluation
-                evaluations.append({
-                    "move_number": i + 1,
-                    "move": moves[i - 1] if i > 0 else "start",
-                    "eval": existing_analysis[i].get("eval", 0),
-                    "source": "existing"
-                })
-                existing_count += 1
-
-            elif fen in db_results:
-                # Use database evaluation
-                db_eval = db_results[fen]
-                eval_entry = {
-                    "move_number": i + 1,
-                    "move": moves[i - 1] if i > 0 else "start",
-                    "eval": db_eval["evaluation"],
-                    "source": "database",
-                    "depth": db_eval["depth"],
-                    "knodes": db_eval["knodes"],
-                    "best": db_eval.get("best"),
-                    "variation": db_eval.get("variation")
-                }
-                # Include mate information if available
-                if "mate" in db_eval and db_eval["mate"] is not None:
-                    eval_entry["mate"] = db_eval["mate"]
-                evaluations.append(eval_entry)
-                db_count += 1
-
-            elif fen in gcp_results and "error" not in gcp_results[fen]:
-                # Use GCP evaluation
-                gcp_eval = gcp_results[fen]
-                eval_entry = {
-                    "move_number": i + 1,
-                    "move": moves[i - 1] if i > 0 else "start",
-                    "eval": gcp_eval["evaluation"],
-                    "source": "gcp_stockfish",
-                    "depth": gcp_eval["depth"],
-                    "time_ms": gcp_eval.get("time_ms", 0),
-                    "best": gcp_eval.get("best"),
-                    "variation": gcp_eval.get("variation")
-                }
-                # Include mate information if available
-                if "mate" in gcp_eval and gcp_eval["mate"] is not None:
-                    eval_entry["mate"] = gcp_eval["mate"]
-                evaluations.append(eval_entry)
-                gcp_count += 1
-
-        # Find mistakes
-        mistakes = self._find_mistakes_from_evaluations(evaluations)
-
-        return {
-            "evaluations": evaluations,
-            "mistakes": mistakes,
-            "total_moves_analyzed": len(evaluations),
-            "database_evaluations": db_count,
-            "stockfish_evaluations": gcp_count,
-            "existing_evaluations": existing_count,
-            "new_evaluations": gcp_count
-        }
 
     def _get_centipawn_value(self, evaluation: Dict) -> int:
         """Convert mate/eval to centipawn value for comparison - NO perspective conversion"""
@@ -453,8 +369,8 @@ class GameEnricher:
             # Process all positions with real-time progress updates
             for update in gcp_client.evaluate_positions_parallel_streaming(
                 positions_for_gcp,
-                depth=24,
-                max_concurrent=15
+                depth=self.stockfish_depth,
+                max_concurrent=self.max_concurrent
             ):
                 if update["type"] == "progress":
                     completed_api_calls = len(db_results) + update["completed"]
@@ -491,84 +407,6 @@ class GameEnricher:
 
         yield {"type": "complete"}
 
-    def _process_single_game_with_shared_client(self, game: Dict[str, Any], username: str, gcp_client: GCPStockfishClient) -> Dict[str, Any]:
-        """Process a single game with database + GCP analysis using shared client and new architecture"""
-        # Collect game data with new architecture
-        unique_positions, game_data_list = self.collect_all_game_data([game])
-
-        if not unique_positions or not game_data_list or "error" in game_data_list[0]:
-            return {"error": "Failed to extract positions from game"}
-
-        game_data = game_data_list[0]
-
-        # Query database for all unique positions
-        db_evaluator = DatabaseEvaluator()
-        db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
-
-        # Query GCP for remaining positions using shared client
-        positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
-        gcp_results = {}
-        if positions_for_gcp:
-            gcp_results = gcp_client.evaluate_positions_parallel(positions_for_gcp, depth=24, max_concurrent=15)
-
-        # Merge all evaluation sources
-        global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
-
-
-        # Build analysis for this specific game using global evaluations
-        analysis_result = self.build_single_game_analysis(game_data, global_evaluations)
-
-        if "error" not in analysis_result and "skipped" not in analysis_result:
-            # Create the analysis array and inject user stats
-            self._create_game_analysis_array(analysis_result["game"], analysis_result)
-
-            # Inject user-specific accuracy data
-            analyzer = HybridStockfishAnalyzer()
-            self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
-
-        return analysis_result
-
-    def _process_single_game(self, game: Dict[str, Any], username: str) -> Dict[str, Any]:
-        """Process a single game with database + GCP analysis"""
-        # Collect game data
-        all_positions, game_data_list = self.collect_all_game_data([game])
-
-        if not all_positions or not game_data_list or "error" in game_data_list[0]:
-            return {"error": "Failed to extract positions from game"}
-
-        game_data = game_data_list[0]
-
-        # Query database for this game's positions (preserve order)
-        unique_positions = []
-        seen = set()
-        for pos in all_positions:
-            if pos not in seen:
-                unique_positions.append(pos)
-                seen.add(pos)
-
-        db_evaluator = DatabaseEvaluator()
-        db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
-
-        # Query GCP for remaining positions
-        positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
-        gcp_results = {}
-        if positions_for_gcp:
-            gcp_client = GCPStockfishClient()
-            gcp_results = gcp_client.evaluate_positions_batch(positions_for_gcp)
-
-        # Build analysis result
-        analysis_result = self.build_game_evaluations(game_data, db_results, gcp_results)
-
-        if "error" not in analysis_result and "skipped" not in analysis_result:
-            # First, create the full game analysis array (for all moves)
-            self._create_game_analysis_array(game, analysis_result)
-
-            # Then inject user-specific accuracy data
-            analyzer = HybridStockfishAnalyzer()
-            self._inject_user_accuracy_stats(game, analysis_result, username, analyzer)
-
-        return analysis_result
-
     def enrich_games_with_stockfish(self, username: str) -> Dict[str, Any]:
         """Find games needing analysis and enrich them with optimized batch processing"""
         enrichment_results = {
@@ -586,14 +424,12 @@ class GameEnricher:
         # Step 1: Find games needing analysis
         games_needing_analysis = self._find_games_needing_analysis(username)
 
-
         try:
             # Process all games needing analysis
             selected_games = games_needing_analysis
 
             if not selected_games:
                 return enrichment_results
-
 
             # Step 2: Collect all game data and unique positions (new architecture)
             unique_positions, game_data_list = self.collect_all_game_data(selected_games)
@@ -610,7 +446,7 @@ class GameEnricher:
             gcp_results = {}
             if positions_for_gcp:
                 gcp_client = GCPStockfishClient()
-                gcp_results = gcp_client.evaluate_positions_parallel(positions_for_gcp, depth=24, max_concurrent=15)
+                gcp_results = gcp_client.evaluate_positions_parallel(positions_for_gcp, depth=self.stockfish_depth, max_concurrent=self.max_concurrent)
 
             # Step 5: Merge all evaluation sources into global dict
             global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
@@ -677,7 +513,6 @@ class GameEnricher:
         """Find games without comprehensive analysis"""
         games_needing_analysis = []
 
-
         for i, game in enumerate(self.games):
             is_user = (
                 game["white_player"].lower() == username.lower()
@@ -690,9 +525,6 @@ class GameEnricher:
             raw_json = game.get("raw_json", {})
             players_data = raw_json.get("players", {})
             user_has_accuracy = False
-
-            chess_com_data = raw_json.get("chess_com_data")
-
 
             if (
                 game["white_player"].lower() == username.lower()
@@ -709,7 +541,6 @@ class GameEnricher:
 
             if not user_has_accuracy:
                 games_needing_analysis.append(game)
-
 
         return games_needing_analysis
 
@@ -869,5 +700,3 @@ class GameEnricher:
         }
 
         game["raw_json"] = raw_json
-
-

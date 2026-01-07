@@ -225,17 +225,19 @@ def home(request):
         # Add date range information for each report
         enriched_reports = []
         for report in reports:
-            # Get date range from games in this dataset
-            games = ChessGame.objects.filter(
-                game_dataset=report.game_dataset
-            ).aggregate(
-                earliest_game=models.Min('played_at'),
-                latest_game=models.Max('played_at')
-            )
-
-            report.date_range_start = games['earliest_game']
-            report.date_range_end = games['latest_game']
-            report.platform = 'Lichess'  # For now, all are Lichess
+            # Use stored date range from GameDataSet model
+            report.date_range_start = report.game_dataset.oldest_game_date
+            report.date_range_end = report.game_dataset.newest_game_date
+            # Determine platform based on GameDataSet
+            if report.game_dataset.lichess_username:
+                report.platform = 'Lichess'
+                report.username = report.game_dataset.lichess_username
+            elif report.game_dataset.chess_com_username:
+                report.platform = 'Chess.com'
+                report.username = report.game_dataset.chess_com_username
+            else:
+                report.platform = 'Unknown'
+                report.username = 'Unknown'
             enriched_reports.append(report)
 
         context['reports'] = enriched_reports

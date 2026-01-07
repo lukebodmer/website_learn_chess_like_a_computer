@@ -56,6 +56,10 @@ import logging
 import time
 import os
 import sys
+import queue
+import threading
+import signal
+import atexit
 from typing import Dict, List, Optional
 
 # Configure logging
@@ -70,29 +74,51 @@ app = Flask(__name__)
 class StockfishEvaluator:
     def __init__(self, pool_size: int = None, stockfish_path: str = None):
         """
-        Initialize Stockfish evaluator with thread pool
+        Initialize Stockfish evaluator with persistent engine pool
 
         Args:
-            pool_size: Number of concurrent Stockfish processes (default: CPU count)
+            pool_size: Number of concurrent Stockfish processes (default: based on concurrency)
             stockfish_path: Path to Stockfish binary (auto-detected if None)
         """
-        # Optimize for Cloud Run: balance CPU usage with memory constraints
+        # Scale pool size based on expected concurrency for Cloud Run
         if pool_size is None:
             cpu_count = os.cpu_count() or 4
-            # Conservative approach to avoid memory exhaustion: 1x CPU count, max 8 workers
-            # Each worker uses ~512MB (256MB hash + overhead), so 8 workers = ~4GB
-            self.pool_size = min(cpu_count, 8)
+            # Get Cloud Run concurrency setting (default 80)
+            concurrency = int(os.environ.get('CLOUD_RUN_CONCURRENCY', '80'))
+            # Get number of Gunicorn workers (default 4)
+            workers = int(os.environ.get('WORKERS', '4'))
+
+            # Size pool for expected load: target ~2 requests per engine under normal load
+            # But divide by number of workers since each worker gets its own pool
+            target_pool_size = max((concurrency // workers) // 2, cpu_count // workers)
+
+            # Memory constraints: each engine uses ~100MB (64MB hash + overhead)
+            # With 4Gi memory and multiple workers, limit total engines across all workers
+            # 4 workers × 5 engines = 20 total engines = ~2GB, safe margin
+            max_engines_per_worker = 5
+
+            self.pool_size = min(target_pool_size, max_engines_per_worker)
+            logger.info(f"Auto-sizing pool: concurrency={concurrency}, workers={workers}, cpu_count={cpu_count}, pool_size={self.pool_size}")
         else:
             self.pool_size = pool_size
-        self.executor = ThreadPoolExecutor(max_workers=self.pool_size)
+
+        # Use a larger thread pool to handle the concurrent requests
+        self.executor = ThreadPoolExecutor(max_workers=min(self.pool_size * 2, 100))
 
         # Auto-detect Stockfish path
         self.stockfish_path = stockfish_path or self._find_stockfish()
         if not self.stockfish_path:
             raise RuntimeError("Stockfish not found. Please install Stockfish.")
 
-        logger.info(f"Initialized StockfishEvaluator with {self.pool_size} workers")
+        # Initialize engine pool
+        self.engine_pool = queue.Queue(maxsize=self.pool_size)
+        self._shutdown_event = threading.Event()
+
+        logger.info(f"Initialized StockfishEvaluator with {self.pool_size} engines")
         logger.info(f"Using Stockfish at: {self.stockfish_path}")
+
+        # Initialize persistent engines
+        self._initialize_engine_pool()
 
         # Test Stockfish availability
         self._test_stockfish()
@@ -114,6 +140,66 @@ class StockfishEvaluator:
                 continue
         return None
 
+    def _initialize_engine_pool(self):
+        """Initialize the persistent engine pool"""
+        logger.info(f"Initializing {self.pool_size} persistent Stockfish engines...")
+        for i in range(self.pool_size):
+            try:
+                engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
+                # Configure engine for memory-efficient performance with smaller hash
+                engine.configure({"Threads": 1})  # Single thread per engine instance
+                engine.configure({"Hash": 64})    # 64MB hash table per instance (reduced for larger pool)
+                self.engine_pool.put(engine)
+                logger.debug(f"Initialized engine {i+1}/{self.pool_size}")
+            except Exception as e:
+                logger.error(f"Failed to initialize engine {i+1}: {e}")
+                # Clean up any engines we already created
+                self._cleanup_engines()
+                raise RuntimeError(f"Failed to initialize engine pool: {e}")
+        logger.info(f"Successfully initialized {self.pool_size} engines")
+
+    def _cleanup_engines(self):
+        """Clean up all engines in the pool"""
+        logger.info("Cleaning up engine pool...")
+        engines_closed = 0
+        while not self.engine_pool.empty():
+            try:
+                engine = self.engine_pool.get_nowait()
+                engine.quit()
+                engines_closed += 1
+            except queue.Empty:
+                break
+            except Exception as e:
+                logger.error(f"Error closing engine: {e}")
+        logger.info(f"Closed {engines_closed} engines")
+
+    def shutdown(self):
+        """Gracefully shutdown the evaluator and all engines"""
+        logger.info("Shutting down StockfishEvaluator...")
+        self._shutdown_event.set()
+        self._cleanup_engines()
+        self.executor.shutdown(wait=True)
+        logger.info("StockfishEvaluator shutdown complete")
+
+    def _get_engine(self, timeout=30):
+        """Get an engine from the pool with timeout"""
+        try:
+            return self.engine_pool.get(timeout=timeout)
+        except queue.Empty:
+            raise RuntimeError(f"No engines available after {timeout}s timeout")
+
+    def _return_engine(self, engine):
+        """Return an engine to the pool"""
+        try:
+            self.engine_pool.put_nowait(engine)
+        except queue.Full:
+            # This shouldn't happen, but if it does, close the engine
+            logger.warning("Engine pool full, closing excess engine")
+            try:
+                engine.quit()
+            except:
+                pass
+
     def _test_stockfish(self):
         """Test that Stockfish is working"""
         try:
@@ -129,7 +215,7 @@ class StockfishEvaluator:
 
     def evaluate_single_position(self, fen: str, depth: int = 20) -> Dict:
         """
-        Evaluate a single chess position
+        Evaluate a single chess position using pooled engines
 
         Args:
             fen: FEN notation of the position
@@ -138,92 +224,114 @@ class StockfishEvaluator:
         Returns:
             Dict with evaluation result or error
         """
+        if self._shutdown_event.is_set():
+            return {"error": "Evaluator is shutting down"}
+
+        engine = None
         try:
             start_time = time.time()
 
-            with chess.engine.SimpleEngine.popen_uci(self.stockfish_path) as engine:
-                # Configure engine for memory-efficient performance
-                engine.configure({"Threads": 1})  # Single thread per engine instance
-                engine.configure({"Hash": 128})   # 128MB hash table per instance (reduced from 256MB)
+            # Get engine from pool
+            engine = self._get_engine()
 
-                board = chess.Board(fen)
+            board = chess.Board(fen)
 
-                # Use time + depth limit for faster analysis
-                time_limit = min(10.0, depth * 0.5)  # Max 10s, or 0.5s per depth
-                analysis = engine.analyse(
-                    board,
-                    chess.engine.Limit(depth=depth, time=time_limit)
-                )
-                eval_time = time.time() - start_time
+            # Use time + depth limit for faster analysis
+            time_limit = min(10.0, depth * 0.5)  # Max 10s, or 0.5s per depth
+            analysis = engine.analyse(
+                board,
+                chess.engine.Limit(depth=depth, time=time_limit)
+            )
+            eval_time = time.time() - start_time
 
-                # Extract evaluation score from analysis result
-                # Use .white() to always get evaluation from White's perspective
-                score = analysis['score'].white()
-                if score.is_mate():
-                    # Convert mate score to large number
-                    mate_moves = score.mate()
-                    evaluation = 9999 if mate_moves > 0 else -9999
-                    mate_in = mate_moves
-                else:
-                    # Handle centipawn score
-                    evaluation = score.score() if score.score() is not None else 0
-                    mate_in = None
+            # Extract evaluation score from analysis result
+            # Use .white() to always get evaluation from White's perspective
+            score = analysis['score'].white()
+            if score.is_mate():
+                # Convert mate score to large number
+                mate_moves = score.mate()
+                evaluation = 9999 if mate_moves > 0 else -9999
+                mate_in = mate_moves
+            else:
+                # Handle centipawn score
+                evaluation = score.score() if score.score() is not None else 0
+                mate_in = None
 
-                # Extract additional Stockfish data
-                result = {
-                    "evaluation": evaluation,
-                    "depth": depth,
-                    "time_ms": round(eval_time * 1000, 2)
-                }
+            # Extract additional Stockfish data
+            result = {
+                "evaluation": evaluation,
+                "depth": depth,
+                "time_ms": round(eval_time * 1000, 2)
+            }
 
-                # Add mate information
-                if mate_in is not None:
-                    result["mate"] = mate_in
+            # Add mate information
+            if mate_in is not None:
+                result["mate"] = mate_in
 
-                # Extract principal variation (best moves)
-                if 'pv' in analysis and analysis['pv']:
-                    pv_moves = analysis['pv']
+            # Extract principal variation (best moves)
+            if 'pv' in analysis and analysis['pv']:
+                pv_moves = analysis['pv']
 
-                    # Get best move (first move in PV)
-                    if pv_moves:
-                        result["best"] = pv_moves[0].uci()
+                # Get best move (first move in PV)
+                if pv_moves:
+                    result["best"] = pv_moves[0].uci()
 
-                        # Create variation string (sequence of moves in algebraic notation)
-                        variation_moves = []
-                        temp_board = board.copy()
+                    # Create variation string (sequence of moves in algebraic notation)
+                    variation_moves = []
+                    temp_board = board.copy()
 
-                        for move in pv_moves[:10]:  # Limit to first 10 moves
-                            if move in temp_board.legal_moves:
-                                # Convert to algebraic notation
-                                algebraic_move = temp_board.san(move)
-                                variation_moves.append(algebraic_move)
-                                temp_board.push(move)
-                            else:
-                                break
+                    for move in pv_moves[:10]:  # Limit to first 10 moves
+                        if move in temp_board.legal_moves:
+                            # Convert to algebraic notation
+                            algebraic_move = temp_board.san(move)
+                            variation_moves.append(algebraic_move)
+                            temp_board.push(move)
+                        else:
+                            break
 
-                        if variation_moves:
-                            result["variation"] = " ".join(variation_moves)
+                    if variation_moves:
+                        result["variation"] = " ".join(variation_moves)
 
-                # Extract nodes information if available
-                if 'nodes' in analysis:
-                    result["nodes"] = analysis['nodes']
-                    result["knodes"] = round(analysis['nodes'] / 1000, 1)
+            # Extract nodes information if available
+            if 'nodes' in analysis:
+                result["nodes"] = analysis['nodes']
+                result["knodes"] = round(analysis['nodes'] / 1000, 1)
 
-                # Extract time information if available
-                if 'time' in analysis:
-                    result["search_time_ms"] = round(analysis['time'] * 1000, 2)
+            # Extract time information if available
+            if 'time' in analysis:
+                result["search_time_ms"] = round(analysis['time'] * 1000, 2)
 
-                # Extract depth information if available
-                if 'depth' in analysis:
-                    result["search_depth"] = analysis['depth']
+            # Extract depth information if available
+            if 'depth' in analysis:
+                result["search_depth"] = analysis['depth']
 
-                return result
+            return result
 
         except Exception as e:
             logger.error(f"Error evaluating position {fen}: {e}")
+            # If the engine failed, don't return it to pool - it might be corrupted
+            if engine is not None:
+                try:
+                    engine.quit()
+                except:
+                    pass
+                engine = None
+                # Create a new engine to replace the failed one
+                try:
+                    new_engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
+                    new_engine.configure({"Threads": 1})
+                    new_engine.configure({"Hash": 64})
+                    self.engine_pool.put_nowait(new_engine)
+                except Exception as engine_err:
+                    logger.error(f"Failed to replace corrupted engine: {engine_err}")
+
             return {
                 "error": str(e)
             }
+        finally:
+            # Always return engine to pool (if we still have it)
+            if engine is not None:
+                self._return_engine(engine)
 
     def evaluate_batch(self, positions: List[str], depth: int = 20) -> Dict:
         """
@@ -281,6 +389,31 @@ def get_evaluator():
     if evaluator is None:
         evaluator = StockfishEvaluator()
     return evaluator
+
+def shutdown_handler(signum=None, frame=None):
+    """Graceful shutdown handler"""
+    global evaluator
+    logger.info("Received shutdown signal, cleaning up...")
+    if evaluator is not None:
+        try:
+            evaluator.shutdown()
+        except Exception as e:
+            logger.error(f"Error during evaluator cleanup: {e}")
+        finally:
+            evaluator = None
+    sys.exit(0)
+
+# Register cleanup handlers
+signal.signal(signal.SIGTERM, shutdown_handler)
+signal.signal(signal.SIGINT, shutdown_handler)
+atexit.register(shutdown_handler)
+
+@app.teardown_appcontext
+def cleanup_evaluator(error):
+    """Cleanup evaluator on app context teardown"""
+    # Note: Don't shutdown here as it's called per request
+    # The signal handlers and atexit will handle actual shutdown
+    pass
 
 @app.route('/health', methods=['GET'])
 def health_check():
