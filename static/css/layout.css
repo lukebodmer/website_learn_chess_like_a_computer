@@ -2,7 +2,7 @@
 
 /* Header */
 .header {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--background-primary) 0%, var(--background-secondary) 100%);
     color:white; 
     padding: 24px 32px;
     display: flex;
@@ -83,7 +83,8 @@
 
 /* Navigation */
 .nav {
-    background: var(--background-secondary);
+    /*background: var(--background-secondary);*/
+    background: linear-gradient(135deg, var(--background-primary) 0%, var(--background-secondary) 100%);
     border-bottom: 2px solid var(--primary-color);
     padding: 0;
     box-shadow: 0 2px 4px var(--shadow-light);

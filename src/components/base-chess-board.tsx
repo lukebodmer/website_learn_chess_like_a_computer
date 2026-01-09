@@ -9,6 +9,7 @@ export interface BaseChessBoardProps {
   orientation?: 'white' | 'black'
   coordinates?: boolean
   interactive?: boolean
+  allowPieceDragging?: boolean // Separate control for piece dragging (defaults to interactive value if not specified)
   selectedSquare?: string
   legalMoves?: string[]
   lastMove?: { from: string, to: string } | null
@@ -46,6 +47,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   orientation = 'white',
   coordinates = false,
   interactive = true,
+  allowPieceDragging,
   selectedSquare,
   legalMoves = [],
   lastMove,
@@ -83,6 +85,9 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   const [rightClickDragging, setRightClickDragging] = useState<{from: string} | null>(null)
   const [rightClickStart, setRightClickStart] = useState<{square: string, pos: {x: number, y: number}} | null>(null)
   const [userArrows, setUserArrows] = useState<{ from: string, to: string, color: string }[]>([])
+
+  // Determine if piece dragging should be enabled (defaults to interactive if not specified)
+  const pieceDraggingEnabled = allowPieceDragging !== undefined ? allowPieceDragging : interactive
 
   // Update chess position when position prop changes
   useEffect(() => {
@@ -247,7 +252,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     if (animationData) {
       startAnimation(animationData.piece, animationData.from, animationData.to)
     }
-  }, [animationData, startAnimation])
+  }, [animationData])
 
   // Helper to check if piece can be selected
   const canSelectPiece = useCallback((piece: any): boolean => {
@@ -268,8 +273,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       // Right mouse button - prepare for potential arrow drawing
       setRightClickStart({ square, pos: { x: e.clientX, y: e.clientY } })
       setMousePos({ x: e.clientX, y: e.clientY })
-    } else if (e.button === 0) {
-      // Left mouse button - piece dragging
+    } else if (e.button === 0 && pieceDraggingEnabled) {
+      // Left mouse button - piece dragging (only if enabled)
       const piece = chess.get(square)
       if (piece && canSelectPiece(piece)) {
         setDraggedPiece({ square, piece })
@@ -282,7 +287,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         }
       }
     }
-  }, [interactive, getSquareFromCoords, chess, canSelectPiece, onPieceDragStart])
+  }, [interactive, pieceDraggingEnabled, getSquareFromCoords, chess, canSelectPiece, onPieceDragStart])
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isDragging || rightClickDragging) {
@@ -302,6 +307,26 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       setMousePos({ x: e.clientX, y: e.clientY })
     }
   }, [isDragging, rightClickDragging, rightClickStart])
+
+  // Add mouse leave handler to cancel arrow dragging and piece dragging when mouse leaves the board
+  const handleMouseLeave = useCallback(() => {
+    if (rightClickDragging) {
+      setRightClickDragging(null)
+    }
+    if (rightClickStart) {
+      setRightClickStart(null)
+    }
+    if (isDragging && pieceDraggingEnabled) {
+      // Cancel piece dragging and return piece to original position (only if enabled)
+      setIsDragging(false)
+      setDraggedPiece(null)
+
+      // Notify parent that drag has ended
+      if (onPieceDragEnd) {
+        onPieceDragEnd()
+      }
+    }
+  }, [rightClickDragging, rightClickStart, isDragging, pieceDraggingEnabled, onPieceDragEnd])
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!interactive) return
@@ -347,8 +372,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         }
       }
       setRightClickDragging(null)
-    } else if (isDragging && draggedPiece) {
-      // Handle piece dragging
+    } else if (isDragging && draggedPiece && pieceDraggingEnabled) {
+      // Handle piece dragging (only if enabled)
       const targetSquare = getSquareFromCoords(e.clientX, e.clientY)
       if (targetSquare && targetSquare !== draggedPiece.square) {
         if (onPieceDrag) {
@@ -364,10 +389,14 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         onPieceDragEnd()
       }
     }
-  }, [interactive, isDragging, draggedPiece, rightClickDragging, rightClickStart, userArrows, getSquareFromCoords, onPieceDrag, onPieceDragEnd, onSquareRightClick])
+  }, [interactive, isDragging, draggedPiece, rightClickDragging, rightClickStart, userArrows, pieceDraggingEnabled, getSquareFromCoords, onPieceDrag, onPieceDragEnd, onSquareRightClick])
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!interactive || isDragging) return
+
+    // Clear all user-drawn arrows and highlights on left click
+    setUserArrows([])
+    setRightClickHighlights(new Set())
 
     const square = getSquareFromCoords(e.clientX, e.clientY)
     if (square && onSquareClick) {
@@ -808,6 +837,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onClick={handleClick}
         onContextMenu={handleRightClick}
         style={{

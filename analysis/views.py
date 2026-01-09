@@ -29,7 +29,6 @@ from .chess_analysis import ChessAnalyzer
 from .chess_analysis.game_enricher import GameEnricher
 from django.http import StreamingHttpResponse
 from .report_generation import generate_html_report
-from .report_generation.django_report_generator import generate_report_content
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
@@ -250,8 +249,6 @@ def games(request):
     return render(request, 'analysis/games.html')
 
 
-
-
 def lichess_login(request):
     """Initiate Lichess OAuth flow or redirect to analysis if already connected"""
     # Check if user is authenticated and already has a connected Lichess account
@@ -434,9 +431,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
                 if line.strip():
                     try:
                         game_data = json.loads(line)
-                        # For Chess.com data, convert to unified format for display
-                        if platform == 'chess.com':
-                            game_data = convert_chess_com_to_lichess_format(game_data)
+                        # Show raw data as-is, no conversion needed for raw display
                         all_games.append(game_data)
                     except json.JSONDecodeError:
                         continue
@@ -518,9 +513,7 @@ def _generate_unified_analysis_report(request, username, dataset_id):
                 if line.strip():
                     try:
                         game_data = json.loads(line)
-                        # For Chess.com data, convert to unified format for display
-                        if platform == 'chess.com':
-                            game_data = convert_chess_com_to_lichess_format(game_data)
+                        # Show raw data as-is, no conversion needed for raw display
                         all_games.append(game_data)
                     except json.JSONDecodeError:
                         continue
@@ -812,7 +805,7 @@ def chess_com_analysis(request, username):
         'loading': True  # Indicate we're in loading state
     })
 
-def parse_pgn_moves_and_clocks(pgn_text):
+def parse_pgn_moves_and_clocks(pgn_text, initial_time=300, increment=0):
     """Extract moves and clock times from Chess.com PGN format"""
     import re
 
@@ -825,14 +818,15 @@ def parse_pgn_moves_and_clocks(pgn_text):
 
         # Extract moves with clock times using regex
         # Pattern matches: 1. Nf3 {[%clk 0:04:59.8]} 1... e6 {[%clk 0:04:58.9]}
-        # Updated to handle castling (O-O, O-O-O) and other special moves
-        move_pattern = r'([O-]{2,3}|[NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](?:=[NBRQ])?[+#]?)\s*\{\[%clk\s+([0-9:\.]+)\]\}'
+        # Updated to handle castling (O-O-O for queenside, O-O for kingside) and other special moves
+        move_pattern = r'(O-O-O|O-O|[NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](?:=[NBRQ])?[+#]?)\s*\{\[%clk\s+([0-9:\.]+)\]\}'
         matches = re.findall(move_pattern, moves_section)
 
         moves = []
         clocks = []
 
-
+        # First, parse all the move clock times
+        parsed_clocks = []
         for move, clock_str in matches:
             moves.append(move)
 
@@ -860,10 +854,17 @@ def parse_pgn_moves_and_clocks(pgn_text):
 
                 # Convert remaining time to centiseconds (Lichess format expects remaining time in centiseconds)
                 total_centiseconds = int(total_seconds * 100)
-                clocks.append(total_centiseconds)
+                parsed_clocks.append(total_centiseconds)
 
             except Exception as clock_error:
-                clocks.append(0)
+                parsed_clocks.append(0)
+
+        # Now build the final clocks array in Lichess format
+        # Lichess format: [starting_white, starting_black, after_move1, after_move2, ...]
+        # Lichess adds 3 centiseconds to the initial time for starting times
+        if parsed_clocks:
+            starting_time_cs = (initial_time * 100) + 3  # Match Lichess format exactly
+            clocks = [starting_time_cs, starting_time_cs] + parsed_clocks
 
         return moves, clocks
 
@@ -872,10 +873,25 @@ def parse_pgn_moves_and_clocks(pgn_text):
         return [], []
 
 
+def parse_eco_from_pgn(pgn_text):
+    """Extract ECO code from Chess.com PGN headers"""
+    if not pgn_text:
+        return "Unknown"
+
+    try:
+        import re
+        # Look for ECO header in PGN: [ECO "C00"]
+        eco_match = re.search(r'\[ECO "([A-E]\d{2})"\]', pgn_text)
+        if eco_match:
+            return eco_match.group(1)
+    except:
+        pass
+
+    return "Unknown"
+
+
 def extract_opening_name_from_eco_url(eco_url):
     """Extract opening name from Chess.com ECO URL"""
-    # TODO: Map Chess.com opening URLs to proper ECO codes
-    # For now, extract the name from the URL
     if not eco_url or not isinstance(eco_url, str):
         return "Unknown Opening"
 
@@ -889,6 +905,152 @@ def extract_opening_name_from_eco_url(eco_url):
         return "Unknown Opening"
     except:
         return "Unknown Opening"
+
+
+# Global cache for opening database
+_opening_database = None
+
+
+def load_opening_database():
+    """Load and parse the lichess ECO database with FEN positions"""
+    global _opening_database
+
+    if _opening_database is not None:
+        return _opening_database
+
+    try:
+        import os
+        import csv
+        import re
+        from django.conf import settings
+
+        # Path to the TSV file
+        tsv_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'openings', 'lichess_eco_database.tsv')
+
+        _opening_database = []
+
+        with open(tsv_path, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file, delimiter='\t')
+            for row in reader:
+                # Extract moves from PGN and convert to list
+                pgn_moves = row['pgn'].strip()
+                epd_fen = row['epd'].strip()
+
+                if not pgn_moves or not epd_fen:
+                    continue
+
+                # Remove move numbers like "1. ", "2. " etc and split into moves
+                # Handle patterns like "1. Nh3", "1. Nh3 d5 2. g3 e5 3. f4"
+                moves_only = re.sub(r'\d+\.\s*', '', pgn_moves).strip()
+                moves_list = moves_only.split() if moves_only else []
+
+                _opening_database.append({
+                    'eco': row['eco'].strip(),
+                    'name': row['name'].strip(),
+                    'moves': moves_list,
+                    'ply_count': len(moves_list),
+                    'fen': epd_fen
+                })
+
+        # Sort by ply count descending for backward matching (deepest positions first)
+        _opening_database.sort(key=lambda x: x['ply_count'], reverse=True)
+
+        print(f"Loaded {len(_opening_database)} openings from database")
+
+        return _opening_database
+
+    except Exception as e:
+        print(f"Error loading opening database: {e}")
+        return []
+
+
+def normalize_fen(fen):
+    """Normalize FEN by removing move counters and keeping only position data"""
+    # FEN format: position castling en_passant halfmove fullmove
+    # Database EPD format: position castling en_passant halfmove (no fullmove)
+    # We want to match the database format
+    parts = fen.split()
+    if len(parts) >= 4:
+        return ' '.join(parts[:4])  # Keep position, castling, en_passant, halfmove
+    return fen
+
+
+def moves_to_fen_positions(moves_string):
+    """Convert a moves string to a list of normalized FEN positions at each move"""
+    if not moves_string:
+        return []
+
+    try:
+        import chess
+
+        board = chess.Board()
+        fen_positions = []
+
+        moves_list = moves_string.strip().split()
+
+        for move_str in moves_list:
+            try:
+                move = board.parse_san(move_str)
+                board.push(move)
+                # Normalize FEN to match database format
+                normalized_fen = normalize_fen(board.fen())
+                fen_positions.append(normalized_fen)
+            except (chess.InvalidMoveError, chess.IllegalMoveError):
+                # Stop at first invalid move
+                break
+
+        return fen_positions
+
+    except Exception as e:
+        print(f"Error converting moves to FEN: {e}")
+        return []
+
+
+def classify_opening_by_moves(moves_string):
+    """
+    Classify opening by FEN-based backward matching (handles transpositions)
+
+    Args:
+        moves_string: Space-separated moves like "Nf3 e6 e4 d5 e5 c5"
+
+    Returns:
+        dict with 'eco', 'name', and 'ply' keys
+    """
+    if not moves_string:
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+
+    try:
+        database = load_opening_database()
+        if not database:
+            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+
+        # Convert moves to FEN positions
+        fen_positions = moves_to_fen_positions(moves_string)
+        if not fen_positions:
+            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+
+        # Try backward matching - start from move 20 (40th ply) or end of game, whichever is shorter
+        max_check_moves = min(40, len(fen_positions))
+
+        # Go backwards through positions to find the deepest (most specific) match
+        for check_ply in range(max_check_moves, 0, -1):
+            game_fen = fen_positions[check_ply - 1]  # Convert to 0-based index
+
+            # Look for exact FEN match in database
+            for opening in database:
+                if opening['ply_count'] == check_ply and opening['fen'] == game_fen:
+                    return {
+                        'eco': opening['eco'],
+                        'name': opening['name'],
+                        'ply': opening['ply_count']
+                    }
+
+        # No match found
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+
+    except Exception as e:
+        print(f"Error classifying opening: {e}")
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
 
 
 def parse_chess_com_time_control(time_control_str):
@@ -936,45 +1098,33 @@ def parse_chess_com_time_control(time_control_str):
 def convert_chess_com_to_lichess_format(chess_com_game):
     """Convert Chess.com game data to Lichess format for unified processing"""
     try:
-        # Extract moves and clocks from PGN
-        moves_list, clocks_list = parse_pgn_moves_and_clocks(chess_com_game.get('pgn', ''))
+        # Parse time control first
+        initial_time, increment = parse_chess_com_time_control(chess_com_game.get('time_control', '300'))
+
+        # Extract moves and clocks from PGN with time control info
+        moves_list, clocks_list = parse_pgn_moves_and_clocks(
+            chess_com_game.get('pgn', ''),
+            initial_time,
+            increment
+        )
 
         # Convert moves list to single string
         moves_string = ' '.join(moves_list)
 
-        # Extract opening information
-        opening_name = extract_opening_name_from_eco_url(chess_com_game.get('eco', ''))
+        # Classify opening using backward move matching
+        opening_classification = classify_opening_by_moves(moves_string)
 
-        # Parse time control
-        initial_time, increment = parse_chess_com_time_control(chess_com_game.get('time_control', '300'))
-
-        # Adjust clocks to match Lichess format
-        if clocks_list:
-            # Calculate starting time in centiseconds (like Lichess: initial + increment)
+        # Handle correspondence games differently
+        if clocks_list and initial_time >= 86400:  # 24 hours or more (correspondence)
+            # For correspondence games, Chess.com clocks don't represent real time pressure
+            # Generate reasonable clock values that start with full time
             starting_time_cs = (initial_time + increment) * 100
-
-            # Check if this is a correspondence game (very long time controls)
-            is_correspondence = initial_time >= 86400  # 24 hours or more
-
-            if is_correspondence:
-                # For correspondence games, Chess.com clocks don't represent real time pressure
-                # Generate reasonable clock values: start with full time, slight decreases
-                adjusted_clocks = []
-                for i in range(len(clocks_list)):
-                    # Both players start with full time, then slight random decreases
-                    # to simulate the fact that correspondence players don't run out of time
-                    time_remaining = starting_time_cs - (i * 100)  # Small decrease per move
-                    adjusted_clocks.append(max(time_remaining, starting_time_cs * 0.95))
-                clocks_list = adjusted_clocks
-            else:
-                # For regular games, ensure both players start with initial + increment time
-                # but preserve the actual Chess.com remaining time patterns
-                if len(clocks_list) >= 2:
-                    # Ensure first moves start with reasonable time
-                    if clocks_list[0] < starting_time_cs * 0.5:
-                        clocks_list[0] = starting_time_cs
-                    if clocks_list[1] < starting_time_cs * 0.5:
-                        clocks_list[1] = starting_time_cs
+            adjusted_clocks = []
+            for i in range(len(clocks_list)):
+                # Both players start with full time, then slight decreases
+                time_remaining = starting_time_cs - (i * 100)  # Small decrease per move
+                adjusted_clocks.append(max(time_remaining, starting_time_cs * 0.95))
+            clocks_list = adjusted_clocks
 
         # Determine winner
         white_result = chess_com_game.get('white', {}).get('result', '')
@@ -996,8 +1146,11 @@ def convert_chess_com_to_lichess_format(chess_com_game):
             "perf": chess_com_game.get('time_class', 'blitz'),
             "createdAt": int(chess_com_game.get('end_time', 0)) * 1000,  # Convert to milliseconds
             "lastMoveAt": int(chess_com_game.get('end_time', 0)) * 1000,  # Use end_time as approximation
-            "status": "mate" if "checkmate" in chess_com_game.get('white', {}).get('result', '') or
-                             "checkmate" in chess_com_game.get('black', {}).get('result', '') else "resign",
+            "status": ("mate" if "checkmate" in chess_com_game.get('white', {}).get('result', '') or
+                              "checkmate" in chess_com_game.get('black', {}).get('result', '') else
+                       "outoftime" if "timeout" in chess_com_game.get('white', {}).get('result', '') or
+                                      "timeout" in chess_com_game.get('black', {}).get('result', '') else
+                       "resign"),
             "source": "pool",  # Default for Chess.com
             "players": {
                 "white": {
@@ -1019,9 +1172,9 @@ def convert_chess_com_to_lichess_format(chess_com_game):
             },
             "winner": winner,
             "opening": {
-                "eco": "Unknown",  # TODO: Map Chess.com URLs to ECO codes
-                "name": opening_name,
-                "ply": 0  # TODO: Calculate from moves
+                "eco": opening_classification['eco'],
+                "name": opening_classification['name'],
+                "ply": opening_classification['ply']
             },
             "moves": moves_string,
             "clocks": clocks_list,

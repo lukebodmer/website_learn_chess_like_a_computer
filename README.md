@@ -69,14 +69,15 @@ The PostgreSQL evaluations database contains three main tables:
   - `check_positions_exist(fens)`: Efficient existence checking
   - `get_game_positions_with_evaluations(moves)`: Full game analysis
 
-**`StockfishAnalyzer`** (`analysis/chess_analysis/stockfish_analyzer.py`)
-- Modified to check the database first before running Stockfish analysis
-- Falls back to live Stockfish evaluation for positions not in database
-- Tracks statistics on database vs fresh analysis usage
+**`HybridStockfishAnalyzer`** (`analysis/chess_analysis/hybrid_analyzer.py`)
+- Combines database lookups with GCP Stockfish API for optimal performance
+- First checks database for existing evaluations (fast)
+- Sends remaining positions to GCP API for evaluation (scalable)
+- Tracks statistics on database vs GCP API analysis usage
 
 **`GameEnricher`** (`analysis/chess_analysis/game_enricher.py`)
 - Identifies games lacking evaluation data
-- Coordinates database lookups and Stockfish fallback analysis
+- Coordinates database lookups and GCP Stockfish API analysis
 - Injects calculated accuracy percentages back into game JSON
 - **Hard limit set to 5 games** for debugging purposes
 
@@ -89,15 +90,15 @@ The PostgreSQL evaluations database contains three main tables:
    - Retrieve precomputed evaluations if available
    - Track database hit rate
 
-3. **Stockfish Fallback**: For positions not in database:
-   - Use local Stockfish engine for live analysis
-   - Analyze at specified depth (default: 20)
-   - Cache results for potential future use
+3. **GCP Stockfish API**: For positions not in database:
+   - Send positions to GCP Stockfish API for evaluation
+   - High-performance cloud analysis with configurable depth
+   - Scalable processing of multiple positions
 
 4. **Data Enrichment**:
    - Calculate player accuracy from evaluations
    - Inject accuracy percentage into original game JSON structure
-   - Maintain data source statistics (database vs Stockfish vs existing)
+   - Maintain data source statistics (database vs GCP API vs existing)
 
 ## Performance Considerations
 
@@ -110,7 +111,7 @@ The PostgreSQL evaluations database contains three main tables:
 
 The system tracks detailed statistics during analysis:
 - `database_evaluations_used`: Positions found in PostgreSQL database
-- `stockfish_evaluations_used`: Positions requiring fresh Stockfish analysis
+- `stockfish_evaluations_used`: Positions evaluated using GCP Stockfish API
 - `existing_evaluations_used`: Positions that already had evaluation data
 - `total_mistakes_found`: Blunders, mistakes, and inaccuracies identified
 - `games_with_new_analysis`: Games that received new evaluation data
@@ -153,13 +154,13 @@ LIMIT 1;
 1. Ensure PostgreSQL database is running with the chess evaluations data
 2. Update database credentials in `chess_analysis/settings.py`
 3. Run Django migrations: `python manage.py migrate`
-4. Install Stockfish engine for fallback analysis
+4. Configure GCP Stockfish API credentials (see `gcp-stockfish-api/` directory)
 5. Test database connectivity: `python manage.py shell -c "from analysis.chess_analysis.database_evaluator import DatabaseEvaluator; print(DatabaseEvaluator().get_database_connection_info())"`
 
 ### GCP Stockfish API
 See `gcp-stockfish-api/README.md` for deployment instructions.
 
-The integration provides a powerful foundation for rapid chess analysis by leveraging precomputed evaluations while maintaining the flexibility to analyze new positions on-demand.
+The integration provides a powerful foundation for rapid chess analysis by leveraging precomputed evaluations while maintaining the flexibility to analyze new positions using the scalable GCP Stockfish API.
 
 ## Example lichess data
 below are two examples of data fetched from lichess to be used to generate reports. The first has evaluation and the second doesn't (and will need to be enriched with evaluation data from the database and stockfish_api):
@@ -172,7 +173,7 @@ below are two examples of data fetched from lichess to be used to generate repor
     "perf": "blitz",
     "createdAt": 1766853633692,
     "lastMoveAt": 1766854323925,
-    "status": "resign",
+      * [ ] "status": "resign",
     "source": "pool",
     "players": {
       "white": {

@@ -37,6 +37,9 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
 
     <h2>Enriched Games Data:</h2>
     <pre id="enriched-games" style="background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px;">{{ enriched_games|safe }}</pre>
+
+    <!-- Hidden element for report username -->
+    <span id="report-username" style="display: none;">{{ username }}</span>
 </div>
 
 <script>

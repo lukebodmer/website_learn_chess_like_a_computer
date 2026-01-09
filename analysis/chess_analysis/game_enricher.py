@@ -3,6 +3,7 @@ from .hybrid_analyzer import HybridStockfishAnalyzer
 from .database_evaluator import DatabaseEvaluator
 from .gcp_evaluator import GCPStockfishClient
 from .lichess_accuracy import LichessAccuracyCalculator
+from .game_divider import GameDivider, divide_game_from_pgn_moves
 import chess
 import re
 import time
@@ -30,6 +31,60 @@ class GameEnricher:
 
         return valid_moves
 
+    def convert_uci_to_san(self, fen: str, uci_move: str) -> str:
+        """Convert UCI move to SAN notation given a FEN position"""
+        if not uci_move or not fen:
+            return uci_move
+
+        try:
+            # Validate FEN first
+            board = chess.Board(fen)
+            # Validate UCI move format
+            if len(uci_move) < 4 or len(uci_move) > 5:
+                return uci_move
+
+            move = chess.Move.from_uci(uci_move)
+            if move in board.legal_moves:
+                san_move = board.san(move)
+                return san_move
+            else:
+                # Move not legal in this position
+                return uci_move
+        except Exception as e:
+            # Log the error for debugging but don't crash
+            print(f"UCI to SAN conversion failed for {uci_move} in position {fen[:20]}...: {str(e)}")
+            return uci_move
+
+    def convert_uci_variation_to_san(self, fen: str, uci_variation: str) -> str:
+        """Convert UCI variation string to SAN notation"""
+        if not uci_variation or not fen:
+            return uci_variation
+
+        try:
+            board = chess.Board(fen)
+            uci_moves = uci_variation.split()
+            san_moves = []
+
+            for uci_move in uci_moves:
+                try:
+                    if len(uci_move) < 4 or len(uci_move) > 5:
+                        break
+
+                    move = chess.Move.from_uci(uci_move)
+                    if move in board.legal_moves:
+                        san_move = board.san(move)
+                        san_moves.append(san_move)
+                        board.push(move)
+                    else:
+                        break
+                except Exception:
+                    break  # Stop if any move is invalid
+
+            return " ".join(san_moves) if san_moves else uci_variation
+        except Exception as e:
+            print(f"UCI variation to SAN conversion failed for {uci_variation[:50]}... in position {fen[:20]}...: {str(e)}")
+            return uci_variation
+
     def generate_positions_for_game(self, moves: List[str]) -> List[str]:
         """Generate FEN positions for a game's moves"""
         try:
@@ -45,6 +100,24 @@ class GameEnricher:
                     break
 
             return positions
+        except Exception:
+            return []
+
+    def generate_board_positions_for_game(self, moves: List[str]) -> List[chess.Board]:
+        """Generate chess.Board positions for a game's moves (for division analysis)"""
+        try:
+            board = chess.Board()
+            boards = [board.copy()]
+
+            for move_str in moves:
+                try:
+                    move = board.parse_san(move_str)
+                    board.push(move)
+                    boards.append(board.copy())
+                except:
+                    break
+
+            return boards
         except Exception:
             return []
 
@@ -149,7 +222,8 @@ class GameEnricher:
                 eval_entry = {
                     "move_number": move_index + 1,
                     "move": move,
-                    "source": "existing"
+                    "source": "existing",
+                    "position_fen": fen  # Store the FEN for this position
                 }
 
                 # Copy all existing evaluation data
@@ -158,10 +232,9 @@ class GameEnricher:
                     eval_entry["eval"] = existing_data["eval"]
                 if existing_data.get("mate") is not None:
                     eval_entry["mate"] = existing_data["mate"]
-                if existing_data.get("best"):
-                    eval_entry["best"] = existing_data["best"]
-                if existing_data.get("variation"):
-                    eval_entry["variation"] = existing_data["variation"]
+                # Note: We don't copy best/variation from existing data here
+                # as these will be set correctly in _create_game_analysis_array
+                # based on mistake analysis from the previous position
 
                 evaluations.append(eval_entry)
                 existing_count += 1
@@ -177,8 +250,9 @@ class GameEnricher:
                         "eval": eval_data["evaluation"],
                         "source": eval_data["source"],
                         "depth": eval_data.get("depth"),
-                        "best": eval_data.get("best"),
-                        "variation": eval_data.get("variation")
+                        "position_fen": fen  # Store the FEN for this position
+                        # Note: best/variation not included here - will be set correctly
+                        # in _create_game_analysis_array based on mistake analysis
                     }
 
                     # Include additional data based on source
@@ -199,8 +273,8 @@ class GameEnricher:
                     elif eval_data["source"] == "gcp_stockfish":
                         gcp_count += 1
 
-        # Find mistakes from the evaluations
-        mistakes = self._find_mistakes_from_evaluations(evaluations)
+        # Find mistakes from the evaluations, passing positions and global evaluations for context
+        mistakes = self._find_mistakes_from_evaluations(evaluations, positions, global_evaluations)
 
         return {
             "game": game,
@@ -263,13 +337,19 @@ class GameEnricher:
         # NO PERSPECTIVE CONVERSION - Stockfish always reports from White's perspective
         return cp_value
 
-    def _find_mistakes_from_evaluations(self, evaluations: List[Dict]) -> List[Dict]:
+    def _find_mistakes_from_evaluations(self, evaluations: List[Dict], positions: List[str], global_evaluations: Dict[str, Dict]) -> List[Dict]:
         """Find mistakes from evaluation sequence (handles both eval and mate scores)"""
         mistakes = []
 
         for i in range(1, len(evaluations)):
             move_number = evaluations[i].get("move_number", i + 1)
             is_white_move = move_number % 2 == 1
+
+            # Skip mistake detection if current position is checkmate (mate: 0)
+            # This means the player just delivered checkmate, which is not a mistake
+            current_eval = evaluations[i]
+            if "mate" in current_eval and current_eval["mate"] == 0:
+                continue
 
             current_cp = self._get_centipawn_value(evaluations[i])
             prev_cp = self._get_centipawn_value(evaluations[i - 1])
@@ -300,12 +380,39 @@ class GameEnricher:
             else:
                 continue
 
+            # Get the best move and variation from the PREVIOUS position (before the mistake)
+            prev_position_fen = positions[move_number - 1] if move_number - 1 < len(positions) else None
+            best_move_uci = None
+            best_variation_uci = None
+
+            if prev_position_fen and prev_position_fen in global_evaluations:
+                prev_eval_data = global_evaluations[prev_position_fen]
+                best_move_uci = prev_eval_data.get("best")
+                best_variation_uci = prev_eval_data.get("variation")
+
+            # Convert UCI to SAN if we have the data
+            best_move_san = None
+            best_variation_san = None
+
+            if prev_position_fen and best_move_uci:
+                best_move_san = self.convert_uci_to_san(prev_position_fen, best_move_uci)
+                # Debug: Check if conversion happened for mistake analysis
+                if best_move_san == best_move_uci and len(best_move_uci) == 4:
+                    print(f"DEBUG: Mistake UCI conversion failed for '{best_move_uci}' in prev position {prev_position_fen[:30]}...")
+
+            if prev_position_fen and best_variation_uci:
+                best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
+                if best_variation_san == best_variation_uci:
+                    print(f"DEBUG: Mistake variation conversion failed for '{best_variation_uci[:50]}...' in prev position {prev_position_fen[:30]}...")
+
             mistakes.append({
                 "move_number": move_number,
                 "move": evaluations[i].get("move", "unknown"),
                 "type": mistake_type,
                 "eval_loss": eval_loss,
-                "color": "white" if is_white_move else "black"
+                "color": "white" if is_white_move else "black",
+                "best_move": best_move_san,
+                "best_variation": best_variation_san
             })
 
         return mistakes
@@ -400,7 +507,7 @@ class GameEnricher:
 
                 if "error" not in analysis_result and "skipped" not in analysis_result:
                     # Create the analysis array and inject user stats
-                    self._create_game_analysis_array(analysis_result["game"], analysis_result)
+                    self._create_game_analysis_array(analysis_result["game"], analysis_result, global_evaluations)
                     analyzer = HybridStockfishAnalyzer()
                     self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
 
@@ -480,7 +587,7 @@ class GameEnricher:
 
                     # Create game analysis array and inject user stats
                     game = analysis_result["game"]
-                    self._create_game_analysis_array(game, analysis_result)
+                    self._create_game_analysis_array(game, analysis_result, global_evaluations)
 
                     analyzer = HybridStockfishAnalyzer()
                     self._inject_user_accuracy_stats(game, analysis_result, username, analyzer)
@@ -547,7 +654,8 @@ class GameEnricher:
     def _create_game_analysis_array(
         self,
         game: Dict[str, Any],
-        analysis_result: Dict[str, Any]
+        analysis_result: Dict[str, Any],
+        global_evaluations: Dict[str, Dict]
     ) -> None:
         """Create the analysis array for all moves in the game"""
         if (
@@ -575,6 +683,38 @@ class GameEnricher:
                 elif "eval" in move_eval:
                     eval_entry["eval"] = move_eval["eval"]
 
+                # Always add best move and variation from the current position
+                # (what the engine thinks is best from this position)
+                current_position_fen = move_eval.get("position_fen")
+                current_best_move = None
+                current_best_variation = None
+
+                # Get the current position's analysis from global evaluations
+                if current_position_fen and current_position_fen in global_evaluations:
+                    current_eval_data = global_evaluations[current_position_fen]
+                    print(f"DEBUG: Found eval data for position {current_position_fen[:30]}... - best: {current_eval_data.get('best')}")
+
+                    if current_eval_data.get("best"):
+                        original_best = current_eval_data["best"]
+                        current_best_move = self.convert_uci_to_san(current_position_fen, original_best)
+                        print(f"DEBUG: Converted '{original_best}' to '{current_best_move}'")
+
+                    if current_eval_data.get("variation"):
+                        original_variation = current_eval_data["variation"]
+                        current_best_variation = self.convert_uci_variation_to_san(current_position_fen, original_variation)
+                        print(f"DEBUG: Converted variation '{original_variation[:30]}...' to '{current_best_variation[:30]}...'")
+                else:
+                    if current_position_fen:
+                        print(f"DEBUG: No eval data found for position {current_position_fen[:30]}... in global_evaluations")
+                    else:
+                        print(f"DEBUG: current_position_fen is None for move {move_eval.get('move_number')}")
+
+                # Set the current position's best move and variation
+                if current_best_move:
+                    eval_entry["best"] = current_best_move
+                if current_best_variation:
+                    eval_entry["variation"] = current_best_variation
+
                 # Check if this move is a mistake/blunder/inaccuracy
                 move_number = move_eval.get("move_number", i + 1)
                 move_mistakes = [m for m in mistakes if m.get("move_number") == move_number]
@@ -583,40 +723,87 @@ class GameEnricher:
                     mistake = move_mistakes[0]
                     mistake_type = mistake["type"]
 
-                    # Add best move and variation if available
-                    if move_eval.get("best"):
-                        eval_entry["best"] = move_eval["best"]
-                    if move_eval.get("variation"):
-                        eval_entry["variation"] = move_eval["variation"]
+                    # For mistakes, we want to show what the player SHOULD have done
+                    # (from the previous position), not what's best in the current position
+                    alternative_move = mistake.get("best_move", "Better move")
+                    alternative_variation = mistake.get("best_variation")
 
+                    # Override with the alternative move data for the judgment
+                    # but keep the current position's best move in the "best" field
                     # Create judgment object matching Lichess format
                     if mistake_type == "blunders":
                         eval_entry["judgment"] = {
                             "name": "Blunder",
-                            "comment": f"Blunder. {move_eval.get('best', 'Better move')} was best."
+                            "comment": f"Blunder. {alternative_move} was best."
                         }
                     elif mistake_type == "mistakes":
                         if "mate" in eval_entry:
                             eval_entry["judgment"] = {
                                 "name": "Mistake",
-                                "comment": "Checkmate is now unavoidable. " + f"{move_eval.get('best', 'Better move')} was best."
+                                "comment": f"Checkmate is now unavoidable. {alternative_move} was best."
                             }
                         else:
                             eval_entry["judgment"] = {
                                 "name": "Mistake",
-                                "comment": f"Mistake. {move_eval.get('best', 'Better move')} was best."
+                                "comment": f"Mistake. {alternative_move} was best."
                             }
                     elif mistake_type == "inaccuracies":
                         eval_entry["judgment"] = {
                             "name": "Inaccuracy",
-                            "comment": f"Inaccuracy. {move_eval.get('best', 'Better move')} was best."
+                            "comment": f"Inaccuracy. {alternative_move} was best."
                         }
 
                 analysis_array.append(eval_entry)
 
             # Add the analysis array at the root level
             raw_json["analysis"] = analysis_array
+
+            # Add division data for Chess.com games (Lichess already has this)
+            self._add_division_data(game, analysis_result)
+
             game["raw_json"] = raw_json
+
+    def _add_division_data(
+        self,
+        game: Dict[str, Any],
+        analysis_result: Dict[str, Any]
+    ) -> None:
+        """Add division (opening/middlegame/endgame) data to Chess.com games"""
+        raw_json = game.get("raw_json", {})
+
+        # Only add division if it doesn't already exist (Lichess games already have this)
+        if "division" in raw_json:
+            return
+
+        # Try to get moves from the raw_json
+        moves_string = raw_json.get("moves", "")
+        if not moves_string:
+            return
+
+        try:
+            # Parse moves and calculate division
+            moves = self.parse_moves_string(moves_string)
+            if not moves:
+                return
+
+            # Generate board positions for division analysis
+            boards = self.generate_board_positions_for_game(moves)
+            if not boards:
+                return
+
+            # Calculate division
+            division = GameDivider.divide_game(boards)
+            division_dict = division.to_dict()
+
+            # Add division data if we have meaningful results
+            if division_dict:
+                raw_json["division"] = division_dict
+                game["raw_json"] = raw_json
+
+        except Exception as e:
+            # Don't crash if division calculation fails
+            print(f"Division calculation failed for game: {str(e)}")
+            pass
 
     def _inject_user_accuracy_stats(
         self,
