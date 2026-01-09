@@ -417,49 +417,136 @@ class GameEnricher:
 
         return mistakes
 
+    def _find_all_user_games(self, username: str) -> List[Dict[str, Any]]:
+        """Find all games where the user participated"""
+        all_user_games = []
+
+        for game in self.games:
+            is_user = (
+                game["white_player"].lower() == username.lower()
+                or game["black_player"].lower() == username.lower()
+            )
+
+            if is_user:
+                all_user_games.append(game)
+
+        return all_user_games
+
+    def _game_needs_analysis(self, game: Dict[str, Any], username: str) -> bool:
+        """Check if a specific game needs new analysis"""
+        raw_json = game.get("raw_json", {})
+        players_data = raw_json.get("players", {})
+
+        if (
+            game["white_player"].lower() == username.lower()
+            and "white" in players_data
+        ):
+            white_analysis = players_data["white"].get("analysis", {})
+            return white_analysis.get("accuracy") is None
+        elif (
+            game["black_player"].lower() == username.lower()
+            and "black" in players_data
+        ):
+            black_analysis = players_data["black"].get("analysis", {})
+            return black_analysis.get("accuracy") is None
+
+        # If no player data found, assume it needs analysis
+        return True
+
     def enrich_games_with_stockfish_streaming(self, username: str):
-        """Generator that yields API call progress updates"""
-        games_needing_analysis = self._find_games_needing_analysis(username)
-        total_games = len(games_needing_analysis)
+        """Generator that yields individual game completions and API progress updates"""
+        # Get ALL user games first
+        all_user_games = self._find_all_user_games(username)
 
+        # Separate into games that need analysis vs already complete games
+        games_needing_analysis = []
+        games_already_complete = []
 
-        if not games_needing_analysis:
-            yield {
-                "type": "init",
-                "total_positions": 0,
-                "message": f"No analysis needed - {total_games} games already have complete analysis"
-            }
-            return
+        for game in all_user_games:
+            if self._game_needs_analysis(game, username):
+                games_needing_analysis.append(game)
+            else:
+                games_already_complete.append(game)
 
-        # Process all games needing analysis
-        selected_games = games_needing_analysis
+        total_all_games = len(all_user_games)
+        games_needing_analysis_count = len(games_needing_analysis)
 
-        # Step 1: Collect all game data and unique positions for progress tracking
-        unique_positions, game_data_list = self.collect_all_game_data(selected_games)
+        # Step 1: Collect all game data and unique positions for games needing analysis
+        unique_positions, game_data_list = self.collect_all_game_data(games_needing_analysis)
 
-        if not unique_positions:
-            yield {
-                "type": "init",
-                "total_games": total_games,
-                "games_found": total_games
-            }
-            return
-
-        total_positions = len(unique_positions)
+        total_positions = len(unique_positions) if unique_positions else 0
 
         yield {
             "type": "init",
             "total_positions": total_positions,
-            "message": f"Found {total_games} games with {total_positions} positions to evaluate"
+            "total_games": total_all_games,
+            "message": f"Found {total_all_games} total games ({games_needing_analysis_count} need analysis, {len(games_already_complete)} already complete) with {total_positions} positions to evaluate"
         }
 
-        # Step 2: Database lookups (fast, no progress tracking needed)
+        # Immediately yield already-complete games
+        completed_game_count = 0
+        for game in games_already_complete:
+            completed_game_count += 1
+            yield {
+                "type": "game_complete",
+                "game_index": completed_game_count - 1,
+                "game_analysis": {"game": game},  # Minimal structure for already-complete games
+                "completed_games": completed_game_count,
+                "total_games": total_all_games
+            }
+
+        if not unique_positions:
+            # No new analysis needed, all games were already complete
+            yield {
+                "type": "complete",
+                "completed_games": completed_game_count,
+                "total_games": total_all_games,
+                "total_positions": 0
+            }
+            return
+
+        # Step 2: Database lookups
+        from .database_evaluator import DatabaseEvaluator
         db_evaluator = DatabaseEvaluator()
         db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
 
-        # Step 3: GCP API calls with progress tracking
+        # Step 3: Initialize streaming processor with DB results (add source info)
+        from .streaming_processor import StreamingGameProcessor
+
+        # Add source information to database results
+        db_results_with_source = {}
+        for fen, db_eval in db_results.items():
+            db_results_with_source[fen] = {
+                **db_eval,
+                "source": "database"
+            }
+
+        processor = StreamingGameProcessor(game_data_list, db_results_with_source)
+
+        # Step 4: Check if any games can be completed with just DB results
+        initial_completed = processor.add_evaluation("", {})  # Trigger check with empty eval
+        processor.available_evaluations.pop("", None)  # Remove the empty eval we added
+
+        # Process any games that were completed with just database results
+        for game_idx, analysis_result in initial_completed:
+            if "error" not in analysis_result and "skipped" not in analysis_result:
+                # Create the analysis array and inject user stats
+                self._create_game_analysis_array(analysis_result["game"], analysis_result, processor.available_evaluations)
+                from .hybrid_analyzer import HybridStockfishAnalyzer
+                analyzer = HybridStockfishAnalyzer()
+                self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
+
+                yield {
+                    "type": "game_complete",
+                    "game_index": len(games_already_complete) + game_idx,  # Offset by already-complete games
+                    "game_analysis": analysis_result,
+                    "completed_games": len(games_already_complete) + len(processor.get_completed_game_indices()),
+                    "total_games": total_all_games
+                }
+
+        # Step 5: Handle remaining positions that need GCP evaluation
         positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
-        completed_api_calls = len(db_results)  # Database hits count as "completed"
+        completed_api_calls = len(db_results)
 
         yield {
             "type": "api_progress",
@@ -468,18 +555,54 @@ class GameEnricher:
             "current_phase": f"Database: {len(db_results)} hits, {len(positions_for_gcp)} API calls needed"
         }
 
-        gcp_results = {}
         if positions_for_gcp:
-            # Use the GCP client with streaming progress tracking
+            from .gcp_evaluator import GCPStockfishClient
             gcp_client = GCPStockfishClient()
 
-            # Process all positions with real-time progress updates
+            # Stream individual position completions
             for update in gcp_client.evaluate_positions_parallel_streaming(
                 positions_for_gcp,
                 depth=self.stockfish_depth,
                 max_concurrent=self.max_concurrent
             ):
-                if update["type"] == "progress":
+                if update["type"] == "position_complete":
+                    # Add source information to GCP result
+                    gcp_result_with_source = {
+                        **update["result"],
+                        "source": "gcp_stockfish"
+                    }
+
+                    # Add this position to the processor and check for newly completed games
+                    newly_completed = processor.add_evaluation(update["position"], gcp_result_with_source)
+
+                    # Process each newly completed game
+                    for game_idx, analysis_result in newly_completed:
+                        if "error" not in analysis_result and "skipped" not in analysis_result:
+                            # Create the analysis array and inject user stats
+                            self._create_game_analysis_array(analysis_result["game"], analysis_result, processor.available_evaluations)
+                            from .hybrid_analyzer import HybridStockfishAnalyzer
+                            analyzer = HybridStockfishAnalyzer()
+                            self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
+
+                            yield {
+                                "type": "game_complete",
+                                "game_index": len(games_already_complete) + game_idx,  # Offset by already-complete games
+                                "game_analysis": analysis_result,
+                                "completed_games": len(games_already_complete) + len(processor.get_completed_game_indices()),
+                                "total_games": total_all_games
+                            }
+
+                    # Update API progress
+                    completed_api_calls = len(db_results) + update["completed_count"]
+                    yield {
+                        "type": "api_progress",
+                        "completed_calls": completed_api_calls,
+                        "total_calls": total_positions,
+                        "current_phase": f"Stockfish API: {update['completed_count']}/{len(positions_for_gcp)} positions, {len(games_already_complete) + len(processor.get_completed_game_indices())}/{total_all_games} games complete"
+                    }
+
+                elif update["type"] == "progress":
+                    # Additional progress update from GCP client
                     completed_api_calls = len(db_results) + update["completed"]
                     yield {
                         "type": "api_progress",
@@ -487,134 +610,20 @@ class GameEnricher:
                         "total_calls": total_positions,
                         "current_phase": f"Stockfish API: {update['completed']}/{len(positions_for_gcp)} positions evaluated"
                     }
+
                 elif update["type"] == "complete":
-                    gcp_results = update["results"]
+                    # All API calls finished
+                    pass
 
-        # Step 4: Build analysis for each game using global evaluations
-        global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
-
+        # Final completion
+        stats = processor.get_completion_stats()
         yield {
-            "type": "api_progress",
-            "completed_calls": total_positions,
-            "total_calls": total_positions,
-            "current_phase": "Building game analysis..."
+            "type": "complete",
+            "completed_games": len(games_already_complete) + stats["completed_games"],
+            "total_games": total_all_games,
+            "total_positions": total_positions
         }
 
-        # Process each game with the global evaluations
-        for i, game_data in enumerate(game_data_list):
-            if "error" not in game_data and "skipped" not in game_data:
-                analysis_result = self.build_single_game_analysis(game_data, global_evaluations)
-
-                if "error" not in analysis_result and "skipped" not in analysis_result:
-                    # Create the analysis array and inject user stats
-                    self._create_game_analysis_array(analysis_result["game"], analysis_result, global_evaluations)
-                    analyzer = HybridStockfishAnalyzer()
-                    self._inject_user_accuracy_stats(analysis_result["game"], analysis_result, username, analyzer)
-
-
-        yield {"type": "complete"}
-
-    def enrich_games_with_stockfish(self, username: str) -> Dict[str, Any]:
-        """Find games needing analysis and enrich them with optimized batch processing"""
-        enrichment_results = {
-            "total_games_analyzed": 0,
-            "games_with_new_analysis": 0,
-            "total_mistakes_found": 0,
-            "mistake_breakdown": {"blunders": 0, "mistakes": 0, "inaccuracies": 0},
-            "analysis_errors": 0,
-            "games_skipped": 0,
-            "database_evaluations_used": 0,
-            "stockfish_evaluations_used": 0,
-            "existing_evaluations_used": 0,
-        }
-
-        # Step 1: Find games needing analysis
-        games_needing_analysis = self._find_games_needing_analysis(username)
-
-        try:
-            # Process all games needing analysis
-            selected_games = games_needing_analysis
-
-            if not selected_games:
-                return enrichment_results
-
-            # Step 2: Collect all game data and unique positions (new architecture)
-            unique_positions, game_data_list = self.collect_all_game_data(selected_games)
-
-            if not unique_positions:
-                return enrichment_results
-
-            # Step 3: Batch query database for ALL unique positions
-            db_evaluator = DatabaseEvaluator()
-            db_results = db_evaluator.get_multiple_position_evaluations(unique_positions)
-
-            # Step 4: Parallel query GCP for remaining positions
-            positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
-            gcp_results = {}
-            if positions_for_gcp:
-                gcp_client = GCPStockfishClient()
-                gcp_results = gcp_client.evaluate_positions_parallel(positions_for_gcp, depth=self.stockfish_depth, max_concurrent=self.max_concurrent)
-
-            # Step 5: Merge all evaluation sources into global dict
-            global_evaluations = self.merge_evaluation_sources(db_results, gcp_results)
-
-            # Step 6: Process each game individually using global evaluations
-            total_db_count = 0
-            total_gcp_count = 0
-
-            for i, game_data in enumerate(game_data_list):
-                if "error" in game_data or "skipped" in game_data:
-                    if "error" in game_data:
-                        enrichment_results["analysis_errors"] += 1
-                    else:
-                        enrichment_results["games_skipped"] += 1
-                    continue
-                enrichment_results["total_games_analyzed"] += 1
-
-                # Build analysis for this specific game
-                analysis_result = self.build_single_game_analysis(game_data, global_evaluations)
-
-                # Count evaluations
-                db_count = analysis_result.get("database_evaluations", 0)
-                gcp_count = analysis_result.get("stockfish_evaluations", 0)
-                existing_count = analysis_result.get("existing_evaluations", 0)
-
-                total_db_count += db_count
-                total_gcp_count += gcp_count
-
-                if db_count + gcp_count > 0:
-                    enrichment_results["games_with_new_analysis"] += 1
-
-                    # Create game analysis array and inject user stats
-                    game = analysis_result["game"]
-                    self._create_game_analysis_array(game, analysis_result, global_evaluations)
-
-                    analyzer = HybridStockfishAnalyzer()
-                    self._inject_user_accuracy_stats(game, analysis_result, username, analyzer)
-
-                # Update totals
-                enrichment_results["database_evaluations_used"] += db_count
-                enrichment_results["stockfish_evaluations_used"] += gcp_count
-                enrichment_results["existing_evaluations_used"] += existing_count
-
-                # Count mistakes
-                mistakes = analysis_result.get("mistakes", [])
-                enrichment_results["total_mistakes_found"] += len(mistakes)
-
-                for mistake in mistakes:
-                    mistake_type = mistake["type"]
-                    if mistake_type in enrichment_results["mistake_breakdown"]:
-                        enrichment_results["mistake_breakdown"][mistake_type] += 1
-
-                # Store detailed analysis for debugging
-                game["stockfish_analysis"] = analysis_result
-
-
-
-        except Exception as e:
-            enrichment_results["error"] = f"Stockfish analysis failed: {str(e)}"
-
-        return enrichment_results
 
     def _find_games_needing_analysis(self, username: str) -> List[Dict[str, Any]]:
         """Find games without comprehensive analysis"""

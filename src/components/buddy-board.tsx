@@ -70,42 +70,86 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   const [evaluationChartFlipped, setEvaluationChartFlipped] = useState(false)
 
   // Buddy Board drag state
-  const [boardPosition, setBoardPosition] = useState({ x: 120, y: 120 }) // Initial bottom/right position
+  const [boardPosition, setBoardPosition] = useState({ x: window.innerWidth - 820, y: window.innerHeight - 820 }) // Initial position closer to button
   const [isDraggingBoard, setIsDraggingBoard] = useState(false)
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
 
-  // Load games from page data
+  // Set up dynamic game loading observer (runs once on mount)
   useEffect(() => {
     const enrichedGamesEl = document.getElementById('enriched-games')
     const reportUsernameEl = document.getElementById('report-username')
 
-    if (enrichedGamesEl && enrichedGamesEl.textContent) {
-      try {
-        const data = JSON.parse(enrichedGamesEl.textContent)
-        if (Array.isArray(data)) {
-          setGames(data)
-          if (data.length > 0) {
-            // Set default board orientation based on report producer
-            const reportUsername = reportUsernameEl?.textContent?.trim()
-            if (reportUsername) {
-              const firstGame = data[0]
-              const isWhitePlayer = firstGame.players?.white?.user?.name === reportUsername
-              const isBlackPlayer = firstGame.players?.black?.user?.name === reportUsername
+    const loadGamesFromElement = () => {
+      if (enrichedGamesEl && enrichedGamesEl.textContent) {
+        try {
+          const data = JSON.parse(enrichedGamesEl.textContent)
+          if (Array.isArray(data)) {
+            setGames(prev => {
+              const previousGameCount = prev.length
 
-              if (isBlackPlayer) {
-                setBoardOrientation('black')
-              } else {
-                setBoardOrientation('white') // Default to white if producer played white or not found
+              if (data.length > 0) {
+                // Set default board orientation based on report producer (only on first load)
+                if (previousGameCount === 0) {
+                  const reportUsername = reportUsernameEl?.textContent?.trim()
+                  if (reportUsername) {
+                    const firstGame = data[0]
+                    const isWhitePlayer = firstGame.players?.white?.user?.name === reportUsername
+                    const isBlackPlayer = firstGame.players?.black?.user?.name === reportUsername
+
+                    if (isBlackPlayer) {
+                      setBoardOrientation('black')
+                    } else {
+                      setBoardOrientation('white') // Default to white if producer played white or not found
+                    }
+                  }
+                  // First game will be loaded by separate useEffect when board becomes visible
+                } else if (data.length > previousGameCount) {
+                  // New game(s) added - load the newest one after a small delay
+                  setTimeout(() => loadGame(data.length - 1), 0)
+                }
               }
-            }
-            loadGame(0)
+
+              return data
+            })
           }
+        } catch (error) {
+          console.error('Error parsing enriched games data:', error)
         }
-      } catch (error) {
-        console.error('Error parsing enriched games data:', error)
       }
     }
-  }, [isVisible])
+
+    // Initial load
+    loadGamesFromElement()
+
+    // Set up MutationObserver to watch for changes to the enriched games element
+    if (enrichedGamesEl) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+            loadGamesFromElement()
+          }
+        })
+      })
+
+      observer.observe(enrichedGamesEl, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      })
+
+      return () => {
+        observer.disconnect()
+      }
+    }
+  }, [])
+
+  // Load first game when board becomes visible (with delay for animation)
+  useEffect(() => {
+    if (isVisible && games.length > 0 && !gameLoaded) {
+      // Delay loading to allow animation to start
+      setTimeout(() => loadGame(0), 50)
+    }
+  }, [isVisible, games.length, gameLoaded])
 
   // Animation engine - state-driven approach
   useEffect(() => {
@@ -415,7 +459,40 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   // Create evaluation chart component
   const EvaluationChart = () => {
     const currentGame = games[currentGameIndex]
-    if (!currentGame?.analysis) return null
+    if (!currentGame?.analysis) {
+      return (
+        <div style={{
+          width: `${300 + 16}px`,
+          border: '1px solid var(--border-color)',
+          borderRadius: '4px',
+          padding: '8px',
+          backgroundColor: 'var(--background-primary)'
+        }}>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            marginBottom: '8px',
+            color: 'var(--text-primary)',
+            textAlign: 'center'
+          }}>
+            Position Evaluation
+          </div>
+          <div style={{
+            width: '300px',
+            height: '120px',
+            backgroundColor: 'var(--background-secondary)',
+            borderRadius: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '14px'
+          }}>
+            No game data loaded
+          </div>
+        </div>
+      )
+    }
 
     const chartWidth = 300
     const chartHeight = 120
@@ -524,7 +601,15 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               fontWeight: 'normal',
               color: 'var(--text-secondary)'
             }}>
-              {analysis[displayedMoveIndex - 1].judgment.comment}
+              {(() => {
+                const judgment = analysis[displayedMoveIndex - 1].judgment
+                const comment = judgment.comment
+                // Get the last sentence of the comment
+                const sentences = comment.split('.').filter(s => s.trim().length > 0)
+                const lastSentence = sentences[sentences.length - 1]?.trim()
+
+                return `${judgment.name}. ${lastSentence}${lastSentence && !lastSentence.endsWith('.') ? '.' : ''}`
+              })()}
             </span>
           )}
         </div>
@@ -755,7 +840,40 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
     setLastMousePos: (pos: { x: number, y: number }) => void
   }) => {
     const currentGame = games[currentGameIndex]
-    if (!currentGame?.clocks || !currentGame?.clock) return null
+    if (!currentGame?.clocks || !currentGame?.clock) {
+      return (
+        <div style={{
+          width: `${300 + 16}px`,
+          border: '1px solid var(--border-color)',
+          borderRadius: '4px',
+          padding: '8px',
+          backgroundColor: 'var(--background-primary)'
+        }}>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            marginBottom: '8px',
+            color: 'var(--text-primary)',
+            textAlign: 'center'
+          }}>
+            Time Per Move (seconds)
+          </div>
+          <div style={{
+            width: '300px',
+            height: '120px',
+            backgroundColor: 'var(--background-tertiary)',
+            borderRadius: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '14px'
+          }}>
+            No game data loaded
+          </div>
+        </div>
+      )
+    }
 
     const chartWidth = 300
     const chartHeight = 120
@@ -783,27 +901,23 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
     const availableHeight = chartHeight - (2 * timePadding)
 
     // Calculate time used per move
-    // clocks[0] = white start, clocks[1] = black start
-    // clocks[2] = white after move 1, clocks[3] = black after move 1, etc.
+    // clocks[0] = white after move 1, clocks[1] = black after move 1, etc.
     const timeUsedPerMove: number[] = []
 
-    for (let i = 2; i < clocks.length; i++) {
-      const moveNumber = i - 1 // Move 1 starts at index 2
-      const isWhiteMove = moveNumber % 2 === 1
+    // White's first move: initial time - clocks[0]
+    const whiteFirstMoveTime = Math.max(0, (clock.initial * 100) - clocks[0])
+    timeUsedPerMove.push(whiteFirstMoveTime)
 
-      if (i === 2) {
-        // First move (White): white starting time - white time after move 1
-        const timeUsed = clocks[0] - clocks[2]
-        timeUsedPerMove.push(timeUsed)
-      } else if (i === 3) {
-        // Second move (Black): black starting time - black time after move 1
-        const timeUsed = clocks[1] - clocks[3]
-        timeUsedPerMove.push(timeUsed)
-      } else {
-        // All other moves: previous time + increment - current time
-        const timeUsed = clocks[i - 2] + clock.increment * 10 - clocks[i]
-        timeUsedPerMove.push(timeUsed)
-      }
+    // Black's first move: initial time - clocks[1] (if black has moved)
+    if (clocks.length > 1) {
+      const blackFirstMoveTime = Math.max(0, (clock.initial * 100) - clocks[1])
+      timeUsedPerMove.push(blackFirstMoveTime)
+    }
+
+    // All subsequent moves: previous clock - current clock
+    for (let i = 2; i < clocks.length; i++) {
+      const timeUsed = Math.max(0, clocks[i - 2] - clocks[i])
+      timeUsedPerMove.push(timeUsed)
     }
 
     // Find max time used for scaling
@@ -1216,8 +1330,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
       </button>
 
       {/* Board Panel */}
-      {(isVisible || games.length > 0) && (
-        <div
+      <div
           ref={buddyBoardRef}
           style={{
             position: 'fixed',
@@ -1231,8 +1344,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             boxShadow: '0 12px 40px var(--shadow-medium), 0 4px 12px rgba(0, 0, 0, 0.1)',
             zIndex: 2000,
             overflowY: 'auto',
-            transform: isVisible ? 'scale(1)' : 'scale(0.3)',
-            transformOrigin: 'center',
+            transform: isVisible ? 'scale(1)' : 'scale(0.1)',
+            transformOrigin: `${window.innerWidth - boardPosition.x}px ${window.innerHeight - boardPosition.y}px`,
             transition: isDraggingBoard ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: isVisible ? 1 : 0,
             pointerEvents: isVisible ? 'auto' : 'none',
@@ -1249,19 +1362,20 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               onMouseDown={(e) => e.stopPropagation()}
               style={{
                 position: 'absolute',
-                top: '10px',
-                right: '10px',
+                top: '5px',
+                right: '5px',
                 background: 'none',
                 border: 'none',
                 fontSize: '20px',
                 cursor: 'pointer',
                 color: 'var(--text-secondary)',
-                width: '30px',
-                height: '30px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                zIndex: 3000
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--hover-background)'
@@ -1298,7 +1412,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                 Buddy Board
               </h3>
 
-              {games.length > 0 && (
+              {games.length > 0 ? (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1321,9 +1435,12 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                         minWidth: '180px'
                       }}
                     >
-                      {games.map((game, index) => (
-                        <option key={index} value={index}>
-                          Game {index + 1}: {game.players.white.user.name} vs {game.players.black.user.name}
+                      {games
+                        .map((game, originalIndex) => ({ game, originalIndex }))
+                        .sort((a, b) => (b.game.createdAt || 0) - (a.game.createdAt || 0))
+                        .map(({ game, originalIndex }, sortedIndex) => (
+                        <option key={originalIndex} value={originalIndex}>
+                          Game {sortedIndex + 1}: {game.players.white.user.name} vs {game.players.black.user.name}
                         </option>
                       ))}
                     </select>
@@ -1336,24 +1453,50 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     {games.length} game{games.length !== 1 ? 's' : ''} loaded
                   </span>
                 </div>
+              ) : (
+                <div style={{
+                  fontSize: '11px',
+                  color: 'var(--text-secondary)',
+                  whiteSpace: 'nowrap'
+                }}>
+                  No games loaded
+                </div>
               )}
             </div>
 
             {/* Move List and Chess Board Container */}
             <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }} onMouseDown={(e) => e.stopPropagation()}>
-              {/* Move List */}
-              {gameLoaded && currentMoves.length > 0 && (
+              {/* Move List or Empty State */}
+              {games.length === 0 || !games[currentGameIndex] || !gameLoaded || currentMoves.length === 0 ? (
+                <div style={{
+                  width: '200px',
+                  height: `${size}px`,
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '16px',
+                  backgroundColor: 'var(--background-primary)',
+                  marginTop: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  fontSize: '14px',
+                  textAlign: 'center'
+                }}>
+                  No game loaded
+                </div>
+              ) : (
                 <div
                   ref={moveListRef}
                   style={{
                     width: '200px',
-                    height: `${size}px`, // Match the chess board height
+                    height: `${size}px`,
                     overflowY: 'auto',
                     border: '1px solid var(--border-color)',
                     borderRadius: '4px',
                     padding: '0 8px 8px 8px',
                     backgroundColor: 'var(--background-primary)',
-                    marginTop: '20px' // Align with top of board (account for username above board)
+                    marginTop: '20px'
                   }}>
                   {/* Opening - Sticky at top */}
                   {games[currentGameIndex].opening && (
@@ -1657,9 +1800,11 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     textAlign: 'left'
                   }}>
                     <div style={{ color: 'var(--text-primary)' }}>
-                      {boardOrientation === 'white'
-                        ? games[currentGameIndex].players.black.user.name
-                        : games[currentGameIndex].players.white.user.name}
+                      {games.length > 0 && games[currentGameIndex]
+                        ? (boardOrientation === 'white'
+                          ? games[currentGameIndex].players.black.user.name
+                          : games[currentGameIndex].players.white.user.name)
+                        : 'Player'}
                     </div>
 
                     <div style={{
@@ -1673,6 +1818,9 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
+                        if (!games.length || !games[currentGameIndex]) {
+                          return 'No game loaded'
+                        }
                         const currentGame = games[currentGameIndex]
                         const winner = currentGame.winner
                         const status = currentGame.status
@@ -1716,6 +1864,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
+                        if (!games.length || !games[currentGameIndex]) return ''
                         const currentGame = games[currentGameIndex]
                         if (!currentGame.clocks || !currentGame.clock) return ''
 
@@ -1723,23 +1872,53 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                         const isWhiteOnTop = boardOrientation === 'black'
 
                         // Get the appropriate clock time based on current move
+                        // clocks[0] = white after move 1, clocks[1] = black after move 1, etc.
                         let clockTime
+
                         if (displayedMoveIndex === 0) {
-                          // Starting position - use the actual starting time from clocks array
-                          clockTime = isWhiteOnTop ? currentGame.clocks[0] : currentGame.clocks[1]
+                          // Starting position - use initial time from game settings
+                          clockTime = currentGame.clock.initial * 100 // Convert seconds to centiseconds
                         } else {
-                          // Get clock time for the top player at current position
-                          // Clocks array: [white_start, black_start, white_after_move1, black_after_move1, ...]
-                          // For move N, white's time is at index N*2, black's time is at index N*2+1
-                          const clockIndex = isWhiteOnTop ? displayedMoveIndex * 2 : displayedMoveIndex * 2 + 1
-                          clockTime = currentGame.clocks[clockIndex] || (isWhiteOnTop ? currentGame.clocks[0] : currentGame.clocks[1])
+                          if (isWhiteOnTop) {
+                            // Top player is white
+                            // White's moves are at even indices (0, 2, 4...)
+                            const whiteMove = Math.floor((displayedMoveIndex - 1) / 2)
+                            const whiteClockIndex = whiteMove * 2
+                            clockTime = currentGame.clocks[whiteClockIndex] || currentGame.clock.initial * 100
+                          } else {
+                            // Top player is black
+                            // Black's moves are at odd indices (1, 3, 5...)
+                            if (displayedMoveIndex === 1) {
+                              // After white's first move, black hasn't moved yet
+                              clockTime = currentGame.clock.initial * 100
+                            } else {
+                              const blackMove = Math.floor((displayedMoveIndex - 2) / 2)
+                              const blackClockIndex = blackMove * 2 + 1
+                              clockTime = currentGame.clocks[blackClockIndex] || currentGame.clock.initial * 100
+                            }
+                          }
                         }
 
-                        // Convert centiseconds to MM:SS format
-                        const totalSeconds = Math.floor(clockTime / 100)
+                        // Convert centiseconds to MM:SS or MM:SS.S format
+                        const totalCentiseconds = Math.round(clockTime)
+                        const totalSeconds = totalCentiseconds / 100
                         const minutes = Math.floor(totalSeconds / 60)
                         const seconds = totalSeconds % 60
-                        return `${minutes}:${seconds.toString().padStart(2, '0')}`
+
+                        if (totalSeconds < 60) {
+                          // Under a minute - show tenths with smaller decimal
+                          const wholePart = `${minutes}:${Math.floor(seconds).toString().padStart(2, '0')}`
+                          const tenthPart = (seconds % 1).toFixed(1).substring(1) // Get ".X" part
+                          return (
+                            <span>
+                              {wholePart}
+                              <span style={{ fontSize: '0.8em' }}>{tenthPart}</span>
+                            </span>
+                          )
+                        } else {
+                          // Over a minute - round down to nearest second
+                          return `${minutes}:${Math.floor(seconds).toString().padStart(2, '0')}`
+                        }
                       })()}
                     </div>
                   </div>
@@ -1771,9 +1950,11 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     marginTop: '4px',
                     width: `${size}px`
                   }}>
-                    {boardOrientation === 'white'
-                      ? games[currentGameIndex].players.white.user.name
-                      : games[currentGameIndex].players.black.user.name}
+                    {games.length > 0 && games[currentGameIndex]
+                      ? (boardOrientation === 'white'
+                        ? games[currentGameIndex].players.white.user.name
+                        : games[currentGameIndex].players.black.user.name)
+                      : 'Player'}
 
                     {/* Bottom Player Clock */}
                     <div style={{
@@ -1786,6 +1967,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
+                        if (!games.length || !games[currentGameIndex]) return ''
                         const currentGame = games[currentGameIndex]
                         if (!currentGame.clocks || !currentGame.clock) return ''
 
@@ -1793,23 +1975,53 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                         const isWhiteOnBottom = boardOrientation === 'white'
 
                         // Get the appropriate clock time based on current move
+                        // clocks[0] = white after move 1, clocks[1] = black after move 1, etc.
                         let clockTime
+
                         if (displayedMoveIndex === 0) {
-                          // Starting position - use the actual starting time from clocks array
-                          clockTime = isWhiteOnBottom ? currentGame.clocks[0] : currentGame.clocks[1]
+                          // Starting position - use initial time from game settings
+                          clockTime = currentGame.clock.initial * 100 // Convert seconds to centiseconds
                         } else {
-                          // Get clock time for the bottom player at current position
-                          // Clocks array: [white_start, black_start, white_after_move1, black_after_move1, ...]
-                          // For move N, white's time is at index N*2, black's time is at index N*2+1
-                          const clockIndex = isWhiteOnBottom ? displayedMoveIndex * 2 : displayedMoveIndex * 2 + 1
-                          clockTime = currentGame.clocks[clockIndex] || (isWhiteOnBottom ? currentGame.clocks[0] : currentGame.clocks[1])
+                          if (isWhiteOnBottom) {
+                            // Bottom player is white
+                            // White's moves are at even indices (0, 2, 4...)
+                            const whiteMove = Math.floor((displayedMoveIndex - 1) / 2)
+                            const whiteClockIndex = whiteMove * 2
+                            clockTime = currentGame.clocks[whiteClockIndex] || currentGame.clock.initial * 100
+                          } else {
+                            // Bottom player is black
+                            // Black's moves are at odd indices (1, 3, 5...)
+                            if (displayedMoveIndex === 1) {
+                              // After white's first move, black hasn't moved yet
+                              clockTime = currentGame.clock.initial * 100
+                            } else {
+                              const blackMove = Math.floor((displayedMoveIndex - 2) / 2)
+                              const blackClockIndex = blackMove * 2 + 1
+                              clockTime = currentGame.clocks[blackClockIndex] || currentGame.clock.initial * 100
+                            }
+                          }
                         }
 
-                        // Convert centiseconds to MM:SS format
-                        const totalSeconds = Math.floor(clockTime / 100)
+                        // Convert centiseconds to MM:SS or MM:SS.S format
+                        const totalCentiseconds = Math.round(clockTime)
+                        const totalSeconds = totalCentiseconds / 100
                         const minutes = Math.floor(totalSeconds / 60)
                         const seconds = totalSeconds % 60
-                        return `${minutes}:${seconds.toString().padStart(2, '0')}`
+
+                        if (totalSeconds < 60) {
+                          // Under a minute - show tenths with smaller decimal
+                          const wholePart = `${minutes}:${Math.floor(seconds).toString().padStart(2, '0')}`
+                          const tenthPart = (seconds % 1).toFixed(1).substring(1) // Get ".X" part
+                          return (
+                            <span>
+                              {wholePart}
+                              <span style={{ fontSize: '0.8em' }}>{tenthPart}</span>
+                            </span>
+                          )
+                        } else {
+                          // Over a minute - round down to nearest second
+                          return `${minutes}:${Math.floor(seconds).toString().padStart(2, '0')}`
+                        }
                       })()}
                     </div>
                   </div>
@@ -1862,7 +2074,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
 
             {/* Navigation Controls */}
-            {gameLoaded && (
+            {gameLoaded && games.length > 0 && games[currentGameIndex] && (
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',
@@ -1933,7 +2145,6 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               </div>
             )}
         </div>
-      )}
     </>
   )
 }

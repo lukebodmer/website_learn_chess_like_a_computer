@@ -580,13 +580,36 @@ def stream_analysis_progress(request, username, dataset_id):
                 }
                 yield f"data: {json.dumps(init_data)}\n\n"
 
-                # Monitor task progress
+                # Monitor task progress and incremental game completion
                 last_progress = -1
                 last_status = task.status
+                last_enriched_count = 0
 
                 while not task.is_complete:
                     # Refresh task from database
                     task.refresh_from_db()
+
+                    # Check for new completed games
+                    if task.analysis_report:
+                        task.analysis_report.refresh_from_db()
+                        current_enriched_count = len(task.analysis_report.enriched_games) if task.analysis_report.enriched_games else 0
+
+                        # Send individual game completions
+                        if current_enriched_count > last_enriched_count:
+                            # Send the newly completed games
+                            newly_completed_games = task.analysis_report.enriched_games[last_enriched_count:current_enriched_count]
+
+                            for i, game_data in enumerate(newly_completed_games):
+                                game_complete_data = {
+                                    "type": "game_complete",
+                                    "game_index": last_enriched_count + i,
+                                    "game_data": game_data,
+                                    "completed_games": last_enriched_count + i + 1,
+                                    "total_games": task.analysis_report.basic_stats.get('total_games', 0) if task.analysis_report.basic_stats else 0
+                                }
+                                yield f"data: {json.dumps(game_complete_data)}\n\n"
+
+                            last_enriched_count = current_enriched_count
 
                     # Send progress updates
                     if task.progress != last_progress or task.status != last_status:
@@ -604,7 +627,7 @@ def stream_analysis_progress(request, username, dataset_id):
                         last_progress = task.progress
                         last_status = task.status
 
-                    time.sleep(1)  # Poll every second
+                    time.sleep(0.5)  # Poll twice per second for more responsive game updates
 
                 # Task completed, send final result
                 if task.status == 'completed' and task.analysis_report:

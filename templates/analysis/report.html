@@ -75,12 +75,20 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
 });
 
+// Track enriched games as they complete
+let enrichedGamesArray = [];
+let totalExpectedGames = 0;
+
 function handleAnalysisUpdate(data) {
     const progressStatus = document.getElementById('progress-status');
     const progressFill = document.getElementById('progress-fill');
 
     switch (data.type) {
         case 'init':
+            // Initialize tracking variables
+            enrichedGamesArray = [];
+            totalExpectedGames = data.total_games || 0;
+
             if (data.task_status) {
                 // From task monitoring
                 progressStatus.innerText = `Task started - ${data.task_status}`;
@@ -92,6 +100,9 @@ function handleAnalysisUpdate(data) {
                 const totalPositions = data.total_positions || 0;
                 progressStatus.innerText = `Found ${totalPositions} positions to evaluate`;
             }
+
+            // Initialize the enriched games display
+            updateEnrichedGamesDisplay();
             break;
 
         case 'api_progress':
@@ -103,14 +114,27 @@ function handleAnalysisUpdate(data) {
             progressStatus.innerText = `${data.current_phase} - ${progress}% (${completed}/${total})`;
             break;
 
+        case 'game_complete':
+            // Add the completed game to our array
+            if (data.game_data) {
+                enrichedGamesArray.push(data.game_data);
+
+                // Update the display immediately
+                updateEnrichedGamesDisplay();
+
+                // Update progress status to show game completion
+                const completedGames = data.completed_games || enrichedGamesArray.length;
+                const totalGames = data.total_games || totalExpectedGames;
+                progressStatus.innerText = `Games completed: ${completedGames}/${totalGames} - ${data.current_phase || 'Processing...'}`;
+            }
+            break;
 
         case 'complete':
-            progressStatus.innerText = `✅ Analysis complete! Report saved to database.`;
+            progressStatus.innerText = `✅ Analysis complete! ${enrichedGamesArray.length} games processed.`;
             progressFill.style.width = '100%';
 
-            if (data.summary) {
-                updateDisplaysWithResults(data);
-            }
+            // Final update to enriched games display
+            updateEnrichedGamesDisplay();
 
             if (eventSource) {
                 eventSource.close();
@@ -123,6 +147,21 @@ function handleAnalysisUpdate(data) {
                 eventSource.close();
             }
             break;
+    }
+}
+
+function updateEnrichedGamesDisplay() {
+    const enrichedGamesEl = document.getElementById('enriched-games');
+
+    if (enrichedGamesArray.length === 0) {
+        enrichedGamesEl.textContent = JSON.stringify({
+            status: "Waiting for games to complete analysis...",
+            completed_games: 0,
+            total_expected: totalExpectedGames
+        }, null, 2);
+    } else {
+        // Display all completed games
+        enrichedGamesEl.textContent = JSON.stringify(enrichedGamesArray, null, 2);
     }
 }
 

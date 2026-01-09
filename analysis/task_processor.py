@@ -72,46 +72,25 @@ class ReportTaskProcessor:
             task.total_games = 0
             task.save()
 
-            # Create enricher with progress callback
+            # Create enricher
             enricher = GameEnricher(games)
 
-            # Create a custom streaming enricher that updates the task
+            # Run streaming enrichment that incrementally updates the report
             analysis_summary = self._run_enrichment_with_progress(enricher, task)
 
-            # Extract enriched games data
-            enriched_games_data = []
-            for game in games:
-                enriched_games_data.append(game.get('raw_json', {}))
-
-            # Calculate basic stats
-            basic_stats = {
-                'total_games': len(enriched_games_data),
-                'games_analyzed': analysis_summary['total_games_analyzed']
-            }
-
-            # Create AnalysisReport with enriched data
+            # Mark task as completed (report was created and updated incrementally)
             with transaction.atomic():
-                report = AnalysisReport.objects.create(
-                    user=task.user,
-                    game_dataset=task.game_dataset,
-                    basic_stats=basic_stats,
-                    terminations={},  # Could be calculated from enriched data
-                    openings={},      # Could be calculated from enriched data
-                    accuracy_analysis={},  # Could be calculated from enriched data
-                    stockfish_analysis=analysis_summary,
-                    enriched_games=enriched_games_data,
-                    analysis_duration=timezone.now() - task.started_at,
-                    stockfish_games_analyzed=analysis_summary['total_games_analyzed']
-                )
-
-                # Mark task as completed
                 task.status = 'completed'
                 task.completed_at = timezone.now()
                 task.progress = 100
-                task.analysis_report = report
                 task.save()
 
-            print(f"✅ Task {task.id} completed successfully. Report {report.id} created with {len(enriched_games_data)} enriched games")
+            # Get the report that was created incrementally
+            if task.analysis_report:
+                enriched_games_count = len(task.analysis_report.enriched_games) if task.analysis_report.enriched_games else 0
+                print(f"✅ Task {task.id} completed successfully. Report {task.analysis_report.id} created with {enriched_games_count} enriched games")
+            else:
+                print(f"✅ Task {task.id} completed successfully with {analysis_summary['total_games_analyzed']} games analyzed")
 
         except Exception as e:
             print(f"❌ Task {task.id} failed: {e}")
@@ -156,7 +135,7 @@ class ReportTaskProcessor:
         return games
 
     def _run_enrichment_with_progress(self, enricher, task):
-        """Run enrichment and update task progress based on API calls"""
+        """Run enrichment and update task progress, storing games incrementally"""
         # Get the username from the task
         username = ""
         if task.game_dataset.lichess_username:
@@ -164,6 +143,7 @@ class ReportTaskProcessor:
         elif task.game_dataset.chess_com_username:
             username = task.game_dataset.chess_com_username
 
+        # Initialize tracking variables
         analysis_summary = {
             'total_games_analyzed': 0,
             'games_with_new_analysis': 0,
@@ -174,15 +154,46 @@ class ReportTaskProcessor:
             'existing_evaluations_used': 0,
         }
 
+        # Track completed games for incremental storage
+        completed_enriched_games = []
+        total_expected_games = 0
+
         # Use the streaming enricher to get progress updates
         for update in enricher.enrich_games_with_stockfish_streaming(username):
             # Update task progress based on streaming updates
             if update.get('type') == 'init':
-                # Store position count for tracking
+                # Store counts for tracking
                 total_positions = update.get('total_positions', 0)
+                total_expected_games = update.get('total_games', 0)
+
                 if total_positions > 0:
                     task.current_game = f"{total_positions} positions to evaluate"
                     task.total_games = total_positions  # Repurpose for total API calls
+
+                # Initialize empty report to store games incrementally
+                from django.utils import timezone
+                with transaction.atomic():
+                    # Refresh task from database to get latest analysis_report_id
+                    task.refresh_from_db()
+
+                    if not task.analysis_report:
+                        report = AnalysisReport.objects.create(
+                            user=task.user,
+                            game_dataset=task.game_dataset,
+                            basic_stats={'total_games': total_expected_games, 'games_analyzed': 0},
+                            terminations={},
+                            openings={},
+                            accuracy_analysis={},
+                            stockfish_analysis=analysis_summary,
+                            enriched_games=[],  # Start with empty list
+                            analysis_duration=timezone.now() - task.started_at,
+                            stockfish_games_analyzed=0
+                        )
+                        task.analysis_report = report
+                        print(f"📊 Created new AnalysisReport {report.id} for task {task.id}")
+                    else:
+                        print(f"📊 Task {task.id} already has AnalysisReport {task.analysis_report.id}")
+
                 task.save()
 
             elif update.get('type') == 'api_progress':
@@ -194,7 +205,6 @@ class ReportTaskProcessor:
                     task.progress = int((completed_calls / total_calls) * 100)
 
                 # Store exact call counts for accurate frontend progress
-                # Using existing fields: completed_games for completed_calls, total_games for total_calls
                 task.completed_games = completed_calls
                 task.total_games = total_calls
 
@@ -203,14 +213,68 @@ class ReportTaskProcessor:
                 task.current_game = current_phase
                 task.save()
 
+            elif update.get('type') == 'game_complete':
+                # Individual game completed - add to our list and update report incrementally
+                game_analysis = update.get('game_analysis', {})
+
+                if game_analysis and 'game' in game_analysis:
+                    game_json = game_analysis['game'].get('raw_json', {})
+                    completed_enriched_games.append(game_json)
+
+                    # Update analysis summary statistics
+                    analysis_summary['total_games_analyzed'] = len(completed_enriched_games)
+
+                    # Count mistakes from this game
+                    mistakes = game_analysis.get('mistakes', [])
+                    analysis_summary['total_mistakes_found'] += len(mistakes)
+
+                    for mistake in mistakes:
+                        mistake_type = mistake.get('type', '')
+                        if mistake_type in analysis_summary['mistake_breakdown']:
+                            analysis_summary['mistake_breakdown'][mistake_type] += 1
+
+                    # Update report in database with new game
+                    if task.analysis_report:
+                        with transaction.atomic():
+                            report = task.analysis_report
+                            report.enriched_games = completed_enriched_games.copy()
+                            report.stockfish_analysis = analysis_summary.copy()
+                            report.stockfish_games_analyzed = len(completed_enriched_games)
+                            report.basic_stats = {
+                                'total_games': total_expected_games,
+                                'games_analyzed': len(completed_enriched_games)
+                            }
+                            report.save()
+
+                # Update task with game completion info
+                completed_games = update.get('completed_games', len(completed_enriched_games))
+                total_games = update.get('total_games', total_expected_games)
+                task.current_game = f"Completed {completed_games}/{total_games} games"
+                task.save()
 
             elif update.get('type') == 'error':
                 print(f"Enrichment error in task {task.id}: {update.get('error')}")
                 break
 
             elif update.get('type') == 'complete':
+                # Final completion
                 task.progress = 100
-                task.current_game = "Analysis complete"
+                task.current_game = f"Analysis complete - {len(completed_enriched_games)} games processed"
+
+                # Final update to analysis summary
+                analysis_summary['total_games_analyzed'] = len(completed_enriched_games)
+
+                # Update report with final stats
+                if task.analysis_report:
+                    with transaction.atomic():
+                        report = task.analysis_report
+                        report.enriched_games = completed_enriched_games.copy()
+                        report.stockfish_analysis = analysis_summary.copy()
+                        report.stockfish_games_analyzed = len(completed_enriched_games)
+                        from django.utils import timezone
+                        report.analysis_duration = timezone.now() - task.started_at
+                        report.save()
+
                 task.save()
                 break
 

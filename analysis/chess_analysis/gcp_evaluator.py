@@ -304,7 +304,7 @@ class GCPStockfishClient:
         max_concurrent: int = 20
     ):
         """
-        Generator that evaluates positions in parallel and yields progress updates
+        Generator that evaluates positions in parallel and yields individual completions
 
         Args:
             positions: List of FEN strings to evaluate
@@ -312,13 +312,22 @@ class GCPStockfishClient:
             max_concurrent: Maximum number of concurrent requests
 
         Yields:
-            Progress updates and final results
+            Individual position completions and progress updates
         """
         if not positions:
-            return {}
+            yield {"type": "complete", "results": {}}
+            return
 
         if len(positions) == 1:
             result = self.evaluate_positions_batch(positions, depth)
+            position = positions[0]
+            if position in result:
+                yield {
+                    "type": "position_complete",
+                    "position": position,
+                    "result": result[position],
+                    "completed_count": 1
+                }
             yield {"type": "progress", "completed": 1, "total": 1}
             yield {"type": "complete", "results": result}
             return
@@ -328,7 +337,7 @@ class GCPStockfishClient:
         import concurrent.futures
 
         start_time = time.time()
-        results = {}
+        all_results = {}
 
         # Use ThreadPoolExecutor for concurrent HTTP requests
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent) as executor:
@@ -344,13 +353,38 @@ class GCPStockfishClient:
                 try:
                     result = future.result()
                     if position in result:
-                        results[position] = result[position]
+                        position_result = result[position]
+                        all_results[position] = position_result
+
+                        # Yield individual position completion immediately
+                        yield {
+                            "type": "position_complete",
+                            "position": position,
+                            "result": position_result,
+                            "completed_count": completed + 1
+                        }
                     else:
-                        results[position] = {"error": "Position not found in response"}
+                        error_result = {"error": "Position not found in response"}
+                        all_results[position] = error_result
+
+                        yield {
+                            "type": "position_complete",
+                            "position": position,
+                            "result": error_result,
+                            "completed_count": completed + 1
+                        }
 
                 except Exception as e:
                     logger.error(f"Parallel evaluation failed for {position}: {e}")
-                    results[position] = {"error": f"Evaluation failed: {str(e)}"}
+                    error_result = {"error": f"Evaluation failed: {str(e)}"}
+                    all_results[position] = error_result
+
+                    yield {
+                        "type": "position_complete",
+                        "position": position,
+                        "result": error_result,
+                        "completed_count": completed + 1
+                    }
 
                 completed += 1
 
@@ -365,82 +399,13 @@ class GCPStockfishClient:
                     logger.info(f"Parallel evaluation progress: {completed}/{len(positions)}")
 
         elapsed = time.time() - start_time
-        success_count = len([r for r in results.values() if "error" not in r])
+        success_count = len([r for r in all_results.values() if "error" not in r])
 
         logger.info(f"Parallel evaluation complete in {elapsed:.2f}s - {success_count}/{len(positions)} successful")
         print(f"🚀 PARALLEL: {len(positions)} positions in {elapsed:.2f}s ({elapsed/len(positions):.2f}s per position)")
 
-        yield {"type": "complete", "results": results}
+        yield {"type": "complete", "results": all_results}
 
-    def evaluate_positions_parallel(
-        self,
-        positions: List[str],
-        depth: int = 20,
-        max_concurrent: int = 20,
-        progress_callback=None
-    ) -> Dict[str, Dict]:
-        """
-        Evaluate positions in parallel using individual API calls for maximum throughput
-
-        Args:
-            positions: List of FEN strings to evaluate
-            depth: Stockfish search depth
-            max_concurrent: Maximum number of concurrent requests
-            progress_callback: Optional callback function called with (completed, total)
-
-        Returns:
-            Dict mapping FEN to evaluation result
-        """
-        if not positions:
-            return {}
-
-        if len(positions) == 1:
-            return self.evaluate_positions_batch(positions, depth)
-
-        logger.info(f"Parallel evaluation of {len(positions)} positions with max {max_concurrent} concurrent requests")
-
-        import concurrent.futures
-
-        start_time = time.time()
-        results = {}
-
-        # Use ThreadPoolExecutor for concurrent HTTP requests
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent) as executor:
-            # Submit all positions as individual requests
-            future_to_position = {
-                executor.submit(self.evaluate_single_position_async, position, depth): position
-                for position in positions
-            }
-
-            completed = 0
-            for future in concurrent.futures.as_completed(future_to_position):
-                position = future_to_position[future]
-                try:
-                    result = future.result()
-                    if position in result:
-                        results[position] = result[position]
-                    else:
-                        results[position] = {"error": "Position not found in response"}
-
-                except Exception as e:
-                    logger.error(f"Parallel evaluation failed for {position}: {e}")
-                    results[position] = {"error": f"Evaluation failed: {str(e)}"}
-
-                completed += 1
-                if completed % 10 == 0 or completed == len(positions):
-                    logger.info(f"Parallel evaluation progress: {completed}/{len(positions)}")
-
-                # Call progress callback if provided
-                if progress_callback:
-                    progress_callback(completed, len(positions))
-
-        elapsed = time.time() - start_time
-        success_count = len([r for r in results.values() if "error" not in r])
-
-        logger.info(f"Parallel evaluation complete in {elapsed:.2f}s - {success_count}/{len(positions)} successful")
-        print(f"🚀 PARALLEL: {len(positions)} positions in {elapsed:.2f}s ({elapsed/len(positions):.2f}s per position)")
-
-        return results
 
 # Global client instance
 _gcp_client = None
