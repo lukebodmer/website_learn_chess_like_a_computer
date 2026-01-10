@@ -1200,6 +1200,74 @@ tr:hover {
     }
 }
 
+/* Game Filter Button Styles */
+.game-filters {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--background-secondary);
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-controls span {
+    font-weight: bold;
+    margin-right: 10px;
+    color: var(--text-primary);
+}
+
+.filter-btn {
+    background: var(--background-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.filter-btn:hover {
+    background: var(--hover-background);
+    border-color: var(--primary-light);
+    color: var(--text-primary);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.filter-btn-active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--text-on-primary);
+    border-color: var(--primary-dark);
+    font-weight: 600;
+    box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.filter-btn-active:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    transform: translateY(-1px);
+    color: var(--text-on-primary);
+    text-decoration: none;
+}
+
+#filter-status {
+    margin-left: 20px;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 14px;
+}
+
 /* Mobile responsiveness for charts */
 @media (max-width: 480px) {
     .stats-grid {
@@ -1231,5 +1299,16 @@ tr:hover {
 
     .theme-preview {
         height: 50px;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .filter-controls span {
+        margin-right: 0;
+        margin-bottom: 5px;
     }
 }

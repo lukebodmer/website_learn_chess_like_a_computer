@@ -22,7 +22,7 @@ import pycountry
 import pytz
 import time
 
-from .models import UserProfile, GameDataSet, AnalysisReport, ChessGame, ReportGenerationTask
+from .models import UserProfile, GameDataSet, AnalysisReport, ReportGenerationTask
 from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
 from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
@@ -32,7 +32,7 @@ from .report_generation import generate_html_report
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 5
+ANALYSIS_GAME_COUNT = 50
 
 
 # Shared utilities for game fetching
@@ -1837,100 +1837,3 @@ def daily_puzzle_api(request):
         }, status=500)
 
 
-@login_required
-def export_unified_games_json(request, username):
-    """
-    Export all games for a user in unified format (Lichess-evaluated + enriched)
-    Returns a single JSON file with all games in identical format
-    """
-    try:
-        # Get the most recent game dataset for this user
-        game_dataset = GameDataSet.objects.filter(
-            user_profile__lichess_username=username,
-            user_profile__user=request.user
-        ).order_by('-created_at').first()
-
-        if not game_dataset:
-            return JsonResponse({
-                'error': 'No game data found for this user'
-            }, status=404)
-
-        # Get all games from this dataset
-        games = ChessGame.objects.filter(dataset=game_dataset).select_related('dataset')
-
-        unified_games = []
-        lichess_evaluated_count = 0
-        enriched_count = 0
-
-        for game in games:
-            try:
-                raw_json = game.raw_json
-
-                # Check if game already has Lichess evaluation
-                has_lichess_evaluation = False
-                if 'players' in raw_json:
-                    for color in ['white', 'black']:
-                        if (color in raw_json['players'] and
-                            'analysis' in raw_json['players'][color] and
-                            raw_json['players'][color]['analysis'].get('accuracy') is not None):
-                            has_lichess_evaluation = True
-                            break
-
-                # Also check if game has analysis array with judgments
-                if not has_lichess_evaluation and 'analysis' in raw_json:
-                    for move in raw_json['analysis']:
-                        if 'judgment' in move:
-                            has_lichess_evaluation = True
-                            break
-
-                if has_lichess_evaluation:
-                    lichess_evaluated_count += 1
-                else:
-                    enriched_count += 1
-
-                # Add game to unified format (already processed by enricher if needed)
-                unified_game = {
-                    'id': raw_json.get('id', ''),
-                    'white_player': game.white_player,
-                    'black_player': game.black_player,
-                    'opening': game.opening,
-                    'result': raw_json.get('winner', 'unknown'),
-                    'rated': raw_json.get('rated', False),
-                    'speed': raw_json.get('speed', ''),
-                    'time_control': raw_json.get('clock', {}),
-                    'played_at': raw_json.get('createdAt', 0),
-                    'raw_json': raw_json
-                }
-
-                unified_games.append(unified_game)
-
-            except Exception as e:
-                print(f"Error processing game {game.id}: {e}")
-                continue
-
-        # Prepare response
-        response_data = {
-            'metadata': {
-                'username': username,
-                'total_games': len(unified_games),
-                'lichess_evaluated_games': lichess_evaluated_count,
-                'enriched_games': enriched_count,
-                'export_timestamp': timezone.now().isoformat(),
-                'dataset_created': game_dataset.created_at.isoformat()
-            },
-            'games': unified_games
-        }
-
-        # Return as downloadable JSON file
-        response = HttpResponse(
-            json.dumps(response_data, indent=2),
-            content_type='application/json'
-        )
-        response['Content-Disposition'] = f'attachment; filename="{username}_chess_games_unified.json"'
-
-        return response
-
-    except Exception as e:
-        return JsonResponse({
-            'error': f'Failed to export games: {str(e)}'
-        }, status=500)

@@ -32,6 +32,40 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
     {% endif %}
 
+    <h2>Filters</h2>
+    <div id="game-filters" class="game-filters">
+        <div class="filter-controls">
+            <span>View:</span>
+            <button id="filter-all" class="filter-btn filter-btn-active" data-filter="all">
+                All Games
+            </button>
+            <button id="filter-white" class="filter-btn" data-filter="white">
+                White Games
+            </button>
+            <button id="filter-black" class="filter-btn" data-filter="black">
+                Black Games
+            </button>
+            <span id="filter-status">
+                All games loaded
+            </span>
+        </div>
+    </div>
+
+    <h2>Game Results Chart:</h2>
+    <div id="game-results-chart-container" data-username="{{ username }}" >
+        <!-- React GameResultsChart will be mounted here -->
+    </div>
+
+    <h2>Mistakes Analysis Chart:</h2>
+    <div id="mistakes-analysis-chart-container" data-username="{{ username }}" >
+        <!-- React MistakesAnalysisChart will be mounted here -->
+    </div>
+
+    <h2>Opening Analysis:</h2>
+    <div id="opening-analysis-container" data-username="{{ username }}" >
+        <!-- React OpeningAnalysis will be mounted here -->
+    </div>
+
     <h2>Raw Game Data (All Games):</h2>
     <pre style="background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ all_games_raw|safe }}</pre>
 
@@ -73,7 +107,77 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if auto_start %}
     startStreaming();
     {% endif %}
+
+    // Initialize filter system
+    initializeFilters();
 });
+
+function initializeFilters() {
+    // Get the filter manager from the global scope (imported via the main.js bundle)
+    if (typeof window.gameFilterManager === 'undefined') {
+        console.log('Waiting for gameFilterManager to load...');
+        setTimeout(initializeFilters, 100);
+        return;
+    }
+
+    const filterManager = window.gameFilterManager;
+    const username = "{{ username }}";
+
+    // Set username for filtering
+    filterManager.setUsername(username);
+
+    // Get filter buttons
+    const allBtn = document.getElementById('filter-all');
+    const whiteBtn = document.getElementById('filter-white');
+    const blackBtn = document.getElementById('filter-black');
+    const statusSpan = document.getElementById('filter-status');
+
+    // Add click handlers for filter buttons
+    if (allBtn) {
+        allBtn.addEventListener('click', function() {
+            setActiveFilter('all', allBtn);
+            filterManager.setFilter('all');
+        });
+    }
+
+    if (whiteBtn) {
+        whiteBtn.addEventListener('click', function() {
+            setActiveFilter('white', whiteBtn);
+            filterManager.setFilter('white');
+        });
+    }
+
+    if (blackBtn) {
+        blackBtn.addEventListener('click', function() {
+            setActiveFilter('black', blackBtn);
+            filterManager.setFilter('black');
+        });
+    }
+
+    // Function to update active button state
+    function setActiveFilter(filterType, activeButton) {
+        // Remove active class from all buttons
+        [allBtn, whiteBtn, blackBtn].forEach(btn => {
+            if (btn) btn.classList.remove('filter-btn-active');
+        });
+
+        // Add active class to clicked button
+        activeButton.classList.add('filter-btn-active');
+
+        // Update status text
+        if (statusSpan) {
+            statusSpan.textContent = filterManager.getFilterDescription();
+        }
+    }
+
+    // Listen for filter changes from the filter manager
+    filterManager.addListener(function(event) {
+        // Update status text
+        if (statusSpan) {
+            statusSpan.textContent = filterManager.getFilterDescription();
+        }
+    });
+}
 
 // Track enriched games as they complete
 let enrichedGamesArray = [];
@@ -126,6 +230,17 @@ function handleAnalysisUpdate(data) {
                 const completedGames = data.completed_games || enrichedGamesArray.length;
                 const totalGames = data.total_games || totalExpectedGames;
                 progressStatus.innerText = `Games completed: ${completedGames}/${totalGames} - ${data.current_phase || 'Processing...'}`;
+            } else if (data.game_analysis && data.game_analysis.game) {
+                // Handle the nested game structure from your streaming system
+                enrichedGamesArray.push(data.game_analysis.game);
+
+                // Update the display immediately
+                updateEnrichedGamesDisplay();
+
+                // Update progress status to show game completion
+                const completedGames = data.completed_games || enrichedGamesArray.length;
+                const totalGames = data.total_games || totalExpectedGames;
+                progressStatus.innerText = `Games completed: ${completedGames}/${totalGames} - ${data.current_phase || 'Processing...'}`;
             }
             break;
 
@@ -163,6 +278,120 @@ function updateEnrichedGamesDisplay() {
         // Display all completed games
         enrichedGamesEl.textContent = JSON.stringify(enrichedGamesArray, null, 2);
     }
+
+    // Update the filter manager with new games data
+    if (typeof window.gameFilterManager !== 'undefined') {
+        window.gameFilterManager.updateAllGames(enrichedGamesArray);
+    }
+
+    // Update both charts with the latest data
+    updateCharts();
+}
+
+function updateCharts() {
+    updateGameResultsChart();
+    updateMistakesAnalysisChart();
+    updateOpeningAnalysisChart();
+}
+
+function updateGameResultsChart() {
+    // Check if we have the React root and component available
+    if (window.gameResultsChartRoot && window.GameResultsChart && window.React) {
+        const username = document.querySelector('#report-username').textContent;
+
+        console.log('Updating GameResultsChart with:', {
+            gamesCount: enrichedGamesArray.length,
+            username: username,
+            sampleGame: enrichedGamesArray[0]
+        });
+
+        try {
+            // Re-render the chart with updated data
+            window.gameResultsChartRoot.render(
+                window.React.createElement(window.GameResultsChart, {
+                    enrichedGames: enrichedGamesArray,
+                    username: username,
+                    chartType: 'pie'
+                })
+            );
+            console.log('GameResultsChart render successful');
+        } catch (error) {
+            console.error('Error rendering GameResultsChart:', error);
+        }
+    } else {
+        console.log('GameResultsChart not ready yet:', {
+            hasRoot: !!window.gameResultsChartRoot,
+            hasComponent: !!window.GameResultsChart,
+            hasReact: !!window.React,
+            gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
+}
+
+function updateMistakesAnalysisChart() {
+    // Check if we have the React root and component available
+    if (window.mistakesAnalysisChartRoot && window.MistakesAnalysisChart && window.React) {
+        const username = document.querySelector('#report-username').textContent;
+
+        console.log('Updating MistakesAnalysisChart with:', {
+            gamesCount: enrichedGamesArray.length,
+            username: username,
+            sampleGame: enrichedGamesArray[0]
+        });
+
+        try {
+            // Re-render the chart with updated data
+            window.mistakesAnalysisChartRoot.render(
+                window.React.createElement(window.MistakesAnalysisChart, {
+                    enrichedGames: enrichedGamesArray,
+                    username: username
+                })
+            );
+            console.log('MistakesAnalysisChart render successful');
+        } catch (error) {
+            console.error('Error rendering MistakesAnalysisChart:', error);
+        }
+    } else {
+        console.log('MistakesAnalysisChart not ready yet:', {
+            hasRoot: !!window.mistakesAnalysisChartRoot,
+            hasComponent: !!window.MistakesAnalysisChart,
+            hasReact: !!window.React,
+            gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
+}
+
+function updateOpeningAnalysisChart() {
+    // Check if we have the React root and component available
+    if (window.openingAnalysisRoot && window.OpeningAnalysis && window.React) {
+        const username = document.querySelector('#report-username').textContent;
+
+        console.log('Updating OpeningAnalysis with:', {
+            gamesCount: enrichedGamesArray.length,
+            username: username,
+            sampleGame: enrichedGamesArray[0]
+        });
+
+        try {
+            // Re-render the chart with updated data
+            window.openingAnalysisRoot.render(
+                window.React.createElement(window.OpeningAnalysis, {
+                    enrichedGames: enrichedGamesArray,
+                    username: username
+                })
+            );
+            console.log('OpeningAnalysis render successful');
+        } catch (error) {
+            console.error('Error rendering OpeningAnalysis:', error);
+        }
+    } else {
+        console.log('OpeningAnalysis not ready yet:', {
+            hasRoot: !!window.openingAnalysisRoot,
+            hasComponent: !!window.OpeningAnalysis,
+            hasReact: !!window.React,
+            gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
 }
 
 function updateDisplaysWithResults(data) {
@@ -178,6 +407,10 @@ function fetchEnrichedGamesData(reportId) {
             const enrichedGamesEl = document.getElementById('enriched-games');
             if (data.enriched_games && data.enriched_games.length > 0) {
                 enrichedGamesEl.textContent = JSON.stringify(data.enriched_games, null, 2);
+
+                // Update both charts with final data
+                enrichedGamesArray = data.enriched_games;
+                updateCharts();
             } else {
                 enrichedGamesEl.textContent = JSON.stringify({
                     status: "No enriched games data available",

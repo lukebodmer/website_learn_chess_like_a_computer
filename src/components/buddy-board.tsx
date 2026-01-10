@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import BaseChessBoard from './base-chess-board'
 import { Chess } from 'chess.js'
+import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager'
 
 export interface BuddyBoardProps {
   size?: number
@@ -46,6 +47,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [games, setGames] = useState<GameData[]>([])
+  const [filteredGames, setFilteredGames] = useState<GameData[]>([])
   const [currentGameIndex, setCurrentGameIndex] = useState(0)
   const [displayedMoveIndex, setDisplayedMoveIndex] = useState(0)
   const [targetMoveIndex, setTargetMoveIndex] = useState(0)
@@ -74,6 +76,37 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   const [isDraggingBoard, setIsDraggingBoard] = useState(false)
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
 
+  // Set up filter manager when component mounts
+  useEffect(() => {
+    // Get username from the report page
+    const reportUsernameEl = document.getElementById('report-username')
+    const username = reportUsernameEl?.textContent?.trim() || ''
+
+    // Initialize the filter manager
+    gameFilterManager.setUsername(username)
+
+    // Listen for filter changes
+    const handleFilterChange = (event: FilterEvent) => {
+      setFilteredGames(event.filteredGames);
+
+      // If current game index is out of bounds, reset to first game
+      if (event.filteredGames.length > 0) {
+        // Reset to first game if current selection is out of bounds
+        setCurrentGameIndex(0);
+        if (isVisible) {
+          setTimeout(() => loadGame(0), 50);
+        }
+      }
+    };
+
+    gameFilterManager.addListener(handleFilterChange);
+
+    // Clean up listener on unmount
+    return () => {
+      gameFilterManager.removeListener(handleFilterChange);
+    };
+  }, []);
+
   // Set up dynamic game loading observer (runs once on mount)
   useEffect(() => {
     const enrichedGamesEl = document.getElementById('enriched-games')
@@ -88,6 +121,9 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               const previousGameCount = prev.length
 
               if (data.length > 0) {
+                // Update filter manager with new games data
+                gameFilterManager.updateAllGames(data);
+
                 // Set default board orientation based on report producer (only on first load)
                 if (previousGameCount === 0) {
                   const reportUsername = reportUsernameEl?.textContent?.trim()
@@ -145,11 +181,16 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
   // Load first game when board becomes visible (with delay for animation)
   useEffect(() => {
-    if (isVisible && games.length > 0 && !gameLoaded) {
+    if (isVisible && filteredGames.length > 0 && !gameLoaded) {
       // Delay loading to allow animation to start
       setTimeout(() => loadGame(0), 50)
     }
-  }, [isVisible, games.length, gameLoaded])
+  }, [isVisible, filteredGames.length, gameLoaded])
+
+  // Update filteredGames when games change initially
+  useEffect(() => {
+    setFilteredGames(games);
+  }, [games]);
 
   // Animation engine - state-driven approach
   useEffect(() => {
@@ -252,9 +293,9 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
   // Load a specific game by index
   const loadGame = (gameIndex: number) => {
-    if (gameIndex < 0 || gameIndex >= games.length) return
+    if (gameIndex < 0 || gameIndex >= filteredGames.length) return
 
-    const game = games[gameIndex]
+    const game = filteredGames[gameIndex]
     const moves = game.moves.split(' ').filter(move => move.trim() !== '')
 
     // Set board orientation based on report producer for this specific game
@@ -458,7 +499,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
   // Create evaluation chart component
   const EvaluationChart = () => {
-    const currentGame = games[currentGameIndex]
+    const currentGame = filteredGames[currentGameIndex]
     if (!currentGame?.analysis) {
       return (
         <div style={{
@@ -652,7 +693,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
               {/* Division lines */}
               {(() => {
-                const currentGame = games[currentGameIndex]
+                const currentGame = filteredGames[currentGameIndex]
                 const division = currentGame?.division
                 const divisionLines = []
 
@@ -839,7 +880,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
     lastMousePos: { x: number, y: number }
     setLastMousePos: (pos: { x: number, y: number }) => void
   }) => {
-    const currentGame = games[currentGameIndex]
+    const currentGame = filteredGames[currentGameIndex]
     if (!currentGame?.clocks || !currentGame?.clock) {
       return (
         <div style={{
@@ -1103,7 +1144,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               fontWeight: 'normal'
             }}>
               {(() => {
-                const currentGame = games[currentGameIndex]
+                const currentGame = filteredGames[currentGameIndex]
                 if (!currentGame?.clock) return ''
                 const minutes = Math.floor(currentGame.clock.initial / 60)
                 const increment = currentGame.clock.increment
@@ -1157,7 +1198,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
           {/* Division lines */}
           {(() => {
-            const currentGame = games[currentGameIndex]
+            const currentGame = filteredGames[currentGameIndex]
             const division = currentGame?.division
             const divisionLines = []
 
@@ -1412,13 +1453,13 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                 Buddy Board
               </h3>
 
-              {games.length > 0 ? (
+              {filteredGames.length > 0 ? (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px'
                 }}>
-                  {games.length > 1 && (
+                  {filteredGames.length > 1 && (
                     <select
                       value={currentGameIndex}
                       onChange={(e) => loadGame(Number(e.target.value))}
@@ -1435,11 +1476,11 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                         minWidth: '180px'
                       }}
                     >
-                      {games
-                        .map((game, originalIndex) => ({ game, originalIndex }))
+                      {filteredGames
+                        .map((game, filteredIndex) => ({ game, filteredIndex }))
                         .sort((a, b) => (b.game.createdAt || 0) - (a.game.createdAt || 0))
-                        .map(({ game, originalIndex }, sortedIndex) => (
-                        <option key={originalIndex} value={originalIndex}>
+                        .map(({ game, filteredIndex }, sortedIndex) => (
+                        <option key={filteredIndex} value={filteredIndex}>
                           Game {sortedIndex + 1}: {game.players.white.user.name} vs {game.players.black.user.name}
                         </option>
                       ))}
@@ -1450,7 +1491,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     color: 'var(--text-secondary)',
                     whiteSpace: 'nowrap'
                   }}>
-                    {games.length} game{games.length !== 1 ? 's' : ''} loaded
+{filteredGames.length} of {games.length} games
                   </span>
                 </div>
               ) : (
@@ -1467,7 +1508,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             {/* Move List and Chess Board Container */}
             <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }} onMouseDown={(e) => e.stopPropagation()}>
               {/* Move List or Empty State */}
-              {games.length === 0 || !games[currentGameIndex] || !gameLoaded || currentMoves.length === 0 ? (
+              {filteredGames.length === 0 || !filteredGames[currentGameIndex] || !gameLoaded || currentMoves.length === 0 ? (
                 <div style={{
                   width: '200px',
                   height: `${size}px`,
@@ -1499,7 +1540,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     marginTop: '20px'
                   }}>
                   {/* Opening - Sticky at top */}
-                  {games[currentGameIndex].opening && (
+                  {filteredGames[currentGameIndex].opening && (
                     <div style={{
                       position: 'sticky',
                       top: '0',
@@ -1511,7 +1552,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       borderBottom: '1px solid var(--border-color)',
                       zIndex: 1
                     }}>
-                      {games[currentGameIndex].opening.name}
+                      {filteredGames[currentGameIndex].opening.name}
                     </div>
                   )}
                   <div style={{
@@ -1543,7 +1584,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
                     {/* Helper function to convert ply to move number and determine if indicator should be shown */}
                     {(() => {
-                      const currentGame = games[currentGameIndex]
+                      const currentGame = filteredGames[currentGameIndex]
                       const division = currentGame?.division
 
                       // Convert plies to move numbers (rounding down)
@@ -1658,7 +1699,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                                       >
                                         <span>{whiteMove}</span>
                                         {(() => {
-                                          const analysis = games[currentGameIndex]?.analysis
+                                          const analysis = filteredGames[currentGameIndex]?.analysis
                                           if (!analysis || whiteMoveNumber - 1 >= analysis.length) return null
                                           const moveAnalysis = analysis[whiteMoveNumber - 1]
                                           const judgment = moveAnalysis?.judgment
@@ -1727,7 +1768,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                                         >
                                           <span>{blackMove}</span>
                                           {(() => {
-                                            const analysis = games[currentGameIndex]?.analysis
+                                            const analysis = filteredGames[currentGameIndex]?.analysis
                                             if (!analysis || blackMoveNumber - 1 >= analysis.length) return null
                                             const moveAnalysis = analysis[blackMoveNumber - 1]
                                             const judgment = moveAnalysis?.judgment
@@ -1800,10 +1841,10 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     textAlign: 'left'
                   }}>
                     <div style={{ color: 'var(--text-primary)' }}>
-                      {games.length > 0 && games[currentGameIndex]
+                      {filteredGames.length > 0 && filteredGames[currentGameIndex]
                         ? (boardOrientation === 'white'
-                          ? games[currentGameIndex].players.black.user.name
-                          : games[currentGameIndex].players.white.user.name)
+                          ? filteredGames[currentGameIndex].players.black.user.name
+                          : filteredGames[currentGameIndex].players.white.user.name)
                         : 'Player'}
                     </div>
 
@@ -1818,10 +1859,10 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
-                        if (!games.length || !games[currentGameIndex]) {
+                        if (!filteredGames.length || !filteredGames[currentGameIndex]) {
                           return 'No game loaded'
                         }
-                        const currentGame = games[currentGameIndex]
+                        const currentGame = filteredGames[currentGameIndex]
                         const winner = currentGame.winner
                         const status = currentGame.status
 
@@ -1864,8 +1905,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
-                        if (!games.length || !games[currentGameIndex]) return ''
-                        const currentGame = games[currentGameIndex]
+                        if (!filteredGames.length || !filteredGames[currentGameIndex]) return ''
+                        const currentGame = filteredGames[currentGameIndex]
                         if (!currentGame.clocks || !currentGame.clock) return ''
 
                         // Determine which player's clock to show (top player)
@@ -1950,10 +1991,10 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     marginTop: '4px',
                     width: `${size}px`
                   }}>
-                    {games.length > 0 && games[currentGameIndex]
+                    {filteredGames.length > 0 && filteredGames[currentGameIndex]
                       ? (boardOrientation === 'white'
-                        ? games[currentGameIndex].players.white.user.name
-                        : games[currentGameIndex].players.black.user.name)
+                        ? filteredGames[currentGameIndex].players.white.user.name
+                        : filteredGames[currentGameIndex].players.black.user.name)
                       : 'Player'}
 
                     {/* Bottom Player Clock */}
@@ -1967,8 +2008,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       whiteSpace: 'nowrap'
                     }}>
                       {(() => {
-                        if (!games.length || !games[currentGameIndex]) return ''
-                        const currentGame = games[currentGameIndex]
+                        if (!filteredGames.length || !filteredGames[currentGameIndex]) return ''
+                        const currentGame = filteredGames[currentGameIndex]
                         if (!currentGame.clocks || !currentGame.clock) return ''
 
                         // Determine which player's clock to show (bottom player)
@@ -2074,7 +2115,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
 
             {/* Navigation Controls */}
-            {gameLoaded && games.length > 0 && games[currentGameIndex] && (
+            {gameLoaded && filteredGames.length > 0 && filteredGames[currentGameIndex] && (
               <div style={{
                 display: 'flex',
                 justifyContent: 'center',

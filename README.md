@@ -1,6 +1,116 @@
 # Learn Chess Like a Computer
 
-An interactive chess analysis web application that enriches Lichess game data with precomputed evaluations from a massive PostgreSQL database containing 300 million chess positions.
+An interactive chess analysis web application that enriches Lichess and Chess.com game data with precomputed evaluations from a massive PostgreSQL database containing 300 million chess positions. Features real-time streaming analysis that updates the UI as games are completed.
+
+## Real-Time Streaming Analysis
+
+The application provides a dynamic user experience through **Server-Sent Events (SSE)** that stream analysis progress in real-time:
+
+### Streaming Architecture
+
+1. **Immediate Response**: The reports page loads instantly without waiting for analysis
+2. **Progressive Updates**: Individual games appear as they complete analysis (not batch completion)
+3. **Real-Time Progress**: API call counts, game completion counters, and "buddy board" updates stream live
+
+### How Streaming Works
+
+**Backend Streaming** (`analysis/views.py:stream_analysis_progress`):
+- Uses Python generators to yield individual game completions
+- Monitors background analysis tasks and streams updates via SSE
+- Sends `game_complete` events with full enriched game data
+
+**Game Enricher** (`analysis/chess_analysis/game_enricher.py:enrich_games_with_stockfish_streaming`):
+- **Smart Completion Detection**: Games complete as soon as their required positions are evaluated
+- **Database-First Strategy**: Games with database hits complete instantly (no API calls needed)
+- **Position-Based Parallelization**: Multiple API calls run concurrently, games complete incrementally
+
+**Frontend Integration**:
+- JavaScript EventSource listens for SSE updates
+- "Enriched Games Data" JSON display updates incrementally
+- "Buddy Board" chess visualization updates with new game analysis
+- Progress indicators update in real-time
+
+### Performance Benefits
+
+- **No Waiting**: Users see results immediately instead of waiting for full batch completion
+- **Efficient Resource Usage**: Database hits complete instantly, API calls run in parallel
+- **Progressive Enhancement**: UI becomes more useful as more data arrives
+- **Scalable**: Handles 1-1000 games with same responsive experience
+
+## Frontend Game Filtering System
+
+The application features a sophisticated client-side filtering system that allows users to dynamically filter chess games by player color (All Games, White Games, Black Games) across all React components in real-time.
+
+### Game Filter Manager (`@src/game-filter-manager.ts`)
+
+**Centralized State Management**:
+- **Singleton Pattern**: Single source of truth for filter state across the entire application
+- **Event-Driven Architecture**: Uses listener pattern to notify all components of filter changes
+- **Flexible Data Parsing**: Handles different game data formats (Lichess vs Chess.com)
+- **Real-time Updates**: Automatically updates during streaming analysis
+
+**Key Features**:
+```typescript
+export class GameFilterManager {
+  setUsername(username: string): void          // Set player to filter by
+  setFilter(filter: FilterType): void          // Change current filter
+  updateAllGames(games: any[]): void           // Update game dataset
+  getFilteredGames(): any[]                    // Get filtered results
+  addListener(callback): void                  // Subscribe to changes
+}
+```
+
+**Filter Types**: `'all' | 'white' | 'black'`
+
+### React Component Integration
+
+**GameResultsChart Component** (`@src/components/game-results-chart.tsx`):
+- **Automatic Updates**: Subscribes to filter changes and re-renders charts instantly
+- **Synchronized Data**: Uses filtered games for win/loss analysis
+- **Dynamic Titles**: Shows current filter status in chart headers
+
+**BuddyBoard Component** (`@src/components/buddy-board.tsx`):
+- **Game Navigation**: Dropdown selector shows only filtered games
+- **Live Updates**: Automatically switches to filtered game set
+- **Smart Indexing**: Resets to first game when filter changes
+
+### Template Integration (`templates/analysis/report.html`)
+
+**Filter UI**:
+- **Three-button interface**: All Games, White Games, Black Games
+- **Visual feedback**: Active state styling with CSS themes
+- **Status display**: Shows current filter and game counts
+- **Click handlers**: JavaScript event listeners for filter changes
+
+**Global Access**:
+```javascript
+// Filter manager available globally via main.js bundle
+window.gameFilterManager.setFilter('white');
+```
+
+### Streaming Integration
+
+**Real-Time Filtering**: The filter system works seamlessly during live streaming analysis:
+1. **Progressive Updates**: New games automatically join the filtered dataset
+2. **Live Charts**: Charts update with both new data AND current filter
+3. **Persistent State**: Filter selection persists during streaming
+4. **Instant Response**: No page refresh needed when changing filters
+
+**Data Flow**:
+```
+New Game Data → Filter Manager → All React Components → UI Updates
+     ↓              ↓                   ↓                  ↓
+  (streaming)  (event emission)  (listener callbacks)  (re-render)
+```
+
+### Performance Considerations
+
+- **Client-Side Only**: All filtering happens in browser (no server requests)
+- **Efficient Memory**: Single games array with view-only filtering
+- **Event Batching**: Prevents excessive re-renders during rapid updates
+- **Smart Re-renders**: Components only update when their data actually changes
+
+This filtering system provides users with instant, responsive game analysis that adapts in real-time during both completed reports and live streaming sessions.
 
 ## Database Architecture
 
@@ -78,30 +188,31 @@ The PostgreSQL evaluations database contains three main tables:
 **`GameEnricher`** (`analysis/chess_analysis/game_enricher.py`)
 - Identifies games lacking evaluation data
 - Coordinates database lookups and GCP Stockfish API analysis
+- Provides streaming analysis via generator functions
 - Injects calculated accuracy percentages back into game JSON
-- **Hard limit set to 5 games** for debugging purposes
 
 ## Analysis Workflow
 
 1. **Game Detection**: Identify games without existing accuracy data in `raw_json.players.{color}.analysis.accuracy`
 
-2. **Database-First Lookup**: For each position in the game:
-   - Query the PostgreSQL database using FEN notation
-   - Retrieve precomputed evaluations if available
-   - Track database hit rate
+2. **Streaming Analysis Pipeline**:
+   - **Database-First Lookup**: Query 300M position database for instant results
+   - **Parallel API Processing**: Send remaining positions to GCP Stockfish API
+   - **Incremental Completion**: Games complete as soon as all their positions are evaluated
+   - **Real-Time Updates**: Stream individual game completions to frontend
 
-3. **GCP Stockfish API**: For positions not in database:
-   - Send positions to GCP Stockfish API for evaluation
-   - High-performance cloud analysis with configurable depth
-   - Scalable processing of multiple positions
-
-4. **Data Enrichment**:
-   - Calculate player accuracy from evaluations
-   - Inject accuracy percentage into original game JSON structure
-   - Maintain data source statistics (database vs GCP API vs existing)
+3. **Data Enrichment**:
+   - Calculate player accuracy using Lichess algorithm
+   - Generate mistake classifications (blunders, mistakes, inaccuracies)
+   - Inject analysis data into original game JSON structure
+   - Add opening classification and game phase divisions
 
 ## Performance Considerations
 
+- **Streaming Architecture**: Real-time updates eliminate user waiting time
+- **Smart Completion Detection**: Games complete as soon as all required positions are evaluated (no batch waiting)
+- **Database-First Strategy**: 300M position database provides instant results for common positions
+- **Parallel Processing**: Multiple API calls run concurrently with configurable limits (default: 40)
 - **Indexed Queries**: All database lookups use indexed FEN columns for O(log n) performance
 - **Batch Processing**: Multiple positions processed in batches of 100 to avoid memory issues
 - **Connection Management**: Uses Django's multi-database routing for efficient connection handling
@@ -115,6 +226,17 @@ The system tracks detailed statistics during analysis:
 - `existing_evaluations_used`: Positions that already had evaluation data
 - `total_mistakes_found`: Blunders, mistakes, and inaccuracies identified
 - `games_with_new_analysis`: Games that received new evaluation data
+
+## Streaming Data Flow
+
+```
+1. User triggers analysis → Report page loads instantly
+2. Background task starts → SSE connection established
+3. Database lookup (instant) → Games with DB hits complete immediately
+4. API calls start (parallel) → Position evaluations stream back
+5. Games complete incrementally → Frontend updates in real-time
+6. Final completion → All data available, streaming ends
+```
 
 ## Example Database Query
 

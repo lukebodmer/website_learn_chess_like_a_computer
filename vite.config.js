@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     outDir: '../static/js/dist',
     emptyOutDir: true,
+    sourcemap: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'src/main.tsx')

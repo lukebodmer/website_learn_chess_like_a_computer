@@ -23,5 +23,4 @@ urlpatterns = [
     path('logout/', views.custom_logout, name='logout'),
     path('games/', views.games, name='games'),
     path('api/daily-puzzle/', views.daily_puzzle_api, name='daily_puzzle_api'),
-    path('export/<str:username>/unified-games.json', views.export_unified_games_json, name='export_unified_games'),
 ]

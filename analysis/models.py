@@ -175,58 +175,6 @@ class PrincipalVariation(models.Model):
         return f"PV {self.pv_index}: {score} - {self.line[:30]}..."
 
 
-class ChessGame(models.Model):
-    """Individual chess game data for detailed analysis"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    game_dataset = models.ForeignKey(GameDataSet, on_delete=models.CASCADE)
-
-    # Basic game info
-    lichess_game_id = models.CharField(max_length=50, unique=True)
-    white_player = models.CharField(max_length=100)
-    black_player = models.CharField(max_length=100)
-    result = models.CharField(max_length=10)  # "1-0", "0-1", "1/2-1/2", "*"
-    opening = models.CharField(max_length=200, blank=True)
-    termination = models.CharField(max_length=100, blank=True)
-
-    # Game metadata
-    white_rating = models.IntegerField(null=True, blank=True)
-    black_rating = models.IntegerField(null=True, blank=True)
-    speed = models.CharField(max_length=50, blank=True)
-    played_at = models.DateTimeField(null=True, blank=True)
-
-    # Analysis data
-    user_accuracy = models.FloatField(null=True, blank=True)
-    user_color = models.CharField(max_length=10, blank=True)  # "white" or "black"
-    stockfish_analyzed = models.BooleanField(default=False)
-
-    # Raw game data
-    raw_game_data = models.JSONField(default=dict)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-played_at']
-
-    def __str__(self):
-        return f"{self.white_player} vs {self.black_player} - {self.result}"
-
-    @property
-    def user_won(self):
-        if self.user_color == 'white':
-            return self.result == '1-0'
-        elif self.user_color == 'black':
-            return self.result == '0-1'
-        return False
-
-    @property
-    def user_lost(self):
-        if self.user_color == 'white':
-            return self.result == '0-1'
-        elif self.user_color == 'black':
-            return self.result == '1-0'
-        return False
-
-
 class ReportGenerationTask(models.Model):
     """Background task for generating analysis reports"""
 
