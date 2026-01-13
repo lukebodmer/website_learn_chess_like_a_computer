@@ -88,6 +88,7 @@ class AnalysisReport(models.Model):
     accuracy_analysis = models.JSONField(default=dict)
     stockfish_analysis = models.JSONField(default=dict)
     enriched_games = models.JSONField(default=list)  # Store enriched games data
+    custom_puzzles = models.JSONField(default=list, blank=True)  # Store custom training puzzles
 
     # Report metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -217,3 +218,53 @@ class ReportGenerationTask(models.Model):
         if self.started_at and self.completed_at:
             return self.completed_at - self.started_at
         return None
+
+
+class Puzzle(models.Model):
+    """Lichess chess puzzle data for training and analysis"""
+    puzzle_id = models.CharField(max_length=20, unique=True, primary_key=True, db_index=True)
+    fen = models.CharField(max_length=200, db_index=True)
+    moves = models.CharField(max_length=500)  # UCI move sequence
+    rating = models.IntegerField(db_index=True)
+    rating_deviation = models.IntegerField()
+    popularity = models.IntegerField()
+    nb_plays = models.IntegerField()
+    themes = models.TextField()  # Space-separated theme tags
+    game_url = models.CharField(max_length=500, blank=True)
+    opening_tags = models.TextField(blank=True, db_index=True)  # Space-separated opening tags
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'puzzles'
+        ordering = ['rating']
+        indexes = [
+            # Primary query indexes
+            models.Index(fields=['rating']),  # For rating range queries
+            models.Index(fields=['fen']),  # For FEN-based queries
+            models.Index(fields=['opening_tags']),  # For opening-based queries
+
+            # Composite indexes for common query patterns
+            models.Index(fields=['rating', 'popularity']),  # For filtered random selection
+            models.Index(fields=['rating', 'nb_plays']),  # For quality puzzles
+
+            # GIN indexes for full-text search (defined in migration)
+            # We'll use these for theme and opening tag searches
+        ]
+
+    def __str__(self):
+        return f"Puzzle {self.puzzle_id} - Rating: {self.rating}"
+
+    @property
+    def themes_list(self):
+        """Return themes as a list"""
+        return self.themes.split() if self.themes else []
+
+    @property
+    def opening_tags_list(self):
+        """Return opening tags as a list"""
+        return self.opening_tags.split() if self.opening_tags else []
+
+    @property
+    def moves_list(self):
+        """Return moves as a list"""
+        return self.moves.split() if self.moves else []

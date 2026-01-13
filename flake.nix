@@ -44,12 +44,13 @@
 		djangorestframework
 		flask
 		requests
+                numpy
+		scipy
 		psycopg2
 		pycountry
 		pytz
 		zstandard
               #  matplotlib
-              #  numpy
               ]))
             ];
 
@@ -64,6 +65,8 @@
               export PGPORT="5432"
               export PGDATABASE="chess_analysis"
 	      echo python manage.py runserver to start Django server
+              echo pg_ctl start to start database
+	      echo npm build run to rebuild javascript
             '';
           };
         };

@@ -1,3 +1,4 @@
+Only use sub-agents if you are stuck
 # Project Guidelines for learnchesslikeacomputer.org
 
 ## Tech Stack

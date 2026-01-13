@@ -19,6 +19,7 @@
                 <div class="status-indicator not-connected lichess-status">
                     <p><strong>⚠️ Lichess Not Connected</strong></p>
                     <p>Connect your Lichess account to start analyzing your games.</p>
+                    <a href="{% url 'analysis:lichess_login' %}" class="lichess-connect-btn">Connect Lichess</a>
                 </div>
             {% endif %}
 

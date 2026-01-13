@@ -146,10 +146,18 @@ class GameEnricher:
 
             # Check if game already has analysis
             existing_analysis = raw_json.get("analysis", [])
-            # A game has sufficient analysis if it has analysis for most moves
-            # analysis array should be roughly equal to number of moves
 
-            # Generate positions for this game
+            # NEW: Preserve original Lichess analysis if it exists
+            # Lichess games are identified by the "fullId" field
+            is_lichess = "fullId" in raw_json
+
+            if is_lichess and existing_analysis:
+                # Save Lichess analysis to separate field before we overwrite it
+                # This preserves the original Lichess evaluations for comparison
+                raw_json["lichess_analysis"] = existing_analysis
+                game["raw_json"] = raw_json
+
+            # Generate positions for this game (always needed for our analysis)
             game_positions = self.generate_positions_for_game(moves)
             if not game_positions:
                 game_data.append({"error": "Position generation failed", "positions": []})
@@ -159,7 +167,8 @@ class GameEnricher:
                 "game": game,  # Keep reference to original game
                 "moves": moves,
                 "positions": game_positions,  # Ordered positions for THIS game
-                "existing_analysis": existing_analysis
+                "existing_analysis": existing_analysis,
+                "is_lichess": is_lichess
             })
 
             # Add to global set for evaluation
@@ -238,6 +247,18 @@ class GameEnricher:
 
                 evaluations.append(eval_entry)
                 existing_count += 1
+
+                # Add existing analysis data to global_evaluations so it can be accessed later
+                # This is needed for UCI to SAN conversion of the "best" field
+                if fen not in global_evaluations:
+                    global_evaluations[fen] = {
+                        "source": "existing",
+                        "evaluation": existing_data.get("eval", 0),
+                        "best": existing_data.get("best"),
+                        "variation": existing_data.get("variation")
+                    }
+                    if existing_data.get("mate") is not None:
+                        global_evaluations[fen]["mate"] = existing_data["mate"]
 
             elif fen in global_evaluations:
                 # Use global evaluation result
@@ -337,8 +358,70 @@ class GameEnricher:
         # NO PERSPECTIVE CONVERSION - Stockfish always reports from White's perspective
         return cp_value
 
+    def _get_winning_chances(self, cp: int) -> float:
+        """
+        Calculate winning chances from centipawns using Lichess formula.
+        Returns a value between -1 and +1 where:
+        - +1 = 100% chance for white to win
+        - -1 = 100% chance for black to win
+        - 0 = equal position (50-50)
+
+        Formula from Lichess: https://github.com/lichess-org/lila/pull/11148
+        """
+        MULTIPLIER = -0.00368208
+        winning_chances = 2 / (1 + pow(2.71828182845904523536, MULTIPLIER * cp)) - 1
+        # Clamp to [-1, +1]
+        return max(-1.0, min(1.0, winning_chances))
+
+    def _get_win_percent(self, evaluation: Dict) -> float:
+        """
+        Convert evaluation to win percentage (0-100) for white using Lichess formula.
+
+        Args:
+            evaluation: Dict with 'eval' (centipawns) or 'mate' fields
+
+        Returns:
+            Win percentage for white (0-100)
+        """
+        # Handle mate scores
+        if "mate" in evaluation and evaluation["mate"] is not None:
+            mate_score = evaluation["mate"]
+            if mate_score == 0:
+                # Checkmate delivered - need context to determine winner
+                # For now, treat as extreme advantage
+                return 100.0 if mate_score >= 0 else 0.0
+            elif mate_score > 0:
+                return 100.0  # White has mate
+            else:
+                return 0.0  # Black has mate
+
+        # Convert centipawns to winning chances
+        cp = evaluation.get("eval", 0)
+        winning_chances = self._get_winning_chances(cp)
+
+        # Convert to percentage: 50 + 50 * winning_chances
+        win_percent = 50 + 50 * winning_chances
+        return win_percent
+
     def _find_mistakes_from_evaluations(self, evaluations: List[Dict], positions: List[str], global_evaluations: Dict[str, Dict]) -> List[Dict]:
-        """Find mistakes from evaluation sequence (handles both eval and mate scores)"""
+        """
+        Find mistakes from evaluation sequence using Lichess winning chances formula.
+
+        Lichess classification (based on lila/modules/analyse/src/main/Advice.scala):
+        - Blunder: 0.3 or more loss in winning chances (in [-1, +1] scale)
+        - Mistake: 0.2 or more loss in winning chances
+        - Inaccuracy: 0.1 or more loss in winning chances
+
+        Special handling for mate sequences:
+        - MateCreated: No mate before, mate after (opponent getting mated)
+        - MateLost: Mate before, no mate after (losing a winning mate sequence)
+        - MateDelayed: Mate before and after, but longer sequence (not classified as mistake)
+
+        Note: winning chances are in [-1, +1] scale where:
+        - +1 = white has 100% chance to win
+        - -1 = black has 100% chance to win
+        - 0 = equal position
+        """
         mistakes = []
 
         for i in range(1, len(evaluations)):
@@ -351,34 +434,133 @@ class GameEnricher:
             if "mate" in current_eval and current_eval["mate"] == 0:
                 continue
 
-            current_cp = self._get_centipawn_value(evaluations[i])
-            prev_cp = self._get_centipawn_value(evaluations[i - 1])
+            prev_eval = evaluations[i - 1]
+            prev_mate = prev_eval.get("mate")
+            current_mate = current_eval.get("mate")
 
-            # Calculate evaluation change from the moving player's perspective
-            # Stockfish evals are always from White's perspective
-            # For White: good move increases eval, bad move decreases eval
-            # For Black: good move decreases eval, bad move increases eval
+            # Get centipawn values (for mate sequence classification)
+            prev_cp = self._get_centipawn_value(prev_eval)
+            current_cp = self._get_centipawn_value(current_eval)
+
+            # Invert perspective based on who moved
+            # For the player who just moved, we want their evaluation from their perspective
             if is_white_move:
-                # White move: eval loss = previous eval - current eval
-                eval_loss = prev_cp - current_cp
+                # White moved, so we want evaluations from white's perspective (no change needed)
+                prev_cp_player_pov = prev_cp
+                current_cp_player_pov = current_cp
+                prev_mate_player_pov = prev_mate
+                current_mate_player_pov = current_mate
             else:
-                # Black move: eval loss = current eval - previous eval
-                # (because a good black move makes the eval more negative)
-                eval_loss = current_cp - prev_cp
+                # Black moved, so we want evaluations from black's perspective (invert)
+                prev_cp_player_pov = -prev_cp
+                current_cp_player_pov = -current_cp
+                prev_mate_player_pov = -prev_mate if prev_mate is not None else None
+                current_mate_player_pov = -current_mate if current_mate is not None else None
 
-            # Only count positive losses as mistakes
-            if eval_loss <= 0:
+            # Check for mate sequences (Lichess MateAdvice logic)
+            mistake_type = None
+            mate_sequence = None
+
+            # MateCreated: No mate before, negative mate after (opponent getting mated)
+            if prev_mate_player_pov is None and current_mate_player_pov is not None and current_mate_player_pov < 0:
+                mate_sequence = "MateCreated"
+                # Classify based on how bad the previous position was
+                if prev_cp_player_pov < -999:
+                    mistake_type = "inaccuracies"
+                elif prev_cp_player_pov < -700:
+                    mistake_type = "mistakes"
+                else:
+                    mistake_type = "blunders"
+
+            # MateLost: Positive mate before, no mate after (or negative mate after)
+            elif prev_mate_player_pov is not None and prev_mate_player_pov > 0:
+                if current_mate_player_pov is None or current_mate_player_pov < 0:
+                    mate_sequence = "MateLost"
+                    # Classify based on how good the resulting position is
+                    if current_cp_player_pov > 999:
+                        mistake_type = "inaccuracies"
+                    elif current_cp_player_pov > 700:
+                        mistake_type = "mistakes"
+                    else:
+                        mistake_type = "blunders"
+
+            # MateDelayed: Positive mate before and after, but not classified as mistake
+            # (This is handled by not setting mistake_type)
+
+            # If we detected a mate sequence mistake, add it
+            if mistake_type:
+                # Get the best move and variation from the PREVIOUS position
+                prev_position_fen = positions[move_number - 1] if move_number - 1 < len(positions) else None
+                best_move_uci = None
+                best_variation_uci = None
+
+                if prev_position_fen and prev_position_fen in global_evaluations:
+                    prev_eval_data = global_evaluations[prev_position_fen]
+                    best_move_uci = prev_eval_data.get("best")
+                    best_variation_uci = prev_eval_data.get("variation")
+
+                # Convert UCI to SAN
+                best_move_san = None
+                best_variation_san = None
+
+                if prev_position_fen and best_move_uci:
+                    best_move_san = self.convert_uci_to_san(prev_position_fen, best_move_uci)
+
+                if prev_position_fen and best_variation_uci:
+                    best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
+
+                # For mate sequences, eval_loss is not really applicable in the same way
+                # Set it to 0 or a large value to indicate special case
+                mistakes.append({
+                    "move_number": move_number,
+                    "move": current_eval.get("move", "unknown"),
+                    "type": mistake_type,
+                    "eval_loss": 100.0 if mate_sequence == "MateLost" else 50.0,  # Arbitrary high values for mate mistakes
+                    "color": "white" if is_white_move else "black",
+                    "best_move": best_move_san,
+                    "best_variation": best_variation_san,
+                    "mate_sequence": mate_sequence
+                })
+                continue  # Skip normal centipawn-based classification
+
+            # Normal centipawn-based mistake detection (CpAdvice logic)
+            # Only apply if both positions have centipawn evaluations (not mate)
+            if prev_mate is not None or current_mate is not None:
+                continue  # Skip if either position has a mate score
+
+            prev_winning_chances = self._get_winning_chances(prev_cp)
+            current_winning_chances = self._get_winning_chances(current_cp)
+
+            # Calculate delta from white's perspective
+            # delta = currentWinningChances - prevWinningChances
+            delta = current_winning_chances - prev_winning_chances
+
+            # Adjust delta based on who moved (Lichess logic: info.color.fold(-d, d))
+            # If WHITE moved: negate delta (because white wants positive delta)
+            # If BLACK moved: keep delta (because black wants negative delta)
+            if is_white_move:
+                delta = -delta
+
+            # Now delta represents how much the moving player LOST
+            # Positive delta = player lost winning chances
+            # Negative delta = player gained winning chances
+
+            # Only count positive losses as mistakes (threshold in [-1, +1] scale)
+            if delta < 0.1:  # Less than 0.1 loss is not a mistake
                 continue
 
-            # Classify mistakes based on evaluation loss
-            if eval_loss > 300:
+            # Classify mistakes based on winning chance loss (Lichess thresholds in [-1, +1] scale)
+            if delta >= 0.3:
                 mistake_type = "blunders"
-            elif eval_loss > 150:
+            elif delta >= 0.2:
                 mistake_type = "mistakes"
-            elif eval_loss > 50:
+            elif delta >= 0.1:
                 mistake_type = "inaccuracies"
             else:
                 continue
+
+            # Convert delta to percentage points for display (0-100 scale)
+            winning_chance_loss = delta * 100
 
             # Get the best move and variation from the PREVIOUS position (before the mistake)
             prev_position_fen = positions[move_number - 1] if move_number - 1 < len(positions) else None
@@ -409,7 +591,7 @@ class GameEnricher:
                 "move_number": move_number,
                 "move": evaluations[i].get("move", "unknown"),
                 "type": mistake_type,
-                "eval_loss": eval_loss,
+                "eval_loss": winning_chance_loss,  # Now in percentage points (0-100)
                 "color": "white" if is_white_move else "black",
                 "best_move": best_move_san,
                 "best_variation": best_variation_san
@@ -433,8 +615,24 @@ class GameEnricher:
         return all_user_games
 
     def _game_needs_analysis(self, game: Dict[str, Any], username: str) -> bool:
-        """Check if a specific game needs new analysis"""
+        """
+        Check if a specific game needs new analysis.
+
+        IMPORTANT: Lichess games ALWAYS need analysis even if they have
+        existing evaluation data, because we want complete best/variation
+        data for all moves (not just mistakes). Lichess only provides
+        best/variation for mistakes, but we need it for every position.
+        """
         raw_json = game.get("raw_json", {})
+
+        # Check if this is a Lichess game (has "fullId" field)
+        is_lichess = "fullId" in raw_json
+
+        if is_lichess:
+            # Always re-analyze Lichess games for complete best/variation data
+            return True
+
+        # For Chess.com games, check if user's accuracy is missing
         players_data = raw_json.get("players", {})
 
         if (
@@ -483,9 +681,12 @@ class GameEnricher:
             "message": f"Found {total_all_games} total games ({games_needing_analysis_count} need analysis, {len(games_already_complete)} already complete) with {total_positions} positions to evaluate"
         }
 
-        # Immediately yield already-complete games
+        # Immediately yield already-complete games (after converting UCI to SAN)
         completed_game_count = 0
         for game in games_already_complete:
+            # Convert any UCI "best" moves to SAN in existing analysis
+            self.convert_existing_analysis_uci_to_san(game)
+
             completed_game_count += 1
             yield {
                 "type": "game_complete",
@@ -660,6 +861,66 @@ class GameEnricher:
 
         return games_needing_analysis
 
+    def convert_existing_analysis_uci_to_san(
+        self,
+        game: Dict[str, Any]
+    ) -> None:
+        """Convert existing Lichess analysis 'best' moves from UCI to SAN format"""
+        raw_json = game.get("raw_json", {})
+        existing_analysis = raw_json.get("analysis", [])
+
+        if not existing_analysis:
+            return
+
+        # Get moves to generate positions
+        moves_string = raw_json.get("moves", "")
+        if not moves_string:
+            return
+
+        moves = self.parse_moves_string(moves_string)
+        if not moves:
+            return
+
+        # Generate positions for the game
+        positions = self.generate_positions_for_game(moves)
+        if not positions or len(positions) != len(moves) + 1:
+            return
+
+        # Convert UCI "best" moves to SAN for each analysis entry
+        # Note: analysis[i] contains the evaluation AFTER move i+1 was played
+        # The "best" field shows what SHOULD have been played instead (from the position BEFORE the move)
+        for move_index, analysis_entry in enumerate(existing_analysis):
+            if not analysis_entry or not isinstance(analysis_entry, dict):
+                continue
+
+            # Only convert if "best" field exists and looks like UCI format
+            best_move_uci = analysis_entry.get("best")
+            if not best_move_uci:
+                continue
+
+            # Check if it looks like UCI (4-5 chars, starts with letter+digit)
+            if not (len(best_move_uci) in [4, 5] and
+                    best_move_uci[0].isalpha() and
+                    best_move_uci[1].isdigit()):
+                continue  # Already in SAN format
+
+            # Get the position BEFORE this move (where the player should have played the best move)
+            # analysis[0] = after move 1, so the "best" is from position[0]
+            # analysis[i] = after move i+1, so the "best" is from position[i]
+            position_before_move_fen = positions[move_index]
+
+            # Convert UCI to SAN
+            best_move_san = self.convert_uci_to_san(position_before_move_fen, best_move_uci)
+
+            # Update the analysis entry
+            if best_move_san != best_move_uci:
+                analysis_entry["best"] = best_move_san
+                print(f"Converted existing analysis UCI '{best_move_uci}' to SAN '{best_move_san}' at move {move_index + 1}")
+
+        # Update the raw_json with converted analysis
+        raw_json["analysis"] = existing_analysis
+        game["raw_json"] = raw_json
+
     def _create_game_analysis_array(
         self,
         game: Dict[str, Any],
@@ -675,7 +936,12 @@ class GameEnricher:
 
         raw_json = game.get("raw_json", {})
 
-        # Only create analysis array once - don't overwrite if it already exists
+        # If analysis already exists, convert any UCI "best" moves to SAN
+        if "analysis" in raw_json:
+            self.convert_existing_analysis_uci_to_san(game)
+            return
+
+        # Only create analysis array if it doesn't already exist
         if "analysis" not in raw_json:
             analysis_array = []
             mistakes = analysis_result.get("mistakes", [])
@@ -683,6 +949,17 @@ class GameEnricher:
             # The analysis array should match position order:
             # analysis[0] = evaluation after move 1 (from starting position)
             # analysis[i] = evaluation after move i+1
+            #
+            # IMPORTANT: For Lichess compatibility, the "best" and "variation" fields
+            # should show what SHOULD have been played from the PREVIOUS position,
+            # not what's best from the current position.
+
+            # Get moves to reconstruct positions
+            raw_json = game.get("raw_json", {})
+            moves_string = raw_json.get("moves", "")
+            moves = self.parse_moves_string(moves_string)
+            positions = self.generate_positions_for_game(moves)
+
             for i, move_eval in enumerate(analysis_result["evaluations"]):
                 eval_entry = {}
 
@@ -692,53 +969,45 @@ class GameEnricher:
                 elif "eval" in move_eval:
                     eval_entry["eval"] = move_eval["eval"]
 
-                # Always add best move and variation from the current position
-                # (what the engine thinks is best from this position)
-                current_position_fen = move_eval.get("position_fen")
-                current_best_move = None
-                current_best_variation = None
+                # Get the "best" move and variation from the PREVIOUS position
+                # (what the player should have played to reach this position optimally)
+                move_number = move_eval.get("move_number", i + 1)
+                previous_position_fen = positions[move_number - 1] if (move_number - 1 < len(positions)) else None
 
-                # Get the current position's analysis from global evaluations
-                if current_position_fen and current_position_fen in global_evaluations:
-                    current_eval_data = global_evaluations[current_position_fen]
-                    print(f"DEBUG: Found eval data for position {current_position_fen[:30]}... - best: {current_eval_data.get('best')}")
+                best_move_from_prev = None
+                variation_from_prev = None
 
-                    if current_eval_data.get("best"):
-                        original_best = current_eval_data["best"]
-                        current_best_move = self.convert_uci_to_san(current_position_fen, original_best)
-                        print(f"DEBUG: Converted '{original_best}' to '{current_best_move}'")
+                # Get the analysis from the PREVIOUS position
+                if previous_position_fen and previous_position_fen in global_evaluations:
+                    prev_eval_data = global_evaluations[previous_position_fen]
 
-                    if current_eval_data.get("variation"):
-                        original_variation = current_eval_data["variation"]
-                        current_best_variation = self.convert_uci_variation_to_san(current_position_fen, original_variation)
-                        print(f"DEBUG: Converted variation '{original_variation[:30]}...' to '{current_best_variation[:30]}...'")
-                else:
-                    if current_position_fen:
-                        print(f"DEBUG: No eval data found for position {current_position_fen[:30]}... in global_evaluations")
-                    else:
-                        print(f"DEBUG: current_position_fen is None for move {move_eval.get('move_number')}")
+                    if prev_eval_data.get("best"):
+                        original_best = prev_eval_data["best"]
+                        # Convert UCI to SAN from the previous position
+                        best_move_from_prev = self.convert_uci_to_san(previous_position_fen, original_best)
 
-                # Set the current position's best move and variation
-                if current_best_move:
-                    eval_entry["best"] = current_best_move
-                if current_best_variation:
-                    eval_entry["variation"] = current_best_variation
+                    if prev_eval_data.get("variation"):
+                        original_variation = prev_eval_data["variation"]
+                        # Convert UCI variation to SAN from the previous position
+                        variation_from_prev = self.convert_uci_variation_to_san(previous_position_fen, original_variation)
+
+                # Set the best move and variation (from previous position)
+                if best_move_from_prev:
+                    eval_entry["best"] = best_move_from_prev
+                if variation_from_prev:
+                    eval_entry["variation"] = variation_from_prev
 
                 # Check if this move is a mistake/blunder/inaccuracy
-                move_number = move_eval.get("move_number", i + 1)
                 move_mistakes = [m for m in mistakes if m.get("move_number") == move_number]
 
                 if move_mistakes:
                     mistake = move_mistakes[0]
                     mistake_type = mistake["type"]
 
-                    # For mistakes, we want to show what the player SHOULD have done
-                    # (from the previous position), not what's best in the current position
+                    # For mistakes, the best move is already in eval_entry["best"]
+                    # Just need to add the judgment
                     alternative_move = mistake.get("best_move", "Better move")
-                    alternative_variation = mistake.get("best_variation")
 
-                    # Override with the alternative move data for the judgment
-                    # but keep the current position's best move in the "best" field
                     # Create judgment object matching Lichess format
                     if mistake_type == "blunders":
                         eval_entry["judgment"] = {

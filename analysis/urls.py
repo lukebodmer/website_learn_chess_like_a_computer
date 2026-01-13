@@ -5,6 +5,7 @@ app_name = 'analysis'
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('signup/', views.signup, name='signup'),
     path('lichess/login/', views.lichess_login, name='lichess_login'),
     path('lichess/callback/', views.lichess_callback, name='lichess_callback'),
     path('chess-com/connect/', views.chess_com_connect, name='chess_com_connect'),
@@ -19,7 +20,7 @@ urlpatterns = [
     path('stream-analysis/<str:username>/<int:dataset_id>/', views.stream_analysis_progress, name='stream_analysis'),
     path('report-data/<int:report_id>/', views.get_report_data, name='get_report_data'),
     path('reports/', views.user_reports, name='user_reports'),
-    path('settings/', views.settings, name='settings'),
+    path('settings/', views.account_settings, name='settings'),
     path('logout/', views.custom_logout, name='logout'),
     path('games/', views.games, name='games'),
     path('api/daily-puzzle/', views.daily_puzzle_api, name='daily_puzzle_api'),

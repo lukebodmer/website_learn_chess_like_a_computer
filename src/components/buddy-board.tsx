@@ -825,7 +825,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                   marginBottom: '6px',
                   textAlign: 'center'
                 }}>
-                  {currentGame.players.white.user.name}
+                  {currentGame.players?.white?.user?.name || currentGame.players?.white?.name || 'Unknown'}
                 </div>
                 <div style={{ fontSize: '12px' }}>
                   <div style={{ color: 'var(--secondary-light)' }}>Inaccuracy: {currentGame.players.white.analysis?.inaccuracy || 0}</div>
@@ -844,7 +844,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                   marginBottom: '6px',
                   textAlign: 'center'
                 }}>
-                  {currentGame.players.black.user.name}
+                  {currentGame.players?.black?.user?.name || currentGame.players?.black?.name || 'Unknown'}
                 </div>
                 <div style={{ fontSize: '12px' }}>
                   <div style={{ color: 'var(--secondary-light)' }}>Inaccuracy: {currentGame.players.black.analysis?.inaccuracy || 0}</div>
@@ -1479,11 +1479,15 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                       {filteredGames
                         .map((game, filteredIndex) => ({ game, filteredIndex }))
                         .sort((a, b) => (b.game.createdAt || 0) - (a.game.createdAt || 0))
-                        .map(({ game, filteredIndex }, sortedIndex) => (
-                        <option key={filteredIndex} value={filteredIndex}>
-                          Game {sortedIndex + 1}: {game.players.white.user.name} vs {game.players.black.user.name}
-                        </option>
-                      ))}
+                        .map(({ game, filteredIndex }, sortedIndex) => {
+                          const whiteName = game.players?.white?.user?.name || game.players?.white?.name || 'Unknown';
+                          const blackName = game.players?.black?.user?.name || game.players?.black?.name || 'Unknown';
+                          return (
+                            <option key={filteredIndex} value={filteredIndex}>
+                              Game {sortedIndex + 1}: {whiteName} vs {blackName}
+                            </option>
+                          );
+                        })}
                     </select>
                   )}
                   <span style={{
@@ -1843,8 +1847,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     <div style={{ color: 'var(--text-primary)' }}>
                       {filteredGames.length > 0 && filteredGames[currentGameIndex]
                         ? (boardOrientation === 'white'
-                          ? filteredGames[currentGameIndex].players.black.user.name
-                          : filteredGames[currentGameIndex].players.white.user.name)
+                          ? (filteredGames[currentGameIndex].players?.black?.user?.name || filteredGames[currentGameIndex].players?.black?.name || 'Unknown')
+                          : (filteredGames[currentGameIndex].players?.white?.user?.name || filteredGames[currentGameIndex].players?.white?.name || 'Unknown'))
                         : 'Player'}
                     </div>
 
@@ -1993,8 +1997,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                   }}>
                     {filteredGames.length > 0 && filteredGames[currentGameIndex]
                       ? (boardOrientation === 'white'
-                        ? filteredGames[currentGameIndex].players.white.user.name
-                        : filteredGames[currentGameIndex].players.black.user.name)
+                        ? (filteredGames[currentGameIndex].players?.white?.user?.name || filteredGames[currentGameIndex].players?.white?.name || 'Unknown')
+                        : (filteredGames[currentGameIndex].players?.black?.user?.name || filteredGames[currentGameIndex].players?.black?.name || 'Unknown'))
                       : 'Player'}
 
                     {/* Bottom Player Clock */}

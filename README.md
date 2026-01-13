@@ -1,3 +1,4 @@
+Only use sub-agents if you are stuck
 # Learn Chess Like a Computer
 
 An interactive chess analysis web application that enriches Lichess and Chess.com game data with precomputed evaluations from a massive PostgreSQL database containing 300 million chess positions. Features real-time streaming analysis that updates the UI as games are completed.

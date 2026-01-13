@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Chess Analysis{% endblock %}
+
+{% block content %}
+<h2>Create Your Account</h2>
+
+<form method="post" style="max-width: 400px;">
+    {% csrf_token %}
+    <div style="margin: 15px 0;">
+        <label for="{{ form.username.id_for_label }}">Username:</label><br>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div style="color: red; font-size: 14px;">{{ form.username.errors }}</div>
+        {% endif %}
+        {% if form.username.help_text %}
+            <div style="color: #666; font-size: 12px; margin-top: 5px;">{{ form.username.help_text }}</div>
+        {% endif %}
+    </div>
+
+    <div style="margin: 15px 0;">
+        <label for="{{ form.password1.id_for_label }}">Password:</label><br>
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+            <div style="color: red; font-size: 14px;">{{ form.password1.errors }}</div>
+        {% endif %}
+        {% if form.password1.help_text %}
+            <div style="color: #666; font-size: 12px; margin-top: 5px;">{{ form.password1.help_text }}</div>
+        {% endif %}
+    </div>
+
+    <div style="margin: 15px 0;">
+        <label for="{{ form.password2.id_for_label }}">Confirm Password:</label><br>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+            <div style="color: red; font-size: 14px;">{{ form.password2.errors }}</div>
+        {% endif %}
+        {% if form.password2.help_text %}
+            <div style="color: #666; font-size: 12px; margin-top: 5px;">{{ form.password2.help_text }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="color: red; margin: 15px 0;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div style="margin: 20px 0;">
+        <button type="submit" class="btn">Sign Up</button>
+    </div>
+</form>
+
+<p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+
+<style>
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+</style>
+{% endblock %}

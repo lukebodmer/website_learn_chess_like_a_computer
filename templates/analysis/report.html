@@ -14,10 +14,10 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     <div class="report-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
         {% if platform == 'chess.com' %}
             <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" style="height: 40px; width: auto;">
-            <h1>Chess.com Analysis Report for {{ username }}</h1>
+            <h1 style="margin: 0;">Chess.com Analysis Report for {{ username }}</h1>
         {% else %}
             <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" style="height: 40px; width: auto;">
-            <h1>Lichess Analysis Report for {{ username }}</h1>
+            <h1 style="margin: 0;">Lichess Analysis Report for {{ username }}</h1>
         {% endif %}
     </div>
 
@@ -32,45 +32,116 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
     {% endif %}
 
-    <h2>Filters</h2>
-    <div id="game-filters" class="game-filters">
-        <div class="filter-controls">
-            <span>View:</span>
-            <button id="filter-all" class="filter-btn filter-btn-active" data-filter="all">
-                All Games
-            </button>
-            <button id="filter-white" class="filter-btn" data-filter="white">
-                White Games
-            </button>
-            <button id="filter-black" class="filter-btn" data-filter="black">
-                Black Games
-            </button>
-            <span id="filter-status">
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Filters</h2>
+    <div id="game-filters" class="game-filters" style="display: flex; flex-direction: column; align-items: center;">
+        <div style="margin-bottom: 16px; width: 100%; max-width: 600px;">
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary); text-align: center;">Color:</div>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                <button id="filter-all" class="filter-btn filter-btn-active" data-filter="all">
+                    All
+                </button>
+                <button id="filter-white" class="filter-btn" data-filter="white">
+                    White
+                </button>
+                <button id="filter-black" class="filter-btn" data-filter="black">
+                    Black
+                </button>
+            </div>
+        </div>
+        <div style="margin-bottom: 16px; width: 100%; max-width: 600px;">
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary); text-align: center;">Time Control:</div>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                <button id="speed-filter-all" class="filter-btn filter-btn-active" data-speed="all">
+                    All
+                </button>
+                <div id="speed-filter-buttons" style="display: contents;">
+                    <!-- Speed filter buttons will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <span id="filter-status" style="color: var(--text-secondary); font-size: 14px;">
                 All games loaded
             </span>
         </div>
     </div>
 
-    <h2>Game Results Chart:</h2>
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Game Results Chart:</h2>
     <div id="game-results-chart-container" data-username="{{ username }}" >
         <!-- React GameResultsChart will be mounted here -->
     </div>
 
-    <h2>Mistakes Analysis Chart:</h2>
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Mistakes Analysis Chart:</h2>
     <div id="mistakes-analysis-chart-container" data-username="{{ username }}" >
         <!-- React MistakesAnalysisChart will be mounted here -->
     </div>
 
-    <h2>Opening Analysis:</h2>
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Opening Analysis:</h2>
     <div id="opening-analysis-container" data-username="{{ username }}" >
         <!-- React OpeningAnalysis will be mounted here -->
     </div>
 
-    <h2>Raw Game Data (All Games):</h2>
-    <pre style="background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px;">{{ all_games_raw|safe }}</pre>
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Blunder Analysis:</h2>
+    <div id="blunder-analysis-container" data-username="{{ username }}" >
+        <!-- React BlunderAnalysis will be mounted here -->
+    </div>
 
-    <h2>Enriched Games Data:</h2>
-    <pre id="enriched-games" style="background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px;">{{ enriched_games|safe }}</pre>
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Time Analysis:</h2>
+    <div id="time-analysis-container" data-username="{{ username }}" >
+        <!-- React TimeAnalysis will be mounted here -->
+    </div>
+
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Principles Summary:</h2>
+    <div id="principles-summary-container">
+        <!-- React PrinciplesSummary will be mounted here -->
+    </div>
+
+    <h2 style="margin-top: 40px; margin-bottom: 10px;">Custom Training Puzzles:</h2>
+    <div id="custom-puzzles-container">
+        <!-- React CustomPuzzles will be mounted here -->
+    </div>
+
+    <!-- Hidden element to store stockfish_analysis data for React components -->
+    <div id="stockfish-analysis" style="display: none;">{{ stockfish_analysis|safe }}</div>
+
+    <!-- Hidden element to store custom puzzles data for React components -->
+    <div id="custom-puzzles-data" style="display: none;">{{ custom_puzzles|safe }}</div>
+
+    <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleRawGameData()">
+        <span id="raw-game-data-toggle">▶</span> Raw Game Data (All Games)
+    </h2>
+    <pre id="raw-game-data" style="display: none; background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px; margin: 20px 0;">{{ all_games_raw|safe }}</pre>
+
+    <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleEnrichedGamesData()">
+        <span id="enriched-games-toggle">▶</span> Enriched Games Data
+    </h2>
+    <pre id="enriched-games" style="display: none; background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px; margin: 20px 0;">{{ enriched_games|safe }}</pre>
+
+    <script>
+    function toggleRawGameData() {
+        const pre = document.getElementById('raw-game-data');
+        const toggle = document.getElementById('raw-game-data-toggle');
+        if (pre.style.display === 'none') {
+            pre.style.display = 'block';
+            toggle.textContent = '▼';
+        } else {
+            pre.style.display = 'none';
+            toggle.textContent = '▶';
+        }
+    }
+
+    function toggleEnrichedGamesData() {
+        const pre = document.getElementById('enriched-games');
+        const toggle = document.getElementById('enriched-games-toggle');
+        if (pre.style.display === 'none') {
+            pre.style.display = 'block';
+            toggle.textContent = '▼';
+        } else {
+            pre.style.display = 'none';
+            toggle.textContent = '▶';
+        }
+    }
+    </script>
 
     <!-- Hidden element for report username -->
     <span id="report-username" style="display: none;">{{ username }}</span>
@@ -130,33 +201,47 @@ function initializeFilters() {
     const allBtn = document.getElementById('filter-all');
     const whiteBtn = document.getElementById('filter-white');
     const blackBtn = document.getElementById('filter-black');
+    const speedAllBtn = document.getElementById('speed-filter-all');
+    const speedButtonsContainer = document.getElementById('speed-filter-buttons');
     const statusSpan = document.getElementById('filter-status');
 
-    // Add click handlers for filter buttons
+    // Store speed filter buttons for later reference
+    let speedFilterButtons = [];
+
+    // Add click handlers for color filter buttons
     if (allBtn) {
         allBtn.addEventListener('click', function() {
-            setActiveFilter('all', allBtn);
+            setActiveColorFilter('all', allBtn);
             filterManager.setFilter('all');
         });
     }
 
     if (whiteBtn) {
         whiteBtn.addEventListener('click', function() {
-            setActiveFilter('white', whiteBtn);
+            setActiveColorFilter('white', whiteBtn);
             filterManager.setFilter('white');
         });
     }
 
     if (blackBtn) {
         blackBtn.addEventListener('click', function() {
-            setActiveFilter('black', blackBtn);
+            setActiveColorFilter('black', blackBtn);
             filterManager.setFilter('black');
         });
     }
 
-    // Function to update active button state
-    function setActiveFilter(filterType, activeButton) {
-        // Remove active class from all buttons
+    // Add click handler for "All Speeds" button
+    if (speedAllBtn) {
+        speedAllBtn.addEventListener('click', function() {
+            // Reset to 'all' speeds
+            filterManager.setSpeedFilter('all');
+            updateSpeedButtonStates();
+        });
+    }
+
+    // Function to update active color filter button state
+    function setActiveColorFilter(filterType, activeButton) {
+        // Remove active class from all color filter buttons
         [allBtn, whiteBtn, blackBtn].forEach(btn => {
             if (btn) btn.classList.remove('filter-btn-active');
         });
@@ -170,11 +255,77 @@ function initializeFilters() {
         }
     }
 
+    // Function to update speed button states based on current filter
+    function updateSpeedButtonStates() {
+        const currentFilter = filterManager.getCurrentSpeedFilter();
+
+        // Update "All Speeds" button
+        if (speedAllBtn) {
+            if (currentFilter === 'all') {
+                speedAllBtn.classList.add('filter-btn-active');
+            } else {
+                speedAllBtn.classList.remove('filter-btn-active');
+            }
+        }
+
+        // Update individual speed buttons
+        speedFilterButtons.forEach(btn => {
+            const speed = btn.dataset.speed;
+            if (filterManager.isSpeedSelected(speed)) {
+                btn.classList.add('filter-btn-active');
+            } else {
+                btn.classList.remove('filter-btn-active');
+            }
+        });
+
+        // Update status text
+        if (statusSpan) {
+            statusSpan.textContent = filterManager.getFilterDescription();
+        }
+    }
+
+    // Function to rebuild speed filter buttons
+    function rebuildSpeedFilterButtons(availableSpeeds) {
+        if (!speedButtonsContainer) return;
+
+        // Clear existing buttons
+        speedButtonsContainer.innerHTML = '';
+        speedFilterButtons = [];
+
+        // Create a button for each available speed
+        availableSpeeds.forEach(speed => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.dataset.speed = speed;
+            btn.textContent = speed.charAt(0).toUpperCase() + speed.slice(1);
+
+            btn.addEventListener('click', function() {
+                // Toggle this speed in the filter
+                filterManager.toggleSpeed(speed);
+                updateSpeedButtonStates();
+            });
+
+            speedButtonsContainer.appendChild(btn);
+            speedFilterButtons.push(btn);
+        });
+
+        // Update button states after rebuilding
+        updateSpeedButtonStates();
+    }
+
     // Listen for filter changes from the filter manager
     filterManager.addListener(function(event) {
         // Update status text
         if (statusSpan) {
             statusSpan.textContent = filterManager.getFilterDescription();
+        }
+
+        // Rebuild speed filter buttons if speeds have changed
+        if (event.availableSpeeds) {
+            rebuildSpeedFilterButtons(event.availableSpeeds);
+        } else {
+            // Just update button states if speeds haven't changed
+            updateSpeedButtonStates();
         }
     });
 }
@@ -251,6 +402,11 @@ function handleAnalysisUpdate(data) {
             // Final update to enriched games display
             updateEnrichedGamesDisplay();
 
+            // Update principles summary if data is available
+            if (data.stockfish_analysis && data.stockfish_analysis.principles) {
+                updatePrinciplesSummary(data.stockfish_analysis.principles);
+            }
+
             if (eventSource) {
                 eventSource.close();
             }
@@ -292,6 +448,8 @@ function updateCharts() {
     updateGameResultsChart();
     updateMistakesAnalysisChart();
     updateOpeningAnalysisChart();
+    updateBlunderAnalysis();
+    updateTimeAnalysis();
 }
 
 function updateGameResultsChart() {
@@ -390,6 +548,105 @@ function updateOpeningAnalysisChart() {
             hasComponent: !!window.OpeningAnalysis,
             hasReact: !!window.React,
             gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
+}
+
+function updateBlunderAnalysis() {
+    // Check if we have the React root and component available
+    if (window.blunderAnalysisRoot && window.BlunderAnalysis && window.React) {
+        const username = document.querySelector('#report-username').textContent;
+
+        console.log('Updating BlunderAnalysis with:', {
+            gamesCount: enrichedGamesArray.length,
+            username: username,
+            sampleGame: enrichedGamesArray[0]
+        });
+
+        try {
+            // Re-render the component with updated data
+            window.blunderAnalysisRoot.render(
+                window.React.createElement(window.BlunderAnalysis, {
+                    enrichedGames: enrichedGamesArray,
+                    username: username
+                })
+            );
+            console.log('BlunderAnalysis render successful');
+        } catch (error) {
+            console.error('Error rendering BlunderAnalysis:', error);
+        }
+    } else {
+        console.log('BlunderAnalysis not ready yet:', {
+            hasRoot: !!window.blunderAnalysisRoot,
+            hasComponent: !!window.BlunderAnalysis,
+            hasReact: !!window.React,
+            gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
+}
+
+function updateTimeAnalysis() {
+    // Check if we have the React root and component available
+    if (window.timeAnalysisRoot && window.TimeAnalysis && window.React) {
+        const username = document.querySelector('#report-username').textContent;
+
+        console.log('Updating TimeAnalysis with:', {
+            gamesCount: enrichedGamesArray.length,
+            username: username,
+            sampleGame: enrichedGamesArray[0]
+        });
+
+        try {
+            // Re-render the component with updated data
+            window.timeAnalysisRoot.render(
+                window.React.createElement(window.TimeAnalysis, {
+                    enrichedGames: enrichedGamesArray,
+                    username: username
+                })
+            );
+            console.log('TimeAnalysis render successful');
+        } catch (error) {
+            console.error('Error rendering TimeAnalysis:', error);
+        }
+    } else {
+        console.log('TimeAnalysis not ready yet:', {
+            hasRoot: !!window.timeAnalysisRoot,
+            hasComponent: !!window.TimeAnalysis,
+            hasReact: !!window.React,
+            gamesArrayLength: enrichedGamesArray ? enrichedGamesArray.length : 'undefined'
+        });
+    }
+}
+
+function updatePrinciplesSummary(principlesData) {
+    // Check if we have the React root and component available
+    if (window.principlesSummaryRoot && window.PrinciplesSummary && window.React) {
+        console.log('Updating PrinciplesSummary with:', {
+            principlesData: principlesData
+        });
+
+        try {
+            // Update the hidden stockfish-analysis element for persistent storage
+            const stockfishAnalysisEl = document.getElementById('stockfish-analysis');
+            if (stockfishAnalysisEl) {
+                stockfishAnalysisEl.textContent = JSON.stringify({ principles: principlesData });
+            }
+
+            // Re-render the component with updated data
+            window.principlesSummaryRoot.render(
+                window.React.createElement(window.PrinciplesSummary, {
+                    principlesData: principlesData
+                })
+            );
+            console.log('PrinciplesSummary render successful');
+        } catch (error) {
+            console.error('Error rendering PrinciplesSummary:', error);
+        }
+    } else {
+        console.log('PrinciplesSummary not ready yet:', {
+            hasRoot: !!window.principlesSummaryRoot,
+            hasComponent: !!window.PrinciplesSummary,
+            hasReact: !!window.React
         });
     }
 }

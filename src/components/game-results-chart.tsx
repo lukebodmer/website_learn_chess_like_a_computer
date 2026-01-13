@@ -249,7 +249,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
         backgroundColor: 'var(--background-secondary)',
         borderRadius: '8px',
         border: '1px solid var(--border-color)',
-        boxShadow: '0 2px 6px var(--shadow-light)'
+        boxShadow: '0 2px 6px var(--shadow-light)',
       }}>
         <div style={{ marginBottom: '16px' }}>
           <h3 style={{
@@ -278,7 +278,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
       border: '1px solid var(--border-color)',
-      boxShadow: '0 2px 6px var(--shadow-light)'
+      boxShadow: '0 2px 6px var(--shadow-light)',
+      margin: '20px 0'
     }}>
       <div style={{ marginBottom: '16px' }}>
         <h3 style={{

@@ -6,6 +6,10 @@ import BuddyBoard from './components/buddy-board'
 import GameResultsChart from './components/game-results-chart'
 import MistakesAnalysisChart from './components/mistakes-analysis-chart'
 import OpeningAnalysis from './components/opening-analysis'
+import BlunderAnalysis from './components/blunder-analysis'
+import TimeAnalysis from './components/time-analysis'
+import PrinciplesSummary from './components/principles-summary'
+import CustomPuzzles from './components/custom-puzzles'
 import { gameFilterManager } from './game-filter-manager'
 
 // Make React available globally for template scripts
@@ -177,5 +181,160 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).openingAnalysisRoot = root
     ;(window as any).OpeningAnalysis = OpeningAnalysis
+  }
+
+  // Mount BlunderAnalysis on report pages
+  const blunderAnalysisContainer = document.getElementById('blunder-analysis-container')
+  if (blunderAnalysisContainer) {
+    const username = blunderAnalysisContainer.dataset.username || ''
+    const root = ReactDOM.createRoot(blunderAnalysisContainer)
+
+    // Use the same initial games data as the other charts
+    let initialGamesData = []
+    try {
+      const enrichedGamesElement = document.getElementById('enriched-games')
+      if (enrichedGamesElement && enrichedGamesElement.textContent) {
+        const enrichedText = enrichedGamesElement.textContent.trim()
+
+        // Check if it's actual games data (not a status message)
+        if (enrichedText && (enrichedText.startsWith('[') || enrichedText.startsWith('{'))) {
+          const parsedData = JSON.parse(enrichedText)
+
+          // Handle both array format and single object format
+          if (Array.isArray(parsedData)) {
+            initialGamesData = parsedData
+          } else if (parsedData && typeof parsedData === 'object') {
+            // Check if it's a nested structure with games
+            if (parsedData.games && Array.isArray(parsedData.games)) {
+              initialGamesData = parsedData.games
+            } else {
+              initialGamesData = [parsedData]
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing enriched games data for blunder analysis:', error.message)
+    }
+
+    // Render component with initial data
+    root.render(<BlunderAnalysis enrichedGames={initialGamesData} username={username} />)
+
+    // Store the root reference globally so we can update it from the streaming handler
+    ;(window as any).blunderAnalysisRoot = root
+    ;(window as any).BlunderAnalysis = BlunderAnalysis
+  }
+
+  // Mount TimeAnalysis on report pages
+  const timeAnalysisContainer = document.getElementById('time-analysis-container')
+  if (timeAnalysisContainer) {
+    const username = timeAnalysisContainer.dataset.username || ''
+    const root = ReactDOM.createRoot(timeAnalysisContainer)
+
+    // Use the same initial games data as the other charts
+    let initialGamesData = []
+    try {
+      const enrichedGamesElement = document.getElementById('enriched-games')
+      if (enrichedGamesElement && enrichedGamesElement.textContent) {
+        const enrichedText = enrichedGamesElement.textContent.trim()
+
+        // Check if it's actual games data (not a status message)
+        if (enrichedText && (enrichedText.startsWith('[') || enrichedText.startsWith('{'))) {
+          const parsedData = JSON.parse(enrichedText)
+
+          // Handle both array format and single object format
+          if (Array.isArray(parsedData)) {
+            initialGamesData = parsedData
+          } else if (parsedData && typeof parsedData === 'object') {
+            // Check if it's a nested structure with games
+            if (parsedData.games && Array.isArray(parsedData.games)) {
+              initialGamesData = parsedData.games
+            } else {
+              initialGamesData = [parsedData]
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing enriched games data for time analysis:', error.message)
+    }
+
+    // Render component with initial data
+    root.render(<TimeAnalysis enrichedGames={initialGamesData} username={username} />)
+
+    // Store the root reference globally so we can update it from the streaming handler
+    ;(window as any).timeAnalysisRoot = root
+    ;(window as any).TimeAnalysis = TimeAnalysis
+  }
+
+  // Mount PrinciplesSummary on report pages
+  const principlesSummaryContainer = document.getElementById('principles-summary-container')
+  if (principlesSummaryContainer) {
+    const root = ReactDOM.createRoot(principlesSummaryContainer)
+
+    // Get principles data from stockfish_analysis
+    let principlesData = null
+    try {
+      const stockfishAnalysisElement = document.getElementById('stockfish-analysis')
+      if (stockfishAnalysisElement && stockfishAnalysisElement.textContent) {
+        const stockfishText = stockfishAnalysisElement.textContent.trim()
+
+        if (stockfishText && (stockfishText.startsWith('{') || stockfishText.startsWith('['))) {
+          const parsedData = JSON.parse(stockfishText)
+          principlesData = parsedData.principles || null
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing stockfish analysis data for principles summary:', error.message)
+    }
+
+    // Render component with initial data
+    root.render(<PrinciplesSummary principlesData={principlesData} />)
+
+    // Store the root reference globally so we can update it from the streaming handler
+    ;(window as any).principlesSummaryRoot = root
+    ;(window as any).PrinciplesSummary = PrinciplesSummary
+  }
+
+  // Mount CustomPuzzles on report pages
+  const customPuzzlesContainer = document.getElementById('custom-puzzles-container')
+  console.log('🧩 CustomPuzzles container found:', !!customPuzzlesContainer)
+
+  if (customPuzzlesContainer) {
+    const root = ReactDOM.createRoot(customPuzzlesContainer)
+
+    // Get puzzle data from dedicated custom-puzzles-data element
+    let puzzlesData = []
+    try {
+      const customPuzzlesElement = document.getElementById('custom-puzzles-data')
+      console.log('🧩 Custom puzzles data element found:', !!customPuzzlesElement)
+
+      if (customPuzzlesElement && customPuzzlesElement.textContent) {
+        const puzzlesText = customPuzzlesElement.textContent.trim()
+        console.log('🧩 Puzzles text length:', puzzlesText.length)
+        console.log('🧩 Puzzles text starts with [:', puzzlesText.startsWith('['))
+
+        if (puzzlesText && puzzlesText.startsWith('[')) {
+          puzzlesData = JSON.parse(puzzlesText)
+          console.log('🧩 Successfully parsed puzzles, count:', puzzlesData.length)
+          console.log('🧩 First puzzle:', puzzlesData[0])
+        } else {
+          console.log('🧩 Puzzles text does not start with [')
+        }
+      } else {
+        console.log('🧩 No custom puzzles element or empty content')
+      }
+    } catch (error) {
+      console.error('🧩 Error parsing custom puzzles data:', error)
+    }
+
+    console.log('🧩 Rendering CustomPuzzles with', puzzlesData.length, 'puzzles')
+
+    // Render component with puzzle data
+    root.render(<CustomPuzzles puzzles={puzzlesData} size={400} />)
+
+    // Store the root reference globally
+    ;(window as any).customPuzzlesRoot = root
+    ;(window as any).CustomPuzzles = CustomPuzzles
   }
 })

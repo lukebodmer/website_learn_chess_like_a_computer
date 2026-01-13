@@ -367,7 +367,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
           setUserArrows(prev => [...prev, {
             from: rightClickDragging.from,
             to: targetSquare,
-            color: '#ff0000' // Red arrows
+            color: '#9933ff' // Purple arrows
           }])
         }
       }
@@ -528,7 +528,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     // Draw right-click highlights
     for (const square of rightClickHighlights) {
       const coords = getSquareCoords(square)
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.4)' // Red highlight with transparency
+      ctx.fillStyle = 'rgba(153, 51, 255, 0.4)' // Purple highlight with transparency
       ctx.fillRect(coords.x, coords.y, squareSize, squareSize)
     }
 
@@ -783,7 +783,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         // Only draw if we've moved a reasonable distance
         const distance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2))
         if (distance > 20) {
-          ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)' // Semi-transparent red
+          ctx.strokeStyle = 'rgba(153, 51, 255, 0.7)' // Semi-transparent purple
           ctx.lineWidth = 6
           ctx.lineCap = 'round'
 

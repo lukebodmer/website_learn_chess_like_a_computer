@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.db import transaction
 from .models import ReportGenerationTask, AnalysisReport
 from .chess_analysis.game_enricher import GameEnricher
+from .chess_analysis.principles_analyzer import ChessPrinciplesAnalyzer
+from .chess_analysis.puzzle_finder import PuzzleFinder
 
 
 class ReportTaskProcessor:
@@ -107,13 +109,15 @@ class ReportTaskProcessor:
                 try:
                     raw_game_data = json.loads(line)
 
-                    # Convert Chess.com data to Lichess format if needed
+                    # Convert to universal format with enriched opening data
                     if is_chess_com:
                         # Import the conversion function
-                        from .views import convert_chess_com_to_lichess_format
-                        game_json = convert_chess_com_to_lichess_format(raw_game_data)
+                        from .views import convert_chess_com_to_universal_format
+                        game_json = convert_chess_com_to_universal_format(raw_game_data)
                     else:
-                        game_json = raw_game_data
+                        # Enrich Lichess data with opening FEN and moves
+                        from .views import convert_lichess_to_universal_format
+                        game_json = convert_lichess_to_universal_format(raw_game_data)
 
                     # Parse into our game format
                     players = game_json.get("players", {})
@@ -130,8 +134,6 @@ class ReportTaskProcessor:
                 except Exception as e:
                     print(f"Error converting Chess.com game: {e}")
                     continue
-
-
         return games
 
     def _run_enrichment_with_progress(self, enricher, task):
@@ -258,19 +260,95 @@ class ReportTaskProcessor:
 
             elif update.get('type') == 'complete':
                 # Final completion
-                task.progress = 100
-                task.current_game = f"Analysis complete - {len(completed_enriched_games)} games processed"
+                task.progress = 95  # Leave 5% for principles analysis
+                task.current_game = f"Analysis complete - {len(completed_enriched_games)} games processed. Running principles analysis..."
 
                 # Final update to analysis summary
                 analysis_summary['total_games_analyzed'] = len(completed_enriched_games)
 
-                # Update report with final stats
+                # Run principles analysis on enriched games
+                print(f"📊 Running principles analysis on {len(completed_enriched_games)} enriched games")
+                task.current_game = "Analyzing chess principles..."
+                task.save()
+
+                try:
+                    # Create principles analyzer
+                    principles_analyzer = ChessPrinciplesAnalyzer(
+                        enriched_games=completed_enriched_games,
+                        username=username
+                    )
+
+                    # Run all principles analysis
+                    principles_results = principles_analyzer.analyze_all_principles()
+
+                    # Add principles results to analysis summary
+                    analysis_summary['principles'] = principles_results
+
+                    print(f"✅ Principles analysis complete. ECO range: {principles_results.get('eco_range')}, Games: {principles_results.get('total_games_analyzed')}")
+
+                    # Generate custom puzzles based on principles analysis
+                    task.progress = 97
+                    task.current_game = "Generating custom puzzle recommendations..."
+                    task.save()
+
+                    try:
+                        # Determine user rating from enriched games
+                        user_rating = self._get_user_average_rating(completed_enriched_games, username)
+
+                        if user_rating and user_rating > 0:
+                            print(f"📊 Generating puzzles for user rating: {user_rating}")
+
+                            # Create puzzle finder with principles analysis
+                            puzzle_finder = PuzzleFinder(principles_results, target_puzzle_count=1000)
+
+                            # Get puzzle recommendations
+                            puzzle_recommendations = puzzle_finder.get_puzzle_recommendations(user_rating)
+
+                            # Store puzzle data separately (not in analysis_summary)
+                            task.puzzle_data = puzzle_recommendations
+
+                            puzzles_found = puzzle_recommendations.get('total_puzzles_found', 0)
+                            print(f"✅ Generated {puzzles_found} custom puzzles for training")
+                        else:
+                            print(f"⚠️ Could not determine user rating, skipping puzzle generation")
+                            task.puzzle_data = None
+
+                    except Exception as e:
+                        print(f"❌ Puzzle generation failed: {e}")
+                        # Continue even if puzzle generation fails
+                        task.puzzle_data = {
+                            'error': str(e),
+                            'puzzles': [],
+                            'total_puzzles_found': 0
+                        }
+
+                except Exception as e:
+                    print(f"❌ Principles analysis failed: {e}")
+                    # Continue even if principles analysis fails
+                    analysis_summary['principles'] = {
+                        'error': str(e),
+                        'eco_range': 'unknown',
+                        'total_games_analyzed': 0,
+                        'principles': {}
+                    }
+                    analysis_summary['puzzle_recommendations'] = None
+
+                # Update final progress
+                task.progress = 100
+                task.current_game = f"Complete - {len(completed_enriched_games)} games analyzed with principles"
+
+                # Update report with final stats including principles and puzzles
                 if task.analysis_report:
                     with transaction.atomic():
                         report = task.analysis_report
                         report.enriched_games = completed_enriched_games.copy()
                         report.stockfish_analysis = analysis_summary.copy()
                         report.stockfish_games_analyzed = len(completed_enriched_games)
+
+                        # Store puzzle data in dedicated field
+                        if hasattr(task, 'puzzle_data') and task.puzzle_data:
+                            report.custom_puzzles = task.puzzle_data.get('puzzles', [])
+
                         from django.utils import timezone
                         report.analysis_duration = timezone.now() - task.started_at
                         report.save()
@@ -279,6 +357,44 @@ class ReportTaskProcessor:
                 break
 
         return analysis_summary
+
+    def _get_user_average_rating(self, enriched_games, username):
+        """
+        Calculate user's average rating from enriched games.
+
+        Args:
+            enriched_games: List of enriched game dictionaries
+            username: Username to find rating for
+
+        Returns:
+            Average rating as integer, or None if not found
+        """
+        ratings = []
+        username_lower = username.lower()
+
+        for game in enriched_games:
+            players = game.get("players", {})
+
+            # Check white player
+            white_user = players.get("white", {}).get("user", {}).get("name", "").lower()
+            if white_user == username_lower:
+                rating = players.get("white", {}).get("rating")
+                if rating:
+                    ratings.append(rating)
+                continue
+
+            # Check black player
+            black_user = players.get("black", {}).get("user", {}).get("name", "").lower()
+            if black_user == username_lower:
+                rating = players.get("black", {}).get("rating")
+                if rating:
+                    ratings.append(rating)
+
+        if not ratings:
+            return None
+
+        # Return average rating
+        return int(sum(ratings) / len(ratings))
 
     def _fail_task(self, task, error_message):
         """Mark task as failed"""

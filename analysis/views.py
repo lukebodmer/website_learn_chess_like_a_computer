@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
@@ -32,7 +32,7 @@ from .report_generation import generate_html_report
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 50
+ANALYSIS_GAME_COUNT = 20
 
 
 # Shared utilities for game fetching
@@ -154,7 +154,7 @@ def get_lichess_user(access_token):
 
 
 def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT):
-    """Fetch recent games from Lichess API with configurable game count"""
+    """Fetch recent rated games from Lichess API with configurable game count"""
     response = requests.get(
         f"https://lichess.org/api/games/user/{username}",
         headers={
@@ -171,6 +171,7 @@ def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT
             "opening": "true",
             "division": "true",
             "finished": "true",
+            "rated": "true",  # Only fetch rated games
             "sort": "dateDesc",
         },
     )
@@ -179,14 +180,21 @@ def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT
         ndjson_data = response.text
         lines = [line for line in ndjson_data.strip().split('\n') if line.strip()]
         games = []
+        filtered_ndjson_lines = []
 
-        # Parse games
+        # Parse games and filter for rated games only
         for line in lines:
             try:
                 game = json.loads(line)
-                games.append(game)
+                # Double-check that game is rated (API filter should handle this, but just in case)
+                if game.get('rated', False):
+                    games.append(game)
+                    filtered_ndjson_lines.append(line)
             except json.JSONDecodeError:
                 continue
+
+        # Rebuild ndjson_data with only rated games
+        filtered_ndjson_data = '\n'.join(filtered_ndjson_lines)
 
         # Use shared utility to track dates
         oldest_date, newest_date = track_game_dates(
@@ -196,7 +204,7 @@ def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT
 
         return {
             'games': games,
-            'ndjson_data': ndjson_data,
+            'ndjson_data': filtered_ndjson_data,
             'games_count': len(games),
             'oldest_game_date': oldest_date,
             'newest_game_date': newest_date
@@ -242,6 +250,24 @@ def home(request):
         context['reports'] = enriched_reports
 
     return render(request, 'analysis/home.html', context)
+
+
+def signup(request):
+    """User registration page"""
+    if request.user.is_authenticated:
+        return redirect('analysis:home')
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f"Welcome {user.username}! Your account has been created.")
+            return redirect('analysis:home')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'registration/signup.html', {'form': form})
 
 
 def games(request):
@@ -445,11 +471,23 @@ def _render_completed_report(request, report, platform, username, game_dataset):
     if report.enriched_games:
         enriched_games_display = json.dumps(report.enriched_games, indent=2)
 
+    # Get stockfish analysis (including principles) for display
+    stockfish_analysis_display = "{}"
+    if report.stockfish_analysis:
+        stockfish_analysis_display = json.dumps(report.stockfish_analysis, indent=2)
+
+    # Get custom puzzles for display
+    custom_puzzles_display = "[]"
+    if report.custom_puzzles:
+        custom_puzzles_display = json.dumps(report.custom_puzzles, indent=2)
+
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
         'all_games_raw': all_games_raw,
         'enriched_games': enriched_games_display,
+        'stockfish_analysis': stockfish_analysis_display,
+        'custom_puzzles': custom_puzzles_display,
         'auto_start': False,  # Don't auto-start streaming for existing reports
         'platform': platform
     })
@@ -530,6 +568,8 @@ def _generate_unified_analysis_report(request, username, dataset_id):
         'dataset_id': dataset_id,
         'all_games_raw': all_games_raw,
         'enriched_games': json.dumps({"status": "Waiting for analysis to complete..."}, indent=2),
+        'stockfish_analysis': json.dumps({}),  # Empty initially, will be populated during streaming
+        'custom_puzzles': json.dumps([]),  # Empty initially, will be populated after analysis
         'auto_start': True,  # Tell template to auto-start streaming
         'platform': platform  # Tell template which platform this is
     })
@@ -970,7 +1010,7 @@ def load_opening_database():
                 _opening_database.append({
                     'eco': row['eco'].strip(),
                     'name': row['name'].strip(),
-                    'moves': moves_list,
+                    'moves': ' '.join(moves_list),  # Store as space-separated string
                     'ply_count': len(moves_list),
                     'fen': epd_fen
                 })
@@ -1037,20 +1077,20 @@ def classify_opening_by_moves(moves_string):
         moves_string: Space-separated moves like "Nf3 e6 e4 d5 e5 c5"
 
     Returns:
-        dict with 'eco', 'name', and 'ply' keys
+        dict with 'eco', 'name', 'ply', 'fen', and 'moves' keys (moves is a space-separated string)
     """
     if not moves_string:
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
 
     try:
         database = load_opening_database()
         if not database:
-            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
 
         # Convert moves to FEN positions
         fen_positions = moves_to_fen_positions(moves_string)
         if not fen_positions:
-            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
 
         # Try backward matching - start from move 20 (40th ply) or end of game, whichever is shorter
         max_check_moves = min(40, len(fen_positions))
@@ -1065,15 +1105,60 @@ def classify_opening_by_moves(moves_string):
                     return {
                         'eco': opening['eco'],
                         'name': opening['name'],
-                        'ply': opening['ply_count']
+                        'ply': opening['ply_count'],
+                        'fen': opening['fen'],
+                        'moves': opening['moves']
                     }
 
         # No match found
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
 
     except Exception as e:
         print(f"Error classifying opening: {e}")
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0}
+        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
+
+
+def lookup_opening_in_database(eco, name, ply):
+    """
+    Look up opening in database by ECO, name, and ply to get FEN and moves
+
+    Args:
+        eco: ECO code like "A00"
+        name: Opening name like "Amar Opening"
+        ply: Ply count
+
+    Returns:
+        dict with 'fen' and 'moves' keys (moves is a space-separated string), or empty strings if not found
+    """
+    try:
+        database = load_opening_database()
+        if not database:
+            return {'fen': '', 'moves': ''}
+
+        # Try exact match on all three fields
+        for opening in database:
+            if (opening['eco'] == eco and
+                opening['name'] == name and
+                opening['ply_count'] == ply):
+                return {
+                    'fen': opening['fen'],
+                    'moves': opening['moves']
+                }
+
+        # If no exact match, try matching just ECO and ply
+        for opening in database:
+            if opening['eco'] == eco and opening['ply_count'] == ply:
+                return {
+                    'fen': opening['fen'],
+                    'moves': opening['moves']
+                }
+
+        # No match found
+        return {'fen': '', 'moves': ''}
+
+    except Exception as e:
+        print(f"Error looking up opening in database: {e}")
+        return {'fen': '', 'moves': ''}
 
 
 def parse_chess_com_time_control(time_control_str):
@@ -1118,8 +1203,8 @@ def parse_chess_com_time_control(time_control_str):
         return 300, 0
 
 
-def convert_chess_com_to_lichess_format(chess_com_game):
-    """Convert Chess.com game data to Lichess format for unified processing"""
+def convert_chess_com_to_universal_format(chess_com_game):
+    """Convert Chess.com game data to universal format with enriched opening data"""
     try:
         # Parse time control first
         initial_time, increment = parse_chess_com_time_control(chess_com_game.get('time_control', '300'))
@@ -1197,7 +1282,9 @@ def convert_chess_com_to_lichess_format(chess_com_game):
             "opening": {
                 "eco": opening_classification['eco'],
                 "name": opening_classification['name'],
-                "ply": opening_classification['ply']
+                "ply": opening_classification['ply'],
+                "fen": opening_classification['fen'],
+                "moves": opening_classification['moves']
             },
             "moves": moves_string,
             "clocks": clocks_list,
@@ -1226,13 +1313,58 @@ def convert_chess_com_to_lichess_format(chess_com_game):
         return lichess_format
 
     except Exception as e:
-        print(f"Error converting Chess.com game to Lichess format: {e}")
+        print(f"Error converting Chess.com game to universal format: {e}")
         # Return minimal format to prevent crashes
         return {
             "id": chess_com_game.get('uuid', 'unknown'),
             "error": f"Conversion failed: {str(e)}",
             "chess_com_data": chess_com_game
         }
+
+
+def convert_lichess_to_universal_format(lichess_game):
+    """
+    Convert Lichess game data to universal format by enriching opening data with FEN and moves
+
+    Args:
+        lichess_game: Dict with Lichess game data (already has opening.eco, opening.name, opening.ply)
+
+    Returns:
+        Dict with enriched opening data including fen and moves
+    """
+    try:
+        # Make a copy to avoid modifying the original
+        enriched_game = lichess_game.copy()
+
+        # Check if game has opening data
+        if 'opening' in enriched_game and enriched_game['opening']:
+            opening = enriched_game['opening']
+            eco = opening.get('eco', 'Unknown')
+            name = opening.get('name', 'Unknown')
+            ply = opening.get('ply', 0)
+
+            # Look up the opening in the database to get FEN and moves
+            opening_details = lookup_opening_in_database(eco, name, ply)
+
+            # Add FEN and moves to the opening data
+            enriched_game['opening']['fen'] = opening_details.get('fen', '')
+            enriched_game['opening']['moves'] = opening_details.get('moves', '')
+        else:
+            # No opening data, add empty opening structure
+            enriched_game['opening'] = {
+                'eco': 'Unknown',
+                'name': 'Unknown',
+                'ply': 0,
+                'fen': '',
+                'moves': ''
+            }
+
+        return enriched_game
+
+    except Exception as e:
+        print(f"Error enriching Lichess game data: {e}")
+        # Return the original game if enrichment fails
+        return lichess_game
 
 
 def convert_chess_com_game_to_dict(game):
@@ -1418,7 +1550,7 @@ def generate_chess_com_analysis_report(request, username, dataset_id):
 
 
 @login_required
-def settings(request):
+def account_settings(request):
     """Account settings page for logged-in users"""
     user = request.user
     profile, created = UserProfile.objects.get_or_create(user=user)
@@ -1835,5 +1967,3 @@ def daily_puzzle_api(request):
             'success': False,
             'error': 'Failed to load daily puzzles from both sources'
         }, status=500)
-
-
