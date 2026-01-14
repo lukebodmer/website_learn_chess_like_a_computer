@@ -44,6 +44,11 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
   const [animationData, setAnimationData] = useState<{ piece: any, from: string, to: string } | null>(null)
   const [pendingPositionUpdate, setPendingPositionUpdate] = useState<string | null>(null)
   const [pendingStateUpdate, setPendingStateUpdate] = useState<any>(null)
+  const [hintLevel, setHintLevel] = useState<number>(0) // 0 = no hint, 1 = highlight piece, 2 = show arrow
+  const [highlightedSquares, setHighlightedSquares] = useState<{ square: string, color: string }[]>([])
+  const [arrows, setArrows] = useState<{ from: string, to: string, color: string }[]>([])
+  const [orientation, setOrientation] = useState<'white' | 'black'>('white')
+  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
 
   // Fetch daily puzzle data
   useEffect(() => {
@@ -62,6 +67,19 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
           // Set up initial position
           chess.load(puzzle.fen)
           setPosition(puzzle.fen)
+
+          // Set board orientation based on whose turn it is
+          const turn = chess.turn()
+          setOrientation(turn === 'w' ? 'white' : 'black')
+
+          // Set last move highlight if available
+          if (puzzle.lastMove) {
+            setLastMoveSquares({
+              from: puzzle.lastMove.from,
+              to: puzzle.lastMove.to
+            })
+          }
+
           setPuzzleState(prev => ({ ...prev, status: 'ready' }))
         } else {
           throw new Error('No puzzle data available')
@@ -141,7 +159,11 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
             const isCorrect = solutionMoves[puzzleState.currentMoveIndex] === testMove.san
 
             if (isCorrect) {
-              // Correct move - animate it
+              // Correct move - clear hints and animate it
+              setHintLevel(0)
+              setHighlightedSquares([])
+              setArrows([])
+
               setAnimationData({
                 piece: piece,
                 from: selectedSquare,
@@ -308,6 +330,11 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
     if (puzzleData) {
       chess.load(puzzleData.fen)
       setPosition(puzzleData.fen)
+
+      // Reset board orientation based on whose turn it is
+      const turn = chess.turn()
+      setOrientation(turn === 'w' ? 'white' : 'black')
+
       setPuzzleState({
         status: 'ready',
         currentMoveIndex: 0,
@@ -319,13 +346,52 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
       setAnimationData(null)
       setPendingPositionUpdate(null)
       setPendingStateUpdate(null)
+      setHintLevel(0)
+      setHighlightedSquares([])
+      setArrows([])
     }
   }
 
   const showHint = () => {
+    if (!puzzleData) return
+
     const solutionMoves = getSolutionMoves()
-    if (solutionMoves.length > puzzleState.currentMoveIndex) {
-      setPuzzleState(prev => ({ ...prev, showHint: true }))
+    if (solutionMoves.length <= puzzleState.currentMoveIndex) return
+
+    const nextMove = solutionMoves[puzzleState.currentMoveIndex]
+
+    if (hintLevel === 0) {
+      // First hint: highlight the piece to move
+      try {
+        const tempChess = new Chess(chess.fen())
+        const move = tempChess.move(nextMove)
+        if (move) {
+          setHighlightedSquares([
+            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
+          ])
+          setHintLevel(1)
+          setPuzzleState(prev => ({ ...prev, showHint: true }))
+        }
+      } catch (e) {
+        console.error('Error showing hint:', e)
+      }
+    } else if (hintLevel === 1) {
+      // Second hint: show arrow to destination
+      try {
+        const tempChess = new Chess(chess.fen())
+        const move = tempChess.move(nextMove)
+        if (move) {
+          setHighlightedSquares([
+            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
+          ])
+          setArrows([
+            { from: move.from, to: move.to, color: '#ffff00' }
+          ])
+          setHintLevel(2)
+        }
+      } catch (e) {
+        console.error('Error showing hint arrow:', e)
+      }
     }
   }
 
@@ -398,21 +464,16 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
 
   return (
     <div style={{
-      display: 'inline-block'
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      width: '100%'
     }}>
       {/* Header */}
       <div style={{
         marginBottom: '12px',
         textAlign: 'center'
       }}>
-        <h3 style={{
-          margin: '0 0 8px 0',
-          fontSize: '18px',
-          color: '#333',
-          fontWeight: 600
-        }}>
-          Chess.com
-        </h3>
         <div style={{
           fontSize: '13px',
           color: 'white',
@@ -427,11 +488,14 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         size={size}
         position={position}
         pieceTheme={pieceTheme}
-        orientation="white"
+        orientation={orientation}
         coordinates={true}
         interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
         selectedSquare={selectedSquare}
         legalMoves={legalMoves}
+        highlightedSquares={highlightedSquares}
+        arrows={arrows}
+        lastMove={lastMoveSquares}
         animationData={animationData}
         onSquareClick={handleSquareClick}
         onAnimationComplete={handleAnimationComplete}
@@ -462,17 +526,18 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         {puzzleState.status !== 'solved' && (
           <button
             onClick={showHint}
+            disabled={hintLevel >= 2}
             style={{
               padding: '6px 12px',
               fontSize: '12px',
-              background: '#17a2b8',
+              background: hintLevel >= 2 ? '#cccccc' : '#17a2b8',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: hintLevel >= 2 ? 'not-allowed' : 'pointer'
             }}
           >
-            Hint
+            Hint {hintLevel > 0 ? `(${hintLevel}/2)` : ''}
           </button>
         )}
 

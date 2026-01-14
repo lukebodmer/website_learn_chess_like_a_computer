@@ -36,11 +36,11 @@ export const useChessGame = (options: UseChessGameOptions = {}) => {
     return piece.color === currentTurn
   }, [])
 
-  // Make a move
-  const makeMove = useCallback((from: string, to: string, promotion?: string, animate: boolean = true): boolean => {
+  // Make a move (skipTurnCheck allows AI to make moves)
+  const makeMove = useCallback((from: string, to: string, promotion?: string, animate: boolean = true, skipTurnCheck: boolean = false): boolean => {
     try {
       const piece = chessRef.current.get(from)
-      if (!piece || !canSelectPiece(piece)) return false
+      if (!piece || (!skipTurnCheck && !canSelectPiece(piece))) return false
 
       // Check for pawn promotion
       if (piece.type === 'p' && !promotion) {

@@ -5,10 +5,12 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   root: 'src',
+  publicDir: '../public',
   build: {
     outDir: '../static/js/dist',
     emptyOutDir: true,
     sourcemap: true,
+    copyPublicDir: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'src/main.tsx')

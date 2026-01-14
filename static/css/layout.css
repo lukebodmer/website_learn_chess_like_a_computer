@@ -203,6 +203,21 @@
     color: #856404;
 }
 
+/* Platform-specific status indicators */
+.status-indicator.lichess-status.connected {
+    border-left: 4px solid #d85c0d;
+    border-color: rgba(216, 92, 13, 0.3);
+    background: linear-gradient(135deg, rgba(216, 92, 13, 0.12) 0%, rgba(243, 156, 18, 0.12) 100%);
+    color: var(--text-primary);
+}
+
+.status-indicator.chess-com-status.connected {
+    border-left: 4px solid #769656;
+    border-color: rgba(118, 150, 86, 0.3);
+    background: linear-gradient(135deg, rgba(118, 150, 86, 0.12) 0%, rgba(143, 188, 143, 0.12) 100%);
+    color: var(--text-primary);
+}
+
 
 /* Empty State */
 .empty-state {

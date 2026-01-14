@@ -435,3 +435,26 @@
         font-size: 1.4em;
     }
 }
+
+/* Side-by-Side Puzzle Grid Layout */
+.daily-puzzles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* Mobile: Stack puzzles vertically */
+@media (max-width: 768px) {
+    .daily-puzzles-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Tablet: Side by side with smaller gap */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .daily-puzzles-grid {
+        gap: 15px;
+    }
+}

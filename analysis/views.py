@@ -1671,6 +1671,9 @@ def get_daily_puzzle_data():
             # Extract solution moves from PGN
             solution_moves = extract_solution_from_pgn(puzzle.pgn)
 
+            # Get the last move from the PGN (the move that led to the puzzle position)
+            last_move = get_last_move_from_chess_com_pgn(puzzle.pgn, puzzle.fen)
+
             puzzle_data = {
                 'title': puzzle.title or 'Chess.com Daily Puzzle',
                 'fen': puzzle.fen,
@@ -1680,7 +1683,8 @@ def get_daily_puzzle_data():
                 'solution': solution_moves,
                 'publish_time': puzzle.publish_time,
                 'publish_datetime': getattr(puzzle, 'publish_datetime', None),
-                'source': 'chess.com'
+                'source': 'chess.com',
+                'lastMove': last_move  # Add last move info
             }
 
             # Cache until next 12:05 AM EST (when new puzzle is released)
@@ -1732,6 +1736,9 @@ def get_lichess_puzzle_data():
             # Calculate FEN position at the puzzle start
             puzzle_fen = get_position_fen_from_pgn(game['pgn'], puzzle['initialPly'])
 
+            # Get the last move that led to the puzzle position
+            last_move = get_last_move_from_pgn(game['pgn'], puzzle['initialPly'])
+
             puzzle_data = {
                 'id': puzzle['id'],
                 'title': f"Lichess Daily Puzzle - Rating {puzzle['rating']}",
@@ -1741,7 +1748,8 @@ def get_lichess_puzzle_data():
                 'rating': puzzle['rating'],
                 'plays': puzzle['plays'],
                 'themes': puzzle['themes'],
-                'source': 'lichess'
+                'source': 'lichess',
+                'lastMove': last_move  # Add last move info
             }
 
             # Cache until next puzzle (same logic as Chess.com)
@@ -1776,14 +1784,20 @@ def convert_uci_to_algebraic(uci_moves, pgn, initial_ply):
         board = game.board()
         moves = list(game.mainline_moves())
 
-        # Play moves up to initial_ply
-        for i in range(min(initial_ply, len(moves))):
+        # Lichess initialPly is the ply AFTER which the puzzle starts
+        # So we need to play up to AND INCLUDING the initialPly move
+        plies_to_play = min(initial_ply + 1, len(moves))
+
+        for i in range(plies_to_play):
             board.push(moves[i])
 
         # Convert UCI moves to algebraic
         algebraic_moves = []
         for uci_move in uci_moves:
             try:
+                # Clean the UCI move (remove spaces)
+                uci_move = uci_move.replace(' ', '')
+
                 move = chess.Move.from_uci(uci_move)
                 if move in board.legal_moves:
                     algebraic = board.san(move)
@@ -1791,7 +1805,7 @@ def convert_uci_to_algebraic(uci_moves, pgn, initial_ply):
                     board.push(move)
                 else:
                     break
-            except:
+            except Exception as e:
                 break
 
         return algebraic_moves
@@ -1801,9 +1815,53 @@ def convert_uci_to_algebraic(uci_moves, pgn, initial_ply):
         return []
 
 
+def get_last_move_from_pgn(pgn, initial_ply):
+    """
+    Get the last move that was played before the puzzle position
+    Returns dict with 'from' and 'to' squares, or None if not available
+    """
+    try:
+        import chess
+        import chess.pgn
+        from io import StringIO
+
+        pgn_io = StringIO(pgn)
+        game = chess.pgn.read_game(pgn_io)
+
+        if not game:
+            return None
+
+        board = game.board()
+        moves = list(game.mainline_moves())
+
+        # We need the move at position initial_ply (0-indexed)
+        # This is the last move before the puzzle starts
+        if initial_ply >= len(moves):
+            return None
+
+        # Play moves up to but not including initial_ply
+        for i in range(initial_ply):
+            board.push(moves[i])
+
+        # Get the move at initial_ply
+        last_move = moves[initial_ply]
+
+        return {
+            'from': chess.square_name(last_move.from_square),
+            'to': chess.square_name(last_move.to_square)
+        }
+
+    except Exception as e:
+        print(f"Error getting last move from PGN: {e}")
+        return None
+
+
 def get_position_fen_from_pgn(pgn, initial_ply):
     """
     Get FEN position from PGN at a specific ply
+
+    Note: Lichess puzzles use initialPly to indicate after which move the puzzle starts.
+    The puzzle position is AFTER the move at initialPly is played.
     """
     try:
         import chess
@@ -1819,9 +1877,14 @@ def get_position_fen_from_pgn(pgn, initial_ply):
         board = game.board()
         moves = list(game.mainline_moves())
 
-        # Play moves up to initial_ply
-        for i in range(min(initial_ply, len(moves))):
-            board.push(moves[i])
+        # Lichess initialPly is the ply AFTER which the puzzle starts
+        # So we need to play up to AND INCLUDING the initialPly move
+        # This means we play moves 0 through initial_ply (inclusive)
+        plies_to_play = min(initial_ply + 1, len(moves))
+
+        for i in range(plies_to_play):
+            move = moves[i]
+            board.push(move)
 
         return board.fen()
 
@@ -1873,6 +1936,61 @@ def get_seconds_until_next_puzzle_release():
 
     # Add 5 minute buffer to avoid race conditions
     return seconds_until_release + 300  # 5 minutes buffer
+
+
+def get_last_move_from_chess_com_pgn(pgn, target_fen):
+    """
+    Get the last move from Chess.com PGN that led to the puzzle position
+    Returns dict with 'from' and 'to' squares, or None if not available
+    """
+    if not pgn:
+        return None
+
+    try:
+        import chess
+        import chess.pgn
+        from io import StringIO
+
+        # Parse the PGN
+        pgn_io = StringIO(pgn)
+        game = chess.pgn.read_game(pgn_io)
+
+        if not game:
+            return None
+
+        board = game.board()
+        last_move = None
+
+        # Play through all moves until we reach the target FEN
+        for move in game.mainline_moves():
+            # Check if after this move we reach the target position
+            board.push(move)
+
+            # Compare positions (ignore move counters)
+            current_fen_base = ' '.join(board.fen().split()[:4])
+            target_fen_base = ' '.join(target_fen.split()[:4])
+
+            if current_fen_base == target_fen_base:
+                # This is the move that led to the puzzle position
+                return {
+                    'from': chess.square_name(move.from_square),
+                    'to': chess.square_name(move.to_square)
+                }
+
+            last_move = move
+
+        # If we didn't find exact match, return the last move played
+        if last_move:
+            return {
+                'from': chess.square_name(last_move.from_square),
+                'to': chess.square_name(last_move.to_square)
+            }
+
+        return None
+
+    except Exception as e:
+        print(f"Error getting last move from Chess.com PGN: {e}")
+        return None
 
 
 def extract_solution_from_pgn(pgn):

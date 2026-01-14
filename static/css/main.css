@@ -1010,18 +1010,6 @@ label {
     border-left: 4px solid var(--warning-color);
 }
 
-/* Platform-specific status indicators */
-.status-indicator.lichess-status.connected {
-    border-left: 4px solid #d85c0d;
-    border-color: #d85c0d;
-    background: linear-gradient(135deg, rgba(216, 92, 13, 0.03) 0%, rgba(243, 156, 18, 0.03) 100%);
-}
-
-.status-indicator.chess-com-status.connected {
-    border-left: 4px solid #769656;
-    border-color: #769656;
-    background: linear-gradient(135deg, rgba(118, 150, 86, 0.03) 0%, rgba(143, 188, 143, 0.03) 100%);
-}
 
 .status-indicator p {
     margin: 0;
@@ -1111,66 +1099,6 @@ label {
     margin-top: 10px;
 }
 
-.generate-report-card {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 25px 15px;
-    background: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    min-height: 80px;
-}
-
-.report-button-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-
-.report-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-}
-
-.generate-report-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px var(--shadow-medium);
-    border-color: var(--accent-color);
-}
-
-.generate-report-card.lichess-card:hover {
-    border-color: #d85c0d;
-    background: linear-gradient(135deg, rgba(216, 92, 13, 0.05) 0%, rgba(243, 156, 18, 0.05) 100%);
-}
-
-.generate-report-card.lichess-card:hover .report-label {
-    color: #d85c0d;
-}
-
-.generate-report-card.chess-com-card:hover {
-    border-color: #769656;
-    background: linear-gradient(135deg, rgba(118, 150, 86, 0.05) 0%, rgba(143, 188, 143, 0.05) 100%);
-}
-
-.generate-report-card.chess-com-card:hover .report-label {
-    color: #769656;
-}
-
-.report-logo {
-    width: 48px;
-    height: 48px;
-    transition: transform 0.3s ease;
-}
-
-.generate-report-card:hover .report-logo {
-    transform: scale(1.1);
-}
 
 /* Mobile responsiveness for home page */
 @media (max-width: 768px) {

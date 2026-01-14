@@ -2,8 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import ChessBoard from './components/chess-board'
 import DailyPuzzle from './components/daily-puzzle'
+import LichessDailyPuzzle from './components/lichess-daily-puzzle'
 import BuddyBoard from './components/buddy-board'
 import FiltersButton from './components/filters-button'
+import GameStation from './components/game-station'
+import GamesGrid from './components/games-grid'
 import GameResultsChart from './components/game-results-chart'
 import MistakesAnalysisChart from './components/mistakes-analysis-chart'
 import OpeningAnalysis from './components/opening-analysis'
@@ -22,18 +25,44 @@ console.log('Main Vite entry point loaded')
 
 // Auto-mount components based on DOM elements
 document.addEventListener('DOMContentLoaded', () => {
-  // Mount ChessBoard on games page
+  // Mount GamesGrid on games page
   const chessBoardContainer = document.getElementById('chess-board-container')
   if (chessBoardContainer) {
-    const root = ReactDOM.createRoot(chessBoardContainer)
-    root.render(<ChessBoard size={400} />)
+    // Mount GamesGrid in the main content area
+    const gamesGridContainer = document.getElementById('games-grid-container')
+    if (gamesGridContainer) {
+      const gridRoot = ReactDOM.createRoot(gamesGridContainer)
+
+      // Handler to emit game selection event
+      const handleGameSelect = (gameId: string) => {
+        const event = new CustomEvent('gameSelected', { detail: { gameId } })
+        window.dispatchEvent(event)
+      }
+
+      gridRoot.render(<GamesGrid onGameSelect={handleGameSelect} />)
+    }
   }
+
+  // Mount GameStation globally (on all pages)
+  const gameStationContainer = document.createElement('div')
+  gameStationContainer.id = 'game-station-container'
+  document.body.appendChild(gameStationContainer)
+
+  const stationRoot = ReactDOM.createRoot(gameStationContainer)
+  stationRoot.render(<GameStation />)
 
   // Mount DailyPuzzle on home page
   const dailyPuzzleContainer = document.getElementById('daily-puzzle-container')
   if (dailyPuzzleContainer) {
     const root = ReactDOM.createRoot(dailyPuzzleContainer)
     root.render(<DailyPuzzle size={320} />)
+  }
+
+  // Mount LichessDailyPuzzle on home page
+  const lichessDailyPuzzleContainer = document.getElementById('lichess-daily-puzzle-container')
+  if (lichessDailyPuzzleContainer) {
+    const root = ReactDOM.createRoot(lichessDailyPuzzleContainer)
+    root.render(<LichessDailyPuzzle size={320} />)
   }
 
   // Mount BuddyBoard and FiltersButton on report pages (check if we're on a report page)

@@ -345,20 +345,24 @@
 
 /* Lichess and Chess.com specific styling */
 .lichess-card {
-    border-color: #d85000;
+    background: linear-gradient(135deg, rgba(216, 92, 13, 0.12) 0%, rgba(243, 156, 18, 0.12) 100%);
+    border-color: rgba(216, 92, 13, 0.3);
 }
 
 .lichess-card:hover {
-    border-color: #d85000;
+    background: linear-gradient(135deg, rgba(216, 92, 13, 0.18) 0%, rgba(243, 156, 18, 0.18) 100%);
+    border-color: #d85c0d;
     box-shadow: 0 8px 25px rgba(216, 80, 0, 0.2);
 }
 
 .chess-com-card {
-    border-color: #81b64c;
+    background: linear-gradient(135deg, rgba(118, 150, 86, 0.12) 0%, rgba(143, 188, 143, 0.12) 100%);
+    border-color: rgba(118, 150, 86, 0.3);
 }
 
 .chess-com-card:hover {
-    border-color: #81b64c;
+    background: linear-gradient(135deg, rgba(118, 150, 86, 0.18) 0%, rgba(143, 188, 143, 0.18) 100%);
+    border-color: #769656;
     box-shadow: 0 8px 25px rgba(129, 182, 76, 0.2);
 }
 
