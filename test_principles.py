@@ -37,7 +37,7 @@ analyzer = ChessPrinciplesAnalyzer(
 )
 
 print(f"Filtered user games: {len(analyzer.user_games)}")
-print(f"ECO range: {analyzer.eco_range}")
+print(f"ELO range: {analyzer.elo_range}")
 
 # Test one principle
 opening_result = analyzer.calculate_opening_awareness()

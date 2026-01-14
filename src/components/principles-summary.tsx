@@ -34,7 +34,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
     // Build data array for radar chart
     const data = Object.entries(principleLabels).map(([key, label]) => {
       const principleData = principles[key];
-      const percentile = principleData?.eco_comparison?.percentile || 0;
+      const percentile = principleData?.elo_comparison?.percentile || 0;
 
       // Use percentile directly (0-100)
       return {
@@ -47,8 +47,8 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
     return data;
   }, [principlesData]);
 
-  // Get ECO range for display
-  const ecoRange = principlesData?.eco_range || 'Unknown';
+  // Get ELO range for display
+  const eloRange = principlesData?.elo_range || 'Unknown';
   const totalGames = principlesData?.total_games_analyzed || 0;
 
   // Find top 3 areas to work on (lowest percentiles = need most improvement)
@@ -92,7 +92,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
     <div className="section">
       <h2 style={{ marginTop: 0, marginBottom: '10px' }}>Chess Principles Summary</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-        Rating Range: <strong>{ecoRange}</strong> | Games Analyzed: <strong>{totalGames}</strong>
+        Rating Range: <strong>{eloRange}</strong> | Games Analyzed: <strong>{totalGames}</strong>
       </p>
 
       {/* Radar Chart */}
@@ -112,8 +112,8 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
             <Radar
               name="Performance Percentile"
               dataKey="score"
-              stroke="var(--primary-color)"
-              fill="var(--primary-color)"
+              stroke="var(--text-primary)"
+              fill="var(--success-text)"
               fillOpacity={0.8}
               strokeWidth={2}
             />
@@ -163,7 +163,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
             ))}
           </div>
           <p style={{ marginTop: '15px', fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-            Lower percentiles indicate areas where you're underperforming compared to players in your rating range ({ecoRange}).
+            Lower percentiles indicate areas where you're underperforming compared to players in your rating range ({eloRange}).
             Focus on improving these skills to reach the average level for your rating.
           </p>
         </div>
@@ -190,7 +190,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
             <strong>Lower Percentiles:</strong> Indicate areas where you're underperforming and should focus your practice.
           </li>
           <li>
-            <strong>Your Rating Range ({ecoRange}):</strong> Your performance is compared to thousands of players with similar ratings using statistical distributions.
+            <strong>Your Rating Range ({eloRange}):</strong> Your performance is compared to thousands of players with similar ratings using statistical distributions.
           </li>
         </ul>
       </div>

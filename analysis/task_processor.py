@@ -284,7 +284,7 @@ class ReportTaskProcessor:
                     # Add principles results to analysis summary
                     analysis_summary['principles'] = principles_results
 
-                    print(f"✅ Principles analysis complete. ECO range: {principles_results.get('eco_range')}, Games: {principles_results.get('total_games_analyzed')}")
+                    print(f"✅ Principles analysis complete. ELO range: {principles_results.get('elo_range')}, Games: {principles_results.get('total_games_analyzed')}")
 
                     # Generate custom puzzles based on principles analysis
                     task.progress = 97
@@ -327,7 +327,7 @@ class ReportTaskProcessor:
                     # Continue even if principles analysis fails
                     analysis_summary['principles'] = {
                         'error': str(e),
-                        'eco_range': 'unknown',
+                        'elo_range': 'unknown',
                         'total_games_analyzed': 0,
                         'principles': {}
                     }

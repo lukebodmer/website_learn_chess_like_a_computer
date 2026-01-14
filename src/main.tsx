@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import ChessBoard from './components/chess-board'
 import DailyPuzzle from './components/daily-puzzle'
 import BuddyBoard from './components/buddy-board'
+import FiltersButton from './components/filters-button'
 import GameResultsChart from './components/game-results-chart'
 import MistakesAnalysisChart from './components/mistakes-analysis-chart'
 import OpeningAnalysis from './components/opening-analysis'
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     root.render(<DailyPuzzle size={320} />)
   }
 
-  // Mount BuddyBoard on report pages (check if we're on a report page)
+  // Mount BuddyBoard and FiltersButton on report pages (check if we're on a report page)
   if (window.location.pathname.includes('/report/') ||
       document.querySelector('.enriched-games') ||
       document.querySelector('[data-enriched-games]')) {
@@ -45,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const root = ReactDOM.createRoot(buddyBoardContainer)
     root.render(<BuddyBoard size={400} />)
+
+    // Mount FiltersButton
+    const filtersButtonContainer = document.createElement('div')
+    filtersButtonContainer.id = 'filters-button-container'
+    document.body.appendChild(filtersButtonContainer)
+
+    const filtersRoot = ReactDOM.createRoot(filtersButtonContainer)
+    filtersRoot.render(<FiltersButton />)
   }
 
   // Mount GameResultsChart on report pages
@@ -259,8 +268,26 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing enriched games data for time analysis:', error.message)
     }
 
+    // Get time management data from stockfish_analysis
+    let timeManagementData = null
+    try {
+      const stockfishAnalysisElement = document.getElementById('stockfish-analysis')
+      if (stockfishAnalysisElement && stockfishAnalysisElement.textContent) {
+        const stockfishText = stockfishAnalysisElement.textContent.trim()
+
+        if (stockfishText && (stockfishText.startsWith('{') || stockfishText.startsWith('['))) {
+          const parsedData = JSON.parse(stockfishText)
+          // Time management is nested under principles.principles.time_management
+          timeManagementData = parsedData.principles?.principles?.time_management || null
+          console.log('Time management data loaded:', timeManagementData ? 'Yes' : 'No')
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing stockfish analysis data for time management:', error.message)
+    }
+
     // Render component with initial data
-    root.render(<TimeAnalysis enrichedGames={initialGamesData} username={username} />)
+    root.render(<TimeAnalysis enrichedGames={initialGamesData} username={username} timeManagementData={timeManagementData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).timeAnalysisRoot = root

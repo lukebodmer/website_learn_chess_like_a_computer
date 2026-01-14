@@ -19,12 +19,12 @@ Complete skeleton with:
 - 11 principle calculation methods (10 from spec + time management)
 - Helper methods for:
   - User game filtering
-  - ECO range detection
+  - ELO range detection
   - User color determination
-  - ECO averages loading
+  - ELO averages loading
 
-### 3. ECO Averages Data Structure
-**File Created:** `data/eco_averages.json`
+### 3. ELO Averages Data Structure
+**File Created:** `data/elo_averages.json`
 
 Contains baseline metrics for 6 rating ranges:
 - 800-1200
@@ -51,9 +51,9 @@ Contains baseline metrics for 6 rating ranges:
 Fully implemented with:
 - Opening phase mistake counting (by game division)
 - Per-opening (ECO code) breakdown
-- ECO range comparison
+- ELO range comparison
 - Importance score calculation (0-1 scale)
-- Complete return structure with raw_metrics, eco_comparison, and importance_score
+- Complete return structure with raw_metrics, elo_comparison, and importance_score
 
 ## Data Structure Changes
 
@@ -105,7 +105,7 @@ Fully implemented with:
 3. **Next Steps: Testing**
    - Test with sample Lichess games (verify dual-analysis storage)
    - Test with sample Chess.com games
-   - Verify ECO range detection
+   - Verify ELO range detection
    - Verify all 10 principles calculations
    - Validate importance score calculations
 
@@ -119,12 +119,12 @@ def calculate_<principle_name>(self) -> Dict[str, Any]:
     # 2. Loop through user games
     # 3. Extract relevant data from analysis/division/etc
     # 4. Calculate raw metrics (user's actual performance)
-    # 5. Load ECO averages for comparison
+    # 5. Load ELO averages for comparison
     # 6. Calculate difference and percentile
     # 7. Calculate importance score (0-1)
     # 8. Return structured dict with:
     #    - raw_metrics
-    #    - eco_comparison
+    #    - elo_comparison
     #    - importance_score
 ```
 
@@ -133,7 +133,7 @@ def calculate_<principle_name>(self) -> Dict[str, Any]:
 ✅ **Modularity**: Each function is independent and testable
 ✅ **Clear naming**: No abstract variables; descriptive names like `user_opening_mistakes`
 ✅ **No nested functions**: All logic at module level
-✅ **Flexible data**: ECO averages in JSON for easy updates
+✅ **Flexible data**: ELO averages in JSON for easy updates
 ✅ **Backward compatible**: Doesn't break existing enrichment
 ✅ **Game-set level**: Analysis runs after all individual games enriched
 
@@ -141,7 +141,7 @@ def calculate_<principle_name>(self) -> Dict[str, Any]:
 
 - **Game Enricher**: `analysis/chess_analysis/game_enricher.py`
 - **Principles Analyzer**: `analysis/chess_analysis/principles_analyzer.py`
-- **ECO Averages**: `data/eco_averages.json`
+- **ELO Averages**: `data/elo_averages.json`
 - **Models**: `analysis/models.py` (AnalysisReport stores results)
 - **Views**: `analysis/views.py` (streaming endpoints)
 
@@ -162,13 +162,13 @@ def calculate_<principle_name>(self) -> Dict[str, Any]:
     "total_games_analyzed": 25,
     "games_with_new_analysis": 25,
     "principles": {
-      "eco_range": "1400-1600",
+      "elo_range": "1400-1600",
       "total_games_analyzed": 25,
       "username": "player123",
       "principles": {
         "opening_awareness": {
           "raw_metrics": {...},
-          "eco_comparison": {...},
+          "elo_comparison": {...},
           "importance_score": 0.72
         },
         "middlegame_planning": {...},
@@ -186,7 +186,7 @@ From the frontend or report views:
 ```python
 report = AnalysisReport.objects.get(id=report_id)
 principles = report.stockfish_analysis.get('principles', {})
-eco_range = principles.get('eco_range')
+elo_range = principles.get('elo_range')
 opening_score = principles['principles']['opening_awareness']['importance_score']
 ```
 
@@ -194,7 +194,7 @@ opening_score = principles['principles']['opening_awareness']['importance_score'
 
 - **Lichess games**: Always re-analyzed for consistency, original data preserved in `lichess_analysis`
 - **Chess.com games**: Only analyzed if missing accuracy data
-- **ECO averages**: Currently mock data in `data/eco_averages.json` - will need real statistical data
+- **ELO averages**: Currently mock data in `data/elo_averages.json` - will need real statistical data
 - **Importance score formula**: Can be tuned based on testing and user feedback
 - **Performance**: Principles analysis adds ~5% to total processing time
 - **Error handling**: Principles analysis failure won't prevent report completion

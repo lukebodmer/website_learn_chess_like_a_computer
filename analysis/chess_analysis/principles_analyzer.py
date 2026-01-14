@@ -2,11 +2,11 @@
 Chess Principles Analyzer
 
 Analyzes player performance across 10 key chess skill areas and generates
-quantitative percentile scores by comparing to ECO range averages.
+quantitative percentile scores by comparing to ELO range averages.
 
 Each principle is calculated by a dedicated function that:
 1. Extracts raw metrics (x values) from enriched game data
-2. Compares to ECO range averages (xbar values)
+2. Compares to ELO range averages (xbar values)
 3. Calculates a percentile score (0-100)
 4. Returns structured data for storage and future visualization
 """
@@ -24,23 +24,23 @@ class ChessPrinciplesAnalyzer:
 
     Each skill area receives:
     - Raw metrics: Player's actual performance data
-    - ECO comparison: How player compares to peers in their rating range
+    - ELO comparison: How player compares to peers in their rating range
     - Percentile: 0-100 value indicating performance relative to peers
     """
 
-    def __init__(self, enriched_games: List[Dict[str, Any]], username: str, eco_range: Optional[str] = None):
+    def __init__(self, enriched_games: List[Dict[str, Any]], username: str, elo_range: Optional[str] = None):
         """
         Initialize the principles analyzer.
 
         Args:
             enriched_games: List of games with complete analysis data
             username: Username of the player being analyzed
-            eco_range: ECO rating range (e.g., "1200-1400"). If None, will be auto-detected.
+            elo_range: ELO rating range (e.g., "1200-1400"). If None, will be auto-detected.
         """
         self.enriched_games = enriched_games
         self.username = username.lower()
-        self.eco_range = eco_range
-        self.eco_averages = self._load_eco_averages()
+        self.elo_range = elo_range
+        self.elo_averages = self._load_elo_averages()
 
         # Filter to only user's games
         self.user_games = self._filter_user_games()
@@ -70,34 +70,34 @@ class ChessPrinciplesAnalyzer:
 
         return user_games
 
-    def _load_eco_averages(self) -> Dict[str, Any]:
+    def _load_elo_averages(self) -> Dict[str, Any]:
         """
-        Load ECO range average data from JSON file.
+        Load ELO range average data from JSON file.
 
         Returns:
-            Dictionary with ECO ranges as keys and average metrics as values
+            Dictionary with ELO ranges as keys and average metrics as values
         """
-        eco_file_path = os.path.join(
+        elo_file_path = os.path.join(
             os.path.dirname(__file__),
-            '..', '..', 'data', 'eco_averages.json'
+            '..', '..', 'data', 'elo_averages.json'
         )
 
         try:
-            with open(eco_file_path, 'r') as f:
+            with open(elo_file_path, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"Warning: ECO averages file not found at {eco_file_path}")
+            print(f"Warning: ELO averages file not found at {elo_file_path}")
             return {}
         except json.JSONDecodeError:
-            print(f"Warning: ECO averages file is not valid JSON")
+            print(f"Warning: ELO averages file is not valid JSON")
             return {}
 
-    def _detect_eco_range(self) -> str:
+    def _detect_elo_range(self) -> str:
         """
-        Auto-detect the user's ECO rating range from their games.
+        Auto-detect the user's ELO rating range from their games.
 
         Returns:
-            ECO range string (e.g., "1200-1400")
+            ELO range string (e.g., "1200-1400")
         """
         if not self.user_games:
             return "1200-1400"  # Default
@@ -126,7 +126,7 @@ class ChessPrinciplesAnalyzer:
         # Calculate average rating
         avg_rating = sum(ratings) / len(ratings)
 
-        # Map to ECO ranges (200-point buckets)
+        # Map to ELO ranges (200-point buckets)
         if avg_rating < 1200:
             return "800-1200"
         elif avg_rating < 1400:
@@ -185,15 +185,15 @@ class ChessPrinciplesAnalyzer:
 
         Args:
             user_value: User's actual metric value
-            metric_key: Key to look up in eco_averages (e.g., "opening_inaccuracies_per_game")
+            metric_key: Key to look up in elo_averages (e.g., "opening_inaccuracies_per_game")
             lower_is_better: If True, lower values get higher percentiles (e.g., fewer blunders is better)
                            If False, higher values get higher percentiles (e.g., higher mate conversion is better)
 
         Returns:
             Percentile score from 0-100, where 100 is best performance
         """
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        distribution_params = eco_data.get(metric_key)
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        distribution_params = elo_data.get(metric_key)
 
         if not distribution_params or not isinstance(distribution_params, dict):
             # Fallback: no distribution data, return 50 (average)
@@ -227,21 +227,21 @@ class ChessPrinciplesAnalyzer:
 
         Args:
             user_value: User's metric value
-            metric_key: Key in eco_averages (e.g., "checkmate_rate")
+            metric_key: Key in elo_averages (e.g., "checkmate_rate")
             lower_is_better: Whether lower values are better performance
 
         Returns:
-            Dictionary with percentile, eco_average, and difference
+            Dictionary with percentile, elo_average, and difference
         """
         overall_percentile = self._calculate_percentile_score(user_value, metric_key, lower_is_better)
 
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_mean = eco_data.get(metric_key, {}).get("mean", 0)
-        difference = user_value - eco_mean
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_mean = elo_data.get(metric_key, {}).get("mean", 0)
+        difference = user_value - elo_mean
 
         return {
             "percentile": round(overall_percentile, 1),
-            "eco_average": eco_mean,
+            "elo_average": elo_mean,
             "difference": difference
         }
 
@@ -285,11 +285,11 @@ class ChessPrinciplesAnalyzer:
         Returns:
             Dictionary with analysis results for all principles
         """
-        if self.eco_range is None:
-            self.eco_range = self._detect_eco_range()
+        if self.elo_range is None:
+            self.elo_range = self._detect_elo_range()
 
         results = {
-            "eco_range": self.eco_range,
+            "elo_range": self.elo_range,
             "total_games_analyzed": len(self.user_games),
             "username": self.username,
             "principles": {}
@@ -316,7 +316,7 @@ class ChessPrinciplesAnalyzer:
 
     def calculate_opening_awareness(self) -> Dict[str, Any]:
         """
-        Analyze opening phase mistakes compared to ECO range average.
+        Analyze opening phase mistakes compared to ELO range average.
 
         Evaluates:
         - Inaccuracies, mistakes, and blunders in opening phase
@@ -334,9 +334,9 @@ class ChessPrinciplesAnalyzer:
                         ...
                     }
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_total_errors": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -345,7 +345,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         # Accumulate mistakes by opening phase
@@ -423,7 +423,7 @@ class ChessPrinciplesAnalyzer:
         if games_analyzed == 0:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         avg_opening_inaccuracies = total_opening_inaccuracies / games_analyzed
@@ -450,13 +450,13 @@ class ChessPrinciplesAnalyzer:
         weights = [0.5, 0.3, 0.2]
         score_data = self._calculate_percentile_from_multiple_metrics(metrics, weights)
 
-        # Get ECO means for comparison
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_avg_inaccuracies = eco_data.get("opening_inaccuracies_per_game", {}).get("mean", 0)
-        eco_avg_mistakes = eco_data.get("opening_mistakes_per_game", {}).get("mean", 0)
-        eco_avg_blunders = eco_data.get("opening_blunders_per_game", {}).get("mean", 0)
-        eco_total_errors = eco_avg_inaccuracies + eco_avg_mistakes + eco_avg_blunders
-        difference = user_total_errors - eco_total_errors
+        # Get ELO means for comparison
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_avg_inaccuracies = elo_data.get("opening_inaccuracies_per_game", {}).get("mean", 0)
+        elo_avg_mistakes = elo_data.get("opening_mistakes_per_game", {}).get("mean", 0)
+        elo_avg_blunders = elo_data.get("opening_blunders_per_game", {}).get("mean", 0)
+        elo_total_errors = elo_avg_inaccuracies + elo_avg_mistakes + elo_avg_blunders
+        difference = user_total_errors - elo_total_errors
 
         return {
             "raw_metrics": {
@@ -467,9 +467,9 @@ class ChessPrinciplesAnalyzer:
                 "total_opening_errors": round(user_total_errors, 2),
                 "by_opening": by_opening_formatted
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_total_errors": round(user_total_errors, 2),
-                "eco_average": round(eco_total_errors, 2),
+                "elo_average": round(elo_total_errors, 2),
                 "difference": round(difference, 2),
                 "percentile": score_data["percentile"]
             }
@@ -481,7 +481,7 @@ class ChessPrinciplesAnalyzer:
 
     def calculate_middlegame_planning(self) -> Dict[str, Any]:
         """
-        Analyze middlegame phase mistakes compared to ECO range average.
+        Analyze middlegame phase mistakes compared to ELO range average.
 
         Evaluates:
         - Inaccuracies, mistakes, and blunders in middlegame phase
@@ -492,7 +492,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         # Accumulate mistakes by middlegame phase
@@ -560,7 +560,7 @@ class ChessPrinciplesAnalyzer:
         if games_analyzed == 0:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         avg_middlegame_inaccuracies = total_middlegame_inaccuracies / games_analyzed
@@ -577,13 +577,13 @@ class ChessPrinciplesAnalyzer:
         weights = [0.5, 0.3, 0.2]
         score_data = self._calculate_percentile_from_multiple_metrics(metrics, weights)
 
-        # Get ECO means for comparison
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_avg_inaccuracies = eco_data.get("middlegame_inaccuracies_per_game", {}).get("mean", 0)
-        eco_avg_mistakes = eco_data.get("middlegame_mistakes_per_game", {}).get("mean", 0)
-        eco_avg_blunders = eco_data.get("middlegame_blunders_per_game", {}).get("mean", 0)
-        eco_total_errors = eco_avg_inaccuracies + eco_avg_mistakes + eco_avg_blunders
-        difference = user_total_errors - eco_total_errors
+        # Get ELO means for comparison
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_avg_inaccuracies = elo_data.get("middlegame_inaccuracies_per_game", {}).get("mean", 0)
+        elo_avg_mistakes = elo_data.get("middlegame_mistakes_per_game", {}).get("mean", 0)
+        elo_avg_blunders = elo_data.get("middlegame_blunders_per_game", {}).get("mean", 0)
+        elo_total_errors = elo_avg_inaccuracies + elo_avg_mistakes + elo_avg_blunders
+        difference = user_total_errors - elo_total_errors
 
         return {
             "raw_metrics": {
@@ -593,9 +593,9 @@ class ChessPrinciplesAnalyzer:
                 "avg_middlegame_blunders": round(avg_middlegame_blunders, 2),
                 "total_middlegame_errors": round(user_total_errors, 2)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_total_errors": round(user_total_errors, 2),
-                "eco_average": round(eco_total_errors, 2),
+                "elo_average": round(elo_total_errors, 2),
                 "difference": round(difference, 2),
                 "percentile": score_data["percentile"]
             }
@@ -607,7 +607,7 @@ class ChessPrinciplesAnalyzer:
 
     def calculate_endgame_technique(self) -> Dict[str, Any]:
         """
-        Analyze endgame phase mistakes compared to ECO range average.
+        Analyze endgame phase mistakes compared to ELO range average.
 
         Evaluates:
         - Inaccuracies, mistakes, and blunders in endgame phase
@@ -618,7 +618,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         # Accumulate mistakes by endgame phase
@@ -685,7 +685,7 @@ class ChessPrinciplesAnalyzer:
         if games_analyzed == 0:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         avg_endgame_inaccuracies = total_endgame_inaccuracies / games_analyzed
@@ -702,13 +702,13 @@ class ChessPrinciplesAnalyzer:
         weights = [0.5, 0.3, 0.2]
         score_data = self._calculate_percentile_from_multiple_metrics(metrics, weights)
 
-        # Get ECO means for comparison
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_avg_inaccuracies = eco_data.get("endgame_inaccuracies_per_game", {}).get("mean", 0)
-        eco_avg_mistakes = eco_data.get("endgame_mistakes_per_game", {}).get("mean", 0)
-        eco_avg_blunders = eco_data.get("endgame_blunders_per_game", {}).get("mean", 0)
-        eco_total_errors = eco_avg_inaccuracies + eco_avg_mistakes + eco_avg_blunders
-        difference = user_total_errors - eco_total_errors
+        # Get ELO means for comparison
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_avg_inaccuracies = elo_data.get("endgame_inaccuracies_per_game", {}).get("mean", 0)
+        elo_avg_mistakes = elo_data.get("endgame_mistakes_per_game", {}).get("mean", 0)
+        elo_avg_blunders = elo_data.get("endgame_blunders_per_game", {}).get("mean", 0)
+        elo_total_errors = elo_avg_inaccuracies + elo_avg_mistakes + elo_avg_blunders
+        difference = user_total_errors - elo_total_errors
 
         return {
             "raw_metrics": {
@@ -718,9 +718,9 @@ class ChessPrinciplesAnalyzer:
                 "avg_endgame_blunders": round(avg_endgame_blunders, 2),
                 "total_endgame_errors": round(user_total_errors, 2)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_total_errors": round(user_total_errors, 2),
-                "eco_average": round(eco_total_errors, 2),
+                "elo_average": round(elo_total_errors, 2),
                 "difference": round(difference, 2),
                 "percentile": score_data["percentile"]
             }
@@ -746,9 +746,9 @@ class ChessPrinciplesAnalyzer:
                     "checkmated_rate": float,
                     "lost_with_mate_threat": int
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_checkmate_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -757,7 +757,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         total_games = len(self.user_games)
@@ -825,9 +825,9 @@ class ChessPrinciplesAnalyzer:
                 "lost_with_mate_threat": lost_with_mate_threat_count,
                 "lost_with_threat_rate": round(lost_with_threat_rate, 3)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_checkmate_rate": round(checkmated_rate, 3),
-                "eco_average": round(score_data["eco_average"], 3),
+                "elo_average": round(score_data["elo_average"], 3),
                 "difference": round(score_data["difference"], 3),
                 "percentile": score_data["percentile"]
             }
@@ -853,9 +853,9 @@ class ChessPrinciplesAnalyzer:
                     "mates_lost": int,
                     "conversion_rate": float
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_conversion_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -864,7 +864,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         forced_mate_positions = 0
@@ -926,9 +926,9 @@ class ChessPrinciplesAnalyzer:
                 "mates_lost": mates_lost,
                 "conversion_rate": round(conversion_rate, 3)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_conversion_rate": round(conversion_rate, 3),
-                "eco_average": round(score_data["eco_average"], 3),
+                "elo_average": round(score_data["elo_average"], 3),
                 "difference": round(score_data["difference"], 3),
                 "percentile": score_data["percentile"]
             }
@@ -954,9 +954,9 @@ class ChessPrinciplesAnalyzer:
                     "opportunities_missed": int,
                     "capitalization_rate": float
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_capitalization_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -965,7 +965,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         opponent_blunders = 0
@@ -1042,9 +1042,9 @@ class ChessPrinciplesAnalyzer:
                 "opportunities_missed": opportunities_missed,
                 "capitalization_rate": round(capitalization_rate, 3)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_capitalization_rate": round(capitalization_rate, 3),
-                "eco_average": round(score_data["eco_average"], 3),
+                "elo_average": round(score_data["elo_average"], 3),
                 "difference": round(score_data["difference"], 3),
                 "percentile": score_data["percentile"]
             }
@@ -1071,9 +1071,9 @@ class ChessPrinciplesAnalyzer:
                     "total_comebacks": int,
                     "comeback_rate": float
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_comeback_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -1082,7 +1082,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         losing_positions_count = 0
@@ -1146,9 +1146,9 @@ class ChessPrinciplesAnalyzer:
                 "total_comebacks": total_comebacks,
                 "comeback_rate": round(comeback_rate, 3)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_comeback_rate": round(comeback_rate, 3),
-                "eco_average": round(score_data["eco_average"], 3),
+                "elo_average": round(score_data["elo_average"], 3),
                 "difference": round(score_data["difference"], 3),
                 "percentile": score_data["percentile"]
             }
@@ -1174,9 +1174,9 @@ class ChessPrinciplesAnalyzer:
                     "missed_captures": int,
                     "material_awareness_rate": float
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_awareness_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -1185,7 +1185,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         total_user_moves = 0
@@ -1246,16 +1246,16 @@ class ChessPrinciplesAnalyzer:
         material_errors = hanging_piece_moves + missed_captures
         material_awareness_rate = 1.0 - (material_errors / total_user_moves) if total_user_moves > 0 else 0.0
 
-        # Get ECO average
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_awareness_rate = eco_data.get("material_awareness_rate", {}).get("mean", 0)
+        # Get ELO average
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_awareness_rate = elo_data.get("material_awareness_rate", {}).get("mean", 0)
 
         # Calculate difference
-        difference = material_awareness_rate - eco_awareness_rate
+        difference = material_awareness_rate - elo_awareness_rate
 
         # Calculate percentile
-        if eco_awareness_rate > 0:
-            percentile = max(0, min(100, 50 + (difference / eco_awareness_rate) * 50))
+        if elo_awareness_rate > 0:
+            percentile = max(0, min(100, 50 + (difference / elo_awareness_rate) * 50))
         else:
             percentile = 50
 
@@ -1266,9 +1266,9 @@ class ChessPrinciplesAnalyzer:
                 "missed_captures": missed_captures,
                 "material_awareness_rate": round(material_awareness_rate, 3)
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_awareness_rate": round(material_awareness_rate, 3),
-                "eco_average": round(eco_awareness_rate, 3),
+                "elo_average": round(elo_awareness_rate, 3),
                 "difference": round(difference, 3),
                 "percentile": round(percentile, 1)
             }
@@ -1293,9 +1293,9 @@ class ChessPrinciplesAnalyzer:
                     "smooth_games": int,
                     "volatile_games": int
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_volatility": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -1304,7 +1304,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         game_volatilities = []
@@ -1360,16 +1360,16 @@ class ChessPrinciplesAnalyzer:
         # Calculate average volatility
         avg_volatility = sum(game_volatilities) / len(game_volatilities) if game_volatilities else 0.0
 
-        # Get ECO average
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_volatility = eco_data.get("eval_volatility", {}).get("mean", 0)
+        # Get ELO average
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_volatility = elo_data.get("eval_volatility", {}).get("mean", 0)
 
         # Calculate difference
-        difference = avg_volatility - eco_volatility
+        difference = avg_volatility - elo_volatility
 
         # Calculate percentile (lower volatility is better)
-        if eco_volatility > 0:
-            percentile = max(0, min(100, 50 - (difference / eco_volatility) * 50))
+        if elo_volatility > 0:
+            percentile = max(0, min(100, 50 - (difference / elo_volatility) * 50))
         else:
             percentile = 50
 
@@ -1380,9 +1380,9 @@ class ChessPrinciplesAnalyzer:
                 "smooth_games": smooth_games,
                 "volatile_games": volatile_games
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_volatility": round(avg_volatility, 2),
-                "eco_average": round(eco_volatility, 2),
+                "elo_average": round(elo_volatility, 2),
                 "difference": round(difference, 2),
                 "percentile": round(percentile, 1)
             }
@@ -1408,9 +1408,9 @@ class ChessPrinciplesAnalyzer:
                     "good_quiet_moves": int,
                     "bad_quiet_moves": int
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_quiet_move_quality": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -1419,7 +1419,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         total_quiet_moves = 0
@@ -1498,16 +1498,16 @@ class ChessPrinciplesAnalyzer:
             if quiet_move_eval_changes else 0.0
         )
 
-        # Get ECO average
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_quiet_move_quality = eco_data.get("quiet_move_quality", {}).get("mean", 0)
+        # Get ELO average
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_quiet_move_quality = elo_data.get("quiet_move_quality", {}).get("mean", 0)
 
         # Calculate difference
-        difference = avg_quiet_move_quality - eco_quiet_move_quality
+        difference = avg_quiet_move_quality - elo_quiet_move_quality
 
         # Calculate percentile (higher quality is better)
-        if eco_quiet_move_quality != 0:
-            percentile = max(0, min(100, 50 + (difference / abs(eco_quiet_move_quality)) * 50))
+        if elo_quiet_move_quality != 0:
+            percentile = max(0, min(100, 50 + (difference / abs(elo_quiet_move_quality)) * 50))
         else:
             percentile = 50
 
@@ -1518,9 +1518,9 @@ class ChessPrinciplesAnalyzer:
                 "good_quiet_moves": good_quiet_moves,
                 "bad_quiet_moves": bad_quiet_moves
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_quiet_move_quality": round(avg_quiet_move_quality, 2),
-                "eco_average": round(eco_quiet_move_quality, 2),
+                "elo_average": round(elo_quiet_move_quality, 2),
                 "difference": round(difference, 2),
                 "percentile": round(percentile, 1)
             }
@@ -1548,9 +1548,9 @@ class ChessPrinciplesAnalyzer:
                     "time_pressure_blunders": int,
                     "lost_with_time_remaining": int
                 },
-                "eco_comparison": {
+                "elo_comparison": {
                     "user_timeout_rate": float,
-                    "eco_average": float,
+                    "elo_average": float,
                     "difference": float,
                     "percentile": float
                 }
@@ -1559,7 +1559,7 @@ class ChessPrinciplesAnalyzer:
         if not self.user_games:
             return {
                 "raw_metrics": {},
-                "eco_comparison": {}
+                "elo_comparison": {}
             }
 
         total_games = len(self.user_games)
@@ -1633,16 +1633,16 @@ class ChessPrinciplesAnalyzer:
         timeout_rate = timeouts / total_games if total_games > 0 else 0.0
         time_pressure_blunder_rate = time_pressure_blunders / total_games if total_games > 0 else 0.0
 
-        # Get ECO average
-        eco_data = self.eco_averages.get(self.eco_range, {})
-        eco_timeout_rate = eco_data.get("timeout_rate", {}).get("mean", 0)
+        # Get ELO average
+        elo_data = self.elo_averages.get(self.elo_range, {})
+        elo_timeout_rate = elo_data.get("timeout_rate", {}).get("mean", 0)
 
         # Calculate difference
-        difference = timeout_rate - eco_timeout_rate
+        difference = timeout_rate - elo_timeout_rate
 
         # Calculate percentile
-        if eco_timeout_rate > 0:
-            percentile = max(0, min(100, 50 - (difference / eco_timeout_rate) * 50))
+        if elo_timeout_rate > 0:
+            percentile = max(0, min(100, 50 - (difference / elo_timeout_rate) * 50))
         else:
             percentile = 50
 
@@ -1655,9 +1655,9 @@ class ChessPrinciplesAnalyzer:
                 "time_pressure_blunder_rate": round(time_pressure_blunder_rate, 3),
                 "lost_with_time_remaining": lost_with_time_remaining
             },
-            "eco_comparison": {
+            "elo_comparison": {
                 "user_timeout_rate": round(timeout_rate, 3),
-                "eco_average": round(eco_timeout_rate, 3),
+                "elo_average": round(elo_timeout_rate, 3),
                 "difference": round(difference, 3),
                 "percentile": round(percentile, 1)
             }

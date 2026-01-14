@@ -161,8 +161,8 @@ class PuzzleFinder:
         principle_weights = {}
 
         for principle_name, principle_data in self.principles.items():
-            eco_comparison = principle_data.get("eco_comparison", {})
-            percentile = eco_comparison.get("percentile", 50.0)
+            elo_comparison = principle_data.get("elo_comparison", {})
+            percentile = elo_comparison.get("percentile", 50.0)
 
             # Convert percentile to weight (inverse relationship)
             # percentile=0 (worst) -> weight=100, percentile=100 (best) -> weight=0
@@ -231,7 +231,7 @@ class PuzzleFinder:
 
         for principle_name, themes in self.PRINCIPLE_THEME_MAPPING.items():
             principle_data = self.principles.get(principle_name, {})
-            percentile = principle_data.get("eco_comparison", {}).get("percentile", 50.0)
+            percentile = principle_data.get("elo_comparison", {}).get("percentile", 50.0)
 
             # Calculate total puzzles for this principle's themes
             total_puzzles = sum(theme_counts.get(theme, 0) for theme in themes)

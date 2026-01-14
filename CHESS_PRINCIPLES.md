@@ -7,14 +7,14 @@ The Chess Principles Analysis System quantitatively measures 10 key chess skill 
 **Backend**: All 10 principles implemented in `analysis/chess_analysis/principles_analyzer.py`
 **Data Storage**: Results saved in `AnalysisReport.stockfish_analysis['principles']`
 **Frontend**: Radar chart visualization in `src/components/principles-summary.tsx`
-**Baseline Data**: ECO range averages stored in `data/eco_averages.json` (6 rating ranges: 800-1200, 1200-1400, 1400-1600, 1600-1800, 1800-2000, 2000+)
+**Baseline Data**: ELO range averages stored in `data/elo_averages.json` (6 rating ranges: 800-1200, 1200-1400, 1400-1600, 1600-1800, 1800-2000, 2000+)
 
 ## How It Works
 
 1. **Data Collection**: After Stockfish analysis enriches all games with evaluations and best moves
-2. **Filtering**: System filters games where the user played (white or black) and determines their ECO rating range
+2. **Filtering**: System filters games where the user played (white or black) and determines their ELO rating range
 3. **Analysis**: Each principle function extracts raw metrics (e.g., blunders per game, mate conversion rate)
-4. **Comparison**: Raw metrics compared to ECO range baseline distributions from `eco_averages.json`
+4. **Comparison**: Raw metrics compared to ELO range baseline distributions from `elo_averages.json`
 5. **Scoring**: Percentile-based importance scores (0-100):
    - Uses skew-normal distribution with mean, std, and skew parameters
    - Calculates user's percentile in the rating range population
@@ -30,7 +30,7 @@ The Chess Principles Analysis System quantitatively measures 10 key chess skill 
 
 - **Modular Design**: Each principle has its own clearly-named function (e.g., `calculate_opening_awareness()`)
 - **Consistent Return Format**: All functions return `{"importance_score": float, "raw_metrics": dict}`
-- **ECO Range Auto-Detection**: System automatically determines user's rating range from game data
+- **ELO Range Auto-Detection**: System automatically determines user's rating range from game data
 - **Both Game-Level and Set-Level Analysis**: Some metrics analyzed per-game, others across entire game set
 # 10 Key Areas (Implemented)
 
@@ -40,7 +40,7 @@ The Chess Principles Analysis System quantitatively measures 10 key chess skill 
 **Implementation** (`calculate_opening_awareness()`):
 - Counts inaccuracies, mistakes, and blunders during opening phase (moves 1-12)
 - Breaks down by ECO opening code to identify strongest/weakest openings
-- Compares totals to ECO range averages for opening errors
+- Compares totals to ELO range averages for opening errors
 
 **Raw Metrics Collected**:
 - `opening_inaccuracies_per_game`, `opening_mistakes_per_game`, `opening_blunders_per_game`
@@ -164,7 +164,7 @@ The Chess Principles Analysis System quantitatively measures 10 key chess skill 
 ## 2. Principles Analysis (`analysis/chess_analysis/principles_analyzer.py`)
 ```python
 class ChessPrinciplesAnalyzer:
-    def __init__(self, enriched_games: List[Dict], username: str, eco_range: Optional[str] = None)
+    def __init__(self, enriched_games: List[Dict], username: str, elo_range: Optional[str] = None)
     def analyze_all_principles() -> Dict[str, Any]
 ```
 
@@ -185,7 +185,7 @@ class ChessPrinciplesAnalyzer:
 - **Mounting**: `src/main.tsx` - auto-mounts component and loads data from `#stockfish-analysis` element
 - **Streaming**: JavaScript `updatePrinciplesSummary()` function handles real-time updates
 
-## 5. Baseline Data (`data/eco_averages.json`)
+## 5. Baseline Data (`data/elo_averages.json`)
 ```json
 {
   "800-1200": {

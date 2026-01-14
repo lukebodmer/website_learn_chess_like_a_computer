@@ -419,6 +419,18 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   }
 
   const toggleBoard = () => {
+    if (!isVisible) {
+      // When opening, ensure the board position is within viewport bounds
+      const boardWidth = 700
+      const boardHeight = 700 // More accurate height estimate to keep it higher
+      const maxX = window.innerWidth - boardWidth - 20
+      const maxY = window.innerHeight - boardHeight - 20
+
+      setBoardPosition(prev => ({
+        x: Math.max(20, Math.min(maxX, prev.x)),
+        y: Math.max(20, Math.min(maxY, prev.y))
+      }))
+    }
     setIsVisible(!isVisible)
   }
 
