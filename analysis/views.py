@@ -32,7 +32,7 @@ from .report_generation import generate_html_report
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 20
+ANALYSIS_GAME_COUNT = 50
 
 
 # Shared utilities for game fetching
@@ -1208,6 +1208,49 @@ def parse_chess_com_time_control(time_control_str):
         return 300, 0
 
 
+def extract_ending_type_from_pgn(pgn_text, white_result, black_result):
+    """Extract the ending type from Chess.com PGN text
+
+    Returns one of: 'stalemate', 'agreement', 'repetition', '50moveRule', 'insufficientMaterial', or None
+    """
+    if not pgn_text:
+        return None
+
+    # Look for Termination tag in PGN headers
+    termination_match = None
+    for line in pgn_text.split('\n'):
+        if line.startswith('[Termination'):
+            termination_match = line
+            break
+
+    if not termination_match:
+        return None
+
+    termination_lower = termination_match.lower()
+
+    # Check for stalemate
+    if 'stalemate' in termination_lower:
+        return 'stalemate'
+
+    # Check for agreement
+    if 'agreement' in termination_lower:
+        return 'agreement'
+
+    # Check for 50-move rule
+    if '50' in termination_lower and 'move' in termination_lower:
+        return '50moveRule'
+
+    # Check for repetition
+    if 'repetition' in termination_lower:
+        return 'repetition'
+
+    # Check for insufficient material
+    if 'insufficient' in termination_lower and 'material' in termination_lower:
+        return 'insufficientMaterial'
+
+    return None
+
+
 def convert_chess_com_to_universal_format(chess_com_game):
     """Convert Chess.com game data to universal format with enriched opening data"""
     try:
@@ -1249,6 +1292,15 @@ def convert_chess_com_to_universal_format(chess_com_game):
         elif black_result == 'win':
             winner = 'black'
 
+        # Extract ending type from PGN (for draws)
+        ending_type = None
+        if winner is None:  # Only for draws
+            ending_type = extract_ending_type_from_pgn(
+                chess_com_game.get('pgn', ''),
+                white_result,
+                black_result
+            )
+
         # Create Lichess-compatible format
         lichess_format = {
             # Lichess-compatible fields
@@ -1284,6 +1336,7 @@ def convert_chess_com_to_universal_format(chess_com_game):
                 }
             },
             "winner": winner,
+            "endingType": ending_type,  # For draws: stalemate, agreement, repetition, 50moveRule, insufficientMaterial
             "opening": {
                 "eco": opening_classification['eco'],
                 "name": opening_classification['name'],
@@ -1327,6 +1380,221 @@ def convert_chess_com_to_universal_format(chess_com_game):
         }
 
 
+def check_draw_by_agreement(pgn_text):
+    """Check if a draw was by mutual agreement
+
+    Args:
+        pgn_text: PGN text from Lichess with literate=true
+
+    Returns:
+        True if draw by agreement, False otherwise
+    """
+    if not pgn_text:
+        return False
+
+    # Look for "offers draw" in the PGN comments right before the game ends
+    lines = pgn_text.split('\n')
+
+    for i, line in enumerate(lines):
+        if 'offers draw' in line.lower():
+            # Get remaining text after the offer
+            remaining_lines = lines[i:]
+            remaining_text = '\n'.join(remaining_lines).lower()
+
+            # Check if 1/2-1/2 appears after the offer
+            if '1/2-1/2' not in remaining_text:
+                continue
+
+            # Extract text between the offer and the result
+            result_idx = remaining_text.find('1/2-1/2')
+            text_between = remaining_text[:result_idx]
+
+            # Check if there are any move numbers (indicating moves after the offer)
+            # Move numbers look like "15. " or "15..."
+            has_moves_after = False
+            for j in range(len(text_between) - 2):
+                if text_between[j].isdigit() and text_between[j+1:j+3] in ['. ', '..']:
+                    has_moves_after = True
+                    break
+
+            if not has_moves_after:
+                return True
+
+    return False
+
+
+def check_threefold_repetition(moves_str):
+    """Check if the game ended in threefold repetition
+
+    Threefold repetition occurs when the exact same board position
+    (same player to move, castling rights, and en passant) occurs 3 times.
+
+    Args:
+        moves_str: Space-separated string of moves in SAN format
+
+    Returns:
+        True if threefold repetition detected, False otherwise
+    """
+    if not moves_str:
+        return False
+
+    try:
+        import chess
+
+        # Create a new board
+        board = chess.Board()
+
+        # Parse and play all moves
+        moves_list = moves_str.split()
+        for move_san in moves_list:
+            try:
+                # Parse the move in Standard Algebraic Notation
+                move = board.parse_san(move_san)
+                board.push(move)
+            except (chess.InvalidMoveError, chess.IllegalMoveError, chess.AmbiguousMoveError):
+                # If we can't parse a move, return False
+                return False
+
+        # Check if the final position is a threefold repetition
+        # Use is_repetition(3) to check if the current position occurred 3+ times
+        return board.is_repetition(3)
+
+    except Exception as e:
+        print(f"Error checking threefold repetition: {e}")
+        return False
+
+
+def check_50_move_rule(moves_str):
+    """Check if the game ended by the 50-move rule
+
+    The 50-move rule states that a draw can be claimed if 50 consecutive moves
+    (100 plies) have been made without a pawn move or capture.
+
+    Args:
+        moves_str: Space-separated string of moves in SAN format
+
+    Returns:
+        True if 50-move rule detected, False otherwise
+    """
+    if not moves_str:
+        return False
+
+    try:
+        import chess
+
+        # Create a new board
+        board = chess.Board()
+
+        # Parse and play all moves
+        moves_list = moves_str.split()
+        for move_san in moves_list:
+            try:
+                # Parse the move in Standard Algebraic Notation
+                move = board.parse_san(move_san)
+                board.push(move)
+            except (chess.InvalidMoveError, chess.IllegalMoveError, chess.AmbiguousMoveError):
+                # If we can't parse a move, return False
+                return False
+
+        # Check if the fifty-move rule applies
+        # is_fifty_moves() checks if halfmove clock >= 100
+        return board.is_fifty_moves()
+
+    except Exception as e:
+        print(f"Error checking 50-move rule: {e}")
+        return False
+
+
+def check_insufficient_material(moves_str):
+    """Check if the game ended due to insufficient material
+
+    Insufficient material occurs when neither player has enough pieces to checkmate.
+    Examples:
+    - King vs King
+    - King and Bishop vs King
+    - King and Knight vs King
+    - King and Bishop vs King and Bishop (with bishops on same color)
+
+    Args:
+        moves_str: Space-separated string of moves in SAN format
+
+    Returns:
+        True if insufficient material detected, False otherwise
+    """
+    if not moves_str:
+        return False
+
+    try:
+        import chess
+
+        # Create a new board
+        board = chess.Board()
+
+        # Parse and play all moves
+        moves_list = moves_str.split()
+        for move_san in moves_list:
+            try:
+                # Parse the move in Standard Algebraic Notation
+                move = board.parse_san(move_san)
+                board.push(move)
+            except (chess.InvalidMoveError, chess.IllegalMoveError, chess.AmbiguousMoveError):
+                # If we can't parse a move, return False
+                return False
+
+        # Check if there is insufficient material to checkmate
+        return board.is_insufficient_material()
+
+    except Exception as e:
+        print(f"Error checking insufficient material: {e}")
+        return False
+
+
+def extract_ending_type_from_lichess(lichess_game):
+    """Extract the ending type from Lichess game data
+
+    Args:
+        lichess_game: Dict with Lichess game data (with pgnInJson=true and literate=true)
+
+    Returns:
+        One of: 'stalemate', 'agreement', 'repetition', '50moveRule', 'insufficientMaterial', or None
+    """
+    # Only process draws
+    if lichess_game.get('winner') is not None:
+        return None
+
+    status = lichess_game.get('status', '').lower()
+
+    # Stalemate is explicitly marked
+    if status == 'stalemate':
+        return 'stalemate'
+
+    # For status == 'draw', determine the specific type
+    if status == 'draw':
+        pgn_text = lichess_game.get('pgn', '')
+        moves_str = lichess_game.get('moves', '')
+
+        # Check for draw by agreement first
+        if check_draw_by_agreement(pgn_text):
+            return 'agreement'
+
+        # Check for threefold repetition
+        if check_threefold_repetition(moves_str):
+            return 'repetition'
+
+        # Check for 50-move rule
+        if check_50_move_rule(moves_str):
+            return '50moveRule'
+
+        # Check for insufficient material
+        if check_insufficient_material(moves_str):
+            return 'insufficientMaterial'
+
+        # If we can't determine the type, return None
+        return None
+
+    return None
+
+
 def convert_lichess_to_universal_format(lichess_game):
     """
     Convert Lichess game data to universal format by enriching opening data with FEN and moves
@@ -1340,6 +1608,12 @@ def convert_lichess_to_universal_format(lichess_game):
     try:
         # Make a copy to avoid modifying the original
         enriched_game = lichess_game.copy()
+
+        # Extract ending type for draws if not already present
+        if 'endingType' not in enriched_game or enriched_game.get('endingType') is None:
+            ending_type = extract_ending_type_from_lichess(lichess_game)
+            if ending_type:
+                enriched_game['endingType'] = ending_type
 
         # Check if game has opening data
         if 'opening' in enriched_game and enriched_game['opening']:

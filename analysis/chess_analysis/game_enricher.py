@@ -577,15 +577,37 @@ class GameEnricher:
             best_variation_san = None
 
             if prev_position_fen and best_move_uci:
-                best_move_san = self.convert_uci_to_san(prev_position_fen, best_move_uci)
-                # Debug: Check if conversion happened for mistake analysis
-                if best_move_san == best_move_uci and len(best_move_uci) == 4:
-                    print(f"DEBUG: Mistake UCI conversion failed for '{best_move_uci}' in prev position {prev_position_fen[:30]}...")
+                # Check if move is already in SAN format
+                is_already_san = (
+                    len(best_move_uci) > 5 or  # UCI moves are max 5 chars
+                    best_move_uci in ["O-O", "O-O-O"] or  # Castling in SAN
+                    any(c in best_move_uci for c in ['x', '+', '#', '='])  # SAN-specific characters
+                )
+
+                if is_already_san:
+                    best_move_san = best_move_uci
+                else:
+                    best_move_san = self.convert_uci_to_san(prev_position_fen, best_move_uci)
+                    # Only show debug if it's actually UCI format that failed to convert
+                    if best_move_san == best_move_uci and len(best_move_uci) == 4:
+                        print(f"DEBUG: Mistake UCI conversion failed for '{best_move_uci}' in prev position {prev_position_fen[:30]}...")
 
             if prev_position_fen and best_variation_uci:
-                best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
-                if best_variation_san == best_variation_uci:
-                    print(f"DEBUG: Mistake variation conversion failed for '{best_variation_uci[:50]}...' in prev position {prev_position_fen[:30]}...")
+                # Check if variation is already in SAN format (contains moves like "Nf3", "O-O", "dxc6")
+                # UCI format only contains coordinates like "e2e4", "g1f3"
+                is_already_san = any(
+                    len(move) > 5 or  # UCI moves are max 5 chars (e2e4q for promotion)
+                    move in ["O-O", "O-O-O"] or  # Castling in SAN
+                    any(c in move for c in ['x', '+', '#', '='])  # SAN-specific characters
+                    for move in best_variation_uci.split()[:3]  # Check first 3 moves
+                )
+
+                if is_already_san:
+                    best_variation_san = best_variation_uci
+                else:
+                    best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
+                    if best_variation_san == best_variation_uci and len(best_variation_uci.split()[0]) == 4:
+                        print(f"DEBUG: Mistake variation conversion failed for '{best_variation_uci[:50]}...' in prev position {prev_position_fen[:30]}...")
 
             mistakes.append({
                 "move_number": move_number,

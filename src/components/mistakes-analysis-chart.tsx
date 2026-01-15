@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, Legend } from 'recharts';
-import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager';
+import { gameFilterManager, FilterEvent, FilterType, SpeedFilter } from '../game-filter-manager';
 
 interface GameAnalysis {
   id?: string;
@@ -38,13 +38,85 @@ interface PhaseData {
   inaccuracies: number;
   mistakes: number;
   blunders: number;
+  popAvgInaccuracies?: number;
+  popAvgMistakes?: number;
+  popAvgBlunders?: number;
 }
+
+// Helper function to determine ELO bracket
+const getEloBracket = (rating: number): string => {
+  if (rating < 1200) return '800-1200';
+  if (rating < 1400) return '1200-1400';
+  if (rating < 1600) return '1400-1600';
+  if (rating < 1800) return '1600-1800';
+  if (rating < 2000) return '1800-2000';
+  return '2000+';
+};
+
+// Helper function to calculate average ELO from games
+const calculateAverageElo = (games: GameAnalysis[], username: string): number | null => {
+  let totalRating = 0;
+  let count = 0;
+
+  games.forEach(game => {
+    let rating = null;
+    let isWhitePlayer = false;
+    let isBlackPlayer = false;
+
+    // Try to extract data from different possible structures
+    if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
+      // Lichess format
+      isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+
+      if (isWhitePlayer) {
+        rating = game.players?.white?.rating;
+      } else if (isBlackPlayer) {
+        rating = game.players?.black?.rating;
+      }
+    } else if (game.white_player || game.black_player) {
+      // Custom format
+      isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = game.raw_json || game.game?.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    } else if (game.game) {
+      // Nested game structure
+      const nestedGame = game.game;
+      isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = nestedGame.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    }
+
+    if (rating !== null) {
+      totalRating += rating;
+      count++;
+    }
+  });
+
+  return count > 0 ? totalRating / count : null;
+};
 
 // Color scheme using CSS variables from main.css
 const COLORS = {
-  inaccuracies: 'var(--warning-color)',     // Orange for inaccuracies
-  mistakes: 'var(--danger-color)',          // Red for mistakes
-  blunders: 'var(--text-muted)'            // Gray for blunders (most severe)
+  inaccuracies: 'var(--text-muted)',        // Gray for inaccuracies (least severe)
+  mistakes: 'var(--warning-color)',         // Orange for mistakes
+  blunders: 'var(--danger-color)'           // Red for blunders (most severe)
 };
 
 export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
@@ -74,16 +146,21 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
     };
   }, []);
 
-  const { chartData, totalGames, averageStats, phaseData, totalPhaseData } = useMemo(() => {
+  const { chartData, totalGames, averageStats, phaseData, totalPhaseData, eloBracket } = useMemo(() => {
     if (!filteredGames.length) {
       return {
         chartData: [],
         totalGames: 0,
         averageStats: { inaccuracies: 0, mistakes: 0, blunders: 0 },
         phaseData: [],
-        totalPhaseData: []
+        totalPhaseData: [],
+        eloBracket: null
       };
     }
+
+    // Calculate user's average ELO and bracket
+    const avgElo = calculateAverageElo(filteredGames, username);
+    const eloBracket = avgElo ? getEloBracket(avgElo) : null;
 
     // Initialize counters
     let totalInaccuracies = 0;
@@ -207,26 +284,54 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       }
     });
 
-    // Calculate averages
-    const avgInaccuracies = validGameCount > 0 ? totalInaccuracies / validGameCount : 0;
-    const avgMistakes = validGameCount > 0 ? totalMistakes / validGameCount : 0;
-    const avgBlunders = validGameCount > 0 ? totalBlunders / validGameCount : 0;
+    // Calculate averages from phase data
+    const avgInaccuracies = validGameCount > 0 ?
+      (phaseCounters.opening.inaccuracies + phaseCounters.middle.inaccuracies + phaseCounters.end.inaccuracies) / validGameCount : 0;
+    const avgMistakes = validGameCount > 0 ?
+      (phaseCounters.opening.mistakes + phaseCounters.middle.mistakes + phaseCounters.end.mistakes) / validGameCount : 0;
+    const avgBlunders = validGameCount > 0 ?
+      (phaseCounters.opening.blunders + phaseCounters.middle.blunders + phaseCounters.end.blunders) / validGameCount : 0;
 
-    // Build chart data
+    // Get population averages for total mistakes per game if we have an ELO bracket
+    let popAvgTotalInaccuracies = 0;
+    let popAvgTotalMistakes = 0;
+    let popAvgTotalBlunders = 0;
+
+    if (eloBracket && eloAveragesData[eloBracket as keyof typeof eloAveragesData]) {
+      const bracketData = eloAveragesData[eloBracket as keyof typeof eloAveragesData];
+      // Sum up opening + middlegame + endgame averages
+      popAvgTotalInaccuracies =
+        bracketData.opening_inaccuracies_per_game.mean +
+        bracketData.middlegame_inaccuracies_per_game.mean +
+        bracketData.endgame_inaccuracies_per_game.mean;
+      popAvgTotalMistakes =
+        bracketData.opening_mistakes_per_game.mean +
+        bracketData.middlegame_mistakes_per_game.mean +
+        bracketData.endgame_mistakes_per_game.mean;
+      popAvgTotalBlunders =
+        bracketData.opening_blunders_per_game.mean +
+        bracketData.middlegame_blunders_per_game.mean +
+        bracketData.endgame_blunders_per_game.mean;
+    }
+
+    // Build chart data with population averages
     const chartData = [
       {
         name: 'Inaccuracies',
         value: parseFloat(avgInaccuracies.toFixed(2)),
+        popAvg: parseFloat(popAvgTotalInaccuracies.toFixed(2)),
         fill: COLORS.inaccuracies
       },
       {
         name: 'Mistakes',
         value: parseFloat(avgMistakes.toFixed(2)),
+        popAvg: parseFloat(popAvgTotalMistakes.toFixed(2)),
         fill: COLORS.mistakes
       },
       {
         name: 'Blunders',
         value: parseFloat(avgBlunders.toFixed(2)),
+        popAvg: parseFloat(popAvgTotalBlunders.toFixed(2)),
         fill: COLORS.blunders
       }
     ];
@@ -238,24 +343,57 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       { phase: 'Endgame', inaccuracies: phaseCounters.end.inaccuracies, mistakes: phaseCounters.end.mistakes, blunders: phaseCounters.end.blunders }
     ];
 
+    // Get population averages if we have an ELO bracket
+    let popAvgOpening = { inaccuracies: 0, mistakes: 0, blunders: 0 };
+    let popAvgMiddlegame = { inaccuracies: 0, mistakes: 0, blunders: 0 };
+    let popAvgEndgame = { inaccuracies: 0, mistakes: 0, blunders: 0 };
+
+    if (eloBracket && eloAveragesData[eloBracket as keyof typeof eloAveragesData]) {
+      const bracketData = eloAveragesData[eloBracket as keyof typeof eloAveragesData];
+      popAvgOpening = {
+        inaccuracies: bracketData.opening_inaccuracies_per_game.mean,
+        mistakes: bracketData.opening_mistakes_per_game.mean,
+        blunders: bracketData.opening_blunders_per_game.mean
+      };
+      popAvgMiddlegame = {
+        inaccuracies: bracketData.middlegame_inaccuracies_per_game.mean,
+        mistakes: bracketData.middlegame_mistakes_per_game.mean,
+        blunders: bracketData.middlegame_blunders_per_game.mean
+      };
+      popAvgEndgame = {
+        inaccuracies: bracketData.endgame_inaccuracies_per_game.mean,
+        mistakes: bracketData.endgame_mistakes_per_game.mean,
+        blunders: bracketData.endgame_blunders_per_game.mean
+      };
+    }
+
     const averagePhaseData = [
       {
         phase: 'Opening',
         inaccuracies: phaseCounters.opening.gameCount > 0 ? parseFloat((phaseCounters.opening.inaccuracies / phaseCounters.opening.gameCount).toFixed(2)) : 0,
         mistakes: phaseCounters.opening.gameCount > 0 ? parseFloat((phaseCounters.opening.mistakes / phaseCounters.opening.gameCount).toFixed(2)) : 0,
-        blunders: phaseCounters.opening.gameCount > 0 ? parseFloat((phaseCounters.opening.blunders / phaseCounters.opening.gameCount).toFixed(2)) : 0
+        blunders: phaseCounters.opening.gameCount > 0 ? parseFloat((phaseCounters.opening.blunders / phaseCounters.opening.gameCount).toFixed(2)) : 0,
+        popAvgInaccuracies: popAvgOpening.inaccuracies,
+        popAvgMistakes: popAvgOpening.mistakes,
+        popAvgBlunders: popAvgOpening.blunders
       },
       {
         phase: 'Middlegame',
         inaccuracies: phaseCounters.middle.gameCount > 0 ? parseFloat((phaseCounters.middle.inaccuracies / phaseCounters.middle.gameCount).toFixed(2)) : 0,
         mistakes: phaseCounters.middle.gameCount > 0 ? parseFloat((phaseCounters.middle.mistakes / phaseCounters.middle.gameCount).toFixed(2)) : 0,
-        blunders: phaseCounters.middle.gameCount > 0 ? parseFloat((phaseCounters.middle.blunders / phaseCounters.middle.gameCount).toFixed(2)) : 0
+        blunders: phaseCounters.middle.gameCount > 0 ? parseFloat((phaseCounters.middle.blunders / phaseCounters.middle.gameCount).toFixed(2)) : 0,
+        popAvgInaccuracies: popAvgMiddlegame.inaccuracies,
+        popAvgMistakes: popAvgMiddlegame.mistakes,
+        popAvgBlunders: popAvgMiddlegame.blunders
       },
       {
         phase: 'Endgame',
         inaccuracies: phaseCounters.end.gameCount > 0 ? parseFloat((phaseCounters.end.inaccuracies / phaseCounters.end.gameCount).toFixed(2)) : 0,
         mistakes: phaseCounters.end.gameCount > 0 ? parseFloat((phaseCounters.end.mistakes / phaseCounters.end.gameCount).toFixed(2)) : 0,
-        blunders: phaseCounters.end.gameCount > 0 ? parseFloat((phaseCounters.end.blunders / phaseCounters.end.gameCount).toFixed(2)) : 0
+        blunders: phaseCounters.end.gameCount > 0 ? parseFloat((phaseCounters.end.blunders / phaseCounters.end.gameCount).toFixed(2)) : 0,
+        popAvgInaccuracies: popAvgEndgame.inaccuracies,
+        popAvgMistakes: popAvgEndgame.mistakes,
+        popAvgBlunders: popAvgEndgame.blunders
       }
     ];
 
@@ -268,74 +406,86 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
         blunders: avgBlunders
       },
       phaseData: averagePhaseData,
-      totalPhaseData: totalPhaseData
+      totalPhaseData: totalPhaseData,
+      eloBracket
     };
   }, [filteredGames, username, currentFilter]);
 
-  // Helper function to convert phase data to grouped bar chart format
-  const convertToGroupedData = (phaseData: PhaseData[]) => {
-    return phaseData.map(phase => ({
-      phase: phase.phase,
-      Inaccuracies: phase.inaccuracies,
-      Mistakes: phase.mistakes,
-      Blunders: phase.blunders
-    }));
+  // Helper function to convert single phase data to chart format
+  const convertPhaseToChartData = (phase: PhaseData) => {
+    return [
+      {
+        name: 'Inaccuracies',
+        You: phase.inaccuracies,
+        PopAvg: phase.popAvgInaccuracies || 0,
+        fill: COLORS.inaccuracies
+      },
+      {
+        name: 'Mistakes',
+        You: phase.mistakes,
+        PopAvg: phase.popAvgMistakes || 0,
+        fill: COLORS.mistakes
+      },
+      {
+        name: 'Blunders',
+        You: phase.blunders,
+        PopAvg: phase.popAvgBlunders || 0,
+        fill: COLORS.blunders
+      }
+    ];
   };
 
-  const renderCustomTooltip = (props: any) => {
-    if (!props.active || !props.payload || !props.payload[0]) return null;
-
-    const data = props.payload[0];
-
+  // Custom legend for phase charts
+  const renderPhaseLegend = (props: any) => {
     return (
       <div style={{
-        backgroundColor: 'var(--background-primary)',
-        padding: '10px 14px',
-        border: '1px solid var(--border-color)',
-        borderRadius: '8px',
-        boxShadow: '0 4px 16px var(--shadow-medium)',
-        color: 'var(--text-primary)',
-        backdropFilter: 'blur(8px)'
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        fontSize: '11px',
+        paddingTop: '8px'
       }}>
-        <p style={{
-          margin: '0 0 6px 0',
-          fontWeight: '600',
-          fontSize: '14px',
-          color: 'var(--text-primary)'
-        }}>
-          {data.payload.name || data.dataKey}
-        </p>
-        <p style={{
-          margin: 0,
-          fontSize: '12px',
-          color: 'var(--text-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }}>
-          <span style={{
-            color: data.color,
-            fontSize: '14px',
-            filter: 'brightness(1.1)'
-          }}>●</span>
-          <span>{`${data.value} ${data.payload.name ? 'avg per game' : ''}`}</span>
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: 'var(--text-primary)',
+            opacity: 1
+          }} />
+          <span style={{ color: 'var(--text-secondary)' }}>You</span>
+        </div>
+        {eloBracket && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: 'var(--text-primary)',
+              opacity: 0.5
+            }} />
+            <span style={{ color: 'var(--text-secondary)' }}>Avg ({eloBracket})</span>
+          </div>
+        )}
       </div>
     );
   };
 
-  const renderPhaseTooltip = (props: any) => {
-    if (!props.active || !props.payload || !props.label) return null;
+  const renderCustomTooltip = (props: any) => {
+    if (!props.active || !props.payload || !props.payload.length) return null;
+
+    const name = props.label;
+    const youBar = props.payload.find((p: any) => p.dataKey === 'value');
+    const popAvgBar = props.payload.find((p: any) => p.dataKey === 'popAvg');
 
     return (
       <div style={{
         backgroundColor: 'var(--background-primary)',
-        padding: '10px 14px',
+        padding: '12px 16px',
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
         boxShadow: '0 4px 16px var(--shadow-medium)',
         color: 'var(--text-primary)',
-        backdropFilter: 'blur(8px)'
+        backdropFilter: 'blur(8px)',
+        minWidth: '220px'
       }}>
         <p style={{
           margin: '0 0 8px 0',
@@ -343,25 +493,110 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           fontSize: '14px',
           color: 'var(--text-primary)'
         }}>
-          {props.label}
+          {name}
         </p>
-        {props.payload.map((entry: any, index: number) => (
-          <p key={index} style={{
-            margin: '2px 0',
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <span style={{
-              color: entry.color,
-              fontSize: '14px',
-              filter: 'brightness(1.1)'
-            }}>●</span>
-            <span>{`${entry.dataKey}: ${entry.value}`}</span>
-          </p>
-        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {youBar && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: youBar.color,
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>You:</strong> {youBar.value} avg per game</span>
+            </p>
+          )}
+          {eloBracket && popAvgBar && popAvgBar.value > 0 && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: popAvgBar.color || '#999',
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>Avg ({eloBracket}):</strong> {popAvgBar.value} avg per game</span>
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPhaseTooltip = (props: any) => {
+    if (!props.active || !props.payload || !props.payload.length) return null;
+
+    const name = props.label;
+    const youBar = props.payload.find((p: any) => p.dataKey === 'You');
+    const popAvgBar = props.payload.find((p: any) => p.dataKey === 'PopAvg');
+
+    return (
+      <div style={{
+        backgroundColor: 'var(--background-primary)',
+        padding: '12px 16px',
+        border: '1px solid var(--border-color)',
+        borderRadius: '8px',
+        boxShadow: '0 4px 16px var(--shadow-medium)',
+        color: 'var(--text-primary)',
+        backdropFilter: 'blur(8px)',
+        minWidth: '200px'
+      }}>
+        <p style={{
+          margin: '0 0 8px 0',
+          fontWeight: '600',
+          fontSize: '14px',
+          color: 'var(--text-primary)'
+        }}>
+          {name}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {youBar && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: youBar.color,
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>You:</strong> {youBar.value.toFixed(2)}</span>
+            </p>
+          )}
+          {eloBracket && popAvgBar && popAvgBar.value > 0 && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: popAvgBar.color || '#999',
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>Avg ({eloBracket}):</strong> {popAvgBar.value.toFixed(2)}</span>
+            </p>
+          )}
+        </div>
       </div>
     );
   };
@@ -405,7 +640,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
+      border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
       <div style={{ marginBottom: '16px' }}>
@@ -449,10 +684,10 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           }}>
             Average Mistakes Per Game
           </h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
               style={{ cursor: 'default' }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
@@ -469,16 +704,26 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                 content={renderCustomTooltip}
                 cursor={false}
               />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              <Legend content={renderPhaseLegend} />
+              {/* User's actual mistakes */}
+              <Bar dataKey="value" name="You" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Bar>
+              {/* Population average */}
+              {eloBracket && (
+                <Bar dataKey="popAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-pop-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Average Mistakes by Phase Chart */}
+        {/* Opening Phase Chart */}
         <div style={{
           backgroundColor: 'var(--background-primary)',
           border: '1px solid var(--border-color)',
@@ -492,17 +737,17 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
             color: 'var(--text-primary)',
             textAlign: 'center'
           }}>
-            Average Mistakes by Game Phase
+            Opening Mistakes
           </h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart
-              data={convertToGroupedData(phaseData)}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              data={convertPhaseToChartData(phaseData[0])}
+              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
               style={{ cursor: 'default' }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
               <XAxis
-                dataKey="phase"
+                dataKey="name"
                 fontSize={12}
                 tick={{ fill: 'var(--text-secondary)' }}
               />
@@ -514,10 +759,125 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                 content={renderPhaseTooltip}
                 cursor={false}
               />
-              <Legend />
-              <Bar dataKey="Inaccuracies" fill={COLORS.inaccuracies} radius={[2, 2, 0, 0]} />
-              <Bar dataKey="Mistakes" fill={COLORS.mistakes} radius={[2, 2, 0, 0]} />
-              <Bar dataKey="Blunders" fill={COLORS.blunders} radius={[2, 2, 0, 0]} />
+              <Legend content={renderPhaseLegend} />
+              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
+                <Cell fill={COLORS.inaccuracies} />
+                <Cell fill={COLORS.mistakes} />
+                <Cell fill={COLORS.blunders} />
+              </Bar>
+              {eloBracket && (
+                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Cell fill={COLORS.inaccuracies} />
+                  <Cell fill={COLORS.mistakes} />
+                  <Cell fill={COLORS.blunders} />
+                </Bar>
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Middlegame Phase Chart */}
+        <div style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px'
+        }}>
+          <h4 style={{
+            margin: '0 0 12px 0',
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)',
+            textAlign: 'center'
+          }}>
+            Middlegame Mistakes
+          </h4>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={convertPhaseToChartData(phaseData[1])}
+              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+              style={{ cursor: 'default' }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+              <XAxis
+                dataKey="name"
+                fontSize={12}
+                tick={{ fill: 'var(--text-secondary)' }}
+              />
+              <YAxis
+                fontSize={12}
+                tick={{ fill: 'var(--text-secondary)' }}
+              />
+              <Tooltip
+                content={renderPhaseTooltip}
+                cursor={false}
+              />
+              <Legend content={renderPhaseLegend} />
+              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
+                <Cell fill={COLORS.inaccuracies} />
+                <Cell fill={COLORS.mistakes} />
+                <Cell fill={COLORS.blunders} />
+              </Bar>
+              {eloBracket && (
+                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Cell fill={COLORS.inaccuracies} />
+                  <Cell fill={COLORS.mistakes} />
+                  <Cell fill={COLORS.blunders} />
+                </Bar>
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Endgame Phase Chart */}
+        <div style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px'
+        }}>
+          <h4 style={{
+            margin: '0 0 12px 0',
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)',
+            textAlign: 'center'
+          }}>
+            Endgame Mistakes
+          </h4>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={convertPhaseToChartData(phaseData[2])}
+              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+              style={{ cursor: 'default' }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+              <XAxis
+                dataKey="name"
+                fontSize={12}
+                tick={{ fill: 'var(--text-secondary)' }}
+              />
+              <YAxis
+                fontSize={12}
+                tick={{ fill: 'var(--text-secondary)' }}
+              />
+              <Tooltip
+                content={renderPhaseTooltip}
+                cursor={false}
+              />
+              <Legend content={renderPhaseLegend} />
+              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
+                <Cell fill={COLORS.inaccuracies} />
+                <Cell fill={COLORS.mistakes} />
+                <Cell fill={COLORS.blunders} />
+              </Bar>
+              {eloBracket && (
+                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Cell fill={COLORS.inaccuracies} />
+                  <Cell fill={COLORS.mistakes} />
+                  <Cell fill={COLORS.blunders} />
+                </Bar>
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>
