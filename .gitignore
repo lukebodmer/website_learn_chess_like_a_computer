@@ -17,6 +17,7 @@ postgres_data/
 logfile
 data/puzzles/
 db.sqlite3
+static/data/openings/
 
 # GCP deployment (tracked in separate directory)
 # GCP_DEPLOYMENT.md - keeping this file for architecture documentation
