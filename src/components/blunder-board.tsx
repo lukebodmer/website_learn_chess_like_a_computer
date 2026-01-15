@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import BaseChessBoard from './base-chess-board';
+import { SendToBuddyBoardIcon } from './send-to-buddy-board-icon';
 
 interface BlunderData {
   gameId: string;
@@ -19,13 +20,21 @@ interface BlunderData {
 interface BlunderBoardProps {
   blunder: BlunderData | null;
   size?: number;
+  isSolved?: boolean;
+  onSolved?: () => void;
+  onSendToBuddyBoard?: () => void;
+  username?: string;
 }
 
 type PuzzleMode = 'viewing' | 'solving' | 'solved' | 'failed';
 
 export const BlunderBoard: React.FC<BlunderBoardProps> = ({
   blunder,
-  size = 400
+  size = 400,
+  isSolved = false,
+  onSolved,
+  onSendToBuddyBoard,
+  username = ''
 }) => {
   const [chess] = useState(() => new Chess());
   const [position, setPosition] = useState<string>('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
@@ -37,6 +46,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
   const [animationData, setAnimationData] = useState<{ piece: any, from: string, to: string } | null>(null);
   const [pendingPositionUpdate, setPendingPositionUpdate] = useState<string | null>(null);
   const [hintLevel, setHintLevel] = useState<number>(0); // 0 = no hint, 1 = highlight piece, 2 = show arrow
+  const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white');
 
   // Reset to viewing mode when blunder changes
   useEffect(() => {
@@ -47,7 +57,16 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
       setPuzzleMode('viewing');
       setSelectedSquare(null);
       setLegalMoves([]);
+      setBoardOrientation('white');
       return;
+    }
+
+    // Determine board orientation based on which player the user is
+    if (username) {
+      const isBlackPlayer = blunder.blackPlayer.toLowerCase() === username.toLowerCase();
+      setBoardOrientation(isBlackPlayer ? 'black' : 'white');
+    } else {
+      setBoardOrientation('white');
     }
 
     // Reset to viewing mode
@@ -62,10 +81,8 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
 
     // Try to make the blunder move to get the squares and show the result
     try {
-      console.log('Attempting to parse blunder move:', blunder.blunderMove, 'from position:', blunder.position);
       const move = chess.move(blunder.blunderMove);
       if (move) {
-        console.log('Blunder move parsed successfully:', move);
         // Show position AFTER the blunder
         setPosition(chess.fen());
         // Highlight the blunder move in red
@@ -84,7 +101,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
 
     setHighlightedSquares(highlights);
     setArrows([]);
-  }, [blunder, chess]);
+  }, [blunder, chess, username]);
 
   const startPuzzleMode = () => {
     if (!blunder) return;
@@ -134,6 +151,11 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
 
               setPendingPositionUpdate(chess.fen());
               setPuzzleMode('solved');
+
+              // Call the onSolved callback if provided
+              if (onSolved) {
+                onSolved();
+              }
             } else {
               // Incorrect move - undo and show feedback
               chess.undo();
@@ -315,10 +337,68 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
         padding: '12px',
         backgroundColor: 'var(--background-secondary)',
         borderRadius: '8px',
-        border: '1px solid var(--border-color)'
+        border: '1px solid var(--border-color)',
+        position: 'relative'
       }}>
-        <div style={{ fontSize: '14px', color: 'var(--text-primary)', marginBottom: '8px' }}>
-          <strong>Move {blunder.moveNumber}:</strong> {blunder.whitePlayer} vs {blunder.blackPlayer}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '8px'
+        }}>
+          <div style={{ flex: 1, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span><strong>Move {blunder.moveNumber}:</strong> {blunder.whitePlayer} vs {blunder.blackPlayer}</span>
+            {isSolved && (
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: '#00aa00',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <span style={{
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>✓</span>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onSendToBuddyBoard}
+            style={{
+              width: '44px',
+              height: '44px',
+              padding: '6px',
+              border: '2px solid var(--border-color)',
+              borderRadius: '6px',
+              backgroundColor: 'var(--primary-color)',
+              color: 'var(--text-on-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px var(--shadow-light)',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color-dark, var(--primary-color))';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+            }}
+            title="Send game to Buddy Board"
+          >
+            <SendToBuddyBoardIcon size={34} />
+          </button>
         </div>
         <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <div>
@@ -327,7 +407,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
             <strong>Before:</strong> {getEvalBeforeDisplay()}
           </div>
           <div>
-            <strong>Best:</strong> {puzzleMode === 'viewing' ? '???' : blunder.bestMove}
+            <strong>Best:</strong> {(puzzleMode === 'solved' || isSolved) ? blunder.bestMove : '???'}
             <br />
             <strong>After:</strong> {getEvalDisplay()}
           </div>
@@ -352,7 +432,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
       <BaseChessBoard
         size={size}
         position={position}
-        orientation="white"
+        orientation={boardOrientation}
         coordinates={true}
         showGameEndSymbols={false}
         showCheckHighlight={true}
@@ -445,41 +525,6 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
         )}
       </div>
 
-      {/* Legend */}
-      <div style={{
-        padding: '8px',
-        backgroundColor: 'var(--background-secondary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        fontSize: '12px',
-        color: 'var(--text-secondary)',
-        display: 'flex',
-        gap: '16px',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span>Right-click to highlight/draw arrows</span>
-        </div>
-        {puzzleMode === 'viewing' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(255, 0, 0, 0.4)', border: '1px solid #999' }}></div>
-            <span>Blunder Move</span>
-          </div>
-        )}
-        {puzzleMode === 'solved' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(0, 255, 0, 0.4)', border: '1px solid #999' }}></div>
-            <span>Best Move</span>
-          </div>
-        )}
-        {puzzleMode === 'solving' && hintLevel > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(255, 255, 0, 0.5)', border: '1px solid #999' }}></div>
-            <span>Hint</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

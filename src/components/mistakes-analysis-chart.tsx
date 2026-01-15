@@ -56,9 +56,9 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
 
   // Set up filter manager when component mounts
   useEffect(() => {
-    // Initialize the filter manager with username and current games
-    gameFilterManager.setUsername(username);
-    gameFilterManager.updateAllGames(enrichedGames);
+    // Get initial filtered games from the filter manager
+    setFilteredGames(gameFilterManager.getFilteredGames());
+    setCurrentFilter(gameFilterManager.getCurrentFilter());
 
     // Listen for filter changes
     const handleFilterChange = (event: FilterEvent) => {
@@ -72,12 +72,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
     return () => {
       gameFilterManager.removeListener(handleFilterChange);
     };
-  }, [username]);
-
-  // Update games when enrichedGames prop changes
-  useEffect(() => {
-    gameFilterManager.updateAllGames(enrichedGames);
-  }, [enrichedGames]);
+  }, []);
 
   const { chartData, totalGames, averageStats, phaseData, totalPhaseData } = useMemo(() => {
     if (!filteredGames.length) {

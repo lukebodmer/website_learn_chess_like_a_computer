@@ -1,10 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { createPortal } from 'react-dom'
 import ChessBoard from './components/chess-board'
 import DailyPuzzle from './components/daily-puzzle'
 import LichessDailyPuzzle from './components/lichess-daily-puzzle'
 import BuddyBoard from './components/buddy-board'
 import FiltersButton from './components/filters-button'
+import TopFilters from './components/top-filters'
 import GameStation from './components/game-station'
 import GamesGrid from './components/games-grid'
 import GameResultsChart from './components/game-results-chart'
@@ -14,11 +16,14 @@ import BlunderAnalysis from './components/blunder-analysis'
 import TimeAnalysis from './components/time-analysis'
 import PrinciplesSummary from './components/principles-summary'
 import CustomPuzzles from './components/custom-puzzles'
+import PrincipleSelector from './components/principle-selector'
 import { gameFilterManager } from './game-filter-manager'
 
 // Make React available globally for template scripts
 ;(window as any).React = React
+;(window as any).ReactDOM = ReactDOM
 ;(window as any).gameFilterManager = gameFilterManager
+;(window as any).TopFilters = TopFilters
 
 // This is the main entry point for Vite
 console.log('Main Vite entry point loaded')
@@ -69,20 +74,27 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname.includes('/report/') ||
       document.querySelector('.enriched-games') ||
       document.querySelector('[data-enriched-games]')) {
-    const buddyBoardContainer = document.createElement('div')
-    buddyBoardContainer.id = 'buddy-board-container'
-    document.body.appendChild(buddyBoardContainer)
+    // Check if BuddyBoard is already mounted to prevent duplicates
+    let buddyBoardContainer = document.getElementById('buddy-board-container')
+    if (!buddyBoardContainer) {
+      buddyBoardContainer = document.createElement('div')
+      buddyBoardContainer.id = 'buddy-board-container'
+      document.body.appendChild(buddyBoardContainer)
 
-    const root = ReactDOM.createRoot(buddyBoardContainer)
-    root.render(<BuddyBoard size={400} />)
+      const root = ReactDOM.createRoot(buddyBoardContainer)
+      root.render(<BuddyBoard size={400} />)
+    }
 
-    // Mount FiltersButton
-    const filtersButtonContainer = document.createElement('div')
-    filtersButtonContainer.id = 'filters-button-container'
-    document.body.appendChild(filtersButtonContainer)
+    // Mount FiltersButton - check if already mounted
+    let filtersButtonContainer = document.getElementById('filters-button-container')
+    if (!filtersButtonContainer) {
+      filtersButtonContainer = document.createElement('div')
+      filtersButtonContainer.id = 'filters-button-container'
+      document.body.appendChild(filtersButtonContainer)
 
-    const filtersRoot = ReactDOM.createRoot(filtersButtonContainer)
-    filtersRoot.render(<FiltersButton />)
+      const filtersRoot = ReactDOM.createRoot(filtersButtonContainer)
+      filtersRoot.render(<FiltersButton />)
+    }
   }
 
   // Mount GameResultsChart on report pages
@@ -122,6 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (error) {
       console.log('Error parsing enriched games data:', error.message, error)
+    }
+
+    // Load initial games into the filter manager
+    if (initialGamesData.length > 0) {
+      console.log('Loading initial games into filter manager:', initialGamesData.length)
+      gameFilterManager.setUsername(username)
+      gameFilterManager.updateAllGames(initialGamesData)
     }
 
     // Render chart with initial data (empty for new reports, populated for completed reports)
@@ -225,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const blunderAnalysisContainer = document.getElementById('blunder-analysis-container')
   if (blunderAnalysisContainer) {
     const username = blunderAnalysisContainer.dataset.username || ''
+    const reportId = blunderAnalysisContainer.dataset.reportId ? parseInt(blunderAnalysisContainer.dataset.reportId) : undefined
     const root = ReactDOM.createRoot(blunderAnalysisContainer)
 
     // Use the same initial games data as the other charts
@@ -256,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render component with initial data
-    root.render(<BlunderAnalysis enrichedGames={initialGamesData} username={username} />)
+    root.render(<BlunderAnalysis enrichedGames={initialGamesData} username={username} reportId={reportId} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).blunderAnalysisRoot = root
@@ -308,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const parsedData = JSON.parse(stockfishText)
           // Time management is nested under principles.principles.time_management
           timeManagementData = parsedData.principles?.principles?.time_management || null
-          console.log('Time management data loaded:', timeManagementData ? 'Yes' : 'No')
         }
       }
     } catch (error) {
@@ -352,45 +371,79 @@ document.addEventListener('DOMContentLoaded', () => {
     ;(window as any).PrinciplesSummary = PrinciplesSummary
   }
 
-  // Mount CustomPuzzles on report pages
+  // Mount CustomPuzzles and PrincipleSelector on report pages
   const customPuzzlesContainer = document.getElementById('custom-puzzles-container')
-  console.log('🧩 CustomPuzzles container found:', !!customPuzzlesContainer)
 
   if (customPuzzlesContainer) {
-    const root = ReactDOM.createRoot(customPuzzlesContainer)
-
     // Get puzzle data from dedicated custom-puzzles-data element
     let puzzlesData = []
     try {
       const customPuzzlesElement = document.getElementById('custom-puzzles-data')
-      console.log('🧩 Custom puzzles data element found:', !!customPuzzlesElement)
 
       if (customPuzzlesElement && customPuzzlesElement.textContent) {
         const puzzlesText = customPuzzlesElement.textContent.trim()
-        console.log('🧩 Puzzles text length:', puzzlesText.length)
-        console.log('🧩 Puzzles text starts with [:', puzzlesText.startsWith('['))
 
         if (puzzlesText && puzzlesText.startsWith('[')) {
           puzzlesData = JSON.parse(puzzlesText)
-          console.log('🧩 Successfully parsed puzzles, count:', puzzlesData.length)
-          console.log('🧩 First puzzle:', puzzlesData[0])
-        } else {
-          console.log('🧩 Puzzles text does not start with [')
         }
-      } else {
-        console.log('🧩 No custom puzzles element or empty content')
       }
     } catch (error) {
       console.error('🧩 Error parsing custom puzzles data:', error)
     }
 
-    console.log('🧩 Rendering CustomPuzzles with', puzzlesData.length, 'puzzles')
+    // Get principles data
+    let principlesData = null
+    try {
+      const stockfishAnalysisEl = document.getElementById('stockfish-analysis')
+      if (stockfishAnalysisEl && stockfishAnalysisEl.textContent) {
+        const analysisText = stockfishAnalysisEl.textContent.trim()
+        if (analysisText && analysisText !== '{}') {
+          const analysis = JSON.parse(analysisText)
+          principlesData = analysis.principles || analysis
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing principles data:', error)
+    }
 
-    // Render component with puzzle data
-    root.render(<CustomPuzzles puzzles={puzzlesData} size={400} />)
+    // Create a wrapper component to manage shared state
+    const PuzzlesWithSelector = () => {
+      const [selectedPrinciple, setSelectedPrinciple] = React.useState<string | null>(null)
+
+      return (
+        <div style={{
+          display: 'flex',
+          gap: '20px',
+          alignItems: 'flex-start',
+          minHeight: '650px'
+        }}>
+          {/* Render PrincipleSelector on the left */}
+          <div style={{ flex: '0 0 300px' }}>
+            <PrincipleSelector
+              principlesData={principlesData}
+              selectedPrinciple={selectedPrinciple}
+              onSelectPrinciple={setSelectedPrinciple}
+            />
+          </div>
+
+          {/* Render CustomPuzzles on the right */}
+          <div style={{ flex: '1', display: 'flex', justifyContent: 'center' }}>
+            <CustomPuzzles
+              puzzles={puzzlesData}
+              size={480}
+              selectedPrinciple={selectedPrinciple}
+            />
+          </div>
+        </div>
+      )
+    }
+
+    const root = ReactDOM.createRoot(customPuzzlesContainer)
+    root.render(<PuzzlesWithSelector />)
 
     // Store the root reference globally
     ;(window as any).customPuzzlesRoot = root
     ;(window as any).CustomPuzzles = CustomPuzzles
+    ;(window as any).PrincipleSelector = PrincipleSelector
   }
 })

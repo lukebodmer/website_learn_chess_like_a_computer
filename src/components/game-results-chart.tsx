@@ -63,9 +63,9 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
 
   // Set up filter manager when component mounts
   useEffect(() => {
-    // Initialize the filter manager with username and current games
-    gameFilterManager.setUsername(username);
-    gameFilterManager.updateAllGames(enrichedGames);
+    // Get initial filtered games from the filter manager
+    setFilteredGames(gameFilterManager.getFilteredGames());
+    setCurrentFilter(gameFilterManager.getCurrentFilter());
 
     // Listen for filter changes
     const handleFilterChange = (event: FilterEvent) => {
@@ -79,12 +79,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     return () => {
       gameFilterManager.removeListener(handleFilterChange);
     };
-  }, [username]);
-
-  // Update games when enrichedGames prop changes
-  useEffect(() => {
-    gameFilterManager.updateAllGames(enrichedGames);
-  }, [enrichedGames]);
+  }, []);
 
   const { winsData, lossesData, totalGames, userStats, maxYAxisValue } = useMemo(() => {
     if (!filteredGames.length) {

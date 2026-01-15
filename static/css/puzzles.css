@@ -107,12 +107,6 @@
 }
 
 .puzzle-column {
-    background: var(--background-tertiary);
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px var(--shadow-light);
-    transition: all 0.3s ease;
 }
 
 

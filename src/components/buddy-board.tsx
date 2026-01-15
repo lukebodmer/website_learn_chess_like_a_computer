@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import BaseChessBoard from './base-chess-board'
 import { Chess } from 'chess.js'
 import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager'
+import { ChessBoardIcon } from './chess-board-icon'
+import { StartIcon, PrevIcon, NextIcon, EndIcon } from './navigation-icons'
 
 export interface BuddyBoardProps {
   size?: number
@@ -46,6 +48,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   pieceTheme
 }) => {
   const [isVisible, setIsVisible] = useState(false)
+  const isVisibleRef = useRef(false)
   const [games, setGames] = useState<GameData[]>([])
   const [filteredGames, setFilteredGames] = useState<GameData[]>([])
   const [currentGameIndex, setCurrentGameIndex] = useState(0)
@@ -63,6 +66,11 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
   const [showJudgmentsFor, setShowJudgmentsFor] = useState<'white' | 'black'>('white')
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
   const [lastMove, setLastMove] = useState<{ from: string, to: string } | null>(null)
+
+  // Sync ref with state
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+  }, [isVisible])
 
   // TimeChart zoom and pan state (moved from TimeChart to persist across re-renders)
   const [timeChartZoom, setTimeChartZoom] = useState(1)
@@ -101,9 +109,77 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
     gameFilterManager.addListener(handleFilterChange);
 
-    // Clean up listener on unmount
+    // Listen for custom sendToBuddyBoard event
+    const handleSendToBuddyBoard = (event: CustomEvent) => {
+      const { games, shouldOpen, moveIndex } = event.detail;
+      if (games && Array.isArray(games)) {
+        // Set the games directly without affecting the game filter manager
+        setGames(games);
+        setFilteredGames(games);
+        setCurrentGameIndex(0);
+        setGameLoaded(false);
+
+        // Open the buddy board if requested (use ref to get current visibility state)
+        if (shouldOpen && !isVisibleRef.current) {
+          setIsVisible(true);
+        }
+
+        // Load the first game after a short delay
+        setTimeout(() => {
+          if (games.length > 0) {
+            const game = games[0];
+            const moves = game.moves.split(' ').filter(move => move.trim() !== '');
+
+            loadGame(0);
+
+            // If a specific move index was provided, jump to that move
+            // We need to show the position AFTER the blunder move, so we add 1
+            if (moveIndex !== undefined && moveIndex !== null) {
+              const targetIndex = moveIndex + 1; // Show position after the blunder
+
+              // Need to wait for the game to be loaded and state to be updated
+              setTimeout(() => {
+                // Manually apply moves to ensure we have the right position
+                chess.reset();
+                for (let i = 0; i < targetIndex && i < moves.length; i++) {
+                  try {
+                    chess.move(moves[i]);
+                  } catch (error) {
+                    console.error('Invalid move:', moves[i], error);
+                    break;
+                  }
+                }
+
+                setDisplayedMoveIndex(targetIndex);
+                setTargetMoveIndex(targetIndex);
+                setPosition(chess.fen());
+
+                // Calculate last move for highlighting
+                if (targetIndex > 0 && targetIndex <= moves.length) {
+                  const tempChess = new Chess();
+                  for (let i = 0; i < targetIndex - 1; i++) {
+                    tempChess.move(moves[i]);
+                  }
+                  const lastMoveObj = tempChess.move(moves[targetIndex - 1]);
+                  if (lastMoveObj) {
+                    setLastMove({ from: lastMoveObj.from, to: lastMoveObj.to });
+                  }
+                } else {
+                  setLastMove(null);
+                }
+              }, 200);
+            }
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener('sendToBuddyBoard', handleSendToBuddyBoard as EventListener);
+
+    // Clean up listeners on unmount
     return () => {
       gameFilterManager.removeListener(handleFilterChange);
+      window.removeEventListener('sendToBuddyBoard', handleSendToBuddyBoard as EventListener);
     };
   }, []);
 
@@ -1363,14 +1439,9 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
           e.currentTarget.style.transform = 'scale(1)'
         }}
       >
-        <img
-          src="/static/images/learn_chess_like_a_computer_logo_icon_white.png"
-          alt="Logo"
-          style={{
-            width: '24px',
-            height: '24px'
-          }}
-        />
+        <div style={{ color: 'var(--text-on-primary)' }}>
+          <ChessBoardIcon size={28} />
+        </div>
         <span style={{
           color: 'var(--text-on-primary)',
           fontSize: '10px',
@@ -1394,7 +1465,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             backgroundColor: 'var(--background-secondary)',
             borderRadius: '12px',
             padding: '10px 20px 20px 20px',
-            boxShadow: '0 12px 40px var(--shadow-medium), 0 4px 12px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 0 0 1px var(--primary-color), 0 0 12px 2px rgba(var(--primary-color-rgb, 59, 130, 246), 0.4), 0 12px 40px var(--shadow-medium)',
             zIndex: 2000,
             overflowY: 'auto',
             transform: isVisible ? 'scale(1)' : 'scale(0.1)',
@@ -1402,7 +1473,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             transition: isDraggingBoard ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: isVisible ? 1 : 0,
             pointerEvents: isVisible ? 'auto' : 'none',
-            cursor: isDraggingBoard ? 'grabbing' : 'default'
+            cursor: isDraggingBoard ? 'grabbing' : 'grab'
           }}
           onClick={(e) => e.stopPropagation()}
           onDoubleClick={(e) => e.stopPropagation()}
@@ -1522,7 +1593,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             </div>
 
             {/* Move List and Chess Board Container */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }} onMouseDown={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
               {/* Move List or Empty State */}
               {filteredGames.length === 0 || !filteredGames[currentGameIndex] || !gameLoaded || currentMoves.length === 0 ? (
                 <div style={{
@@ -1545,6 +1616,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
               ) : (
                 <div
                   ref={moveListRef}
+                  onMouseDown={(e) => e.stopPropagation()}
                   style={{
                     width: '200px',
                     height: `${size}px`,
@@ -1553,7 +1625,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     borderRadius: '4px',
                     padding: '0 8px 8px 8px',
                     backgroundColor: 'var(--background-primary)',
-                    marginTop: '20px'
+                    marginTop: '20px',
+                    cursor: 'default'
                   }}>
                   {/* Opening - Sticky at top */}
                   {filteredGames[currentGameIndex].opening && (
@@ -1846,7 +1919,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
 
               {/* Chess Board with Player Names and Flip Button */}
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', cursor: 'default' }} onMouseDown={(e) => e.stopPropagation()}>
                   {/* Top Player Name with Game Result */}
                   <div style={{
                     position: 'relative',
@@ -1997,31 +2070,170 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                     animationDuration={150}
                   />
 
-                  {/* Bottom Player Name */}
+                  {/* Bottom Player Name and Navigation Controls Row */}
                   <div style={{
-                    position: 'relative',
-                    textAlign: 'left',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
                     marginTop: '4px',
                     width: `${size}px`
                   }}>
-                    {filteredGames.length > 0 && filteredGames[currentGameIndex]
-                      ? (boardOrientation === 'white'
-                        ? (filteredGames[currentGameIndex].players?.white?.user?.name || filteredGames[currentGameIndex].players?.white?.name || 'Unknown')
-                        : (filteredGames[currentGameIndex].players?.black?.user?.name || filteredGames[currentGameIndex].players?.black?.name || 'Unknown'))
-                      : 'Player'}
-
-                    {/* Bottom Player Clock */}
+                    {/* Bottom Player Name */}
                     <div style={{
-                      position: 'absolute',
-                      top: '0',
-                      right: '0',
+                      textAlign: 'left',
                       fontSize: '12px',
                       fontWeight: '600',
                       color: 'var(--text-secondary)',
-                      whiteSpace: 'nowrap'
+                      paddingTop: '2px'
+                    }}>
+                      {filteredGames.length > 0 && filteredGames[currentGameIndex]
+                        ? (boardOrientation === 'white'
+                          ? (filteredGames[currentGameIndex].players?.white?.user?.name || filteredGames[currentGameIndex].players?.white?.name || 'Unknown')
+                          : (filteredGames[currentGameIndex].players?.black?.user?.name || filteredGames[currentGameIndex].players?.black?.name || 'Unknown'))
+                        : 'Player'}
+                    </div>
+
+                    {/* Navigation Controls */}
+                    {gameLoaded && currentMoves.length > 0 && (
+                      <div style={{
+                        display: 'flex',
+                        gap: '6px'
+                      }}>
+                      <button
+                        onClick={goToStart}
+                        style={{
+                          padding: '6px 10px',
+                          border: '2px solid var(--border-color)',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--background-primary)',
+                          color: 'var(--primary-color)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px var(--shadow-light)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                          e.currentTarget.style.color = 'var(--text-on-primary)';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                          e.currentTarget.style.color = 'var(--primary-color)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+                        }}
+                        aria-label="Go to start"
+                      >
+                        <StartIcon disabled={false} size={18} />
+                      </button>
+                      <button
+                        onClick={prevMove}
+                        style={{
+                          padding: '6px 10px',
+                          border: '2px solid var(--border-color)',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--background-primary)',
+                          color: 'var(--primary-color)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px var(--shadow-light)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                          e.currentTarget.style.color = 'var(--text-on-primary)';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                          e.currentTarget.style.color = 'var(--primary-color)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+                        }}
+                        aria-label="Previous move"
+                      >
+                        <PrevIcon disabled={false} size={18} />
+                      </button>
+                      <button
+                        onClick={nextMove}
+                        style={{
+                          padding: '6px 10px',
+                          border: '2px solid var(--border-color)',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--background-primary)',
+                          color: 'var(--primary-color)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px var(--shadow-light)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                          e.currentTarget.style.color = 'var(--text-on-primary)';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                          e.currentTarget.style.color = 'var(--primary-color)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+                        }}
+                        aria-label="Next move"
+                      >
+                        <NextIcon disabled={false} size={18} />
+                      </button>
+                      <button
+                        onClick={goToEnd}
+                        style={{
+                          padding: '6px 10px',
+                          border: '2px solid var(--border-color)',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--background-primary)',
+                          color: 'var(--primary-color)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px var(--shadow-light)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                          e.currentTarget.style.color = 'var(--text-on-primary)';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                          e.currentTarget.style.color = 'var(--primary-color)';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+                        }}
+                        aria-label="Go to end"
+                      >
+                        <EndIcon disabled={false} size={18} />
+                      </button>
+                    </div>
+                  )}
+
+                    {/* Bottom Player Clock */}
+                    <div style={{
+                      textAlign: 'right',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: 'var(--text-secondary)',
+                      whiteSpace: 'nowrap',
+                      paddingTop: '2px'
                     }}>
                       {(() => {
                         if (!filteredGames.length || !filteredGames[currentGameIndex]) return ''
@@ -2115,7 +2327,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
             </div>
 
             {/* Charts Row */}
-            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '16px' }} onMouseDown={(e) => e.stopPropagation()}>
+            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '16px', cursor: 'default' }} onMouseDown={(e) => e.stopPropagation()}>
               <EvaluationChart />
               <TimeChart
                 zoomLevel={timeChartZoom}
@@ -2128,79 +2340,6 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
                 setLastMousePos={setTimeChartLastMousePos}
               />
             </div>
-
-
-            {/* Navigation Controls */}
-            {gameLoaded && filteredGames.length > 0 && filteredGames[currentGameIndex] && (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '8px',
-                marginTop: '12px'
-              }}
-              onMouseDown={(e) => e.stopPropagation()}>
-                <button
-                  onClick={goToStart}
-                  disabled={targetMoveIndex === 0}
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '4px',
-                    backgroundColor: targetMoveIndex === 0 ? 'var(--background-tertiary)' : 'var(--background-secondary)',
-                    color: targetMoveIndex === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
-                    cursor: targetMoveIndex === 0 ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  ⏮ Start
-                </button>
-                <button
-                  onClick={prevMove}
-                  disabled={targetMoveIndex === 0}
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '4px',
-                    backgroundColor: targetMoveIndex === 0 ? 'var(--background-tertiary)' : 'var(--background-secondary)',
-                    color: targetMoveIndex === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
-                    cursor: targetMoveIndex === 0 ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  ⏪ Prev
-                </button>
-                <button
-                  onClick={nextMove}
-                  disabled={targetMoveIndex >= currentMoves.length}
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '4px',
-                    backgroundColor: targetMoveIndex >= currentMoves.length ? 'var(--background-tertiary)' : 'var(--background-secondary)',
-                    color: targetMoveIndex >= currentMoves.length ? 'var(--text-muted)' : 'var(--text-primary)',
-                    cursor: targetMoveIndex >= currentMoves.length ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  Next ⏩
-                </button>
-                <button
-                  onClick={goToEnd}
-                  disabled={targetMoveIndex >= currentMoves.length}
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '4px',
-                    backgroundColor: targetMoveIndex >= currentMoves.length ? 'var(--background-tertiary)' : 'var(--background-secondary)',
-                    color: targetMoveIndex >= currentMoves.length ? 'var(--text-muted)' : 'var(--text-primary)',
-                    cursor: targetMoveIndex >= currentMoves.length ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  End ⏭
-                </button>
-              </div>
-            )}
         </div>
     </>
   )

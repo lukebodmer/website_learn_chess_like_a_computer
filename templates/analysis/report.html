@@ -33,38 +33,7 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     {% endif %}
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Filters</h2>
-    <div id="game-filters" class="game-filters" style="display: flex; flex-direction: column; align-items: center;">
-        <div style="margin-bottom: 16px; width: 100%; max-width: 600px;">
-            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary); text-align: center;">Color:</div>
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                <button id="filter-all" class="filter-btn filter-btn-active" data-filter="all">
-                    All
-                </button>
-                <button id="filter-white" class="filter-btn" data-filter="white">
-                    White
-                </button>
-                <button id="filter-black" class="filter-btn" data-filter="black">
-                    Black
-                </button>
-            </div>
-        </div>
-        <div style="margin-bottom: 16px; width: 100%; max-width: 600px;">
-            <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary); text-align: center;">Time Control:</div>
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                <button id="speed-filter-all" class="filter-btn filter-btn-active" data-speed="all">
-                    All
-                </button>
-                <div id="speed-filter-buttons" style="display: contents;">
-                    <!-- Speed filter buttons will be dynamically added here -->
-                </div>
-            </div>
-        </div>
-        <div style="text-align: center;">
-            <span id="filter-status" style="color: var(--text-secondary); font-size: 14px;">
-                All games loaded
-            </span>
-        </div>
-    </div>
+    <div id="top-filters-container" data-username="{{ username }}"></div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Game Results Chart:</h2>
     <div id="game-results-chart-container" data-username="{{ username }}" >
@@ -82,7 +51,7 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Blunder Analysis:</h2>
-    <div id="blunder-analysis-container" data-username="{{ username }}" >
+    <div id="blunder-analysis-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} >
         <!-- React BlunderAnalysis will be mounted here -->
     </div>
 
@@ -97,8 +66,8 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Custom Training Puzzles:</h2>
-    <div id="custom-puzzles-container">
-        <!-- React CustomPuzzles will be mounted here -->
+    <div id="custom-puzzles-container" style="padding: 20px; background-color: var(--background-secondary); border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px var(--shadow-light); min-height: 700px;">
+        <!-- React CustomPuzzles with PrincipleSelector will be mounted here -->
     </div>
 
     <!-- Hidden element to store stockfish_analysis data for React components -->
@@ -179,155 +148,36 @@ document.addEventListener('DOMContentLoaded', function() {
     startStreaming();
     {% endif %}
 
-    // Initialize filter system
-    initializeFilters();
+    // Initialize top filters as a React component
+    initializeTopFilters();
 });
 
-function initializeFilters() {
-    // Get the filter manager from the global scope (imported via the main.js bundle)
-    if (typeof window.gameFilterManager === 'undefined') {
-        console.log('Waiting for gameFilterManager to load...');
-        setTimeout(initializeFilters, 100);
+function initializeTopFilters() {
+    // Wait for React and TopFilters component to be available
+    if (typeof window.React === 'undefined' || typeof window.TopFilters === 'undefined' || typeof window.ReactDOM === 'undefined') {
+        console.log('Waiting for React and TopFilters to load...');
+        setTimeout(initializeTopFilters, 100);
         return;
     }
 
-    const filterManager = window.gameFilterManager;
-    const username = "{{ username }}";
-
-    // Set username for filtering
-    filterManager.setUsername(username);
-
-    // Get filter buttons
-    const allBtn = document.getElementById('filter-all');
-    const whiteBtn = document.getElementById('filter-white');
-    const blackBtn = document.getElementById('filter-black');
-    const speedAllBtn = document.getElementById('speed-filter-all');
-    const speedButtonsContainer = document.getElementById('speed-filter-buttons');
-    const statusSpan = document.getElementById('filter-status');
-
-    // Store speed filter buttons for later reference
-    let speedFilterButtons = [];
-
-    // Add click handlers for color filter buttons
-    if (allBtn) {
-        allBtn.addEventListener('click', function() {
-            setActiveColorFilter('all', allBtn);
-            filterManager.setFilter('all');
-        });
+    const container = document.getElementById('top-filters-container');
+    if (!container) {
+        console.error('Top filters container not found');
+        return;
     }
 
-    if (whiteBtn) {
-        whiteBtn.addEventListener('click', function() {
-            setActiveColorFilter('white', whiteBtn);
-            filterManager.setFilter('white');
-        });
+    const username = container.dataset.username || '';
+
+    // Create a React root and render the TopFilters component
+    if (!window.topFiltersRoot) {
+        window.topFiltersRoot = window.ReactDOM.createRoot(container);
     }
 
-    if (blackBtn) {
-        blackBtn.addEventListener('click', function() {
-            setActiveColorFilter('black', blackBtn);
-            filterManager.setFilter('black');
-        });
-    }
+    console.log('Rendering TopFilters with username:', username);
 
-    // Add click handler for "All Speeds" button
-    if (speedAllBtn) {
-        speedAllBtn.addEventListener('click', function() {
-            // Reset to 'all' speeds
-            filterManager.setSpeedFilter('all');
-            updateSpeedButtonStates();
-        });
-    }
-
-    // Function to update active color filter button state
-    function setActiveColorFilter(filterType, activeButton) {
-        // Remove active class from all color filter buttons
-        [allBtn, whiteBtn, blackBtn].forEach(btn => {
-            if (btn) btn.classList.remove('filter-btn-active');
-        });
-
-        // Add active class to clicked button
-        activeButton.classList.add('filter-btn-active');
-
-        // Update status text
-        if (statusSpan) {
-            statusSpan.textContent = filterManager.getFilterDescription();
-        }
-    }
-
-    // Function to update speed button states based on current filter
-    function updateSpeedButtonStates() {
-        const currentFilter = filterManager.getCurrentSpeedFilter();
-
-        // Update "All Speeds" button
-        if (speedAllBtn) {
-            if (currentFilter === 'all') {
-                speedAllBtn.classList.add('filter-btn-active');
-            } else {
-                speedAllBtn.classList.remove('filter-btn-active');
-            }
-        }
-
-        // Update individual speed buttons
-        speedFilterButtons.forEach(btn => {
-            const speed = btn.dataset.speed;
-            if (filterManager.isSpeedSelected(speed)) {
-                btn.classList.add('filter-btn-active');
-            } else {
-                btn.classList.remove('filter-btn-active');
-            }
-        });
-
-        // Update status text
-        if (statusSpan) {
-            statusSpan.textContent = filterManager.getFilterDescription();
-        }
-    }
-
-    // Function to rebuild speed filter buttons
-    function rebuildSpeedFilterButtons(availableSpeeds) {
-        if (!speedButtonsContainer) return;
-
-        // Clear existing buttons
-        speedButtonsContainer.innerHTML = '';
-        speedFilterButtons = [];
-
-        // Create a button for each available speed
-        availableSpeeds.forEach(speed => {
-            const btn = document.createElement('button');
-            btn.className = 'filter-btn';
-            btn.dataset.speed = speed;
-            btn.textContent = speed.charAt(0).toUpperCase() + speed.slice(1);
-
-            btn.addEventListener('click', function() {
-                // Toggle this speed in the filter
-                filterManager.toggleSpeed(speed);
-                updateSpeedButtonStates();
-            });
-
-            speedButtonsContainer.appendChild(btn);
-            speedFilterButtons.push(btn);
-        });
-
-        // Update button states after rebuilding
-        updateSpeedButtonStates();
-    }
-
-    // Listen for filter changes from the filter manager
-    filterManager.addListener(function(event) {
-        // Update status text
-        if (statusSpan) {
-            statusSpan.textContent = filterManager.getFilterDescription();
-        }
-
-        // Rebuild speed filter buttons if speeds have changed
-        if (event.availableSpeeds) {
-            rebuildSpeedFilterButtons(event.availableSpeeds);
-        } else {
-            // Just update button states if speeds haven't changed
-            updateSpeedButtonStates();
-        }
-    });
+    window.topFiltersRoot.render(
+        window.React.createElement(window.TopFilters, { username: username })
+    );
 }
 
 // Track enriched games as they complete
@@ -686,7 +536,4 @@ function fetchEnrichedGamesData(reportId) {
 }
 
 </script>
-
-{% load static %}
-<script src="{% static 'js/dist/main.js' %}"></script>
 {% endblock %}

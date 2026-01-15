@@ -21,7 +21,7 @@ const OpeningBoard: React.FC<OpeningBoardProps> = ({
       backgroundColor: 'var(--background-primary)',
       borderRadius: '8px',
       border: '1px solid var(--border-color)',
-      marginBottom: '20px'
+      marginBottom: '1px'
     }}>
       <BaseChessBoard
         size={size}

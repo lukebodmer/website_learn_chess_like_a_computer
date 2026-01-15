@@ -22,7 +22,7 @@ import pycountry
 import pytz
 import time
 
-from .models import UserProfile, GameDataSet, AnalysisReport, ReportGenerationTask
+from .models import UserProfile, GameDataSet, AnalysisReport, ReportGenerationTask, SolvedBlunder
 from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
 from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
@@ -89,9 +89,10 @@ def create_game_dataset(user, username, games_data, ndjson_data, platform='liche
             lambda game: game.get('createdAt')
         )
     else:  # chess.com
+        # Handle both dictionary format and object format
         oldest_date, newest_date = track_game_dates(
             games_data,
-            lambda game: getattr(game, 'end_time', 0)
+            lambda game: game.get('end_time', 0) if isinstance(game, dict) else getattr(game, 'end_time', 0)
         )
 
     # Create dataset with proper fields based on platform
@@ -181,19 +182,21 @@ def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT
         lines = [line for line in ndjson_data.strip().split('\n') if line.strip()]
         games = []
         filtered_ndjson_lines = []
+        allowed_speeds = {'bullet', 'blitz', 'rapid'}
 
-        # Parse games and filter for rated games only
+        # Parse games and filter for rated games with allowed speeds only
         for line in lines:
             try:
                 game = json.loads(line)
-                # Double-check that game is rated (API filter should handle this, but just in case)
-                if game.get('rated', False):
+                # Filter for rated games AND bullet/blitz/rapid speeds only
+                speed = game.get('speed', '').lower()
+                if game.get('rated', False) and speed in allowed_speeds:
                     games.append(game)
                     filtered_ndjson_lines.append(line)
             except json.JSONDecodeError:
                 continue
 
-        # Rebuild ndjson_data with only rated games
+        # Rebuild ndjson_data with only rated bullet/blitz/rapid games
         filtered_ndjson_data = '\n'.join(filtered_ndjson_lines)
 
         # Use shared utility to track dates
@@ -484,6 +487,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
+        'report_id': report.id,
         'all_games_raw': all_games_raw,
         'enriched_games': enriched_games_display,
         'stockfish_analysis': stockfish_analysis_display,
@@ -867,6 +871,7 @@ def chess_com_analysis(request, username):
         'username': username,
         'loading': True  # Indicate we're in loading state
     })
+
 
 def parse_pgn_moves_and_clocks(pgn_text, initial_time=300, increment=0):
     """Extract moves and clock times from Chess.com PGN format"""
@@ -1497,12 +1502,21 @@ def fetch_chess_com_games(request, username):
             })
 
         # Convert games to NDJSON format and convert to standard format
+        # Filter to only include bullet, blitz, and rapid games
         ndjson_lines = []
         games_dict_format = []
+        allowed_time_classes = {'bullet', 'blitz', 'rapid'}
 
         for game in all_games:
             try:
                 game_data = convert_chess_com_game_to_dict(game)
+
+                # Filter by time_class: only include bullet, blitz, and rapid
+                time_class = game_data.get('time_class', '').lower()
+                if time_class not in allowed_time_classes:
+                    print(f"Skipping game with time_class: {time_class}")
+                    continue
+
                 games_dict_format.append(game_data)
                 ndjson_lines.append(json.dumps(game_data))
             except Exception as e:
@@ -1511,11 +1525,19 @@ def fetch_chess_com_games(request, username):
 
         ndjson_data = '\n'.join(ndjson_lines)
 
+        # Check if we have any games after filtering
+        if not games_dict_format:
+            return JsonResponse({
+                'success': False,
+                'error': f'No bullet, blitz, or rapid games found in the {total_fetched} games fetched. Only these time controls are supported.'
+            })
+
         # Create GameDataSet using shared utility
+        # Note: Using games_dict_format instead of all_games since we've filtered
         game_dataset = create_game_dataset(
             user=request.user,
             username=username,
-            games_data=all_games,  # Use raw Chess.com objects for date extraction
+            games_data=games_dict_format,  # Use filtered games
             ndjson_data=ndjson_data,
             platform='chess.com'
         )
@@ -2084,4 +2106,76 @@ def daily_puzzle_api(request):
         return JsonResponse({
             'success': False,
             'error': 'Failed to load daily puzzles from both sources'
+        }, status=500)
+
+
+@login_required
+def get_solved_blunders(request, report_id):
+    """
+    API endpoint to get all solved blunders for a specific report
+    Returns JSON with list of blunder keys that have been solved
+    """
+    try:
+        # Verify report belongs to user
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Get all solved blunders for this report
+        solved_blunders = SolvedBlunder.objects.filter(
+            user=request.user,
+            report=report
+        ).values_list('blunder_key', flat=True)
+
+        return JsonResponse({
+            'success': True,
+            'solved_blunders': list(solved_blunders)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def mark_blunder_solved(request, report_id):
+    """
+    API endpoint to mark a blunder as solved
+    Expects POST request with blunder_key in the body
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST request required'
+        }, status=405)
+
+    try:
+        # Verify report belongs to user
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Parse request body
+        data = json.loads(request.body)
+        blunder_key = data.get('blunder_key')
+
+        if not blunder_key:
+            return JsonResponse({
+                'success': False,
+                'error': 'blunder_key is required'
+            }, status=400)
+
+        # Create or get the solved blunder record
+        solved_blunder, created = SolvedBlunder.objects.get_or_create(
+            user=request.user,
+            report=report,
+            blunder_key=blunder_key
+        )
+
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'solved_at': solved_blunder.solved_at.isoformat()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
         }, status=500)

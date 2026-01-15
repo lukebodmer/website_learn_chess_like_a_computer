@@ -27,6 +27,7 @@ export interface CustomPuzzlesProps {
   }>
   size?: number
   pieceTheme?: string
+  selectedPrinciple?: string | null
 }
 
 interface PuzzleState {
@@ -36,19 +37,51 @@ interface PuzzleState {
   showHint: boolean
 }
 
+// Mapping of principle areas to puzzle themes (must match backend)
+const PRINCIPLE_THEME_MAPPING: { [key: string]: string[] } = {
+  'opening_awareness': ['opening', 'advancedPawn', 'kingsideAttack', 'queensideAttack', 'attackingF2F7'],
+  'middlegame_planning': ['middlegame', 'kingsideAttack', 'queensideAttack', 'clearance', 'quietMove', 'sacrifice'],
+  'endgame_technique': ['endgame', 'pawnEndgame', 'knightEndgame', 'bishopEndgame', 'rookEndgame', 'queenEndgame', 'queenRookEndgame', 'promotion', 'underPromotion'],
+  'king_safety': ['exposedKing', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate', 'cornerMate', 'hookMate', 'operaMate', 'balestraMate', 'blindSwineMate', 'pillsburysMate', 'morphysMate', 'triangleMate', 'vukovicMate', 'killBoxMate'],
+  'checkmate_ability': ['mate', 'mateIn1', 'mateIn2', 'mateIn3', 'mateIn4', 'mateIn5', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate'],
+  'tactics_vision': ['fork', 'pin', 'skewer', 'discoveredAttack', 'discoveredCheck', 'doubleCheck', 'hangingPiece', 'trappedPiece', 'capturingDefender', 'attraction', 'deflection', 'clearance', 'interference', 'xRayAttack'],
+  'defensive_skill': ['defensiveMove', 'equality', 'quietMove', 'intermezzo', 'zugzwang'],
+  'big_picture': ['hangingPiece', 'trappedPiece', 'capturingDefender', 'advantage', 'crushing'],
+  'precision_move_quality': ['quietMove', 'advantage', 'defensiveMove', 'clearance', 'intermezzo'],
+  'planning_calculating': ['quietMove', 'long', 'veryLong', 'sacrifice', 'clearance', 'intermezzo'],
+  'time_management': ['short', 'oneMove', 'mateIn1', 'mateIn2']
+};
+
 const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   puzzles,
   size = 400,
-  pieceTheme
+  pieceTheme,
+  selectedPrinciple = null
 }) => {
-  console.log('🧩 CustomPuzzles component rendering with', puzzles.length, 'puzzles')
+
+  // Filter puzzles based on selected principle
+  const filteredPuzzles = React.useMemo(() => {
+    if (!selectedPrinciple) {
+      return puzzles;
+    }
+
+    const themesForPrinciple = PRINCIPLE_THEME_MAPPING[selectedPrinciple] || [];
+    if (themesForPrinciple.length === 0) {
+      return puzzles;
+    }
+
+    return puzzles.filter(puzzle => {
+      const puzzleThemes = puzzle.themes.split(' ');
+      return puzzleThemes.some(theme => themesForPrinciple.includes(theme));
+    });
+  }, [puzzles, selectedPrinciple]);
 
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0)
   const [chess] = useState(() => new Chess())
   // Initialize position with first puzzle's FEN if available
   const [position, setPosition] = useState<string>(() => {
-    if (puzzles.length > 0 && puzzles[0].fen) {
-      return normalizeFEN(puzzles[0].fen)
+    if (filteredPuzzles.length > 0 && filteredPuzzles[0].fen) {
+      return normalizeFEN(filteredPuzzles[0].fen)
     }
     return ''
   })
@@ -64,33 +97,19 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   const [pendingPositionUpdate, setPendingPositionUpdate] = useState<string | null>(null)
   const [pendingStateUpdate, setPendingStateUpdate] = useState<any>(null)
   const [solvedPuzzles, setSolvedPuzzles] = useState<Set<number>>(new Set())
+  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
+  const [hintLevel, setHintLevel] = useState<number>(0) // 0 = no hint, 1 = highlight piece, 2 = show arrow
+  const [highlightedSquares, setHighlightedSquares] = useState<{ square: string, color: string }[]>([])
+  const [arrows, setArrows] = useState<{ from: string, to: string, color: string }[]>([])
 
-  const currentPuzzle = puzzles[currentPuzzleIndex]
-  console.log('🧩 Current puzzle:', currentPuzzle)
+  // Reset puzzle index when filter changes
+  React.useEffect(() => {
+    setCurrentPuzzleIndex(0);
+  }, [selectedPrinciple]);
 
-  // Load current puzzle
-  useEffect(() => {
-    console.log('🧩 Loading puzzle effect, currentPuzzle:', currentPuzzle)
-    if (currentPuzzle) {
-      const normalizedFEN = normalizeFEN(currentPuzzle.fen)
-      console.log('🧩 Normalized FEN:', normalizedFEN)
-      chess.load(normalizedFEN)
-      setPosition(normalizedFEN)
-      setPuzzleState({
-        status: 'ready',
-        currentMoveIndex: 0,
-        userMoves: [],
-        showHint: false
-      })
-      setSelectedSquare(null)
-      setLegalMoves([])
-      setAnimationData(null)
-      setPendingPositionUpdate(null)
-      setPendingStateUpdate(null)
-    }
-  }, [currentPuzzleIndex, currentPuzzle, chess])
+  const currentPuzzle = filteredPuzzles[currentPuzzleIndex]
 
-  // Parse solution moves from UCI format
+  // Parse solution moves from UCI format - defined before useEffect
   const getSolutionMoves = (): string[] => {
     if (!currentPuzzle?.moves) return []
 
@@ -131,6 +150,78 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     }
   }
 
+  // Load current puzzle
+  useEffect(() => {
+    if (currentPuzzle) {
+      const normalizedFEN = normalizeFEN(currentPuzzle.fen)
+      chess.load(normalizedFEN)
+
+      // Get solution moves to check if we need to play opponent's first move
+      const solutionMoves = getSolutionMoves()
+
+      // If there are solution moves and the first move is the opponent's move,
+      // we need to play it to set up the puzzle correctly
+      if (solutionMoves.length > 0) {
+        try {
+          // Make the opponent's first move
+          const firstMove = chess.move(solutionMoves[0])
+          if (firstMove) {
+            setPosition(chess.fen())
+            // Highlight the last move (opponent's move)
+            setLastMoveSquares({
+              from: firstMove.from,
+              to: firstMove.to
+            })
+            setPuzzleState({
+              status: 'ready',
+              currentMoveIndex: 1, // Start from index 1 since opponent played move 0
+              userMoves: [solutionMoves[0]],
+              showHint: false
+            })
+          } else {
+            // If first move failed, just use the position as-is
+            setPosition(normalizedFEN)
+            setLastMoveSquares(null)
+            setPuzzleState({
+              status: 'ready',
+              currentMoveIndex: 0,
+              userMoves: [],
+              showHint: false
+            })
+          }
+        } catch (e) {
+          console.error('Error playing first move:', e)
+          setPosition(normalizedFEN)
+          setLastMoveSquares(null)
+          setPuzzleState({
+            status: 'ready',
+            currentMoveIndex: 0,
+            userMoves: [],
+            showHint: false
+          })
+        }
+      } else {
+        setPosition(normalizedFEN)
+        setLastMoveSquares(null)
+        setPuzzleState({
+          status: 'ready',
+          currentMoveIndex: 0,
+          userMoves: [],
+          showHint: false
+        })
+      }
+
+      setSelectedSquare(null)
+      setLegalMoves([])
+      setAnimationData(null)
+      setPendingPositionUpdate(null)
+      setPendingStateUpdate(null)
+      setHintLevel(0)
+      setHighlightedSquares([])
+      setArrows([])
+    }
+  }, [currentPuzzleIndex, currentPuzzle, chess])
+
   const handleSquareClick = (square: string) => {
     if (puzzleState.status !== 'ready' && puzzleState.status !== 'solving') return
 
@@ -157,7 +248,11 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
             const isCorrect = solutionMoves[puzzleState.currentMoveIndex] === testMove.san
 
             if (isCorrect) {
-              // Correct move - animate it
+              // Correct move - clear hints and animate it
+              setHintLevel(0)
+              setHighlightedSquares([])
+              setArrows([])
+
               setAnimationData({
                 piece: movingPiece,
                 from: selectedSquare,
@@ -312,23 +407,68 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     if (currentPuzzle) {
       const normalizedFEN = normalizeFEN(currentPuzzle.fen)
       chess.load(normalizedFEN)
-      setPosition(normalizedFEN)
-      setPuzzleState({
-        status: 'ready',
-        currentMoveIndex: 0,
-        userMoves: [],
-        showHint: false
-      })
+
+      // Get solution moves and play opponent's first move
+      const solutionMoves = getSolutionMoves()
+      if (solutionMoves.length > 0) {
+        try {
+          const firstMove = chess.move(solutionMoves[0])
+          if (firstMove) {
+            setPosition(chess.fen())
+            setLastMoveSquares({
+              from: firstMove.from,
+              to: firstMove.to
+            })
+            setPuzzleState({
+              status: 'ready',
+              currentMoveIndex: 1,
+              userMoves: [solutionMoves[0]],
+              showHint: false
+            })
+          } else {
+            setPosition(normalizedFEN)
+            setLastMoveSquares(null)
+            setPuzzleState({
+              status: 'ready',
+              currentMoveIndex: 0,
+              userMoves: [],
+              showHint: false
+            })
+          }
+        } catch (e) {
+          setPosition(normalizedFEN)
+          setLastMoveSquares(null)
+          setPuzzleState({
+            status: 'ready',
+            currentMoveIndex: 0,
+            userMoves: [],
+            showHint: false
+          })
+        }
+      } else {
+        setPosition(normalizedFEN)
+        setLastMoveSquares(null)
+        setPuzzleState({
+          status: 'ready',
+          currentMoveIndex: 0,
+          userMoves: [],
+          showHint: false
+        })
+      }
+
       setSelectedSquare(null)
       setLegalMoves([])
       setAnimationData(null)
       setPendingPositionUpdate(null)
       setPendingStateUpdate(null)
+      setHintLevel(0)
+      setHighlightedSquares([])
+      setArrows([])
     }
   }
 
   const nextPuzzle = () => {
-    if (currentPuzzleIndex < puzzles.length - 1) {
+    if (currentPuzzleIndex < filteredPuzzles.length - 1) {
       setCurrentPuzzleIndex(prev => prev + 1)
     }
   }
@@ -341,8 +481,42 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
 
   const showHint = () => {
     const solutionMoves = getSolutionMoves()
-    if (solutionMoves.length > puzzleState.currentMoveIndex) {
-      setPuzzleState(prev => ({ ...prev, showHint: true }))
+    if (solutionMoves.length <= puzzleState.currentMoveIndex) return
+
+    const nextMove = solutionMoves[puzzleState.currentMoveIndex]
+
+    if (hintLevel === 0) {
+      // First hint: highlight the piece to move
+      try {
+        const tempChess = new Chess(chess.fen())
+        const move = tempChess.move(nextMove)
+        if (move) {
+          setHighlightedSquares([
+            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
+          ])
+          setHintLevel(1)
+          setPuzzleState(prev => ({ ...prev, showHint: true }))
+        }
+      } catch (e) {
+        console.error('Error showing hint:', e)
+      }
+    } else if (hintLevel === 1) {
+      // Second hint: show arrow to destination
+      try {
+        const tempChess = new Chess(chess.fen())
+        const move = tempChess.move(nextMove)
+        if (move) {
+          setHighlightedSquares([
+            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
+          ])
+          setArrows([
+            { from: move.from, to: move.to, color: '#ffff00' }
+          ])
+          setHintLevel(2)
+        }
+      } catch (e) {
+        console.error('Error showing hint arrow:', e)
+      }
     }
   }
 
@@ -362,13 +536,10 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   }
 
   if (!puzzles || puzzles.length === 0) {
-    console.log('🧩 No puzzles, returning empty state')
     return (
       <div className="empty-state" style={{
         padding: '40px',
         textAlign: 'center',
-        background: 'var(--background-primary)',
-        borderRadius: '12px',
         color: 'var(--text-secondary)'
       }}>
         <div style={{ fontSize: '48px', marginBottom: '15px' }}>🧩</div>
@@ -382,16 +553,30 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     )
   }
 
-  console.log('🧩 Rendering puzzle UI, position:', position)
+  if (filteredPuzzles.length === 0) {
+    return (
+      <div className="empty-state" style={{
+        padding: '40px',
+        textAlign: 'center',
+        color: 'var(--text-secondary)'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '15px' }}>🔍</div>
+        <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
+          No puzzles for this principle
+        </div>
+        <div style={{ fontSize: '14px' }}>
+          Try selecting a different principle or view all puzzles
+        </div>
+      </div>
+    )
+  }
 
   // Don't render if position isn't loaded yet
   if (!position) {
     return (
       <div className="puzzle-loading" style={{
         padding: '40px',
-        textAlign: 'center',
-        background: 'var(--background-primary)',
-        borderRadius: '12px'
+        textAlign: 'center'
       }}>
         <div className="loading-spinner" style={{ margin: '0 auto 15px' }}></div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
@@ -401,8 +586,6 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     )
   }
 
-  const themes = currentPuzzle.themes.split(' ').slice(0, 3)
-  const progress = `${currentPuzzleIndex + 1} / ${puzzles.length}`
   const solvedCount = solvedPuzzles.size
 
   return (
@@ -413,26 +596,6 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
       gap: '15px',
       maxWidth: '100%'
     }}>
-      {/* Description */}
-      <div style={{
-        width: '100%',
-        maxWidth: '600px',
-        textAlign: 'center',
-        padding: '15px 20px',
-        background: 'var(--background-primary)',
-        borderRadius: '8px',
-        marginBottom: '10px'
-      }}>
-        <p style={{
-          color: 'var(--text-secondary)',
-          margin: 0,
-          fontSize: '14px',
-          lineHeight: '1.6'
-        }}>
-          Practice 1000 puzzles personalized to your weaknesses. These puzzles are specifically selected based on your principle analysis to help you improve where you need it most.
-        </p>
-      </div>
-
       {/* Header */}
       <div style={{
         width: '100%',
@@ -446,34 +609,13 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
             fontSize: '1.2em',
             marginBottom: '8px'
           }}>
-            Puzzle {currentPuzzleIndex + 1} of {puzzles.length}
+            Puzzle {currentPuzzleIndex + 1} of {filteredPuzzles.length}
           </div>
           <div className="puzzle-status" style={{
             marginBottom: '8px'
           }}>
-            Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{puzzles.length}
+            Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
           </div>
-        </div>
-        <div style={{
-          display: 'flex',
-          gap: '6px',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          marginBottom: '10px'
-        }}>
-          {themes.map((theme, i) => (
-            <span key={i} style={{
-              display: 'inline-block',
-              padding: '4px 10px',
-              background: 'var(--background-tertiary)',
-              color: 'var(--text-secondary)',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: 500
-            }}>
-              {theme}
-            </span>
-          ))}
         </div>
         <div className="puzzle-status" style={{
           fontSize: '14px',
@@ -481,11 +623,7 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
           color: puzzleState.status === 'solved' ? 'var(--success-color)' :
                  puzzleState.status === 'failed' ? 'var(--danger-color)' :
                  'var(--text-primary)',
-          padding: '8px',
-          background: puzzleState.status === 'solved' ? 'var(--success-background)' :
-                     puzzleState.status === 'failed' ? '#f8d7da' :
-                     'var(--background-primary)',
-          borderRadius: '6px'
+          padding: '8px'
         }}>
           {getStatusMessage()}
         </div>
@@ -501,6 +639,9 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
         interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
         selectedSquare={selectedSquare}
         legalMoves={legalMoves}
+        highlightedSquares={highlightedSquares}
+        arrows={arrows}
+        lastMove={lastMoveSquares}
         animationData={animationData}
         onSquareClick={handleSquareClick}
         onAnimationComplete={handleAnimationComplete}
@@ -559,62 +700,50 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
           <button
             className="btn"
             onClick={showHint}
+            disabled={hintLevel >= 2}
             style={{
               padding: '8px 16px',
               fontSize: '14px',
-              background: 'var(--info-color)',
+              background: hintLevel >= 2 ? 'var(--text-muted)' : 'var(--info-color)',
               color: 'var(--text-on-primary)',
               border: 'none',
               borderRadius: '6px',
-              cursor: 'pointer',
+              cursor: hintLevel >= 2 ? 'not-allowed' : 'pointer',
               fontWeight: 600,
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              opacity: hintLevel >= 2 ? 0.5 : 1
             }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={(e) => {
+              if (hintLevel < 2) e.currentTarget.style.opacity = '0.85'
+            }}
+            onMouseLeave={(e) => {
+              if (hintLevel < 2) e.currentTarget.style.opacity = '1'
+            }}
           >
-            💡 Hint
+            Hint {hintLevel > 0 ? `(${hintLevel}/2)` : ''}
           </button>
         )}
 
         <button
           className="btn btn-success"
           onClick={nextPuzzle}
-          disabled={currentPuzzleIndex === puzzles.length - 1}
+          disabled={currentPuzzleIndex === filteredPuzzles.length - 1}
           style={{
             padding: '8px 16px',
             fontSize: '14px',
-            background: currentPuzzleIndex === puzzles.length - 1 ? 'var(--text-muted)' : 'var(--success-color)',
+            background: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'var(--text-muted)' : 'var(--success-color)',
             color: 'var(--text-on-primary)',
             border: 'none',
             borderRadius: '6px',
-            cursor: currentPuzzleIndex === puzzles.length - 1 ? 'not-allowed' : 'pointer',
+            cursor: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'not-allowed' : 'pointer',
             fontWeight: 600,
             transition: 'all 0.2s ease',
-            opacity: currentPuzzleIndex === puzzles.length - 1 ? 0.5 : 1
+            opacity: currentPuzzleIndex === filteredPuzzles.length - 1 ? 0.5 : 1
           }}
         >
           Next →
         </button>
       </div>
-
-      {/* Hint Display */}
-      {puzzleState.showHint && (
-        <div className="puzzle-feedback hint" style={{
-          padding: '12px 20px',
-          background: 'var(--background-primary)',
-          border: '2px solid var(--info-color)',
-          borderRadius: '8px',
-          fontSize: '14px',
-          textAlign: 'center',
-          color: 'var(--text-primary)',
-          width: '100%',
-          maxWidth: '500px',
-          fontWeight: 500
-        }}>
-          💡 Hint: {getSolutionMoves()[puzzleState.currentMoveIndex] || 'No more hints available'}
-        </div>
-      )}
     </div>
   )
 }

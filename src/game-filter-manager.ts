@@ -1,10 +1,12 @@
 export type FilterType = 'all' | 'white' | 'black';
 export type SpeedFilter = 'all' | string[]; // 'all' or array of specific speeds like ['blitz', 'bullet']
+export type ResultFilter = 'all' | 'win' | 'loss' | 'draw';
 
 export interface FilterEvent {
   type: 'filter-change';
   filter: FilterType;
   speedFilter: SpeedFilter;
+  resultFilter: ResultFilter;
   allGames: any[];
   filteredGames: any[];
   username: string;
@@ -16,6 +18,7 @@ export class GameFilterManager {
   private allGames: any[] = [];
   private currentFilter: FilterType = 'all';
   private currentSpeedFilter: SpeedFilter = 'all';
+  private currentResultFilter: ResultFilter = 'all';
   private username: string = '';
   private listeners: ((event: FilterEvent) => void)[] = [];
 
@@ -59,6 +62,17 @@ export class GameFilterManager {
   // Get current speed filter
   getCurrentSpeedFilter(): SpeedFilter {
     return this.currentSpeedFilter;
+  }
+
+  // Set the current result filter
+  setResultFilter(result: ResultFilter): void {
+    this.currentResultFilter = result;
+    this.notifyListeners();
+  }
+
+  // Get current result filter
+  getCurrentResultFilter(): ResultFilter {
+    return this.currentResultFilter;
   }
 
   // Toggle a specific speed in the filter (for multi-select)
@@ -207,8 +221,53 @@ export class GameFilterManager {
         }
       }
 
-      // Game must pass both filters
-      return passesColorFilter && passesSpeedFilter;
+      // Apply result filter
+      let passesResultFilter = true;
+
+      if (this.currentResultFilter !== 'all') {
+        // Determine if user is white or black
+        let isWhitePlayer = false;
+        let isBlackPlayer = false;
+
+        if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
+          isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === this.username.toLowerCase();
+          isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === this.username.toLowerCase();
+        } else if (game.white_player || game.black_player) {
+          isWhitePlayer = game.white_player?.toLowerCase() === this.username.toLowerCase();
+          isBlackPlayer = game.black_player?.toLowerCase() === this.username.toLowerCase();
+        } else if (game.game) {
+          const nestedGame = game.game;
+          isWhitePlayer = nestedGame.white_player?.toLowerCase() === this.username.toLowerCase();
+          isBlackPlayer = nestedGame.black_player?.toLowerCase() === this.username.toLowerCase();
+        }
+
+        // Extract winner from different data structures
+        let winner = null;
+        if (game.winner !== undefined) {
+          winner = game.winner;
+        } else if (game.raw_json?.winner) {
+          winner = game.raw_json.winner;
+        } else if (game.game?.raw_json?.winner) {
+          winner = game.game.raw_json.winner;
+        }
+
+        // Determine result from user's perspective
+        let userResult = 'draw';
+        if (winner === 'white' && isWhitePlayer) {
+          userResult = 'win';
+        } else if (winner === 'black' && isBlackPlayer) {
+          userResult = 'win';
+        } else if (winner === 'white' && isBlackPlayer) {
+          userResult = 'loss';
+        } else if (winner === 'black' && isWhitePlayer) {
+          userResult = 'loss';
+        }
+
+        passesResultFilter = userResult === this.currentResultFilter;
+      }
+
+      // Game must pass all filters
+      return passesColorFilter && passesSpeedFilter && passesResultFilter;
     });
   }
 
@@ -233,6 +292,7 @@ export class GameFilterManager {
       type: 'filter-change',
       filter: this.currentFilter,
       speedFilter: this.currentSpeedFilter,
+      resultFilter: this.currentResultFilter,
       allGames: this.allGames,
       filteredGames: filteredGames,
       username: this.username,

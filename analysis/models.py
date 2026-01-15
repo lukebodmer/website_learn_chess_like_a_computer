@@ -268,3 +268,24 @@ class Puzzle(models.Model):
     def moves_list(self):
         """Return moves as a list"""
         return self.moves.split() if self.moves else []
+
+
+class SolvedBlunder(models.Model):
+    """Track which blunder puzzles a user has solved"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    report = models.ForeignKey(AnalysisReport, on_delete=models.CASCADE)
+    # Unique identifier for the blunder (combination of game_id, move_number, and position)
+    blunder_key = models.CharField(max_length=500, db_index=True)
+    solved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'solved_blunders'
+        unique_together = ['user', 'report', 'blunder_key']
+        indexes = [
+            models.Index(fields=['user', 'report']),
+            models.Index(fields=['blunder_key']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} solved blunder {self.blunder_key} in report {self.report.id}"

@@ -1,25 +1,90 @@
 import React, { useState, useEffect } from 'react'
-import { gameFilterManager, FilterType, SpeedFilter } from '../game-filter-manager'
+import { gameFilterManager, FilterType, SpeedFilter, ResultFilter } from '../game-filter-manager'
 
 export interface FiltersButtonProps {}
 
+// Slider filters icon SVG component
+const FiltersIcon: React.FC<{ size?: number }> = ({ size = 24 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Top slider line */}
+    <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    {/* Top slider circle */}
+    <circle cx="14" cy="6" r="3" fill="currentColor" />
+
+    {/* Middle slider line */}
+    <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    {/* Middle slider circle */}
+    <circle cx="8" cy="12" r="3" fill="currentColor" />
+
+    {/* Bottom slider line */}
+    <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    {/* Bottom slider circle */}
+    <circle cx="16" cy="18" r="3" fill="currentColor" />
+  </svg>
+)
+
 const FiltersButton: React.FC<FiltersButtonProps> = () => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false)
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all')
   const [currentSpeedFilter, setCurrentSpeedFilter] = useState<SpeedFilter>('all')
+  const [currentResultFilter, setCurrentResultFilter] = useState<ResultFilter>('all')
   const [availableSpeeds, setAvailableSpeeds] = useState<string[]>([])
+  const [activeFilterCount, setActiveFilterCount] = useState<number>(0)
+
+  // Add styles for animation
+  useEffect(() => {
+    const styleId = 'filters-button-animation-styles'
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.textContent = `
+        @keyframes expandPanel {
+          0% {
+            transform: scale(0.2);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes collapsePanel {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0.2);
+            opacity: 0;
+          }
+        }
+      `
+      document.head.appendChild(style)
+    }
+  }, [])
 
   useEffect(() => {
     // Initialize with current filter state
     setCurrentFilter(gameFilterManager.getCurrentFilter())
     setCurrentSpeedFilter(gameFilterManager.getCurrentSpeedFilter())
+    setCurrentResultFilter(gameFilterManager.getCurrentResultFilter())
     setAvailableSpeeds(gameFilterManager.getAvailableSpeeds())
+    updateActiveFilterCount()
 
     // Listen for filter changes
     const handleFilterChange = () => {
       setCurrentFilter(gameFilterManager.getCurrentFilter())
       setCurrentSpeedFilter(gameFilterManager.getCurrentSpeedFilter())
+      setCurrentResultFilter(gameFilterManager.getCurrentResultFilter())
       setAvailableSpeeds(gameFilterManager.getAvailableSpeeds())
+      updateActiveFilterCount()
     }
 
     gameFilterManager.addListener(handleFilterChange)
@@ -28,6 +93,27 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
       gameFilterManager.removeListener(handleFilterChange)
     }
   }, [])
+
+  const updateActiveFilterCount = () => {
+    let count = 0
+
+    // Count color filter if not 'all'
+    if (gameFilterManager.getCurrentFilter() !== 'all') {
+      count++
+    }
+
+    // Count speed filter if not 'all'
+    if (gameFilterManager.getCurrentSpeedFilter() !== 'all') {
+      count++
+    }
+
+    // Count result filter if not 'all'
+    if (gameFilterManager.getCurrentResultFilter() !== 'all') {
+      count++
+    }
+
+    setActiveFilterCount(count)
+  }
 
   const handleColorFilterChange = (filter: FilterType) => {
     gameFilterManager.setFilter(filter)
@@ -41,12 +127,26 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
     gameFilterManager.setSpeedFilter('all')
   }
 
+  const handleResultFilterChange = (result: ResultFilter) => {
+    gameFilterManager.setResultFilter(result)
+  }
+
   const isSpeedSelected = (speed: string): boolean => {
     return gameFilterManager.isSpeedSelected(speed)
   }
 
   const toggleExpanded = () => {
-    setIsExpanded(!isExpanded)
+    if (isExpanded) {
+      // Start collapse animation
+      setIsAnimatingOut(true)
+      setTimeout(() => {
+        setIsExpanded(false)
+        setIsAnimatingOut(false)
+      }, 300) // Match animation duration
+    } else {
+      // Expand immediately
+      setIsExpanded(true)
+    }
   }
 
   return (
@@ -55,11 +155,10 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
         position: 'fixed',
         bottom: '110px',
         right: '20px',
-        zIndex: 1000,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        zIndex: 1000
       }}
     >
-      {!isExpanded ? (
+      {!isExpanded && !isAnimatingOut ? (
         // Collapsed button
         <button
           onClick={toggleExpanded}
@@ -76,7 +175,8 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             justifyContent: 'center',
             gap: '4px',
             boxShadow: '0 4px 12px var(--shadow-medium)',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            position: 'relative'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--secondary-light)'
@@ -87,12 +187,9 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             e.currentTarget.style.transform = 'scale(1)'
           }}
         >
-          <span style={{
-            fontSize: '24px',
-            color: 'var(--text-on-primary)'
-          }}>
-            ⚙️
-          </span>
+          <div style={{ color: 'var(--text-on-primary)' }}>
+            <FiltersIcon size={28} />
+          </div>
           <span style={{
             color: 'var(--text-on-primary)',
             fontSize: '10px',
@@ -100,7 +197,7 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             textAlign: 'center',
             lineHeight: '1'
           }}>
-            FILTERS
+            FILTERS{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
           </span>
         </button>
       ) : (
@@ -110,9 +207,13 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             backgroundColor: 'var(--background-secondary)',
             borderRadius: '12px',
             padding: '16px',
-            boxShadow: '0 12px 40px var(--shadow-medium), 0 4px 12px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 0 0 1px var(--primary-color), 0 0 12px 2px rgba(var(--primary-color-rgb, 59, 130, 246), 0.4), 0 12px 40px var(--shadow-medium)',
             minWidth: '250px',
-            maxWidth: '300px'
+            maxWidth: '300px',
+            transformOrigin: 'bottom right',
+            animation: isAnimatingOut
+              ? 'collapsePanel 0.3s cubic-bezier(0.4, 0, 0.6, 1) forwards'
+              : 'expandPanel 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards'
           }}
         >
           {/* Header */}
@@ -246,7 +347,7 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
                     }
                   }}
                 >
-                  All Speeds
+                  All
                 </button>
 
                 {/* Individual speed options */}
@@ -284,6 +385,54 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
               </div>
             </div>
           )}
+
+          {/* Game Result Filter */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              fontSize: '12px',
+              fontWeight: '600',
+              color: 'var(--text-secondary)',
+              marginBottom: '8px'
+            }}>
+              Game Result
+            </div>
+            <div style={{
+              display: 'flex',
+              gap: '8px'
+            }}>
+              {(['all', 'win', 'loss', 'draw'] as ResultFilter[]).map(result => (
+                <button
+                  key={result}
+                  onClick={() => handleResultFilterChange(result)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: currentResultFilter === result ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
+                    borderRadius: '6px',
+                    backgroundColor: currentResultFilter === result ? 'var(--primary-color)' : 'var(--background-primary)',
+                    color: currentResultFilter === result ? 'var(--text-on-primary)' : 'var(--text-primary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    textTransform: 'capitalize'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (currentResultFilter !== result) {
+                      e.currentTarget.style.backgroundColor = 'var(--hover-background)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (currentResultFilter !== result) {
+                      e.currentTarget.style.backgroundColor = 'var(--background-primary)'
+                    }
+                  }}
+                >
+                  {result === 'all' ? 'All' : result === 'win' ? 'Win' : result === 'loss' ? 'Loss' : 'Draw'}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Filter summary */}
           <div style={{

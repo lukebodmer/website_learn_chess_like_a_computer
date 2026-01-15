@@ -24,4 +24,6 @@ urlpatterns = [
     path('logout/', views.custom_logout, name='logout'),
     path('games/', views.games, name='games'),
     path('api/daily-puzzle/', views.daily_puzzle_api, name='daily_puzzle_api'),
+    path('api/solved-blunders/<int:report_id>/', views.get_solved_blunders, name='get_solved_blunders'),
+    path('api/mark-blunder-solved/<int:report_id>/', views.mark_blunder_solved, name='mark_blunder_solved'),
 ]
