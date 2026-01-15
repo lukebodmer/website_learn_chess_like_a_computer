@@ -15,6 +15,7 @@ ENV/
 .env
 postgres_data/
 logfile
+data/puzzles/
 
 # GCP deployment (tracked in separate directory)
 # GCP_DEPLOYMENT.md - keeping this file for architecture documentation
