@@ -593,64 +593,84 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '15px',
+      gap: '12px',
       maxWidth: '100%'
     }}>
       {/* Header */}
       <div style={{
         width: '100%',
         maxWidth: '500px',
+        padding: '12px',
+        backgroundColor: 'var(--background-primary)',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
         textAlign: 'center'
       }}>
-        <div className="puzzle-info" style={{
-          marginBottom: '15px'
+        <div className="puzzle-title" style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: 'var(--text-primary)',
+          marginBottom: '4px'
         }}>
-          <div className="puzzle-title" style={{
-            fontSize: '1.2em',
-            marginBottom: '8px'
-          }}>
-            Puzzle {currentPuzzleIndex + 1} of {filteredPuzzles.length}
-          </div>
-          <div className="puzzle-status" style={{
-            marginBottom: '8px'
-          }}>
-            Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
-          </div>
+          Puzzle {currentPuzzleIndex + 1} of {filteredPuzzles.length}
         </div>
         <div className="puzzle-status" style={{
-          fontSize: '14px',
-          fontWeight: 600,
-          color: puzzleState.status === 'solved' ? 'var(--success-color)' :
-                 puzzleState.status === 'failed' ? 'var(--danger-color)' :
-                 'var(--text-primary)',
-          padding: '8px'
+          fontSize: '13px',
+          color: 'var(--text-secondary)'
         }}>
-          {getStatusMessage()}
+          Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
         </div>
       </div>
 
+      {/* Status Message */}
+      <div style={{
+        width: '100%',
+        maxWidth: '500px',
+        padding: '8px',
+        backgroundColor: puzzleState.status === 'solved' ? 'rgba(0, 255, 0, 0.1)' : puzzleState.status === 'failed' ? 'rgba(255, 0, 0, 0.1)' : 'var(--background-primary)',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        textAlign: 'center',
+        fontSize: '14px',
+        fontWeight: '600',
+        color: puzzleState.status === 'solved' ? '#00aa00' : puzzleState.status === 'failed' ? '#cc0000' : 'var(--text-primary)'
+      }}>
+        {getStatusMessage()}
+      </div>
+
       {/* Chess Board */}
-      <BaseChessBoard
-        size={size}
-        position={position}
-        pieceTheme={pieceTheme}
-        orientation="white"
-        coordinates={true}
-        interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
-        selectedSquare={selectedSquare}
-        legalMoves={legalMoves}
-        highlightedSquares={highlightedSquares}
-        arrows={arrows}
-        lastMove={lastMoveSquares}
-        animationData={animationData}
-        onSquareClick={handleSquareClick}
-        onAnimationComplete={handleAnimationComplete}
-      />
+      <div style={{
+        width: '100%',
+        maxWidth: '500px',
+        backgroundColor: 'var(--background-primary)',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        padding: '16px',
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <BaseChessBoard
+          size={size}
+          position={position}
+          pieceTheme={pieceTheme}
+          orientation="white"
+          coordinates={true}
+          interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
+          selectedSquare={selectedSquare}
+          legalMoves={legalMoves}
+          highlightedSquares={highlightedSquares}
+          arrows={arrows}
+          lastMove={lastMoveSquares}
+          animationData={animationData}
+          onSquareClick={handleSquareClick}
+          onAnimationComplete={handleAnimationComplete}
+        />
+      </div>
 
       {/* Controls */}
       <div className="puzzle-controls" style={{
         display: 'flex',
-        gap: '10px',
+        gap: '8px',
         justifyContent: 'center',
         flexWrap: 'wrap',
         width: '100%',
@@ -663,14 +683,31 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
           style={{
             padding: '8px 16px',
             fontSize: '14px',
-            background: currentPuzzleIndex === 0 ? 'var(--text-muted)' : 'var(--text-secondary)',
-            color: 'var(--text-on-primary)',
-            border: 'none',
+            border: '2px solid var(--border-color)',
             borderRadius: '6px',
+            backgroundColor: currentPuzzleIndex === 0 ? 'var(--background-tertiary)' : 'var(--background-primary)',
+            color: currentPuzzleIndex === 0 ? 'var(--text-muted)' : 'var(--primary-color)',
             cursor: currentPuzzleIndex === 0 ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
+            fontWeight: '600',
             transition: 'all 0.2s ease',
-            opacity: currentPuzzleIndex === 0 ? 0.5 : 1
+            boxShadow: currentPuzzleIndex === 0 ? 'none' : '0 2px 4px var(--shadow-light)',
+            opacity: currentPuzzleIndex === 0 ? 0.6 : 1
+          }}
+          onMouseEnter={(e) => {
+            if (currentPuzzleIndex !== 0) {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+              e.currentTarget.style.color = 'var(--text-on-primary)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPuzzleIndex !== 0) {
+              e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+              e.currentTarget.style.color = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+            }
           }}
         >
           ← Previous
@@ -682,16 +719,27 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
           style={{
             padding: '8px 16px',
             fontSize: '14px',
-            background: 'var(--text-secondary)',
-            color: 'var(--text-on-primary)',
-            border: 'none',
+            border: '2px solid var(--border-color)',
             borderRadius: '6px',
+            backgroundColor: 'var(--background-primary)',
+            color: 'var(--primary-color)',
             cursor: 'pointer',
-            fontWeight: 600,
-            transition: 'all 0.2s ease'
+            fontWeight: '600',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px var(--shadow-light)'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--text-muted)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--text-secondary)'}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+            e.currentTarget.style.color = 'var(--text-on-primary)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+            e.currentTarget.style.color = 'var(--primary-color)';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+          }}
         >
           Reset
         </button>
@@ -704,20 +752,31 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
             style={{
               padding: '8px 16px',
               fontSize: '14px',
-              background: hintLevel >= 2 ? 'var(--text-muted)' : 'var(--info-color)',
-              color: 'var(--text-on-primary)',
-              border: 'none',
+              border: '2px solid var(--border-color)',
               borderRadius: '6px',
+              backgroundColor: hintLevel >= 2 ? 'var(--background-tertiary)' : 'var(--background-primary)',
+              color: hintLevel >= 2 ? 'var(--text-muted)' : 'var(--primary-color)',
               cursor: hintLevel >= 2 ? 'not-allowed' : 'pointer',
-              fontWeight: 600,
+              fontWeight: '600',
               transition: 'all 0.2s ease',
-              opacity: hintLevel >= 2 ? 0.5 : 1
+              boxShadow: hintLevel >= 2 ? 'none' : '0 2px 4px var(--shadow-light)',
+              opacity: hintLevel >= 2 ? 0.6 : 1
             }}
             onMouseEnter={(e) => {
-              if (hintLevel < 2) e.currentTarget.style.opacity = '0.85'
+              if (hintLevel < 2) {
+                e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                e.currentTarget.style.color = 'var(--text-on-primary)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+              }
             }}
             onMouseLeave={(e) => {
-              if (hintLevel < 2) e.currentTarget.style.opacity = '1'
+              if (hintLevel < 2) {
+                e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                e.currentTarget.style.color = 'var(--primary-color)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+              }
             }}
           >
             Hint {hintLevel > 0 ? `(${hintLevel}/2)` : ''}
@@ -731,14 +790,29 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
           style={{
             padding: '8px 16px',
             fontSize: '14px',
-            background: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'var(--text-muted)' : 'var(--success-color)',
-            color: 'var(--text-on-primary)',
-            border: 'none',
+            border: '2px solid var(--border-color)',
             borderRadius: '6px',
+            backgroundColor: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'var(--background-tertiary)' : 'var(--primary-color)',
+            color: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'var(--text-muted)' : 'var(--text-on-primary)',
             cursor: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
+            fontWeight: '600',
             transition: 'all 0.2s ease',
-            opacity: currentPuzzleIndex === filteredPuzzles.length - 1 ? 0.5 : 1
+            boxShadow: currentPuzzleIndex === filteredPuzzles.length - 1 ? 'none' : '0 2px 4px var(--shadow-light)',
+            opacity: currentPuzzleIndex === filteredPuzzles.length - 1 ? 0.6 : 1
+          }}
+          onMouseEnter={(e) => {
+            if (currentPuzzleIndex !== filteredPuzzles.length - 1) {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color-dark, var(--primary-color))';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPuzzleIndex !== filteredPuzzles.length - 1) {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+            }
           }}
         >
           Next →

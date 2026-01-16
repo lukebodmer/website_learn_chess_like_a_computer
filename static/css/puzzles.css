@@ -236,17 +236,6 @@
     box-shadow: none;
 }
 
-/* Puzzle Status Display */
-.puzzle-status {
-    font-weight: 600;
-    margin-bottom: 15px;
-    padding: 10px;
-    background: var(--background-tertiary);
-    border-radius: 6px;
-    text-align: center;
-    border-left: 4px solid var(--primary-color);
-}
-
 /* Puzzle Feedback */
 .puzzle-feedback {
     min-height: 60px;

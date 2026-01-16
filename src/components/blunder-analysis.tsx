@@ -268,25 +268,31 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       <div style={{
         display: 'flex',
         gap: '20px',
-        alignItems: 'center',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
         minHeight: '650px'
       }}>
         {/* Blunder List */}
         <div style={{
-          flex: '0 0 300px',
-          height: '600px',
-          minHeight: '600px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          minWidth: '320px',
+          maxWidth: '400px',
+          flex: '1',
+          height: '700px',
+          minHeight: '700px',
           backgroundColor: 'var(--background-primary)',
           borderRadius: '8px',
           border: '1px solid var(--border-color)',
-          display: 'flex',
-          flexDirection: 'column'
+          overflow: 'hidden'
         }}>
           {/* Sticky Header */}
           <div style={{
             position: 'sticky',
             top: 0,
-            backgroundColor: 'var(--background-secondary)',
+            backgroundColor: 'var(--background-primary)',
             padding: '12px',
             borderBottom: '1px solid var(--border-color)',
             fontSize: '14px',
@@ -419,7 +425,15 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
         </div>
 
         {/* Blunder Board */}
-        <div style={{ flex: '1', display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '4px',
+          flex: '1',
+          minWidth: '320px',
+          maxWidth: '500px'
+        }}>
           {selectedBlunder ? (
             <BlunderBoard
               blunder={selectedBlunder}
@@ -434,7 +448,7 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
               {/* Empty state - show opening position */}
               <div style={{
                 padding: '12px',
-                backgroundColor: 'var(--background-secondary)',
+                backgroundColor: 'var(--background-primary)',
                 borderRadius: '8px',
                 border: '1px solid var(--border-color)',
                 position: 'relative'
@@ -486,7 +500,7 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
               {/* Status Message Placeholder */}
               <div style={{
                 padding: '8px',
-                backgroundColor: 'var(--background-secondary)',
+                backgroundColor: 'var(--background-primary)',
                 borderRadius: '8px',
                 border: '1px solid var(--border-color)',
                 textAlign: 'center',
@@ -496,18 +510,27 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
                 {allBlunders.length === 0 ? 'No blunders to display' : 'Select a blunder to view'}
               </div>
 
-              <BaseChessBoard
-                size={450}
-                position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-                orientation="white"
-                coordinates={true}
-                showGameEndSymbols={false}
-                showCheckHighlight={false}
-                interactive={false}
-                allowPieceDragging={false}
-                highlightedSquares={[]}
-                arrows={[]}
-              />
+              <div style={{
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <BaseChessBoard
+                  size={450}
+                  position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+                  orientation="white"
+                  coordinates={true}
+                  showGameEndSymbols={false}
+                  showCheckHighlight={false}
+                  interactive={false}
+                  allowPieceDragging={false}
+                  highlightedSquares={[]}
+                  arrows={[]}
+                />
+              </div>
             </div>
           )}
         </div>

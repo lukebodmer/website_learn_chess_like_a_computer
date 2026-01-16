@@ -408,8 +408,23 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing stockfish analysis data for principles summary:', error.message)
     }
 
+    // Get ELO averages data
+    let eloAveragesData = null
+    try {
+      const eloAveragesElement = document.getElementById('elo-averages-data')
+      if (eloAveragesElement && eloAveragesElement.textContent) {
+        const eloAveragesText = eloAveragesElement.textContent.trim()
+        if (eloAveragesText && eloAveragesText.startsWith('{')) {
+          eloAveragesData = JSON.parse(eloAveragesText)
+          console.log('Parsed ELO averages data for principles summary:', eloAveragesData)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing ELO averages data for principles summary:', error.message)
+    }
+
     // Render component with initial data
-    root.render(<PrinciplesSummary principlesData={principlesData} />)
+    root.render(<PrinciplesSummary principlesData={principlesData} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).principlesSummaryRoot = root
@@ -460,10 +475,18 @@ document.addEventListener('DOMContentLoaded', () => {
           display: 'flex',
           gap: '20px',
           alignItems: 'flex-start',
-          minHeight: '650px'
+          justifyContent: 'center',
+          flexWrap: 'wrap'
         }}>
           {/* Render PrincipleSelector on the left */}
-          <div style={{ flex: '0 0 300px' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            minWidth: '320px',
+            maxWidth: '400px',
+            flex: '1'
+          }}>
             <PrincipleSelector
               principlesData={principlesData}
               selectedPrinciple={selectedPrinciple}
@@ -472,7 +495,15 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           {/* Render CustomPuzzles on the right */}
-          <div style={{ flex: '1', display: 'flex', justifyContent: 'center' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            flex: '1',
+            minWidth: '320px',
+            maxWidth: '550px'
+          }}>
             <CustomPuzzles
               puzzles={puzzlesData}
               size={480}

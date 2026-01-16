@@ -56,7 +56,7 @@ const PrincipleSelector: React.FC<PrincipleSelectorProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '600px',
+      minHeight: '700px',
       backgroundColor: 'var(--background-primary)',
       borderRadius: '8px',
       border: '1px solid var(--border-color)',

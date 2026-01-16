@@ -335,7 +335,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
       {/* Info Display */}
       <div style={{
         padding: '12px',
-        backgroundColor: 'var(--background-secondary)',
+        backgroundColor: 'var(--background-primary)',
         borderRadius: '8px',
         border: '1px solid var(--border-color)',
         position: 'relative'
@@ -417,7 +417,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
       {/* Status Message */}
       <div style={{
         padding: '8px',
-        backgroundColor: puzzleMode === 'solved' ? 'rgba(0, 255, 0, 0.1)' : puzzleMode === 'failed' ? 'rgba(255, 0, 0, 0.1)' : 'var(--background-secondary)',
+        backgroundColor: puzzleMode === 'solved' ? 'rgba(0, 255, 0, 0.1)' : puzzleMode === 'failed' ? 'rgba(255, 0, 0, 0.1)' : 'var(--background-primary)',
         borderRadius: '8px',
         border: '1px solid var(--border-color)',
         textAlign: 'center',
@@ -429,23 +429,32 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
       </div>
 
       {/* Chess Board */}
-      <BaseChessBoard
-        size={size}
-        position={position}
-        orientation={boardOrientation}
-        coordinates={true}
-        showGameEndSymbols={false}
-        showCheckHighlight={true}
-        interactive={true}
-        allowPieceDragging={puzzleMode === 'solving'}
-        highlightedSquares={highlightedSquares}
-        arrows={arrows}
-        selectedSquare={selectedSquare || undefined}
-        legalMoves={legalMoves}
-        animationData={animationData}
-        onSquareClick={handleSquareClick}
-        onAnimationComplete={handleAnimationComplete}
-      />
+      <div style={{
+        backgroundColor: 'var(--background-primary)',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        padding: '16px',
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <BaseChessBoard
+          size={size}
+          position={position}
+          orientation={boardOrientation}
+          coordinates={true}
+          showGameEndSymbols={false}
+          showCheckHighlight={true}
+          interactive={true}
+          allowPieceDragging={puzzleMode === 'solving'}
+          highlightedSquares={highlightedSquares}
+          arrows={arrows}
+          selectedSquare={selectedSquare || undefined}
+          legalMoves={legalMoves}
+          animationData={animationData}
+          onSquareClick={handleSquareClick}
+          onAnimationComplete={handleAnimationComplete}
+        />
+      </div>
 
       {/* Controls */}
       <div style={{
@@ -460,12 +469,24 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
             style={{
               padding: '8px 16px',
               fontSize: '14px',
-              backgroundColor: '#4a9eff',
-              color: 'white',
-              border: 'none',
+              border: '2px solid var(--border-color)',
               borderRadius: '6px',
+              backgroundColor: 'var(--primary-color)',
+              color: 'var(--text-on-primary)',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px var(--shadow-light)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color-dark, var(--primary-color))';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
             }}
           >
             Find Best Move
@@ -479,12 +500,31 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
-                backgroundColor: hintLevel >= 2 ? '#cccccc' : '#17a2b8',
-                color: 'white',
-                border: 'none',
+                border: '2px solid var(--border-color)',
                 borderRadius: '6px',
+                backgroundColor: hintLevel >= 2 ? 'var(--background-tertiary)' : 'var(--background-primary)',
+                color: hintLevel >= 2 ? 'var(--text-muted)' : 'var(--primary-color)',
                 cursor: hintLevel >= 2 ? 'not-allowed' : 'pointer',
-                fontWeight: '600'
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+                boxShadow: hintLevel >= 2 ? 'none' : '0 2px 4px var(--shadow-light)',
+                opacity: hintLevel >= 2 ? 0.6 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (hintLevel < 2) {
+                  e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                  e.currentTarget.style.color = 'var(--text-on-primary)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (hintLevel < 2) {
+                  e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                  e.currentTarget.style.color = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
+                }
               }}
             >
               Hint {hintLevel > 0 ? `(${hintLevel}/2)` : ''}
@@ -494,12 +534,26 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
+                border: '2px solid var(--border-color)',
                 borderRadius: '6px',
+                backgroundColor: 'var(--background-primary)',
+                color: 'var(--primary-color)',
                 cursor: 'pointer',
-                fontWeight: '600'
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px var(--shadow-light)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                e.currentTarget.style.color = 'var(--text-on-primary)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                e.currentTarget.style.color = 'var(--primary-color)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
               }}
             >
               Back to Blunder
@@ -512,12 +566,26 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
             style={{
               padding: '8px 16px',
               fontSize: '14px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
+              border: '2px solid var(--border-color)',
               borderRadius: '6px',
+              backgroundColor: 'var(--background-primary)',
+              color: 'var(--primary-color)',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px var(--shadow-light)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+              e.currentTarget.style.color = 'var(--text-on-primary)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 3px 8px var(--shadow-medium)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+              e.currentTarget.style.color = 'var(--primary-color)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px var(--shadow-light)';
             }}
           >
             Back to Blunder

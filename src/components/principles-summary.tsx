@@ -3,11 +3,15 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 
 interface PrinciplesSummaryProps {
   principlesData: any;
+  eloAveragesData?: any;
 }
 
 export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
-  principlesData
+  principlesData,
+  eloAveragesData = null
 }) => {
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+
   // Extract principles data
   const radarData = useMemo(() => {
     if (!principlesData || !principlesData.principles) {
@@ -80,119 +84,191 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
     return null;
   };
 
-  if (!principlesData || !principlesData.principles) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-        <p>Principles analysis not available yet.</p>
-      </div>
-    );
-  }
+  const hasData = principlesData && principlesData.principles;
 
   return (
-    <div className="section">
-      <h2 style={{ marginTop: 0, marginBottom: '10px' }}>Chess Principles Summary</h2>
+    <div className="section" style={{ border: '2px solid var(--primary-color)' }}>
+      <div style={{ position: 'relative', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ marginTop: 0, marginBottom: 0 }}>Chess Principles Summary</h2>
+          <div
+            style={{
+              position: 'relative',
+              cursor: 'pointer',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              backgroundColor: 'var(--background-primary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              fontSize: '18px',
+              fontWeight: 'normal',
+              transition: 'all 0.2s ease',
+              lineHeight: '1'
+            }}
+            onMouseEnter={() => setShowInfoTooltip(true)}
+            onMouseLeave={() => setShowInfoTooltip(false)}
+            onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+          >
+            ⓘ
+            {showInfoTooltip && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: '0',
+                marginTop: '8px',
+                width: '320px',
+                maxWidth: '90vw',
+                padding: '16px',
+                backgroundColor: 'var(--background-primary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 16px var(--shadow-medium)',
+                zIndex: 1000,
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                lineHeight: '1.5',
+                textAlign: 'left'
+              }}>
+                <h4 style={{ marginTop: 0, marginBottom: '12px', fontSize: '14px', fontWeight: '600' }}>
+                  How to Read This Chart
+                </h4>
+                <ul style={{ marginBottom: 0, paddingLeft: '18px', marginTop: '8px' }}>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Percentiles (0-100):</strong> Show how you rank compared to players in your rating range. Higher percentiles mean better performance.
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>50th Percentile:</strong> You're performing at the average for your rating in this area.
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Lower Percentiles:</strong> Indicate areas where you're underperforming and should focus your practice.
+                  </li>
+                  <li>
+                    <strong>Your Rating Range ({eloRange}):</strong> Your performance is compared to thousands of players with similar ratings using statistical distributions.
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
         Rating Range: <strong>{eloRange}</strong> | Games Analyzed: <strong>{totalGames}</strong>
       </p>
 
       {/* Radar Chart */}
-      <div style={{ marginBottom: '30px' }}>
-        <ResponsiveContainer width="100%" height={500}>
-          <RadarChart data={radarData}>
-            <PolarGrid strokeDasharray="3 3" />
-            <PolarAngleAxis
-              dataKey="principle"
-              tick={{ fill: 'var(--text-primary)', fontSize: 12 }}
-            />
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 100]}
-              tick={{ fill: 'var(--text-secondary)' }}
-            />
-            <Radar
-              name="Performance Percentile"
-              dataKey="score"
-              stroke="var(--text-primary)"
-              fill="var(--success-text)"
-              fillOpacity={0.8}
-              strokeWidth={2}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-          </RadarChart>
-        </ResponsiveContainer>
+      <div style={{
+        marginBottom: '30px',
+        minHeight: '500px',
+        backgroundColor: 'var(--background-primary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '8px',
+        padding: '16px'
+      }}>
+        {hasData ? (
+          <ResponsiveContainer width="100%" height={500}>
+            <RadarChart data={radarData}>
+              <PolarGrid strokeDasharray="3 3" />
+              <PolarAngleAxis
+                dataKey="principle"
+                tick={{ fill: 'var(--text-primary)', fontSize: 12 }}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tick={{ fill: 'var(--text-secondary)' }}
+              />
+              <Radar
+                name="Performance Percentile"
+                dataKey="score"
+                stroke="var(--text-primary)"
+                fill="var(--success-text)"
+                fillOpacity={0.8}
+                strokeWidth={2}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+            </RadarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{
+            height: '500px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '14px',
+            fontStyle: 'italic'
+          }}>
+            Principles analysis not available yet...
+          </div>
+        )}
       </div>
 
       {/* Top Areas to Improve */}
-      {topAreasToImprove.length > 0 && (
-        <div style={{ marginTop: '30px' }}>
-          <h3 style={{ marginBottom: '15px' }}>Top Areas to Improve</h3>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-            {topAreasToImprove.map((area, index) => (
-              <div
-                key={area.principle}
-                style={{
-                  flex: '1 1 200px',
-                  padding: '15px',
-                  backgroundColor: 'var(--background-tertiary)',
-                  borderRadius: '8px',
-                  border: `2px solid ${index === 0 ? 'var(--danger-color)' : index === 1 ? 'var(--secondary-color)' : 'var(--primary-color)'}`,
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '5px'
-                }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-primary)' }}>
-                    #{index + 1}
-                  </span>
-                  <span style={{
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                    color: index === 0 ? 'var(--danger-color)' : index === 1 ? 'var(--secondary-color)' : 'var(--primary-color)'
-                  }}>
-                    {area.score}
-                  </span>
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
-                  {area.principle}
-                </div>
-              </div>
-            ))}
-          </div>
-          <p style={{ marginTop: '15px', fontSize: '14px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-            Lower percentiles indicate areas where you're underperforming compared to players in your rating range ({eloRange}).
-            Focus on improving these skills to reach the average level for your rating.
-          </p>
-        </div>
-      )}
-
-      {/* Explanation */}
       <div style={{
         marginTop: '30px',
-        padding: '15px',
-        backgroundColor: 'var(--background-tertiary)',
+        minHeight: '120px',
+        backgroundColor: 'var(--background-primary)',
+        border: '1px solid var(--border-color)',
         borderRadius: '8px',
-        fontSize: '14px',
-        color: 'var(--text-primary)'
+        padding: '16px'
       }}>
-        <h4 style={{ marginTop: 0, marginBottom: '10px', color: 'var(--text-primary)' }}>How to Read This Chart</h4>
-        <ul style={{ marginBottom: 0, paddingLeft: '20px' }}>
-          <li style={{ marginBottom: '8px' }}>
-            <strong>Percentiles (0-100):</strong> Show how you rank compared to players in your rating range. Higher percentiles mean better performance.
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <strong>50th Percentile:</strong> You're performing at the average for your rating in this area.
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <strong>Lower Percentiles:</strong> Indicate areas where you're underperforming and should focus your practice.
-          </li>
-          <li>
-            <strong>Your Rating Range ({eloRange}):</strong> Your performance is compared to thousands of players with similar ratings using statistical distributions.
-          </li>
-        </ul>
+        {hasData && topAreasToImprove.length > 0 ? (
+          <>
+            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Top Areas to Improve</h3>
+            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+              {topAreasToImprove.map((area, index) => (
+                <div
+                  key={area.principle}
+                  style={{
+                    flex: '1 1 200px',
+                    padding: '15px',
+                    backgroundColor: 'var(--background-tertiary)',
+                    borderRadius: '8px',
+                    border: `2px solid ${index === 0 ? 'var(--danger-color)' : index === 1 ? 'var(--secondary-color)' : 'var(--primary-color)'}`,
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '5px'
+                  }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-primary)' }}>
+                      #{index + 1}
+                    </span>
+                    <span style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      color: index === 0 ? 'var(--danger-color)' : index === 1 ? 'var(--secondary-color)' : 'var(--primary-color)'
+                    }}>
+                      {area.score}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                    {area.principle}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{
+            height: '120px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '14px',
+            fontStyle: 'italic'
+          }}>
+            {hasData ? 'No areas needing improvement identified' : 'Loading improvement areas...'}
+          </div>
+        )}
       </div>
     </div>
   );

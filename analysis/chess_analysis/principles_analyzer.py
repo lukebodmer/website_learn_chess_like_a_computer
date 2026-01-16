@@ -39,11 +39,18 @@ class ChessPrinciplesAnalyzer:
         """
         self.enriched_games = enriched_games
         self.username = username.lower()
-        self.elo_range = elo_range
-        self.elo_averages = self._load_elo_averages()
 
-        # Filter to only user's games
+        # Filter to only user's games first (needed for ELO detection)
         self.user_games = self._filter_user_games()
+
+        # Detect ELO range if not provided
+        if elo_range is None:
+            self.elo_range = self._detect_elo_range()
+        else:
+            self.elo_range = elo_range
+
+        # Load ELO averages after we have the range
+        self.elo_averages = self._load_elo_averages()
 
     def _filter_user_games(self) -> List[Dict[str, Any]]:
         """Filter games to only those where the user participated"""
@@ -72,19 +79,66 @@ class ChessPrinciplesAnalyzer:
 
     def _load_elo_averages(self) -> Dict[str, Any]:
         """
-        Load ELO range average data from JSON file.
+        Load ELO range average data from JSON files.
+
+        The new structure has separate files per ELO bracket, with time controls nested inside.
+        We load the appropriate bracket file and aggregate across time controls.
 
         Returns:
-            Dictionary with ELO ranges as keys and average metrics as values
+            Dictionary with ELO range as key and aggregated metrics across time controls
         """
+        # ELO range should be set before calling this method
+        if not self.elo_range:
+            print("Warning: ELO range not set, cannot load averages")
+            return {}
+
         elo_file_path = os.path.join(
             os.path.dirname(__file__),
-            '..', '..', 'data', 'elo_averages.json'
+            '..', '..', 'data', 'elo_averages', f'{self.elo_range}.json'
         )
 
         try:
             with open(elo_file_path, 'r') as f:
-                return json.load(f)
+                bracket_data = json.load(f)
+
+            # Aggregate metrics across all time controls (bullet, blitz, rapid)
+            # by averaging their values
+            aggregated = {}
+            time_controls = ['bullet', 'blitz', 'rapid']
+
+            # Get all metric keys from the first available time control
+            sample_control = None
+            for tc in time_controls:
+                if tc in bracket_data:
+                    sample_control = tc
+                    break
+
+            if not sample_control:
+                print(f"Warning: No time control data found in {elo_file_path}")
+                return {self.elo_range: {}}
+
+            # Get all metric keys
+            metric_keys = bracket_data[sample_control].keys()
+
+            # For each metric, average across time controls
+            for metric_key in metric_keys:
+                values = []
+                for tc in time_controls:
+                    if tc in bracket_data and metric_key in bracket_data[tc]:
+                        metric_data = bracket_data[tc][metric_key]
+                        if isinstance(metric_data, dict):
+                            values.append(metric_data)
+
+                if values:
+                    # Average the mean, std, and skew values
+                    aggregated[metric_key] = {
+                        'mean': sum(v.get('mean', 0) for v in values) / len(values),
+                        'std': sum(v.get('std', 0) for v in values) / len(values),
+                        'skew': sum(v.get('skew', 0) for v in values) / len(values)
+                    }
+
+            return {self.elo_range: aggregated}
+
         except FileNotFoundError:
             print(f"Warning: ELO averages file not found at {elo_file_path}")
             return {}

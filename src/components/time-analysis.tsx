@@ -100,6 +100,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
 }) => {
   const [filteredGames, setFilteredGames] = useState<any[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
 
   // Set up filter manager when component mounts
   React.useEffect(() => {
@@ -505,7 +506,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       }
 
       gameResults.push({
-        timeRemaining: Math.floor(userFinalTime / 10) * 10, // Round down to nearest 10 seconds
+        timeRemaining: Math.floor(userFinalTime / 1) * 1, // Round down to nearest 1 second
         result
       });
     });
@@ -520,9 +521,9 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     // Find max time to create buckets
     const maxTime = Math.max(...gameResults.map(g => g.timeRemaining));
 
-    // Create 10-second buckets from 0 to maxTime
+    // Create 1-second buckets from 0 to maxTime
     const buckets: Record<number, { wins: number; losses: number; draws: number; total: number }> = {};
-    for (let i = 0; i <= maxTime; i += 10) {
+    for (let i = 0; i <= maxTime; i += 1) {
       buckets[i] = { wins: 0, losses: 0, draws: 0, total: 0 };
     }
 
@@ -538,18 +539,90 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       }
     });
 
-    // Convert to chart data
-    const chartData = Object.entries(buckets).map(([time, data]) => ({
-      time: parseInt(time),
-      wins: data.wins,
-      losses: data.losses,
-      draws: data.draws,
-      total: data.total
-    }));
+    // Helper function to calculate log-normal parameters from data
+    const calculateLogNormalParams = (values: number[]): { mu: number; sigma: number } | null => {
+      if (values.length === 0) return null;
+
+      // Filter out zero values for log-normal (add small epsilon)
+      const logValues = values.map(v => Math.log(Math.max(v, 0.1)));
+      const n = logValues.length;
+
+      const mu = logValues.reduce((sum, val) => sum + val, 0) / n;
+      const variance = logValues.reduce((sum, val) => sum + Math.pow(val - mu, 2), 0) / n;
+      const sigma = Math.sqrt(variance);
+
+      return { mu, sigma };
+    };
+
+    // Helper function to calculate log-normal PDF
+    const logNormalPDF = (x: number, mu: number, sigma: number): number => {
+      if (x <= 0) return 0;
+      const logX = Math.log(x);
+      const exponent = -Math.pow(logX - mu, 2) / (2 * sigma * sigma);
+      return Math.exp(exponent) / (x * sigma * Math.sqrt(2 * Math.PI));
+    };
+
+    // Extract time values for each result type (with repetition for frequency)
+    const winTimes: number[] = [];
+    const lossTimes: number[] = [];
+    const drawTimes: number[] = [];
+
+    gameResults.forEach(({ timeRemaining, result }) => {
+      const time = timeRemaining;
+      if (result === 'win') winTimes.push(time);
+      else if (result === 'loss') lossTimes.push(time);
+      else if (result === 'draw') drawTimes.push(time);
+    });
+
+    // Calculate log-normal parameters for each category
+    const winParams = calculateLogNormalParams(winTimes);
+    const lossParams = calculateLogNormalParams(lossTimes);
+    const drawParams = calculateLogNormalParams(drawTimes);
+
+    // Create smooth curve data points
+    const curvePoints = 200; // Number of points for smooth curve
+    const chartData: any[] = [];
+    const densityThreshold = 0.01;
+
+    // Track which result types have data
+    const hasWinData = winTimes.length > 0;
+    const hasLossData = lossTimes.length > 0;
+    const hasDrawData = drawTimes.length > 0;
+
+    for (let i = 0; i <= curvePoints; i++) {
+      const time = (maxTime * i) / curvePoints;
+      if (time < 0.1) continue; // Skip near-zero values for log-normal
+
+      const point: any = { time: parseFloat(time.toFixed(1)) };
+
+      // Calculate PDF values and scale by total count for each category
+      let maxDensity = 0;
+
+      if (winParams && hasWinData) {
+        point.winsPDF = logNormalPDF(time, winParams.mu, winParams.sigma) * winTimes.length * (maxTime / curvePoints);
+        maxDensity = Math.max(maxDensity, point.winsPDF);
+      }
+      if (lossParams && hasLossData) {
+        point.lossesPDF = logNormalPDF(time, lossParams.mu, lossParams.sigma) * lossTimes.length * (maxTime / curvePoints);
+        maxDensity = Math.max(maxDensity, point.lossesPDF);
+      }
+      if (drawParams && hasDrawData) {
+        point.drawsPDF = logNormalPDF(time, drawParams.mu, drawParams.sigma) * drawTimes.length * (maxTime / curvePoints);
+        maxDensity = Math.max(maxDensity, point.drawsPDF);
+      }
+
+      // Only add points where at least one density is above threshold
+      if (maxDensity >= densityThreshold) {
+        chartData.push(point);
+      }
+    }
 
     return {
       chartData,
-      totalGames: validGameCount
+      totalGames: validGameCount,
+      hasWinData,
+      hasLossData,
+      hasDrawData
     };
   }, [filteredGames, username]);
 
@@ -599,15 +672,14 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
 
         if (!isUserMove) continue;
 
-        const prevEval = analysis[i]?.eval;
-        const currEval = analysis[i + 1]?.eval;
+        const prevWinPct = analysis[i]?.lichess_win_percentage_white;
+        const currWinPct = analysis[i + 1]?.lichess_win_percentage_white;
         const judgment = analysis[i + 1]?.judgment?.name;
 
-        if (prevEval === undefined || currEval === undefined) continue;
+        if (prevWinPct === undefined || currWinPct === undefined) continue;
 
-        // Calculate eval change from user's perspective
-        let evalChange = currEval - prevEval;
-        if (!isWhite) evalChange = -evalChange;
+        // Calculate win percentage change from user's perspective
+        let winPctChange = isWhite ? (currWinPct - prevWinPct) : (prevWinPct - currWinPct);
 
         // Calculate time spent on this move
         let timeSpent = 0;
@@ -634,7 +706,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
         // Only include moves with reasonable time spent (filter outliers)
         if (timeSpent < 300) { // Less than 5 minutes per move
           moveData.push({
-            evalChange: Math.abs(evalChange),
+            winPctChange: Math.abs(winPctChange),
             timeSpent,
             category,
             moveNumber
@@ -649,34 +721,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     };
   }, [filteredGames, username]);
 
-  if (timeUsageData.totalGames === 0) {
-    return (
-      <div className="time-analysis" style={{
-        padding: '20px',
-        backgroundColor: 'var(--background-secondary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        boxShadow: '0 2px 6px var(--shadow-light)'
-      }}>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          marginBottom: '8px',
-          color: 'var(--text-primary)'
-        }}>
-          Time Analysis ({gameFilterManager.getFilterDescription()})
-        </h3>
-        <p style={{
-          color: 'var(--text-secondary)',
-          margin: 0,
-          fontSize: '14px'
-        }}>
-          No games with time data available yet...
-        </p>
-      </div>
-    );
-  }
-
+  const hasData = timeUsageData.totalGames > 0;
   const colors = ['var(--primary-color)', 'var(--success-color)', 'var(--warning-color)'];
 
   const renderCustomTooltip = (props: any) => {
@@ -814,21 +859,92 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          marginBottom: '8px',
-          color: 'var(--text-primary)'
-        }}>
-          Time Analysis ({gameFilterManager.getFilterDescription()})
-        </h3>
+      <div style={{ marginBottom: '16px', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            marginBottom: '8px',
+            color: 'var(--text-primary)'
+          }}>
+            Time Analysis ({gameFilterManager.getFilterDescription()})
+          </h3>
+          <div
+            style={{
+              position: 'relative',
+              cursor: 'pointer',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              backgroundColor: 'var(--background-primary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              fontSize: '18px',
+              fontWeight: 'normal',
+              transition: 'all 0.2s ease',
+              lineHeight: '1'
+            }}
+            onMouseEnter={() => setShowInfoTooltip(true)}
+            onMouseLeave={() => setShowInfoTooltip(false)}
+            onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+          >
+            ⓘ
+            {showInfoTooltip && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: '0',
+                marginTop: '8px',
+                width: '320px',
+                maxWidth: '90vw',
+                padding: '16px',
+                backgroundColor: 'var(--background-primary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 16px var(--shadow-medium)',
+                zIndex: 1000,
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                lineHeight: '1.5',
+                textAlign: 'left'
+              }}>
+                <h4 style={{ marginTop: 0, marginBottom: '12px', fontSize: '14px', fontWeight: '600' }}>
+                  How to Read This Chart
+                </h4>
+                <ul style={{ marginBottom: 0, paddingLeft: '18px', marginTop: '8px' }}>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Time Usage Bars:</strong> Show what percentage of your total game time you spend in each phase (opening, middlegame, endgame).
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Population Average:</strong> Semi-transparent bars show how players in your ELO bracket typically spend their time, helping you identify if you're over/under-thinking certain phases.
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Win % Line:</strong> The gray line shows your average evaluation/win percentage at key transition points in the game.
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Time Remaining Distribution:</strong> Shows when your games typically end and how much time you have left by result type.
+                  </li>
+                  <li>
+                    <strong>Critical Moves Scatter:</strong> Plots time spent vs. position criticality to reveal if you're investing time appropriately on important decisions.
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
         <div style={{
           fontSize: '14px',
           color: 'var(--text-secondary)',
           marginBottom: '8px'
         }}>
-          Average time usage per game phase (based on {timeUsageData.totalGames} games)
+          {hasData ? (
+            <>Average time usage per game phase (based on {timeUsageData.totalGames} games)</>
+          ) : (
+            <span style={{ fontStyle: 'italic' }}>No games with time data available yet...</span>
+          )}
         </div>
       </div>
 
@@ -837,9 +953,11 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
         backgroundColor: 'var(--background-primary)',
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
-        padding: '16px'
+        padding: '16px',
+        minHeight: '316px'
       }}>
-        <ResponsiveContainer width="100%" height={300}>
+        {hasData ? (
+          <ResponsiveContainer width="100%" height={300}>
           <ComposedChart
             data={timeUsageData.chartData}
             margin={{ top: 10, right: 40, left: 10, bottom: 5 }}
@@ -908,6 +1026,19 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
             />
           </ComposedChart>
         </ResponsiveContainer>
+        ) : (
+          <div style={{
+            height: '300px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '14px',
+            fontStyle: 'italic'
+          }}>
+            Loading time usage data...
+          </div>
+        )}
       </div>
 
       {/* Time Remaining Distribution and Critical Moments Charts */}
@@ -918,28 +1049,29 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
         marginTop: '24px'
       }}>
         {/* Time Remaining Distribution */}
-        {timeRemainingData.totalGames > 0 && (
-          <div style={{
-            backgroundColor: 'var(--background-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            padding: '16px'
+        <div style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          minHeight: '338px'
+        }}>
+          <h4 style={{
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            marginBottom: '12px',
+            color: 'var(--text-primary)'
           }}>
-            <h4 style={{
-              fontSize: '0.95rem',
-              fontWeight: '600',
-              marginBottom: '12px',
-              color: 'var(--text-primary)'
-            }}>
-              Time Remaining at Game End
-            </h4>
-            <div style={{
-              fontSize: '12px',
-              color: 'var(--text-secondary)',
-              marginBottom: '12px'
-            }}>
-              Win/loss distribution by time remaining (10-second bins)
-            </div>
+            Time Remaining at Game End
+          </h4>
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+            marginBottom: '12px'
+          }}>
+            Log-normal probability distribution of time remaining by result
+          </div>
+          {hasData && timeRemainingData.totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <AreaChart
                 data={timeRemainingData.chartData}
@@ -961,7 +1093,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                   fontSize={11}
                   tick={{ fill: 'var(--text-secondary)' }}
                   label={{
-                    value: 'Games',
+                    value: 'Probability Density',
                     angle: -90,
                     position: 'insideLeft',
                     style: { fill: 'var(--text-secondary)', fontSize: 11 }
@@ -979,11 +1111,16 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                         borderRadius: '6px',
                         fontSize: '12px'
                       }}>
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>{data.time}s remaining</div>
-                        <div style={{ color: 'var(--success-color)' }}>Wins: {data.wins}</div>
-                        <div style={{ color: 'var(--text-secondary)' }}>Draws: {data.draws}</div>
-                        <div style={{ color: 'var(--danger-color)' }}>Losses: {data.losses}</div>
-                        <div style={{ marginTop: '4px', fontWeight: '600' }}>Total: {data.total}</div>
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>{data.time.toFixed(1)}s remaining</div>
+                        {data.winsPDF !== undefined && (
+                          <div style={{ color: 'var(--success-color)' }}>Win density: {data.winsPDF.toFixed(3)}</div>
+                        )}
+                        {data.drawsPDF !== undefined && (
+                          <div style={{ color: 'var(--text-secondary)' }}>Draw density: {data.drawsPDF.toFixed(3)}</div>
+                        )}
+                        {data.lossesPDF !== undefined && (
+                          <div style={{ color: 'var(--danger-color)' }}>Loss density: {data.lossesPDF.toFixed(3)}</div>
+                        )}
                       </div>
                     );
                   }}
@@ -993,67 +1130,90 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                   wrapperStyle={{ fontSize: '11px' }}
                   iconType="line"
                 />
-                <Area
-                  type="monotone"
-                  dataKey="wins"
-                  stroke="var(--success-color)"
-                  fill="var(--success-color)"
-                  fillOpacity={0.3}
-                  name="Wins"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="draws"
-                  stroke="var(--text-secondary)"
-                  fill="var(--text-secondary)"
-                  fillOpacity={0.3}
-                  name="Draws"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="losses"
-                  stroke="var(--danger-color)"
-                  fill="var(--danger-color)"
-                  fillOpacity={0.3}
-                  name="Losses"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
+                {timeRemainingData.hasWinData && (
+                  <Area
+                    type="monotone"
+                    dataKey="winsPDF"
+                    stroke="var(--success-color)"
+                    fill="var(--success-color)"
+                    fillOpacity={0.4}
+                    name="Wins"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                )}
+                {timeRemainingData.hasDrawData && (
+                  <Area
+                    type="monotone"
+                    dataKey="drawsPDF"
+                    stroke="var(--text-secondary)"
+                    fill="var(--text-secondary)"
+                    fillOpacity={0.4}
+                    name="Draws"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                )}
+                {timeRemainingData.hasLossData && (
+                  <Area
+                    type="monotone"
+                    dataKey="lossesPDF"
+                    stroke="var(--danger-color)"
+                    fill="var(--danger-color)"
+                    fillOpacity={0.4}
+                    name="Losses"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                )}
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        )}
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px',
+              fontStyle: 'italic'
+            }}>
+              Loading time remaining data...
+            </div>
+          )}
+        </div>
 
         {/* Critical Moments Time Usage */}
-        {criticalMomentsData.totalMoves > 0 && (
-          <div style={{
-            backgroundColor: 'var(--background-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            padding: '16px'
+        <div style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          minHeight: '338px'
+        }}>
+          <h4 style={{
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            marginBottom: '12px',
+            color: 'var(--text-primary)'
           }}>
-            <h4 style={{
-              fontSize: '0.95rem',
-              fontWeight: '600',
-              marginBottom: '12px',
-              color: 'var(--text-primary)'
-            }}>
-              Time Spent on Critical Moves
-            </h4>
-            <div style={{
-              fontSize: '12px',
-              color: 'var(--text-secondary)',
-              marginBottom: '12px'
-            }}>
-              Time usage vs. move quality ({criticalMomentsData.totalMoves} moves analyzed)
-            </div>
+            Time Spent on Critical Moves
+          </h4>
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+            marginBottom: '12px'
+          }}>
+            {hasData && criticalMomentsData.totalMoves > 0 ? (
+              <>Time usage vs. move quality ({criticalMomentsData.totalMoves} moves analyzed)</>
+            ) : (
+              <span style={{ fontStyle: 'italic' }}>Analyzing move quality...</span>
+            )}
+          </div>
+          {hasData && criticalMomentsData.totalMoves > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <ScatterChart
                 margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
@@ -1075,12 +1235,12 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 />
                 <YAxis
                   type="number"
-                  dataKey="evalChange"
-                  name="Position Complexity"
+                  dataKey="winPctChange"
+                  name="Win % Change"
                   fontSize={11}
                   tick={{ fill: 'var(--text-secondary)' }}
                   label={{
-                    value: 'Eval Change (cp)',
+                    value: 'Win % Change',
                     angle: -90,
                     position: 'insideLeft',
                     style: { fill: 'var(--text-secondary)', fontSize: 11 }
@@ -1102,7 +1262,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                       }}>
                         <div style={{ fontWeight: '600', marginBottom: '4px' }}>{data.category}</div>
                         <div>Time: {data.timeSpent.toFixed(1)}s</div>
-                        <div>Eval change: {data.evalChange.toFixed(0)}cp</div>
+                        <div>Win % change: {data.winPctChange.toFixed(1)}%</div>
                       </div>
                     );
                   }}
@@ -1138,8 +1298,20 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 />
               </ScatterChart>
             </ResponsiveContainer>
-          </div>
-        )}
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px',
+              fontStyle: 'italic'
+            }}>
+              Loading critical moments data...
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Time Management Metrics from Principles Analyzer */}
