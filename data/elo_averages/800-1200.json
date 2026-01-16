@@ -45,6 +45,21 @@
       "std": 0.7,
       "skew": 1.1
     },
+    "percent_time_used_in_opening": {
+      "mean": 0.30,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_middlegame": {
+      "mean": 0.40,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_endgame": {
+      "mean": 0.3,
+      "std": 0.1,
+      "skew": 0.1
+    },
     "checkmate_rate": {
       "mean": 0.45,
       "std": 0.12,
@@ -192,6 +207,21 @@
       "std": 0.7,
       "skew": 1.1
     },
+    "percent_time_used_in_opening": {
+      "mean": 0.40,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_middlegame": {
+      "mean": 0.30,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_endgame": {
+      "mean": 0.3,
+      "std": 0.1,
+      "skew": 0.1
+    },
     "checkmate_rate": {
       "mean": 0.35,
       "std": 0.12,
@@ -338,6 +368,21 @@
       "mean": 1.5,
       "std": 0.7,
       "skew": 1.1
+    },
+    "percent_time_used_in_opening": {
+      "mean": 0.20,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_middlegame": {
+      "mean": 0.60,
+      "std": 0.1,
+      "skew": 0.1
+    },
+    "percent_time_used_in_endgame": {
+      "mean": 0.2,
+      "std": 0.1,
+      "skew": 0.1
     },
     "checkmate_rate": {
       "mean": 0.35,

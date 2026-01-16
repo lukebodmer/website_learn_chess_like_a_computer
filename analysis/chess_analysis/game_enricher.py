@@ -144,19 +144,6 @@ class GameEnricher:
                 game_data.append({"error": "No valid moves found", "positions": []})
                 continue
 
-            # Check if game already has analysis
-            existing_analysis = raw_json.get("analysis", [])
-
-            # NEW: Preserve original Lichess analysis if it exists
-            # Lichess games are identified by the "fullId" field
-            is_lichess = "fullId" in raw_json
-
-            if is_lichess and existing_analysis:
-                # Save Lichess analysis to separate field before we overwrite it
-                # This preserves the original Lichess evaluations for comparison
-                raw_json["lichess_analysis"] = existing_analysis
-                game["raw_json"] = raw_json
-
             # Generate positions for this game (always needed for our analysis)
             game_positions = self.generate_positions_for_game(moves)
             if not game_positions:
@@ -166,9 +153,7 @@ class GameEnricher:
             game_data.append({
                 "game": game,  # Keep reference to original game
                 "moves": moves,
-                "positions": game_positions,  # Ordered positions for THIS game
-                "existing_analysis": existing_analysis,
-                "is_lichess": is_lichess
+                "positions": game_positions  # Ordered positions for THIS game
             })
 
             # Add to global set for evaluation
@@ -200,15 +185,13 @@ class GameEnricher:
         game = game_data["game"]
         positions = game_data["positions"]
         moves = game_data["moves"]
-        existing_analysis = game_data["existing_analysis"]
 
         evaluations = []
-        db_count = gcp_count = existing_count = 0
+        db_count = gcp_count = 0
 
-        # CRITICAL FIX: Proper alignment between positions and analysis
+        # Build evaluations for each move
         # positions = [start_pos, pos_after_move1, pos_after_move2, ...]  (len = moves + 1)
-        # existing_analysis = [eval_after_move1, eval_after_move2, ...]   (len = moves)
-        # We need to evaluate positions[1:] and align with existing_analysis[0:]
+        # We evaluate positions[1:] (skip starting position)
 
         for move_index in range(len(moves)):
             position_index = move_index + 1  # Skip starting position
@@ -218,49 +201,9 @@ class GameEnricher:
             fen = positions[position_index]  # Position after this move
             move = moves[move_index]         # The move that led to this position
 
-            # Check if we already have analysis for this move
-            has_existing_eval = (
-                move_index < len(existing_analysis)
-                and existing_analysis[move_index] is not None
-                and (existing_analysis[move_index].get("eval") is not None
-                     or existing_analysis[move_index].get("mate") is not None)
-            )
-
-            if has_existing_eval:
-                # Use existing evaluation - preserve existing structure
-                eval_entry = {
-                    "move_number": move_index + 1,
-                    "move": move,
-                    "source": "existing",
-                    "position_fen": fen  # Store the FEN for this position
-                }
-
-                # Copy all existing evaluation data
-                existing_data = existing_analysis[move_index]
-                if existing_data.get("eval") is not None:
-                    eval_entry["eval"] = existing_data["eval"]
-                if existing_data.get("mate") is not None:
-                    eval_entry["mate"] = existing_data["mate"]
-                # Note: We don't copy best/variation from existing data here
-                # as these will be set correctly in _create_game_analysis_array
-                # based on mistake analysis from the previous position
-
-                evaluations.append(eval_entry)
-                existing_count += 1
-
-                # Add existing analysis data to global_evaluations so it can be accessed later
-                # This is needed for UCI to SAN conversion of the "best" field
-                if fen not in global_evaluations:
-                    global_evaluations[fen] = {
-                        "source": "existing",
-                        "evaluation": existing_data.get("eval", 0),
-                        "best": existing_data.get("best"),
-                        "variation": existing_data.get("variation")
-                    }
-                    if existing_data.get("mate") is not None:
-                        global_evaluations[fen]["mate"] = existing_data["mate"]
-
-            elif fen in global_evaluations:
+            # Always use new evaluations from database/API (no longer preserve existing Lichess evals)
+            # This ensures all games get fresh analysis with consistent depth/settings
+            if fen in global_evaluations:
                 # Use global evaluation result
                 eval_data = global_evaluations[fen]
 
@@ -303,9 +246,7 @@ class GameEnricher:
             "mistakes": mistakes,
             "total_moves_analyzed": len(evaluations),
             "database_evaluations": db_count,
-            "stockfish_evaluations": gcp_count,
-            "existing_evaluations": existing_count,
-            "new_evaluations": gcp_count
+            "stockfish_evaluations": gcp_count
         }
 
     def merge_evaluation_sources(
@@ -636,57 +577,51 @@ class GameEnricher:
 
         return all_user_games
 
-    def _game_needs_analysis(self, game: Dict[str, Any], username: str) -> bool:
-        """
-        Check if a specific game needs new analysis.
+    #def _game_needs_analysis(self, game: Dict[str, Any], username: str) -> bool:
+    # THIS IS NO LONGER BEING USED. all games are analyzed no matter what.
+    #    """
+    #    Check if a specific game needs new analysis.
 
-        IMPORTANT: Lichess games ALWAYS need analysis even if they have
-        existing evaluation data, because we want complete best/variation
-        data for all moves (not just mistakes). Lichess only provides
-        best/variation for mistakes, but we need it for every position.
-        """
-        raw_json = game.get("raw_json", {})
+    #    IMPORTANT: Lichess games ALWAYS need analysis even if they have
+    #    existing evaluation data, because we want complete best/variation
+    #    data for all moves (not just mistakes). Lichess only provides
+    #    best/variation for mistakes, but we need it for every position.
+    #    """
+    #    raw_json = game.get("raw_json", {})
 
-        # Check if this is a Lichess game (has "fullId" field)
-        is_lichess = "fullId" in raw_json
+    #    # Check if this is a Lichess game (has "fullId" field)
+    #    is_lichess = "fullId" in raw_json
 
-        if is_lichess:
-            # Always re-analyze Lichess games for complete best/variation data
-            return True
+    #    if is_lichess:
+    #        # Always re-analyze Lichess games for complete best/variation data
+    #        return True
 
-        # For Chess.com games, check if user's accuracy is missing
-        players_data = raw_json.get("players", {})
+    #    # For Chess.com games, check if user's accuracy is missing
+    #    players_data = raw_json.get("players", {})
 
-        if (
-            game["white_player"].lower() == username.lower()
-            and "white" in players_data
-        ):
-            white_analysis = players_data["white"].get("analysis", {})
-            return white_analysis.get("accuracy") is None
-        elif (
-            game["black_player"].lower() == username.lower()
-            and "black" in players_data
-        ):
-            black_analysis = players_data["black"].get("analysis", {})
-            return black_analysis.get("accuracy") is None
+    #    if (
+    #        game["white_player"].lower() == username.lower()
+    #        and "white" in players_data
+    #    ):
+    #        white_analysis = players_data["white"].get("analysis", {})
+    #        return white_analysis.get("accuracy") is None
+    #    elif (
+    #        game["black_player"].lower() == username.lower()
+    #        and "black" in players_data
+    #    ):
+    #        black_analysis = players_data["black"].get("analysis", {})
+    #        return black_analysis.get("accuracy") is None
 
-        # If no player data found, assume it needs analysis
-        return True
+    #    # If no player data found, assume it needs analysis
+    #    return True
 
     def enrich_games_with_stockfish_streaming(self, username: str):
         """Generator that yields individual game completions and API progress updates"""
         # Get ALL user games first
         all_user_games = self._find_all_user_games(username)
 
-        # Separate into games that need analysis vs already complete games
-        games_needing_analysis = []
-        games_already_complete = []
-
-        for game in all_user_games:
-            if self._game_needs_analysis(game, username):
-                games_needing_analysis.append(game)
-            else:
-                games_already_complete.append(game)
+        # All games need analysis (we always re-analyze with our own Stockfish)
+        games_needing_analysis = all_user_games
 
         total_all_games = len(all_user_games)
         games_needing_analysis_count = len(games_needing_analysis)
@@ -700,29 +635,14 @@ class GameEnricher:
             "type": "init",
             "total_positions": total_positions,
             "total_games": total_all_games,
-            "message": f"Found {total_all_games} total games ({games_needing_analysis_count} need analysis, {len(games_already_complete)} already complete) with {total_positions} positions to evaluate"
+            "message": f"Found {total_all_games} games with {total_positions} positions to evaluate"
         }
 
-        # Immediately yield already-complete games (after converting UCI to SAN)
-        completed_game_count = 0
-        for game in games_already_complete:
-            # Convert any UCI "best" moves to SAN in existing analysis
-            self.convert_existing_analysis_uci_to_san(game)
-
-            completed_game_count += 1
-            yield {
-                "type": "game_complete",
-                "game_index": completed_game_count - 1,
-                "game_analysis": {"game": game},  # Minimal structure for already-complete games
-                "completed_games": completed_game_count,
-                "total_games": total_all_games
-            }
-
         if not unique_positions:
-            # No new analysis needed, all games were already complete
+            # No positions to evaluate (shouldn't happen with valid games)
             yield {
                 "type": "complete",
-                "completed_games": completed_game_count,
+                "completed_games": 0,
                 "total_games": total_all_games,
                 "total_positions": 0
             }
@@ -761,9 +681,9 @@ class GameEnricher:
 
                 yield {
                     "type": "game_complete",
-                    "game_index": len(games_already_complete) + game_idx,  # Offset by already-complete games
+                    "game_index": game_idx,
                     "game_analysis": analysis_result,
-                    "completed_games": len(games_already_complete) + len(processor.get_completed_game_indices()),
+                    "completed_games": len(processor.get_completed_game_indices()),
                     "total_games": total_all_games
                 }
 
@@ -809,9 +729,9 @@ class GameEnricher:
 
                             yield {
                                 "type": "game_complete",
-                                "game_index": len(games_already_complete) + game_idx,  # Offset by already-complete games
+                                "game_index": game_idx,
                                 "game_analysis": analysis_result,
-                                "completed_games": len(games_already_complete) + len(processor.get_completed_game_indices()),
+                                "completed_games": len(processor.get_completed_game_indices()),
                                 "total_games": total_all_games
                             }
 
@@ -821,7 +741,7 @@ class GameEnricher:
                         "type": "api_progress",
                         "completed_calls": completed_api_calls,
                         "total_calls": total_positions,
-                        "current_phase": f"Stockfish API: {update['completed_count']}/{len(positions_for_gcp)} positions, {len(games_already_complete) + len(processor.get_completed_game_indices())}/{total_all_games} games complete"
+                        "current_phase": f"Stockfish API: {update['completed_count']}/{len(positions_for_gcp)} positions, {len(processor.get_completed_game_indices())}/{total_all_games} games complete"
                     }
 
                 elif update["type"] == "progress":
@@ -842,7 +762,7 @@ class GameEnricher:
         stats = processor.get_completion_stats()
         yield {
             "type": "complete",
-            "completed_games": len(games_already_complete) + stats["completed_games"],
+            "completed_games": stats["completed_games"],
             "total_games": total_all_games,
             "total_positions": total_positions
         }
@@ -958,110 +878,107 @@ class GameEnricher:
 
         raw_json = game.get("raw_json", {})
 
-        # If analysis already exists, convert any UCI "best" moves to SAN
-        if "analysis" in raw_json:
-            self.convert_existing_analysis_uci_to_san(game)
-            return
+        # Always create new analysis array from our computed results
+        # (We no longer skip games with existing analysis - we want to replace it)
+        analysis_array = []
+        mistakes = analysis_result.get("mistakes", [])
 
-        # Only create analysis array if it doesn't already exist
-        if "analysis" not in raw_json:
-            analysis_array = []
-            mistakes = analysis_result.get("mistakes", [])
+        # The analysis array should match position order:
+        # analysis[0] = evaluation after move 1 (from starting position)
+        # analysis[i] = evaluation after move i+1
+        #
+        # IMPORTANT: For Lichess compatibility, the "best" and "variation" fields
+        # should show what SHOULD have been played from the PREVIOUS position,
+        # not what's best from the current position.
 
-            # The analysis array should match position order:
-            # analysis[0] = evaluation after move 1 (from starting position)
-            # analysis[i] = evaluation after move i+1
-            #
-            # IMPORTANT: For Lichess compatibility, the "best" and "variation" fields
-            # should show what SHOULD have been played from the PREVIOUS position,
-            # not what's best from the current position.
+        # Get moves to reconstruct positions
+        moves_string = raw_json.get("moves", "")
+        moves = self.parse_moves_string(moves_string)
+        positions = self.generate_positions_for_game(moves)
 
-            # Get moves to reconstruct positions
-            raw_json = game.get("raw_json", {})
-            moves_string = raw_json.get("moves", "")
-            moves = self.parse_moves_string(moves_string)
-            positions = self.generate_positions_for_game(moves)
+        for i, move_eval in enumerate(analysis_result["evaluations"]):
+            eval_entry = {}
 
-            for i, move_eval in enumerate(analysis_result["evaluations"]):
-                eval_entry = {}
+            # Use mate information if available, otherwise use eval
+            if "mate" in move_eval and move_eval["mate"] is not None:
+                eval_entry["mate"] = move_eval["mate"]
+            elif "eval" in move_eval:
+                eval_entry["eval"] = move_eval["eval"]
 
-                # Use mate information if available, otherwise use eval
-                if "mate" in move_eval and move_eval["mate"] is not None:
-                    eval_entry["mate"] = move_eval["mate"]
-                elif "eval" in move_eval:
-                    eval_entry["eval"] = move_eval["eval"]
+            # Calculate and add Lichess win percentage for white
+            eval_entry["lichess_win_percentage_white"] = self._get_win_percent(move_eval)
 
-                # Get the "best" move and variation from the PREVIOUS position
-                # (what the player should have played to reach this position optimally)
-                move_number = move_eval.get("move_number", i + 1)
-                previous_position_fen = positions[move_number - 1] if (move_number - 1 < len(positions)) else None
+            # Get the "best" move and variation from the PREVIOUS position
+            # (what the player should have played to reach this position optimally)
+            move_number = move_eval.get("move_number", i + 1)
+            previous_position_fen = positions[move_number - 1] if (move_number - 1 < len(positions)) else None
 
-                best_move_from_prev = None
-                variation_from_prev = None
+            best_move_from_prev = None
+            variation_from_prev = None
 
-                # Get the analysis from the PREVIOUS position
-                if previous_position_fen and previous_position_fen in global_evaluations:
-                    prev_eval_data = global_evaluations[previous_position_fen]
+            # Get the analysis from the PREVIOUS position
+            if previous_position_fen and previous_position_fen in global_evaluations:
+                prev_eval_data = global_evaluations[previous_position_fen]
 
-                    if prev_eval_data.get("best"):
-                        original_best = prev_eval_data["best"]
-                        # Convert UCI to SAN from the previous position
-                        best_move_from_prev = self.convert_uci_to_san(previous_position_fen, original_best)
+                if prev_eval_data.get("best"):
+                    original_best = prev_eval_data["best"]
+                    # Convert UCI to SAN from the previous position
+                    best_move_from_prev = self.convert_uci_to_san(previous_position_fen, original_best)
 
-                    if prev_eval_data.get("variation"):
-                        original_variation = prev_eval_data["variation"]
-                        # Convert UCI variation to SAN from the previous position
-                        variation_from_prev = self.convert_uci_variation_to_san(previous_position_fen, original_variation)
+                if prev_eval_data.get("variation"):
+                    original_variation = prev_eval_data["variation"]
+                    # Convert UCI variation to SAN from the previous position
+                    variation_from_prev = self.convert_uci_variation_to_san(previous_position_fen, original_variation)
 
-                # Set the best move and variation (from previous position)
-                if best_move_from_prev:
-                    eval_entry["best"] = best_move_from_prev
-                if variation_from_prev:
-                    eval_entry["variation"] = variation_from_prev
+            # Set the best move and variation (from previous position)
+            if best_move_from_prev:
+                eval_entry["best"] = best_move_from_prev
+            if variation_from_prev:
+                eval_entry["variation"] = variation_from_prev
 
-                # Check if this move is a mistake/blunder/inaccuracy
-                move_mistakes = [m for m in mistakes if m.get("move_number") == move_number]
+            # Check if this move is a mistake/blunder/inaccuracy
+            move_mistakes = [m for m in mistakes if m.get("move_number") == move_number]
 
-                if move_mistakes:
-                    mistake = move_mistakes[0]
-                    mistake_type = mistake["type"]
+            if move_mistakes:
+                mistake = move_mistakes[0]
+                mistake_type = mistake["type"]
 
-                    # For mistakes, the best move is already in eval_entry["best"]
-                    # Just need to add the judgment
-                    alternative_move = mistake.get("best_move", "Better move")
+                # For mistakes, the best move is already in eval_entry["best"]
+                # Just need to add the judgment
+                alternative_move = mistake.get("best_move", "Better move")
 
-                    # Create judgment object matching Lichess format
-                    if mistake_type == "blunders":
+                # Create judgment object matching Lichess format
+                if mistake_type == "blunders":
+                    eval_entry["judgment"] = {
+                        "name": "Blunder",
+                        "comment": f"Blunder. {alternative_move} was best."
+                    }
+                elif mistake_type == "mistakes":
+                    if "mate" in eval_entry:
                         eval_entry["judgment"] = {
-                            "name": "Blunder",
-                            "comment": f"Blunder. {alternative_move} was best."
+                            "name": "Mistake",
+                            "comment": f"Checkmate is now unavoidable. {alternative_move} was best."
                         }
-                    elif mistake_type == "mistakes":
-                        if "mate" in eval_entry:
-                            eval_entry["judgment"] = {
-                                "name": "Mistake",
-                                "comment": f"Checkmate is now unavoidable. {alternative_move} was best."
-                            }
-                        else:
-                            eval_entry["judgment"] = {
-                                "name": "Mistake",
-                                "comment": f"Mistake. {alternative_move} was best."
-                            }
-                    elif mistake_type == "inaccuracies":
+                    else:
                         eval_entry["judgment"] = {
-                            "name": "Inaccuracy",
-                            "comment": f"Inaccuracy. {alternative_move} was best."
+                            "name": "Mistake",
+                            "comment": f"Mistake. {alternative_move} was best."
                         }
+                elif mistake_type == "inaccuracies":
+                    eval_entry["judgment"] = {
+                        "name": "Inaccuracy",
+                        "comment": f"Inaccuracy. {alternative_move} was best."
+                    }
 
-                analysis_array.append(eval_entry)
+            analysis_array.append(eval_entry)
 
-            # Add the analysis array at the root level
-            raw_json["analysis"] = analysis_array
+        # Add the analysis array at the root level
+        raw_json["analysis"] = analysis_array
 
-            # Add division data for Chess.com games (Lichess already has this)
-            self._add_division_data(game, analysis_result)
+        # Add division data for Chess.com games (Lichess already has this)
+        self._add_division_data(game, analysis_result)
 
-            game["raw_json"] = raw_json
+        game["raw_json"] = raw_json
 
     def _add_division_data(
         self,

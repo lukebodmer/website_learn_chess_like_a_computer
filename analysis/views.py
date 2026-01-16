@@ -32,7 +32,7 @@ from .report_generation import generate_html_report
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 50
+ANALYSIS_GAME_COUNT = 20
 
 
 # Shared utilities for game fetching
@@ -1890,17 +1890,26 @@ def fetch_chess_com_games(request, username):
                 'error': 'No game archives found for this Chess.com account.'
             })
 
-        # Smart fetching strategy to minimize API calls while getting the requested number of games
-        all_games = []
-        total_fetched = 0
-        max_api_calls = min(20, max_games // 20 + 5)  # Scale API calls based on requested games
+        # Filter criteria
+        allowed_time_classes = {'bullet', 'blitz', 'rapid'}
+
+        # Smart fetching strategy: filter as we go and keep fetching until we have enough qualified games
+        qualified_games = []
+        total_games_checked = 0
         api_calls_made = 0
+        max_api_calls = 50  # Safety limit to avoid excessive API calls
 
         # Start from most recent and work backwards
         archives_to_check = list(reversed(archives_response.archives))
 
         for archive_url in archives_to_check:
-            if total_fetched >= max_games or api_calls_made >= max_api_calls:
+            # Stop if we have enough qualified games
+            if len(qualified_games) >= max_games:
+                break
+
+            # Safety limit on API calls
+            if api_calls_made >= max_api_calls:
+                print(f"Reached API call limit ({max_api_calls}). Collected {len(qualified_games)} qualified games.")
                 break
 
             # Extract year and month from URL
@@ -1913,78 +1922,59 @@ def fetch_chess_com_games(request, username):
                 api_calls_made += 1
 
                 if games_response.games:
-                    games_in_month = len(games_response.games)
+                    # Process each game in the month
+                    for game in games_response.games:
+                        total_games_checked += 1
 
-                    # Add games to our collection (most recent first)
-                    games_to_add = min(games_in_month, max_games - total_fetched)
-                    for i in range(games_to_add):
-                        all_games.append(games_response.games[i])
-                        total_fetched += 1
+                        try:
+                            game_data = convert_chess_com_game_to_dict(game)
 
-                    print(f"Fetched {games_to_add} games from {year}/{month} (Total: {total_fetched})")
+                            # Check if game meets our criteria
+                            time_class = game_data.get('time_class', '').lower()
+                            is_rated = game_data.get('rated', True)
 
-                    # Return progress update
-                    if request.GET.get('stream') == 'true':
-                        return JsonResponse({
-                            'success': True,
-                            'progress': True,
-                            'games_fetched': total_fetched,
-                            'archives_checked': api_calls_made,
-                            'current_period': f"{year}/{month}"
-                        })
-                else:
-                    print(f"No games found in {year}/{month}")
+                            if time_class in allowed_time_classes and is_rated:
+                                qualified_games.append(game_data)
+                                print(f"Added qualified game ({len(qualified_games)}/{max_games}): {time_class} from {year}/{month}")
+
+                                # Stop processing this month if we have enough
+                                if len(qualified_games) >= max_games:
+                                    break
+                            else:
+                                print(f"Skipping game: time_class={time_class}, rated={is_rated}")
+
+                        except Exception as e:
+                            print(f"Error processing game: {e}")
+                            continue
+
+                    print(f"Checked {year}/{month}: {len(qualified_games)} qualified games collected so far (API calls: {api_calls_made})")
 
             except Exception as e:
                 print(f"Error fetching games for {year}/{month}: {e}")
                 api_calls_made += 1  # Count failed requests too
                 continue
 
-        print(f"Final result: {total_fetched} games fetched using {api_calls_made} API calls")
+        print(f"Final result: {len(qualified_games)} qualified games collected from {total_games_checked} total games using {api_calls_made} API calls")
 
-        if not all_games:
+        # Check if we have any qualified games
+        if not qualified_games:
             return JsonResponse({
                 'success': False,
-                'error': 'No games found in recent archives.'
+                'error': f'No rated bullet, blitz, or rapid games found after checking {total_games_checked} games. Only these time controls are supported.'
             })
 
-        # Convert games to NDJSON format and convert to standard format
-        # Filter to only include bullet, blitz, and rapid games
+        # Convert qualified games to NDJSON format
         ndjson_lines = []
-        games_dict_format = []
-        allowed_time_classes = {'bullet', 'blitz', 'rapid'}
-
-        for game in all_games:
-            try:
-                game_data = convert_chess_com_game_to_dict(game)
-
-                # Filter by time_class: only include bullet, blitz, and rapid
-                time_class = game_data.get('time_class', '').lower()
-                if time_class not in allowed_time_classes:
-                    print(f"Skipping game with time_class: {time_class}")
-                    continue
-
-                games_dict_format.append(game_data)
-                ndjson_lines.append(json.dumps(game_data))
-            except Exception as e:
-                print(f"Error processing game: {e}")
-                continue
+        for game_data in qualified_games:
+            ndjson_lines.append(json.dumps(game_data))
 
         ndjson_data = '\n'.join(ndjson_lines)
 
-        # Check if we have any games after filtering
-        if not games_dict_format:
-            return JsonResponse({
-                'success': False,
-                'error': f'No bullet, blitz, or rapid games found in the {total_fetched} games fetched. Only these time controls are supported.'
-            })
-
         # Create GameDataSet using shared utility
-        # Note: Using games_dict_format instead of all_games since we've filtered
         game_dataset = create_game_dataset(
             user=request.user,
             username=username,
-            games_data=games_dict_format,  # Use filtered games
+            games_data=qualified_games,
             ndjson_data=ndjson_data,
             platform='chess.com'
         )
@@ -1997,7 +1987,7 @@ def fetch_chess_com_games(request, username):
 
         return JsonResponse({
             'success': True,
-            'games_count': len(all_games),
+            'games_count': len(qualified_games),
             'game_dataset_id': game_dataset.id,
             'date_range': date_range_str or "Date range unavailable",
             'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),

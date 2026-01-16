@@ -440,7 +440,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
+      border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
       {/* Header Row with Three Columns */}

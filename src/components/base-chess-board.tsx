@@ -625,7 +625,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
           if (img && img.complete) {
             const coords = getSquareCoords(square)
             const padding = squareSize * 0.1
-            ctx.imageSmoothingEnabled = false
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = 'high'
             ctx.drawImage(
               img,
               coords.x + padding,
@@ -653,6 +654,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
 
         if (img && img.complete) {
           const padding = squareSize * 0.1
+          ctx.imageSmoothingEnabled = true
+          ctx.imageSmoothingQuality = 'high'
           ctx.drawImage(
             img,
             x + padding,
@@ -674,6 +677,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
 
         if (img && img.complete) {
           const pieceSize = squareSize * 0.8
+          ctx.imageSmoothingEnabled = true
+          ctx.imageSmoothingQuality = 'high'
           ctx.drawImage(
             img,
             mousePos.x - rect.left - pieceSize / 2,

@@ -13,6 +13,7 @@ export interface BuddyBoardProps {
 interface AnalysisData {
   eval?: number
   mate?: number
+  lichess_win_percentage_white?: number
   best?: string
   variation?: string
   judgment?: {
@@ -556,8 +557,14 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
     }
   }, [isDraggingBoard, dragStartPos, boardPosition])
 
-  // Function to convert evaluation to win rate percentage using Lichess formula
+  // Function to get win rate percentage from precomputed data
   const getWinRatePercentage = (analysis: AnalysisData, moveIndex?: number): number => {
+    // Use precomputed lichess_win_percentage_white if available
+    if (analysis.lichess_win_percentage_white !== undefined) {
+      return analysis.lichess_win_percentage_white
+    }
+
+    // Special case: handle checkmate positions
     if (analysis.mate !== undefined) {
       if (analysis.mate === 0) {
         // Checkmate has been delivered - need to determine who won based on whose turn it was
@@ -575,14 +582,8 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
         return analysis.mate > 0 ? 100 : 0
       }
     }
-    if (analysis.eval !== undefined) {
-      // Convert centipawns to win rate percentage using Lichess formula
-      // Win% = 50 + 50 * (2 / (1 + exp(-0.00368208 * centipawns)) - 1)
-      const centipawns = analysis.eval
-      const winRate = 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * centipawns)) - 1)
-      return Math.max(0, Math.min(100, winRate))
-    }
-    return 50 // Neutral position = 50% win rate
+
+    return 50 // Neutral position = 50% win rate (fallback)
   }
 
   // Create evaluation chart component
@@ -631,7 +632,7 @@ const BuddyBoard: React.FC<BuddyBoardProps> = ({
     const maxPoints = analysis.length
 
     // Add starting position (index 0) with neutral evaluation, then analysis data
-    const allEvaluations = [{ eval: 0 }, ...analysis]
+    const allEvaluations = [{ lichess_win_percentage_white: 50 }, ...analysis]
 
     // Convert evaluations to chart coordinates using win rate percentage
     const chartPadding = 8 // Add padding to all sides

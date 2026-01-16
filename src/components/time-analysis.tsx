@@ -1,17 +1,102 @@
 import React, { useState, useMemo } from 'react';
-import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis } from 'recharts';
+import { gameFilterManager, FilterEvent, FilterType, SpeedFilter } from '../game-filter-manager';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ScatterChart, Scatter, ZAxis, LineChart, Line, Area, AreaChart, ComposedChart } from 'recharts';
+
+// Helper function to determine ELO bracket
+const getEloBracket = (rating: number): string => {
+  if (rating < 1200) return '800-1200';
+  if (rating < 1400) return '1200-1400';
+  if (rating < 1600) return '1400-1600';
+  if (rating < 1800) return '1600-1800';
+  if (rating < 2000) return '1800-2000';
+  return '2000+';
+};
+
+// Helper function to calculate average ELO from games
+const calculateAverageElo = (games: any[], username: string): number | null => {
+  let totalRating = 0;
+  let count = 0;
+
+  games.forEach(game => {
+    let rating = null;
+    let isWhitePlayer = false;
+    let isBlackPlayer = false;
+
+    // Try to extract data from different possible structures
+    if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
+      // Lichess format
+      isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+
+      if (isWhitePlayer) {
+        rating = game.players?.white?.rating;
+      } else if (isBlackPlayer) {
+        rating = game.players?.black?.rating;
+      }
+    } else if (game.white_player || game.black_player) {
+      // Custom format
+      isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = game.raw_json || game.game?.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    } else if (game.game) {
+      // Nested game structure
+      const nestedGame = game.game;
+      isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = nestedGame.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    }
+
+    if (rating !== null) {
+      totalRating += rating;
+      count++;
+    }
+  });
+
+  return count > 0 ? totalRating / count : null;
+};
+
+interface EloAveragesData {
+  [timeControl: string]: {
+    bracket: string;
+    elo: number;
+    data: {
+      [key: string]: {
+        mean: number;
+        std: number;
+        skew: number;
+      };
+    };
+  };
+}
 
 interface TimeAnalysisProps {
   enrichedGames: any[];
   username: string;
   timeManagementData?: any;
+  eloAveragesData?: EloAveragesData | null;
 }
 
 export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
   enrichedGames = [],
   username,
-  timeManagementData
+  timeManagementData,
+  eloAveragesData = null
 }) => {
   const [filteredGames, setFilteredGames] = useState<any[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
@@ -42,14 +127,25 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     if (!filteredGames.length) {
       return {
         chartData: [],
-        totalGames: 0
+        totalGames: 0,
+        eloBracket: null
       };
     }
+
+    // Calculate user's average ELO and bracket
+    const avgElo = calculateAverageElo(filteredGames, username);
+    const eloBracket = avgElo ? getEloBracket(avgElo) : null;
 
     let totalOpeningTime = 0;
     let totalMiddleTime = 0;
     let totalEndTime = 0;
     let validGameCount = 0;
+
+    // Track win percentages at different phases
+    let afterOpeningWinPctSum = 0;
+    let afterMiddleWinPctSum = 0;
+    let endWinPctSum = 0;
+    let winPctGameCount = 0;
 
     filteredGames.forEach(game => {
       // Check if user is in this game
@@ -164,6 +260,55 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       totalOpeningTime += openingTime;
       totalMiddleTime += middleTime;
       totalEndTime += endTime;
+
+      // Calculate win percentages at different phases
+      const analysis = game.analysis || game.raw_json?.analysis || game.game?.analysis || game.game?.raw_json?.analysis;
+      const winner = game.winner || game.raw_json?.winner || game.game?.winner || game.game?.raw_json?.winner;
+      const status = game.status || game.raw_json?.status || game.game?.status || game.game?.raw_json?.status;
+
+      if (analysis && analysis.length > 0) {
+        const isWhite = userColor === 'white';
+
+        // Determine game outcome from user's perspective
+        const userWon = winner === userColor;
+        const isDraw = !winner || status === 'draw' || status === 'stalemate';
+        const outcomeWinPct = userWon ? 100 : (isDraw ? 50 : 0);
+
+        // Helper function to get user's win percentage from white's perspective
+        const getUserWinPct = (lichessWinPctWhite: number) => {
+          return isWhite ? lichessWinPctWhite : (100 - lichessWinPctWhite);
+        };
+
+        // After opening phase
+        if (!division || division.middle === undefined) {
+          // Game ended in opening
+          afterOpeningWinPctSum += outcomeWinPct;
+        } else if (analysis[division.middle]?.lichess_win_percentage_white !== undefined) {
+          afterOpeningWinPctSum += getUserWinPct(analysis[division.middle].lichess_win_percentage_white);
+        }
+
+        // After middle game phase
+        if (!division || division.middle === undefined) {
+          // Game ended in opening - no middle game
+          afterMiddleWinPctSum += outcomeWinPct;
+        } else if (!division.end) {
+          // Game ended in middle game
+          afterMiddleWinPctSum += outcomeWinPct;
+        } else if (analysis[division.end]?.lichess_win_percentage_white !== undefined) {
+          afterMiddleWinPctSum += getUserWinPct(analysis[division.end].lichess_win_percentage_white);
+        }
+
+        // End of game
+        if (division && division.end !== undefined) {
+          // Game reached endgame
+          endWinPctSum += outcomeWinPct;
+        } else {
+          // Game ended earlier
+          endWinPctSum += outcomeWinPct;
+        }
+
+        winPctGameCount++;
+      }
     });
 
     if (validGameCount === 0) {
@@ -190,29 +335,105 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     const middlePercent = (avgMiddleTime / avgInitialTime) * 100;
     const endPercent = (avgEndTime / avgInitialTime) * 100;
 
+    // Calculate average win percentages at each phase
+    const avgAfterOpeningWinPct = winPctGameCount > 0 ? afterOpeningWinPctSum / winPctGameCount : 50;
+    const avgAfterMiddleWinPct = winPctGameCount > 0 ? afterMiddleWinPctSum / winPctGameCount : 50;
+    const avgEndWinPct = winPctGameCount > 0 ? endWinPctSum / winPctGameCount : 50;
+
+    // Determine which time control to use based on current filter
+    const speedFilter = gameFilterManager.getCurrentSpeedFilter();
+    let timeControl: string | null = null;
+
+    if (Array.isArray(speedFilter) && speedFilter.length === 1) {
+      // Single time control selected
+      timeControl = speedFilter[0];
+    } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
+      // All speeds or no filter - try to determine from games
+      // Use the most common time control in the filtered games
+      const speeds = filteredGames.map(g => g.speed).filter(Boolean);
+      if (speeds.length > 0) {
+        const speedCounts = speeds.reduce((acc, s) => {
+          acc[s] = (acc[s] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        timeControl = Object.entries(speedCounts).sort((a, b) => b[1] - a[1])[0][0];
+      }
+    } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
+      // Multiple speeds selected - use the first one
+      timeControl = speedFilter[0];
+    }
+
+    // Get population averages from eloAveragesData
+    let popAvgOpeningPercent = 0;
+    let popAvgMiddlePercent = 0;
+    let popAvgEndPercent = 0;
+
+    if (eloAveragesData && timeControl && eloAveragesData[timeControl]) {
+      const timeControlData = eloAveragesData[timeControl].data;
+      // Convert to percentages (they're stored as decimals like 0.30 for 30%)
+      popAvgOpeningPercent = (timeControlData.percent_time_used_in_opening?.mean || 0) * 100;
+      popAvgMiddlePercent = (timeControlData.percent_time_used_in_middlegame?.mean || 0) * 100;
+      popAvgEndPercent = (timeControlData.percent_time_used_in_endgame?.mean || 0) * 100;
+    }
+
     const chartData = [
+      {
+        phase: 'Start',
+        percentage: null,
+        timeSeconds: null,
+        popAvg: null,
+        winPct: 50
+      },
       {
         phase: 'Opening',
         percentage: parseFloat(openingPercent.toFixed(1)),
-        timeSeconds: parseFloat((avgOpeningTime / 100).toFixed(1))
+        timeSeconds: parseFloat((avgOpeningTime / 100).toFixed(1)),
+        popAvg: parseFloat(popAvgOpeningPercent.toFixed(1)),
+        winPct: null
+      },
+      {
+        phase: 'After Opening',
+        percentage: null,
+        timeSeconds: null,
+        popAvg: null,
+        winPct: parseFloat(avgAfterOpeningWinPct.toFixed(1))
       },
       {
         phase: 'Middle Game',
         percentage: parseFloat(middlePercent.toFixed(1)),
-        timeSeconds: parseFloat((avgMiddleTime / 100).toFixed(1))
+        timeSeconds: parseFloat((avgMiddleTime / 100).toFixed(1)),
+        popAvg: parseFloat(popAvgMiddlePercent.toFixed(1)),
+        winPct: null
+      },
+      {
+        phase: 'After Middle',
+        percentage: null,
+        timeSeconds: null,
+        popAvg: null,
+        winPct: parseFloat(avgAfterMiddleWinPct.toFixed(1))
       },
       {
         phase: 'Endgame',
         percentage: parseFloat(endPercent.toFixed(1)),
-        timeSeconds: parseFloat((avgEndTime / 100).toFixed(1))
+        timeSeconds: parseFloat((avgEndTime / 100).toFixed(1)),
+        popAvg: parseFloat(popAvgEndPercent.toFixed(1)),
+        winPct: null
+      },
+      {
+        phase: 'Game End',
+        percentage: null,
+        timeSeconds: null,
+        popAvg: null,
+        winPct: parseFloat(avgEndWinPct.toFixed(1))
       }
     ];
 
     return {
       chartData,
-      totalGames: validGameCount
+      totalGames: validGameCount,
+      eloBracket
     };
-  }, [filteredGames, username]);
+  }, [filteredGames, username, eloAveragesData]);
 
   // Calculate time remaining distribution
   const timeRemainingData = useMemo(() => {
@@ -223,15 +444,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       };
     }
 
-    // Time buckets: 0-10s, 10-30s, 30-60s, 60-120s, 120s+
-    const buckets = {
-      '0-10s': { wins: 0, losses: 0, draws: 0, total: 0 },
-      '10-30s': { wins: 0, losses: 0, draws: 0, total: 0 },
-      '30-60s': { wins: 0, losses: 0, draws: 0, total: 0 },
-      '60-120s': { wins: 0, losses: 0, draws: 0, total: 0 },
-      '120s+': { wins: 0, losses: 0, draws: 0, total: 0 }
-    };
-
+    const gameResults: Array<{ timeRemaining: number; result: 'win' | 'loss' | 'draw' }> = [];
     let validGameCount = 0;
 
     filteredGames.forEach(game => {
@@ -278,31 +491,56 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
 
       if (userFinalTime === null) return;
 
-      // Determine bucket
-      let bucket: string;
-      if (userFinalTime < 10) bucket = '0-10s';
-      else if (userFinalTime < 30) bucket = '10-30s';
-      else if (userFinalTime < 60) bucket = '30-60s';
-      else if (userFinalTime < 120) bucket = '60-120s';
-      else bucket = '120s+';
-
       // Determine result
       const userWon = winner === userColor;
       const isDraw = !winner || status === 'draw' || status === 'stalemate';
 
-      buckets[bucket].total++;
+      let result: 'win' | 'loss' | 'draw';
       if (userWon) {
-        buckets[bucket].wins++;
+        result = 'win';
       } else if (isDraw) {
-        buckets[bucket].draws++;
+        result = 'draw';
       } else {
-        buckets[bucket].losses++;
+        result = 'loss';
+      }
+
+      gameResults.push({
+        timeRemaining: Math.floor(userFinalTime / 10) * 10, // Round down to nearest 10 seconds
+        result
+      });
+    });
+
+    if (gameResults.length === 0) {
+      return {
+        chartData: [],
+        totalGames: 0
+      };
+    }
+
+    // Find max time to create buckets
+    const maxTime = Math.max(...gameResults.map(g => g.timeRemaining));
+
+    // Create 10-second buckets from 0 to maxTime
+    const buckets: Record<number, { wins: number; losses: number; draws: number; total: number }> = {};
+    for (let i = 0; i <= maxTime; i += 10) {
+      buckets[i] = { wins: 0, losses: 0, draws: 0, total: 0 };
+    }
+
+    // Fill buckets
+    gameResults.forEach(({ timeRemaining, result }) => {
+      buckets[timeRemaining].total++;
+      if (result === 'win') {
+        buckets[timeRemaining].wins++;
+      } else if (result === 'draw') {
+        buckets[timeRemaining].draws++;
+      } else {
+        buckets[timeRemaining].losses++;
       }
     });
 
     // Convert to chart data
-    const chartData = Object.entries(buckets).map(([bucket, data]) => ({
-      bucket,
+    const chartData = Object.entries(buckets).map(([time, data]) => ({
+      time: parseInt(time),
       wins: data.wins,
       losses: data.losses,
       draws: data.draws,
@@ -442,45 +680,128 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
   const colors = ['var(--primary-color)', 'var(--success-color)', 'var(--warning-color)'];
 
   const renderCustomTooltip = (props: any) => {
-    if (!props.active || !props.payload || !props.payload[0]) return null;
+    if (!props.active || !props.payload || !props.payload.length) return null;
 
-    const data = props.payload[0];
-    const percentage = data.value;
-    const timeSeconds = data.payload.timeSeconds;
+    const youBar = props.payload.find((p: any) => p.dataKey === 'percentage');
+    const popAvgBar = props.payload.find((p: any) => p.dataKey === 'popAvg');
+    const winPctLine = props.payload.find((p: any) => p.dataKey === 'winPct');
+    const phase = props.label;
+    const timeSeconds = youBar?.payload.timeSeconds;
 
     return (
       <div style={{
         backgroundColor: 'var(--background-primary)',
-        padding: '10px 14px',
+        padding: '12px 16px',
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
         boxShadow: '0 4px 16px var(--shadow-medium)',
         color: 'var(--text-primary)',
-        backdropFilter: 'blur(8px)'
+        backdropFilter: 'blur(8px)',
+        minWidth: '220px'
       }}>
         <p style={{
-          margin: '0 0 6px 0',
+          margin: '0 0 8px 0',
           fontWeight: '600',
           fontSize: '14px',
           color: 'var(--text-primary)'
         }}>
-          {data.payload.phase}
+          {phase}
         </p>
-        <p style={{
-          margin: 0,
-          fontSize: '12px',
-          color: 'var(--text-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }}>
-          <span style={{
-            color: data.color,
-            fontSize: '14px',
-            filter: 'brightness(1.1)'
-          }}>●</span>
-          <span>{`${percentage}% (${timeSeconds}s)`}</span>
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {youBar && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: youBar.color,
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>You:</strong> {youBar.value}% ({timeSeconds}s)</span>
+            </p>
+          )}
+          {timeUsageData.eloBracket && popAvgBar && popAvgBar.value > 0 && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: popAvgBar.color || '#999',
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>Avg ({timeUsageData.eloBracket}):</strong> {popAvgBar.value}%</span>
+            </p>
+          )}
+          {winPctLine && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: 'var(--text-muted)',
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>Win %:</strong> {winPctLine.value}%</span>
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Custom legend for time usage chart
+  const renderTimeLegend = (props: any) => {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        fontSize: '11px',
+        paddingTop: '8px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: 'var(--text-primary)',
+            opacity: 1
+          }} />
+          <span style={{ color: 'var(--text-secondary)' }}>You</span>
+        </div>
+        {timeUsageData.eloBracket && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: 'var(--text-primary)',
+              opacity: 0.5
+            }} />
+            <span style={{ color: 'var(--text-secondary)' }}>Avg ({timeUsageData.eloBracket})</span>
+          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{
+            width: '12px',
+            height: '2px',
+            backgroundColor: 'var(--text-muted)'
+          }} />
+          <span style={{ color: 'var(--text-secondary)' }}>Average Evaluation</span>
+        </div>
       </div>
     );
   };
@@ -490,7 +811,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
+      border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
       <div style={{ marginBottom: '16px' }}>
@@ -519,9 +840,9 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
         padding: '16px'
       }}>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart
+          <ComposedChart
             data={timeUsageData.chartData}
-            margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+            margin={{ top: 10, right: 40, left: 10, bottom: 5 }}
             style={{ cursor: 'default' }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
@@ -531,6 +852,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
               tick={{ fill: 'var(--text-secondary)' }}
             />
             <YAxis
+              yAxisId="left"
               fontSize={12}
               tick={{ fill: 'var(--text-secondary)' }}
               label={{
@@ -540,16 +862,51 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 style: { fill: 'var(--text-secondary)', fontSize: 12 }
               }}
             />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              fontSize={12}
+              tick={{ fill: 'var(--text-secondary)' }}
+              domain={[0, 100]}
+              label={{
+                value: 'Win %',
+                angle: 90,
+                position: 'insideRight',
+                style: { fill: 'var(--text-secondary)', fontSize: 12 }
+              }}
+            />
             <Tooltip
               content={renderCustomTooltip}
               cursor={false}
             />
-            <Bar dataKey="percentage" radius={[4, 4, 0, 0]}>
+            <Legend content={renderTimeLegend} />
+            {/* User's actual time usage */}
+            <Bar yAxisId="left" dataKey="percentage" name="You" radius={[4, 4, 0, 0]}>
               {timeUsageData.chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index]} />
               ))}
             </Bar>
-          </BarChart>
+            {/* Population average */}
+            {timeUsageData.eloBracket && (
+              <Bar yAxisId="left" dataKey="popAvg" name={`Avg (${timeUsageData.eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                {timeUsageData.chartData.map((entry, index) => (
+                  <Cell key={`cell-pop-${index}`} fill={colors[index]} />
+                ))}
+              </Bar>
+            )}
+            {/* Win percentage line */}
+            <Line
+              yAxisId="right"
+              type="linear"
+              dataKey="winPct"
+              stroke="var(--text-muted)"
+              strokeWidth={2}
+              name="Win %"
+              dot={{ fill: 'var(--text-muted)', r: 4 }}
+              activeDot={{ r: 6 }}
+              connectNulls={true}
+            />
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 
@@ -581,18 +938,24 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
               color: 'var(--text-secondary)',
               marginBottom: '12px'
             }}>
-              Win/loss distribution by time remaining
+              Win/loss distribution by time remaining (10-second bins)
             </div>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart
+              <AreaChart
                 data={timeRemainingData.chartData}
                 margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                 <XAxis
-                  dataKey="bucket"
+                  dataKey="time"
                   fontSize={11}
                   tick={{ fill: 'var(--text-secondary)' }}
+                  label={{
+                    value: 'Time Remaining (seconds)',
+                    position: 'insideBottom',
+                    offset: -5,
+                    style: { fill: 'var(--text-secondary)', fontSize: 11 }
+                  }}
                 />
                 <YAxis
                   fontSize={11}
@@ -616,7 +979,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                         borderRadius: '6px',
                         fontSize: '12px'
                       }}>
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>{data.bucket}</div>
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>{data.time}s remaining</div>
                         <div style={{ color: 'var(--success-color)' }}>Wins: {data.wins}</div>
                         <div style={{ color: 'var(--text-secondary)' }}>Draws: {data.draws}</div>
                         <div style={{ color: 'var(--danger-color)' }}>Losses: {data.losses}</div>
@@ -624,16 +987,46 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                       </div>
                     );
                   }}
-                  cursor={false}
+                  cursor={{ strokeDasharray: '3 3' }}
                 />
                 <Legend
                   wrapperStyle={{ fontSize: '11px' }}
-                  iconType="circle"
+                  iconType="line"
                 />
-                <Bar dataKey="wins" stackId="a" fill="var(--success-color)" name="Wins" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="draws" stackId="a" fill="var(--text-secondary)" name="Draws" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="losses" stackId="a" fill="var(--danger-color)" name="Losses" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="wins"
+                  stroke="var(--success-color)"
+                  fill="var(--success-color)"
+                  fillOpacity={0.3}
+                  name="Wins"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="draws"
+                  stroke="var(--text-secondary)"
+                  fill="var(--text-secondary)"
+                  fillOpacity={0.3}
+                  name="Draws"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="losses"
+                  stroke="var(--danger-color)"
+                  fill="var(--danger-color)"
+                  fillOpacity={0.3}
+                  name="Losses"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4 }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         )}

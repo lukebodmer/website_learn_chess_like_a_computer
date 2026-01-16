@@ -260,7 +260,7 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
+      border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)',
       minHeight: '700px'
     }}>
@@ -268,7 +268,7 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       <div style={{
         display: 'flex',
         gap: '20px',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         minHeight: '650px'
       }}>
         {/* Blunder List */}
@@ -276,11 +276,11 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
           flex: '0 0 300px',
           height: '600px',
           minHeight: '600px',
-          overflowY: 'auto',
           backgroundColor: 'var(--background-primary)',
           borderRadius: '8px',
           border: '1px solid var(--border-color)',
-          position: 'relative'
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           {/* Sticky Header */}
           <div style={{
@@ -306,7 +306,7 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
           </div>
 
           {/* Blunder Items */}
-          <div style={{ padding: '8px' }}>
+          <div style={{ padding: '8px', flex: 1, overflowY: 'auto' }}>
           {allBlunders.length === 0 ? (
             <div style={{
               padding: '20px',
@@ -395,12 +395,10 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
 
           {/* Progress Bar */}
           <div style={{
-            position: 'sticky',
-            bottom: 0,
             backgroundColor: 'var(--background-secondary)',
             padding: '8px 12px',
             borderTop: '1px solid var(--border-color)',
-            zIndex: 1
+            flexShrink: 0
           }}>
             <div style={{
               height: '6px',

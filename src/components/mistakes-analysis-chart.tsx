@@ -641,39 +641,12 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
     );
   };
 
-  if (totalGames === 0) {
-    const filterDescription = currentFilter === 'all'
-      ? 'No analyzed games available yet...'
-      : `No ${currentFilter} analyzed games found for ${username}`;
-
-    return (
-      <div className="mistakes-analysis-chart" style={{
-        padding: '20px',
-        backgroundColor: 'var(--background-secondary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        boxShadow: '0 2px 6px var(--shadow-light)'
-      }}>
-        <div style={{ marginBottom: '16px' }}>
-          <h3 style={{
-            fontSize: '1.125rem',
-            fontWeight: '600',
-            marginBottom: '8px',
-            color: 'var(--text-primary)'
-          }}>
-            Mistakes Analysis ({gameFilterManager.getFilterDescription()})
-          </h3>
-          <p style={{
-            color: 'var(--text-secondary)',
-            margin: 0,
-            fontSize: '14px'
-          }}>
-            {filterDescription}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Determine the message to show when there's no data
+  const noDataMessage = totalGames === 0
+    ? (currentFilter === 'all'
+        ? 'No analyzed games available yet...'
+        : `No analyzed games found for ${username}`)
+    : null;
 
   return (
     <div className="mistakes-analysis-chart" style={{
@@ -697,7 +670,11 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           color: 'var(--text-secondary)',
           marginBottom: '8px'
         }}>
-          Analyzed Games: {totalGames} | Avg Inaccuracies: {averageStats.inaccuracies.toFixed(2)} | Avg Mistakes: {averageStats.mistakes.toFixed(2)} | Avg Blunders: {averageStats.blunders.toFixed(2)}
+          {noDataMessage ? (
+            <span style={{ fontStyle: 'italic' }}>{noDataMessage}</span>
+          ) : (
+            <>Analyzed Games: {totalGames} | Avg Inaccuracies: {averageStats.inaccuracies.toFixed(2)} | Avg Mistakes: {averageStats.mistakes.toFixed(2)} | Avg Blunders: {averageStats.blunders.toFixed(2)}</>
+          )}
         </div>
       </div>
 
@@ -724,43 +701,56 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           }}>
             Average Mistakes Per Game
           </h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={chartData}
-              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-              style={{ cursor: 'default' }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis
-                dataKey="name"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <YAxis
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <Tooltip
-                content={renderCustomTooltip}
-                cursor={false}
-              />
-              <Legend content={renderPhaseLegend} />
-              {/* User's actual mistakes */}
-              <Bar dataKey="value" name="You" radius={[4, 4, 0, 0]}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Bar>
-              {/* Population average */}
-              {eloBracket && (
-                <Bar dataKey="popAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+          {totalGames > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                style={{ cursor: 'default' }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis
+                  dataKey="name"
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <YAxis
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <Tooltip
+                  content={renderCustomTooltip}
+                  cursor={false}
+                />
+                <Legend content={renderPhaseLegend} />
+                {/* User's actual mistakes */}
+                <Bar dataKey="value" name="You" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-pop-${index}`} fill={entry.fill} />
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Bar>
-              )}
-            </BarChart>
-          </ResponsiveContainer>
+                {/* Population average */}
+                {eloBracket && (
+                  <Bar dataKey="popAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-pop-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                )}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px'
+            }}>
+              No data available
+            </div>
+          )}
         </div>
 
         {/* Opening Phase Chart */}
@@ -779,41 +769,54 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           }}>
             Opening Mistakes
           </h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={convertPhaseToChartData(phaseData[0])}
-              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-              style={{ cursor: 'default' }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis
-                dataKey="name"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <YAxis
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <Tooltip
-                content={renderPhaseTooltip}
-                cursor={false}
-              />
-              <Legend content={renderPhaseLegend} />
-              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
-                <Cell fill={COLORS.inaccuracies} />
-                <Cell fill={COLORS.mistakes} />
-                <Cell fill={COLORS.blunders} />
-              </Bar>
-              {eloBracket && (
-                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+          {totalGames > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart
+                data={convertPhaseToChartData(phaseData[0])}
+                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                style={{ cursor: 'default' }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis
+                  dataKey="name"
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <YAxis
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <Tooltip
+                  content={renderPhaseTooltip}
+                  cursor={false}
+                />
+                <Legend content={renderPhaseLegend} />
+                <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
                   <Cell fill={COLORS.inaccuracies} />
                   <Cell fill={COLORS.mistakes} />
                   <Cell fill={COLORS.blunders} />
                 </Bar>
-              )}
-            </BarChart>
-          </ResponsiveContainer>
+                {eloBracket && (
+                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                    <Cell fill={COLORS.inaccuracies} />
+                    <Cell fill={COLORS.mistakes} />
+                    <Cell fill={COLORS.blunders} />
+                  </Bar>
+                )}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px'
+            }}>
+              No data available
+            </div>
+          )}
         </div>
 
         {/* Middlegame Phase Chart */}
@@ -832,41 +835,54 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           }}>
             Middlegame Mistakes
           </h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={convertPhaseToChartData(phaseData[1])}
-              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-              style={{ cursor: 'default' }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis
-                dataKey="name"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <YAxis
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <Tooltip
-                content={renderPhaseTooltip}
-                cursor={false}
-              />
-              <Legend content={renderPhaseLegend} />
-              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
-                <Cell fill={COLORS.inaccuracies} />
-                <Cell fill={COLORS.mistakes} />
-                <Cell fill={COLORS.blunders} />
-              </Bar>
-              {eloBracket && (
-                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+          {totalGames > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart
+                data={convertPhaseToChartData(phaseData[1])}
+                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                style={{ cursor: 'default' }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis
+                  dataKey="name"
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <YAxis
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <Tooltip
+                  content={renderPhaseTooltip}
+                  cursor={false}
+                />
+                <Legend content={renderPhaseLegend} />
+                <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
                   <Cell fill={COLORS.inaccuracies} />
                   <Cell fill={COLORS.mistakes} />
                   <Cell fill={COLORS.blunders} />
                 </Bar>
-              )}
-            </BarChart>
-          </ResponsiveContainer>
+                {eloBracket && (
+                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                    <Cell fill={COLORS.inaccuracies} />
+                    <Cell fill={COLORS.mistakes} />
+                    <Cell fill={COLORS.blunders} />
+                  </Bar>
+                )}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px'
+            }}>
+              No data available
+            </div>
+          )}
         </div>
 
         {/* Endgame Phase Chart */}
@@ -885,41 +901,54 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           }}>
             Endgame Mistakes
           </h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={convertPhaseToChartData(phaseData[2])}
-              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-              style={{ cursor: 'default' }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-              <XAxis
-                dataKey="name"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <YAxis
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-              />
-              <Tooltip
-                content={renderPhaseTooltip}
-                cursor={false}
-              />
-              <Legend content={renderPhaseLegend} />
-              <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
-                <Cell fill={COLORS.inaccuracies} />
-                <Cell fill={COLORS.mistakes} />
-                <Cell fill={COLORS.blunders} />
-              </Bar>
-              {eloBracket && (
-                <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+          {totalGames > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart
+                data={convertPhaseToChartData(phaseData[2])}
+                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                style={{ cursor: 'default' }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis
+                  dataKey="name"
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <YAxis
+                  fontSize={12}
+                  tick={{ fill: 'var(--text-secondary)' }}
+                />
+                <Tooltip
+                  content={renderPhaseTooltip}
+                  cursor={false}
+                />
+                <Legend content={renderPhaseLegend} />
+                <Bar dataKey="You" name="You" radius={[4, 4, 0, 0]}>
                   <Cell fill={COLORS.inaccuracies} />
                   <Cell fill={COLORS.mistakes} />
                   <Cell fill={COLORS.blunders} />
                 </Bar>
-              )}
-            </BarChart>
-          </ResponsiveContainer>
+                {eloBracket && (
+                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                    <Cell fill={COLORS.inaccuracies} />
+                    <Cell fill={COLORS.mistakes} />
+                    <Cell fill={COLORS.blunders} />
+                  </Bar>
+                )}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{
+              height: '250px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '14px'
+            }}>
+              No data available
+            </div>
+          )}
         </div>
       </div>
     </div>

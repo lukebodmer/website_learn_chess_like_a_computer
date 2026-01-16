@@ -469,10 +469,22 @@ function updateTimeAnalysis() {
     if (window.timeAnalysisRoot && window.TimeAnalysis && window.React) {
         const username = document.querySelector('#report-username').textContent;
 
+        // Parse ELO averages data from hidden div
+        let eloAveragesData = null;
+        try {
+            const eloAveragesEl = document.getElementById('elo-averages-data');
+            if (eloAveragesEl && eloAveragesEl.textContent.trim()) {
+                eloAveragesData = JSON.parse(eloAveragesEl.textContent);
+            }
+        } catch (error) {
+            console.warn('Could not parse ELO averages data:', error);
+        }
+
         console.log('Updating TimeAnalysis with:', {
             gamesCount: enrichedGamesArray.length,
             username: username,
-            sampleGame: enrichedGamesArray[0]
+            sampleGame: enrichedGamesArray[0],
+            hasEloAverages: !!eloAveragesData
         });
 
         try {
@@ -480,7 +492,8 @@ function updateTimeAnalysis() {
             window.timeAnalysisRoot.render(
                 window.React.createElement(window.TimeAnalysis, {
                     enrichedGames: enrichedGamesArray,
-                    username: username
+                    username: username,
+                    eloAveragesData: eloAveragesData
                 })
             );
             console.log('TimeAnalysis render successful');

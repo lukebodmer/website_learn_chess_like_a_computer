@@ -364,8 +364,23 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing stockfish analysis data for time management:', error.message)
     }
 
+    // Get ELO averages data
+    let eloAveragesData = null
+    try {
+      const eloAveragesElement = document.getElementById('elo-averages-data')
+      if (eloAveragesElement && eloAveragesElement.textContent) {
+        const eloAveragesText = eloAveragesElement.textContent.trim()
+
+        if (eloAveragesText && (eloAveragesText.startsWith('{') || eloAveragesText.startsWith('['))) {
+          eloAveragesData = JSON.parse(eloAveragesText)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing ELO averages data for time analysis:', error.message)
+    }
+
     // Render component with initial data
-    root.render(<TimeAnalysis enrichedGames={initialGamesData} username={username} timeManagementData={timeManagementData} />)
+    root.render(<TimeAnalysis enrichedGames={initialGamesData} username={username} timeManagementData={timeManagementData} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).timeAnalysisRoot = root
