@@ -1,22 +1,22 @@
 {
   "bullet": {
     "opening_inaccuracies_per_game": {
-      "mean": 3.2,
+      "mean": 2.2,
       "std": 1.2,
       "skew": 0.8
     },
     "opening_mistakes_per_game": {
-      "mean": 1.8,
+      "mean": 1.4,
       "std": 0.7,
       "skew": 0.9
     },
     "opening_blunders_per_game": {
-      "mean": 1.2,
+      "mean": 1.3,
       "std": 0.6,
       "skew": 1.2
     },
     "middlegame_inaccuracies_per_game": {
-      "mean": 4.5,
+      "mean": 3.5,
       "std": 1.5,
       "skew": 0.7
     },
@@ -26,32 +26,32 @@
       "skew": 0.8
     },
     "middlegame_blunders_per_game": {
-      "mean": 1.8,
+      "mean": 3.8,
       "std": 0.8,
       "skew": 1.0
     },
     "endgame_inaccuracies_per_game": {
-      "mean": 2.8,
+      "mean": 3.8,
       "std": 1.0,
       "skew": 0.8
     },
     "endgame_mistakes_per_game": {
-      "mean": 1.9,
+      "mean": 2.9,
       "std": 0.7,
       "skew": 0.9
     },
     "endgame_blunders_per_game": {
-      "mean": 1.5,
+      "mean": 2.5,
       "std": 0.7,
       "skew": 1.1
     },
     "checkmate_rate": {
-      "mean": 0.35,
+      "mean": 0.45,
       "std": 0.12,
       "skew": 0.6
     },
     "mate_conversion_rate": {
-      "mean": 0.45,
+      "mean": 0.35,
       "std": 0.18,
       "skew": 0.5
     },
@@ -91,12 +91,12 @@
       "skew": 0.8
     },
     "win_by_checkmate_rate": {
-      "mean": 0.42,
+      "mean": 0.32,
       "std": 0.15,
       "skew": 0.4
     },
     "win_by_resignation_rate": {
-      "mean": 0.48,
+      "mean": 0.58,
       "std": 0.14,
       "skew": -0.2
     },
@@ -121,27 +121,27 @@
       "skew": 1.0
     },
     "draw_by_stalemate_rate": {
-      "mean": 0.25,
+      "mean": 0.30,
       "std": 0.12,
       "skew": 0.6
     },
     "draw_by_agreement_rate": {
-      "mean": 0.15,
+      "mean": 0.05,
       "std": 0.08,
       "skew": 0.4
     },
     "draw_by_repetition_rate": {
-      "mean": 0.30,
+      "mean": 0.40,
       "std": 0.10,
       "skew": 0.2
     },
     "draw_by_50move_rate": {
-      "mean": 0.10,
+      "mean": 0.05,
       "std": 0.06,
       "skew": 1.0
     },
     "draw_by_insufficient_material_rate": {
-      "mean": 0.20,
+      "mean": 0.10,
       "std": 0.09,
       "skew": 0.5
     }
@@ -238,12 +238,12 @@
       "skew": 0.8
     },
     "win_by_checkmate_rate": {
-      "mean": 0.42,
+      "mean": 0.22,
       "std": 0.15,
       "skew": 0.4
     },
     "win_by_resignation_rate": {
-      "mean": 0.48,
+      "mean": 0.68,
       "std": 0.14,
       "skew": -0.2
     },

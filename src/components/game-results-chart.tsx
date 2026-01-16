@@ -1,13 +1,14 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ReferenceArea } from 'recharts';
 import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager';
-import eloAveragesData from '../../data/elo_averages.json';
 
 interface GameResult {
   id?: string;
   winner?: 'white' | 'black' | null;
   status?: 'mate' | 'resign' | 'outoftime' | 'draw' | 'stalemate' | 'insufficient';
   endingType?: 'stalemate' | 'agreement' | 'repetition' | '50moveRule' | 'insufficientMaterial' | null;
+  speed?: string;
+  perf?: string;
   players?: {
     white?: {
       user?: {
@@ -27,10 +28,25 @@ interface GameResult {
   game?: any;
 }
 
+interface EloAveragesData {
+  [timeControl: string]: {
+    bracket: string;
+    elo: number;
+    data: {
+      [key: string]: {
+        mean: number;
+        std: number;
+        skew: number;
+      };
+    };
+  };
+}
+
 interface GameResultsChartProps {
   enrichedGames: GameResult[];
   username: string;
   chartType?: 'pie' | 'bar';
+  eloAveragesData?: EloAveragesData | null;
 }
 
 interface ChartData {
@@ -144,7 +160,8 @@ const calculateAverageElo = (games: GameResult[], username: string): number | nu
 export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   enrichedGames = [],
   username,
-  chartType = 'bar'
+  chartType = 'bar',
+  eloAveragesData = null
 }) => {
   const [filteredGames, setFilteredGames] = useState<GameResult[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
@@ -516,29 +533,55 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       unknown: totalDraws > 0 ? (results.draws.unknown / totalDraws) * 100 : 0
     };
 
-    // Get population average percentages if we have an ELO bracket
+    // Get population average percentages if we have an ELO bracket and time control
     let popAvgWinPercentages = { mate: 0, resign: 0, timeout: 0 };
     let popAvgLossPercentages = { mate: 0, resign: 0, timeout: 0 };
     let popAvgDrawPercentages = { stalemate: 0, agreement: 0, repetition: 0, '50moveRule': 0, insufficientMaterial: 0 };
 
-    if (eloBracket && eloAveragesData[eloBracket as keyof typeof eloAveragesData]) {
-      const bracketData = eloAveragesData[eloBracket as keyof typeof eloAveragesData];
+    // Determine which time control to use based on current filter
+    const speedFilter = gameFilterManager.getCurrentSpeedFilter();
+    let timeControl: string | null = null;
+
+    if (Array.isArray(speedFilter) && speedFilter.length === 1) {
+      // Single time control selected
+      timeControl = speedFilter[0];
+    } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
+      // All speeds or no filter - try to determine from games
+      // Use the most common time control in the filtered games
+      const speeds = filteredGames.map(g => {
+        // Try multiple sources for speed
+        return g.speed || g.perf || g.raw_json?.speed || g.raw_json?.perf || g.game?.raw_json?.speed || g.game?.raw_json?.perf;
+      }).filter(Boolean);
+      if (speeds.length > 0) {
+        const speedCounts = speeds.reduce((acc, s) => {
+          acc[s] = (acc[s] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        timeControl = Object.entries(speedCounts).sort((a, b) => b[1] - a[1])[0][0];
+      }
+    } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
+      // Multiple speeds selected - use the first one
+      timeControl = speedFilter[0];
+    }
+
+    if (eloBracket && eloAveragesData && timeControl && eloAveragesData[timeControl]) {
+      const timeControlData = eloAveragesData[timeControl].data;
       popAvgWinPercentages = {
-        mate: bracketData.win_by_checkmate_rate.mean * 100,
-        resign: bracketData.win_by_resignation_rate.mean * 100,
-        timeout: bracketData.win_by_timeout_rate.mean * 100
+        mate: (timeControlData.win_by_checkmate_rate?.mean || 0) * 100,
+        resign: (timeControlData.win_by_resignation_rate?.mean || 0) * 100,
+        timeout: (timeControlData.win_by_timeout_rate?.mean || 0) * 100
       };
       popAvgLossPercentages = {
-        mate: bracketData.loss_by_checkmate_rate.mean * 100,
-        resign: bracketData.loss_by_resignation_rate.mean * 100,
-        timeout: bracketData.loss_by_timeout_rate.mean * 100
+        mate: (timeControlData.loss_by_checkmate_rate?.mean || 0) * 100,
+        resign: (timeControlData.loss_by_resignation_rate?.mean || 0) * 100,
+        timeout: (timeControlData.loss_by_timeout_rate?.mean || 0) * 100
       };
       popAvgDrawPercentages = {
-        stalemate: bracketData.draw_by_stalemate_rate.mean * 100,
-        agreement: bracketData.draw_by_agreement_rate.mean * 100,
-        repetition: bracketData.draw_by_repetition_rate.mean * 100,
-        '50moveRule': bracketData.draw_by_50move_rate.mean * 100,
-        insufficientMaterial: bracketData.draw_by_insufficient_material_rate.mean * 100
+        stalemate: (timeControlData.draw_by_stalemate_rate?.mean || 0) * 100,
+        agreement: (timeControlData.draw_by_agreement_rate?.mean || 0) * 100,
+        repetition: (timeControlData.draw_by_repetition_rate?.mean || 0) * 100,
+        '50moveRule': (timeControlData.draw_by_50move_rate?.mean || 0) * 100,
+        insufficientMaterial: (timeControlData.draw_by_insufficient_material_rate?.mean || 0) * 100
       };
     }
 
@@ -641,7 +684,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       maxYAxisValue,
       eloBracket
     };
-  }, [filteredGames, username, currentFilter]);
+  }, [filteredGames, username, currentFilter, currentSpeedFilter, eloAveragesData]);
 
   const renderCustomTooltip = (props: any) => {
     if (!props.active || !props.payload || !props.payload.length) return null;
@@ -785,6 +828,40 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     );
   };
 
+  // Custom legend for wins/losses charts
+  const renderWinsLossesLegend = (props: any) => {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        fontSize: '11px',
+        paddingTop: '8px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: 'var(--text-primary)',
+            opacity: 1
+          }} />
+          <span style={{ color: 'var(--text-secondary)' }}>You</span>
+        </div>
+        {eloBracket && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: 'var(--text-primary)',
+              opacity: 0.5
+            }} />
+            <span style={{ color: 'var(--text-secondary)' }}>Avg ({eloBracket})</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderEloTooltip = (props: any) => {
     if (!props.active || !props.payload || !props.payload.length) return null;
 
@@ -839,7 +916,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
+      border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)',
       margin: '20px 0'
     }}>
@@ -1055,10 +1132,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                   content={renderCustomTooltip}
                   cursor={false}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: '11px' }}
-                  iconType="square"
-                />
+                <Legend content={renderWinsLossesLegend} />
                 {/* User's actual wins */}
                 <Bar
                   dataKey="value"
@@ -1138,10 +1212,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                   content={renderCustomTooltip}
                   cursor={false}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: '11px' }}
-                  iconType="square"
-                />
+                <Legend content={renderWinsLossesLegend} />
                 {/* User's actual losses */}
                 <Bar
                   dataKey="value"

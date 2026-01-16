@@ -76,6 +76,9 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     <!-- Hidden element to store custom puzzles data for React components -->
     <div id="custom-puzzles-data" style="display: none;">{{ custom_puzzles|safe }}</div>
 
+    <!-- Hidden element to store ELO averages data for React components -->
+    <div id="elo-averages-data" style="display: none;">{{ elo_averages|safe }}</div>
+
     <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleRawGameData()">
         <span id="raw-game-data-toggle">▶</span> Raw Game Data (All Games)
     </h2>
@@ -307,10 +310,22 @@ function updateGameResultsChart() {
     if (window.gameResultsChartRoot && window.GameResultsChart && window.React) {
         const username = document.querySelector('#report-username').textContent;
 
+        // Parse ELO averages data from hidden div
+        let eloAveragesData = null;
+        try {
+            const eloAveragesEl = document.getElementById('elo-averages-data');
+            if (eloAveragesEl && eloAveragesEl.textContent.trim()) {
+                eloAveragesData = JSON.parse(eloAveragesEl.textContent);
+            }
+        } catch (error) {
+            console.warn('Could not parse ELO averages data:', error);
+        }
+
         console.log('Updating GameResultsChart with:', {
             gamesCount: enrichedGamesArray.length,
             username: username,
-            sampleGame: enrichedGamesArray[0]
+            sampleGame: enrichedGamesArray[0],
+            hasEloAverages: !!eloAveragesData
         });
 
         try {
@@ -319,7 +334,8 @@ function updateGameResultsChart() {
                 window.React.createElement(window.GameResultsChart, {
                     enrichedGames: enrichedGamesArray,
                     username: username,
-                    chartType: 'pie'
+                    chartType: 'pie',
+                    eloAveragesData: eloAveragesData
                 })
             );
             console.log('GameResultsChart render successful');
@@ -341,10 +357,22 @@ function updateMistakesAnalysisChart() {
     if (window.mistakesAnalysisChartRoot && window.MistakesAnalysisChart && window.React) {
         const username = document.querySelector('#report-username').textContent;
 
+        // Parse ELO averages data from hidden div
+        let eloAveragesData = null;
+        try {
+            const eloAveragesEl = document.getElementById('elo-averages-data');
+            if (eloAveragesEl && eloAveragesEl.textContent.trim()) {
+                eloAveragesData = JSON.parse(eloAveragesEl.textContent);
+            }
+        } catch (error) {
+            console.warn('Could not parse ELO averages data:', error);
+        }
+
         console.log('Updating MistakesAnalysisChart with:', {
             gamesCount: enrichedGamesArray.length,
             username: username,
-            sampleGame: enrichedGamesArray[0]
+            sampleGame: enrichedGamesArray[0],
+            hasEloAverages: !!eloAveragesData
         });
 
         try {
@@ -352,7 +380,8 @@ function updateMistakesAnalysisChart() {
             window.mistakesAnalysisChartRoot.render(
                 window.React.createElement(window.MistakesAnalysisChart, {
                     enrichedGames: enrichedGamesArray,
-                    username: username
+                    username: username,
+                    eloAveragesData: eloAveragesData
                 })
             );
             console.log('MistakesAnalysisChart render successful');

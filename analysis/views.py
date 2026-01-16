@@ -448,6 +448,151 @@ def fetch_lichess_games(request, username):
         })
 
 
+def get_latest_elo_by_time_control(raw_data, username, platform):
+    """Extract the latest ELO rating for each time control (bullet, blitz, rapid) from raw game data
+
+    Args:
+        raw_data: NDJSON string of raw game data
+        username: The username to get ELO for
+        platform: 'lichess' or 'chess.com'
+
+    Returns:
+        Dictionary with time controls as keys and ELO ratings as values
+        Example: {'bullet': 1377, 'blitz': 783, 'rapid': 878}
+    """
+    if not raw_data or not username:
+        return {}
+
+    username_lower = username.lower()
+    elo_by_time_control = {}
+
+    try:
+        lines = raw_data.strip().split('\n')
+
+        # Process games in order (most recent first for Lichess, need to reverse for Chess.com)
+        for line in lines:
+            if not line.strip():
+                continue
+
+            try:
+                game_data = json.loads(line)
+
+                # Extract time control based on platform
+                if platform == 'lichess':
+                    time_control = game_data.get('speed', '').lower()
+                else:  # chess.com
+                    time_control = game_data.get('time_class', '').lower()
+
+                # Only process bullet, blitz, rapid
+                if time_control not in ['bullet', 'blitz', 'rapid']:
+                    continue
+
+                # Skip if we already have ELO for this time control
+                if time_control in elo_by_time_control:
+                    continue
+
+                # Extract player ELO based on platform
+                user_elo = None
+
+                if platform == 'lichess':
+                    # Lichess format
+                    players = game_data.get('players', {})
+                    white_player = players.get('white', {})
+                    black_player = players.get('black', {})
+
+                    white_username = white_player.get('user', {}).get('name', '').lower()
+                    black_username = black_player.get('user', {}).get('name', '').lower()
+
+                    if white_username == username_lower:
+                        user_elo = white_player.get('rating')
+                    elif black_username == username_lower:
+                        user_elo = black_player.get('rating')
+                else:  # chess.com
+                    # Chess.com format
+                    white_data = game_data.get('white', {})
+                    black_data = game_data.get('black', {})
+
+                    white_username = white_data.get('username', '').lower()
+                    black_username = black_data.get('username', '').lower()
+
+                    if white_username == username_lower:
+                        user_elo = white_data.get('rating')
+                    elif black_username == username_lower:
+                        user_elo = black_data.get('rating')
+
+                # Store the ELO if found and valid
+                if user_elo and user_elo > 0:
+                    elo_by_time_control[time_control] = user_elo
+
+                # Stop if we have all three time controls
+                if len(elo_by_time_control) == 3:
+                    break
+
+            except json.JSONDecodeError:
+                continue
+    except Exception as e:
+        print(f"Error extracting ELO by time control: {e}")
+
+    return elo_by_time_control
+
+
+def load_elo_averages_for_time_controls(elo_by_time_control):
+    """Load ELO averages data for each time control based on user's ratings
+
+    Args:
+        elo_by_time_control: Dictionary with time controls and ELO ratings
+                            Example: {'bullet': 1377, 'blitz': 783, 'rapid': 878}
+
+    Returns:
+        Dictionary with structure:
+        {
+            'bullet': { 'bracket': '1200-1400', 'data': {...} },
+            'blitz': { 'bracket': '800-1200', 'data': {...} },
+            'rapid': { 'bracket': '800-1200', 'data': {...} }
+        }
+    """
+    result = {}
+
+    for time_control, elo_rating in elo_by_time_control.items():
+        # Determine bracket for this ELO
+        if elo_rating < 1200:
+            bracket = '800-1200'
+        elif elo_rating < 1400:
+            bracket = '1200-1400'
+        elif elo_rating < 1600:
+            bracket = '1400-1600'
+        elif elo_rating < 1800:
+            bracket = '1600-1800'
+        elif elo_rating < 2000:
+            bracket = '1800-2000'
+        else:
+            bracket = '2000+'
+
+        # Load the JSON file for this bracket
+        try:
+            from django.conf import settings
+            json_path = os.path.join(settings.BASE_DIR, 'data', 'elo_averages', f'{bracket}.json')
+
+            if os.path.exists(json_path):
+                with open(json_path, 'r') as f:
+                    bracket_data = json.load(f)
+
+                # Extract data for this specific time control
+                time_control_data = bracket_data.get(time_control, {})
+
+                result[time_control] = {
+                    'bracket': bracket,
+                    'elo': elo_rating,
+                    'data': time_control_data
+                }
+            else:
+                print(f"ELO averages file not found: {json_path}")
+        except Exception as e:
+            print(f"Error loading ELO averages for {time_control} at bracket {bracket}: {e}")
+
+    return result
+
+
 def _render_completed_report(request, report, platform, username, game_dataset):
     """Render a completed analysis report"""
     # Get ALL games from raw data for display
@@ -484,6 +629,19 @@ def _render_completed_report(request, report, platform, username, game_dataset):
     if report.custom_puzzles:
         custom_puzzles_display = json.dumps(report.custom_puzzles, indent=2)
 
+    # Load ELO averages data based on user's ratings by time control
+    elo_averages_data = "{}"
+    if game_dataset.raw_data:
+        elo_by_time_control = get_latest_elo_by_time_control(
+            game_dataset.raw_data,
+            username,
+            platform
+        )
+        if elo_by_time_control:
+            elo_averages = load_elo_averages_for_time_controls(elo_by_time_control)
+            if elo_averages:
+                elo_averages_data = json.dumps(elo_averages, indent=2)
+
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
@@ -492,6 +650,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
         'enriched_games': enriched_games_display,
         'stockfish_analysis': stockfish_analysis_display,
         'custom_puzzles': custom_puzzles_display,
+        'elo_averages': elo_averages_data,
         'auto_start': False,  # Don't auto-start streaming for existing reports
         'platform': platform
     })
@@ -566,6 +725,19 @@ def _generate_unified_analysis_report(request, username, dataset_id):
     except Exception as e:
         all_games_raw = f"Error parsing game data: {e}"
 
+    # Load ELO averages data based on user's ratings by time control
+    elo_averages_data = "{}"
+    if game_dataset.raw_data:
+        elo_by_time_control = get_latest_elo_by_time_control(
+            game_dataset.raw_data,
+            username,
+            platform
+        )
+        if elo_by_time_control:
+            elo_averages = load_elo_averages_for_time_controls(elo_by_time_control)
+            if elo_averages:
+                elo_averages_data = json.dumps(elo_averages, indent=2)
+
     # Show the unified report page
     return render(request, 'analysis/report.html', {
         'username': username,
@@ -574,6 +746,7 @@ def _generate_unified_analysis_report(request, username, dataset_id):
         'enriched_games': json.dumps({"status": "Waiting for analysis to complete..."}, indent=2),
         'stockfish_analysis': json.dumps({}),  # Empty initially, will be populated during streaming
         'custom_puzzles': json.dumps([]),  # Empty initially, will be populated after analysis
+        'elo_averages': elo_averages_data,
         'auto_start': True,  # Tell template to auto-start streaming
         'platform': platform  # Tell template which platform this is
     })

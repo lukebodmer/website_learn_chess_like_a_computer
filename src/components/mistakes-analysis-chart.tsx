@@ -4,6 +4,7 @@ import { gameFilterManager, FilterEvent, FilterType, SpeedFilter } from '../game
 
 interface GameAnalysis {
   id?: string;
+  speed?: string;
   players?: {
     white?: {
       user?: {
@@ -22,9 +23,24 @@ interface GameAnalysis {
   game?: any;
 }
 
+interface EloAveragesData {
+  [timeControl: string]: {
+    bracket: string;
+    elo: number;
+    data: {
+      [key: string]: {
+        mean: number;
+        std: number;
+        skew: number;
+      };
+    };
+  };
+}
+
 interface MistakesAnalysisChartProps {
   enrichedGames: GameAnalysis[];
   username: string;
+  eloAveragesData?: EloAveragesData | null;
 }
 
 interface ChartData {
@@ -121,7 +137,8 @@ const COLORS = {
 
 export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
   enrichedGames = [],
-  username
+  username,
+  eloAveragesData = null
 }) => {
   const [filteredGames, setFilteredGames] = useState<GameAnalysis[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
@@ -292,26 +309,49 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
     const avgBlunders = validGameCount > 0 ?
       (phaseCounters.opening.blunders + phaseCounters.middle.blunders + phaseCounters.end.blunders) / validGameCount : 0;
 
-    // Get population averages for total mistakes per game if we have an ELO bracket
+    // Get population averages for total mistakes per game if we have ELO averages data
     let popAvgTotalInaccuracies = 0;
     let popAvgTotalMistakes = 0;
     let popAvgTotalBlunders = 0;
 
-    if (eloBracket && eloAveragesData[eloBracket as keyof typeof eloAveragesData]) {
-      const bracketData = eloAveragesData[eloBracket as keyof typeof eloAveragesData];
+    // Determine which time control to use based on current filter
+    const speedFilter = gameFilterManager.getCurrentSpeedFilter();
+    let timeControl: string | null = null;
+
+    if (Array.isArray(speedFilter) && speedFilter.length === 1) {
+      // Single time control selected
+      timeControl = speedFilter[0];
+    } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
+      // All speeds or no filter - try to determine from games
+      // Use the most common time control in the filtered games
+      const speeds = filteredGames.map(g => g.speed).filter(Boolean);
+      if (speeds.length > 0) {
+        const speedCounts = speeds.reduce((acc, s) => {
+          acc[s] = (acc[s] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        timeControl = Object.entries(speedCounts).sort((a, b) => b[1] - a[1])[0][0];
+      }
+    } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
+      // Multiple speeds selected - use the first one
+      timeControl = speedFilter[0];
+    }
+
+    if (eloAveragesData && timeControl && eloAveragesData[timeControl]) {
+      const timeControlData = eloAveragesData[timeControl].data;
       // Sum up opening + middlegame + endgame averages
       popAvgTotalInaccuracies =
-        bracketData.opening_inaccuracies_per_game.mean +
-        bracketData.middlegame_inaccuracies_per_game.mean +
-        bracketData.endgame_inaccuracies_per_game.mean;
+        (timeControlData.opening_inaccuracies_per_game?.mean || 0) +
+        (timeControlData.middlegame_inaccuracies_per_game?.mean || 0) +
+        (timeControlData.endgame_inaccuracies_per_game?.mean || 0);
       popAvgTotalMistakes =
-        bracketData.opening_mistakes_per_game.mean +
-        bracketData.middlegame_mistakes_per_game.mean +
-        bracketData.endgame_mistakes_per_game.mean;
+        (timeControlData.opening_mistakes_per_game?.mean || 0) +
+        (timeControlData.middlegame_mistakes_per_game?.mean || 0) +
+        (timeControlData.endgame_mistakes_per_game?.mean || 0);
       popAvgTotalBlunders =
-        bracketData.opening_blunders_per_game.mean +
-        bracketData.middlegame_blunders_per_game.mean +
-        bracketData.endgame_blunders_per_game.mean;
+        (timeControlData.opening_blunders_per_game?.mean || 0) +
+        (timeControlData.middlegame_blunders_per_game?.mean || 0) +
+        (timeControlData.endgame_blunders_per_game?.mean || 0);
     }
 
     // Build chart data with population averages
@@ -343,27 +383,27 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       { phase: 'Endgame', inaccuracies: phaseCounters.end.inaccuracies, mistakes: phaseCounters.end.mistakes, blunders: phaseCounters.end.blunders }
     ];
 
-    // Get population averages if we have an ELO bracket
+    // Get population averages if we have ELO averages data
     let popAvgOpening = { inaccuracies: 0, mistakes: 0, blunders: 0 };
     let popAvgMiddlegame = { inaccuracies: 0, mistakes: 0, blunders: 0 };
     let popAvgEndgame = { inaccuracies: 0, mistakes: 0, blunders: 0 };
 
-    if (eloBracket && eloAveragesData[eloBracket as keyof typeof eloAveragesData]) {
-      const bracketData = eloAveragesData[eloBracket as keyof typeof eloAveragesData];
+    if (eloAveragesData && timeControl && eloAveragesData[timeControl]) {
+      const timeControlData = eloAveragesData[timeControl].data;
       popAvgOpening = {
-        inaccuracies: bracketData.opening_inaccuracies_per_game.mean,
-        mistakes: bracketData.opening_mistakes_per_game.mean,
-        blunders: bracketData.opening_blunders_per_game.mean
+        inaccuracies: timeControlData.opening_inaccuracies_per_game?.mean || 0,
+        mistakes: timeControlData.opening_mistakes_per_game?.mean || 0,
+        blunders: timeControlData.opening_blunders_per_game?.mean || 0
       };
       popAvgMiddlegame = {
-        inaccuracies: bracketData.middlegame_inaccuracies_per_game.mean,
-        mistakes: bracketData.middlegame_mistakes_per_game.mean,
-        blunders: bracketData.middlegame_blunders_per_game.mean
+        inaccuracies: timeControlData.middlegame_inaccuracies_per_game?.mean || 0,
+        mistakes: timeControlData.middlegame_mistakes_per_game?.mean || 0,
+        blunders: timeControlData.middlegame_blunders_per_game?.mean || 0
       };
       popAvgEndgame = {
-        inaccuracies: bracketData.endgame_inaccuracies_per_game.mean,
-        mistakes: bracketData.endgame_mistakes_per_game.mean,
-        blunders: bracketData.endgame_blunders_per_game.mean
+        inaccuracies: timeControlData.endgame_inaccuracies_per_game?.mean || 0,
+        mistakes: timeControlData.endgame_mistakes_per_game?.mean || 0,
+        blunders: timeControlData.endgame_blunders_per_game?.mean || 0
       };
     }
 
@@ -409,7 +449,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       totalPhaseData: totalPhaseData,
       eloBracket
     };
-  }, [filteredGames, username, currentFilter]);
+  }, [filteredGames, username, currentFilter, eloAveragesData]);
 
   // Helper function to convert single phase data to chart format
   const convertPhaseToChartData = (phase: PhaseData) => {

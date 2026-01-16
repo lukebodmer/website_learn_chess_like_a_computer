@@ -136,6 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing enriched games data:', error.message, error)
     }
 
+    // Try to get ELO averages data from the page
+    let eloAveragesData = null
+    try {
+      const eloAveragesElement = document.getElementById('elo-averages-data')
+      if (eloAveragesElement && eloAveragesElement.textContent) {
+        const eloAveragesText = eloAveragesElement.textContent.trim()
+        if (eloAveragesText && eloAveragesText.startsWith('{')) {
+          eloAveragesData = JSON.parse(eloAveragesText)
+          console.log('Parsed ELO averages data:', eloAveragesData)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing ELO averages data:', error.message)
+    }
+
     // Load initial games into the filter manager
     if (initialGamesData.length > 0) {
       console.log('Loading initial games into filter manager:', initialGamesData.length)
@@ -144,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render chart with initial data (empty for new reports, populated for completed reports)
-    root.render(<GameResultsChart enrichedGames={initialGamesData} username={username} />)
+    root.render(<GameResultsChart enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).gameResultsChartRoot = root
@@ -190,8 +205,23 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing enriched games data for mistakes chart:', error.message)
     }
 
+    // Try to get ELO averages data from the page
+    let eloAveragesData = null
+    try {
+      const eloAveragesElement = document.getElementById('elo-averages-data')
+      if (eloAveragesElement && eloAveragesElement.textContent) {
+        const eloAveragesText = eloAveragesElement.textContent.trim()
+        if (eloAveragesText && eloAveragesText.startsWith('{')) {
+          eloAveragesData = JSON.parse(eloAveragesText)
+          console.log('Parsed ELO averages data for mistakes chart:', eloAveragesData)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing ELO averages data for mistakes chart:', error.message)
+    }
+
     // Render chart with initial data
-    root.render(<MistakesAnalysisChart enrichedGames={initialGamesData} username={username} />)
+    root.render(<MistakesAnalysisChart enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).mistakesAnalysisChartRoot = root

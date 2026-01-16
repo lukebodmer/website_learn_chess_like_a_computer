@@ -67,6 +67,7 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
       padding: '20px',
       backgroundColor: 'var(--background-secondary)',
       borderRadius: '12px',
+      border: '2px solid var(--primary-color)',
       marginBottom: '20px'
     }}>
       {/* Color Filter */}
