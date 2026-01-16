@@ -46,12 +46,12 @@
       "skew": 1.1
     },
     "percent_time_used_in_opening": {
-      "mean": 0.30,
+      "mean": 0.3,
       "std": 0.1,
       "skew": 0.1
     },
     "percent_time_used_in_middlegame": {
-      "mean": 0.40,
+      "mean": 0.4,
       "std": 0.1,
       "skew": 0.1
     },
@@ -136,7 +136,7 @@
       "skew": 1.0
     },
     "draw_by_stalemate_rate": {
-      "mean": 0.30,
+      "mean": 0.3,
       "std": 0.12,
       "skew": 0.6
     },
@@ -146,8 +146,8 @@
       "skew": 0.4
     },
     "draw_by_repetition_rate": {
-      "mean": 0.40,
-      "std": 0.10,
+      "mean": 0.4,
+      "std": 0.1,
       "skew": 0.2
     },
     "draw_by_50move_rate": {
@@ -156,7 +156,7 @@
       "skew": 1.0
     },
     "draw_by_insufficient_material_rate": {
-      "mean": 0.10,
+      "mean": 0.1,
       "std": 0.09,
       "skew": 0.5
     }
@@ -208,12 +208,12 @@
       "skew": 1.1
     },
     "percent_time_used_in_opening": {
-      "mean": 0.40,
+      "mean": 0.4,
       "std": 0.1,
       "skew": 0.1
     },
     "percent_time_used_in_middlegame": {
-      "mean": 0.30,
+      "mean": 0.3,
       "std": 0.1,
       "skew": 0.1
     },
@@ -308,17 +308,17 @@
       "skew": 0.4
     },
     "draw_by_repetition_rate": {
-      "mean": 0.30,
-      "std": 0.10,
+      "mean": 0.3,
+      "std": 0.1,
       "skew": 0.2
     },
     "draw_by_50move_rate": {
-      "mean": 0.10,
+      "mean": 0.1,
       "std": 0.06,
       "skew": 1.0
     },
     "draw_by_insufficient_material_rate": {
-      "mean": 0.20,
+      "mean": 0.2,
       "std": 0.09,
       "skew": 0.5
     }
@@ -370,12 +370,12 @@
       "skew": 1.1
     },
     "percent_time_used_in_opening": {
-      "mean": 0.20,
+      "mean": 0.2,
       "std": 0.1,
       "skew": 0.1
     },
     "percent_time_used_in_middlegame": {
-      "mean": 0.60,
+      "mean": 0.6,
       "std": 0.1,
       "skew": 0.1
     },
@@ -470,19 +470,7209 @@
       "skew": 0.4
     },
     "draw_by_repetition_rate": {
-      "mean": 0.30,
-      "std": 0.10,
+      "mean": 0.3,
+      "std": 0.1,
       "skew": 0.2
     },
     "draw_by_50move_rate": {
-      "mean": 0.10,
+      "mean": 0.1,
       "std": 0.06,
       "skew": 1.0
     },
     "draw_by_insufficient_material_rate": {
-      "mean": 0.20,
+      "mean": 0.2,
       "std": 0.09,
       "skew": 0.5
+    }
+  },
+  "openings": {
+    "bullet": {
+      "king's knight opening": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bishop's opening": {
+        "eco": "C23",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "alekhine defense": {
+        "eco": "B02",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lemming defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hippopotamus defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "east indian defense": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "kangaroo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "global opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bogo-indian defense": {
+        "eco": "E11",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "philidor defense": {
+        "eco": "C41",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit accepted": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "french defense": {
+        "eco": "C00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "carr defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vulture defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pseudo queen's indian defense": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "marienbad system": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "modern defense": {
+        "eco": "B06",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mieses opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "grob opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "caro-kann defense": {
+        "eco": "B10",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "borg defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "dutch defense": {
+        "eco": "A80",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening, with d5": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amsterdam attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "richter-veresov attack": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scotch game": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ponziani opening": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mexican defense": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "paleface attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bird opening": {
+        "eco": "A02",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "k\u00e1das opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ruy lopez": {
+        "eco": "C60",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "four knights game": {
+        "eco": "C47",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit": {
+        "eco": "C30",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "yusupov-rubinstein system": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pterodactyl defense": {
+        "eco": "A42",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zaire defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mikenas defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van't kruijs opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hungarian opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "clemenz opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "anderssen's opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit accepted": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit": {
+        "eco": "D06",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rubinstein opening": {
+        "eco": "D05",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit accepted": {
+        "eco": "C33",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english orangutan": {
+        "eco": "A15",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "saragossa opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "catalan opening": {
+        "eco": "E00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense": {
+        "eco": "D43",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "three knights opening": {
+        "eco": "C46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "petrov's defense": {
+        "eco": "C42",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "trompowsky attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "montevideo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit declined": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "valencia opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "irish gambit": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "elephant gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "czech defense": {
+        "eco": "B07",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pirc defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav indian": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian accelerated": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "robatsch defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "old indian defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zukertort opening": {
+        "eco": "A04",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian defense": {
+        "eco": "E61",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav defense": {
+        "eco": "D10",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sicilian defense": {
+        "eco": "B20",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scandinavian defense": {
+        "eco": "B01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzowitsch defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "goldsmith defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "fried fox defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "wade defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "australian defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english opening": {
+        "eco": "A10",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with bf5": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sodium attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lasker simul special": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gr\u00fcnfeld defense": {
+        "eco": "D80",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit declined": {
+        "eco": "D30",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna gambit, with max lange defense": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "st. george defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "horwitz defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "tarrasch defense": {
+        "eco": "D32",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit accepted": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "portuguese opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benoni defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "r\u00e9ti opening": {
+        "eco": "A09",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack": {
+        "eco": "A05",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-larsen attack": {
+        "eco": "A01",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amar opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit accepted": {
+        "eco": "D20",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system, with e6": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amazon attack": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "italian game": {
+        "eco": "C50",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bongcloud attack": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "canard opening": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van geet opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn, mengarini attack": {
+        "eco": "E60",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-indian defense": {
+        "eco": "E20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian defense": {
+        "eco": "E12",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense accepted": {
+        "eco": "D44",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gunderam defense": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna game": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "owen defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn game": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "duras gambit": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit accepted": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with be2": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with bd3": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "d\u00f6ry defense": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "indian defense": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn game": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with e6": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      }
+    },
+    "blitz": {
+      "king's knight opening": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bishop's opening": {
+        "eco": "C23",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "alekhine defense": {
+        "eco": "B02",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lemming defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hippopotamus defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "east indian defense": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "kangaroo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "global opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bogo-indian defense": {
+        "eco": "E11",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "philidor defense": {
+        "eco": "C41",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit accepted": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "french defense": {
+        "eco": "C00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "carr defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vulture defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pseudo queen's indian defense": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "marienbad system": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "modern defense": {
+        "eco": "B06",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mieses opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "grob opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "caro-kann defense": {
+        "eco": "B10",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "borg defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "dutch defense": {
+        "eco": "A80",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening, with d5": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amsterdam attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "richter-veresov attack": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scotch game": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ponziani opening": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mexican defense": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "paleface attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bird opening": {
+        "eco": "A02",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "k\u00e1das opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ruy lopez": {
+        "eco": "C60",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "four knights game": {
+        "eco": "C47",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit": {
+        "eco": "C30",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 5.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "yusupov-rubinstein system": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pterodactyl defense": {
+        "eco": "A42",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zaire defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mikenas defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van't kruijs opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hungarian opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "clemenz opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "anderssen's opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit accepted": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit": {
+        "eco": "D06",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rubinstein opening": {
+        "eco": "D05",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit accepted": {
+        "eco": "C33",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english orangutan": {
+        "eco": "A15",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "saragossa opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "catalan opening": {
+        "eco": "E00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense": {
+        "eco": "D43",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "three knights opening": {
+        "eco": "C46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "petrov's defense": {
+        "eco": "C42",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "trompowsky attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "montevideo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit declined": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "valencia opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "irish gambit": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "elephant gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "czech defense": {
+        "eco": "B07",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pirc defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav indian": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian accelerated": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "robatsch defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "old indian defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zukertort opening": {
+        "eco": "A04",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian defense": {
+        "eco": "E61",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav defense": {
+        "eco": "D10",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sicilian defense": {
+        "eco": "B20",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scandinavian defense": {
+        "eco": "B01",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzowitsch defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "goldsmith defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "fried fox defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "wade defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "australian defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english opening": {
+        "eco": "A10",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with bf5": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sodium attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lasker simul special": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gr\u00fcnfeld defense": {
+        "eco": "D80",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit declined": {
+        "eco": "D30",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna gambit, with max lange defense": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "st. george defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "horwitz defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "tarrasch defense": {
+        "eco": "D32",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit accepted": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "portuguese opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benoni defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "r\u00e9ti opening": {
+        "eco": "A09",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack": {
+        "eco": "A05",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-larsen attack": {
+        "eco": "A01",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amar opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit accepted": {
+        "eco": "D20",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system, with e6": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amazon attack": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "italian game": {
+        "eco": "C50",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bongcloud attack": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "canard opening": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van geet opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn, mengarini attack": {
+        "eco": "E60",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-indian defense": {
+        "eco": "E20",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian defense": {
+        "eco": "E12",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense accepted": {
+        "eco": "D44",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gunderam defense": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna game": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "owen defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn game": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "duras gambit": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit accepted": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with be2": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with bd3": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "d\u00f6ry defense": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "indian defense": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn game": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with e6": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      }
+    },
+    "rapid": {
+      "king's knight opening": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bishop's opening": {
+        "eco": "C23",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 5.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "alekhine defense": {
+        "eco": "B02",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lemming defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hippopotamus defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "east indian defense": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "kangaroo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "global opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bogo-indian defense": {
+        "eco": "E11",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "philidor defense": {
+        "eco": "C41",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit accepted": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "french defense": {
+        "eco": "C00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "carr defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vulture defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pseudo queen's indian defense": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "marienbad system": {
+        "eco": "A47",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "modern defense": {
+        "eco": "B06",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mieses opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "grob opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "caro-kann defense": {
+        "eco": "B10",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "borg defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "dutch defense": {
+        "eco": "A80",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening, with d5": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amsterdam attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "richter-veresov attack": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scotch game": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ponziani opening": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game accepted": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mexican defense": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "paleface attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bird opening": {
+        "eco": "A02",
+        "opening_inaccuracies_per_game": {
+          "mean": 5.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "k\u00e1das opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ruy lopez": {
+        "eco": "C60",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "four knights game": {
+        "eco": "C47",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit": {
+        "eco": "C30",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "ware defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "yusupov-rubinstein system": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pterodactyl defense": {
+        "eco": "A42",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zaire defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "mikenas defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van't kruijs opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "hungarian opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "clemenz opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "anderssen's opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit accepted": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit": {
+        "eco": "D06",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rubinstein opening": {
+        "eco": "D05",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's gambit accepted": {
+        "eco": "C33",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "barnes defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english orangutan": {
+        "eco": "A15",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "saragossa opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "catalan opening": {
+        "eco": "E00",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense": {
+        "eco": "D43",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "three knights opening": {
+        "eco": "C46",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "petrov's defense": {
+        "eco": "C42",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "trompowsky attack": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "montevideo defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "englund gambit declined": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "valencia opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "irish gambit": {
+        "eco": "C44",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "elephant gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "czech defense": {
+        "eco": "B07",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "pirc defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav indian": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian accelerated": {
+        "eco": "A50",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "robatsch defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "old indian defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "zukertort opening": {
+        "eco": "A04",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian defense": {
+        "eco": "E61",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "slav defense": {
+        "eco": "D10",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "latvian gambit": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sicilian defense": {
+        "eco": "B20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "scandinavian defense": {
+        "eco": "B01",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzowitsch defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "goldsmith defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "fried fox defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "wade defense": {
+        "eco": "A41",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "australian defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "english opening": {
+        "eco": "A10",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with bf5": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "sodium attack": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "lasker simul special": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gr\u00fcnfeld defense": {
+        "eco": "D80",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 5.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit declined": {
+        "eco": "D30",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna gambit, with max lange defense": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "st. george defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "horwitz defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "tarrasch defense": {
+        "eco": "D32",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blackmar-diemer gambit accepted": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "danish gambit": {
+        "eco": "C21",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.2,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "portuguese opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "center game": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benoni defense": {
+        "eco": "A56",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "r\u00e9ti opening": {
+        "eco": "A09",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack": {
+        "eco": "A05",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.8,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-larsen attack": {
+        "eco": "A01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amar opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.5,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "blumenfeld countergambit": {
+        "eco": "E10",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's gambit accepted": {
+        "eco": "D20",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.9,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system, with e6": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "amazon attack": {
+        "eco": "D00",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "italian game": {
+        "eco": "C50",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn opening": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "bongcloud attack": {
+        "eco": "C20",
+        "opening_inaccuracies_per_game": {
+          "mean": 4.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "canard opening": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "van geet opening": {
+        "eco": "A00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.1,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn, mengarini attack": {
+        "eco": "E60",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.7,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.6,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "nimzo-indian defense": {
+        "eco": "E20",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's indian defense": {
+        "eco": "E12",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.8,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "semi-slav defense accepted": {
+        "eco": "D44",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "rapport-jobava system": {
+        "eco": "D01",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "gunderam defense": {
+        "eco": "C40",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.8,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "vienna game": {
+        "eco": "C25",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 3.4,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.4,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "owen defense": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.3,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 2.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's pawn game": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 3.0,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "duras gambit": {
+        "eco": "B00",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.7,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 1.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "benko gambit accepted": {
+        "eco": "A57",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.7,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with be2": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 1.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "london system, with bd3": {
+        "eco": "A48",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.5,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.2,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.0,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "d\u00f6ry defense": {
+        "eco": "A46",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.4,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.3,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.2,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "indian defense": {
+        "eco": "A45",
+        "opening_inaccuracies_per_game": {
+          "mean": 0.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 4.3,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "queen's pawn game": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.9,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 2.9,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.5,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "polish defense": {
+        "eco": "A40",
+        "opening_inaccuracies_per_game": {
+          "mean": 2.1,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 0.6,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 0.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      },
+      "king's indian attack, with e6": {
+        "eco": "A07",
+        "opening_inaccuracies_per_game": {
+          "mean": 1.6,
+          "std": 0.8,
+          "skew": 0.5
+        },
+        "opening_mistakes_per_game": {
+          "mean": 4.0,
+          "std": 0.5,
+          "skew": 0.7
+        },
+        "opening_blunders_per_game": {
+          "mean": 3.1,
+          "std": 0.4,
+          "skew": 0.9
+        }
+      }
     }
   }
 }

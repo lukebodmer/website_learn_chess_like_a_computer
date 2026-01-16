@@ -32,7 +32,7 @@ from .report_generation import generate_html_report
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 20
+ANALYSIS_GAME_COUNT = 30
 
 
 # Shared utilities for game fetching
@@ -548,10 +548,12 @@ def load_elo_averages_for_time_controls(elo_by_time_control):
         {
             'bullet': { 'bracket': '1200-1400', 'data': {...} },
             'blitz': { 'bracket': '800-1200', 'data': {...} },
-            'rapid': { 'bracket': '800-1200', 'data': {...} }
+            'rapid': { 'bracket': '800-1200', 'data': {...} },
+            'openings': { 'bullet': {...}, 'blitz': {...}, 'rapid': {...} }
         }
     """
     result = {}
+    openings_data = None
 
     for time_control, elo_rating in elo_by_time_control.items():
         # Determine bracket for this ELO
@@ -585,10 +587,18 @@ def load_elo_averages_for_time_controls(elo_by_time_control):
                     'elo': elo_rating,
                     'data': time_control_data
                 }
+
+                # Extract openings data (only once, since it's the same for all time controls in a bracket)
+                if openings_data is None and 'openings' in bracket_data:
+                    openings_data = bracket_data['openings']
             else:
                 print(f"ELO averages file not found: {json_path}")
         except Exception as e:
             print(f"Error loading ELO averages for {time_control} at bracket {bracket}: {e}")
+
+    # Add openings data to result if found
+    if openings_data:
+        result['openings'] = openings_data
 
     return result
 

@@ -262,8 +262,23 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing enriched games data for opening analysis:', error.message)
     }
 
+    // Try to get ELO averages data from the page
+    let eloAveragesData = null
+    try {
+      const eloAveragesElement = document.getElementById('elo-averages-data')
+      if (eloAveragesElement && eloAveragesElement.textContent) {
+        const eloAveragesText = eloAveragesElement.textContent.trim()
+        if (eloAveragesText && eloAveragesText.startsWith('{')) {
+          eloAveragesData = JSON.parse(eloAveragesText)
+          console.log('Parsed ELO averages data for opening analysis:', eloAveragesData)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing ELO averages data for opening analysis:', error.message)
+    }
+
     // Render chart with initial data
-    root.render(<OpeningAnalysis enrichedGames={initialGamesData} username={username} />)
+    root.render(<OpeningAnalysis enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).openingAnalysisRoot = root

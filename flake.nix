@@ -28,7 +28,12 @@
 	      pkgs.nodejs_24
 	      pkgs.stockfish
 	      pkgs.postgresql
+	      pkgs.vscode-json-languageserver
 	      pkgs.zstd
+
+	      pkgs.nodePackages.typescript-language-server
+	      pkgs.nodePackages.vscode-json-languageserver
+	      pkgs.nodePackages.vscode-langservers-extracted
 
             # Python packages
               (python.withPackages (ps: with ps; [

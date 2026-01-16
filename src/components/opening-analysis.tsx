@@ -5,6 +5,75 @@ import { Chess } from 'chess.js';
 import { StartIcon, PrevIcon, NextIcon, EndIcon } from './navigation-icons';
 import { SendToBuddyBoardIcon } from './send-to-buddy-board-icon';
 
+// Helper function to determine ELO bracket
+const getEloBracket = (rating: number): string => {
+  if (rating < 1200) return '800-1200';
+  if (rating < 1400) return '1200-1400';
+  if (rating < 1600) return '1400-1600';
+  if (rating < 1800) return '1600-1800';
+  if (rating < 2000) return '1800-2000';
+  return '2000+';
+};
+
+// Helper function to calculate average ELO from games
+const calculateAverageElo = (games: any[], username: string): number | null => {
+  let totalRating = 0;
+  let count = 0;
+
+  games.forEach(game => {
+    let rating = null;
+    let isWhitePlayer = false;
+    let isBlackPlayer = false;
+
+    // Try to extract data from different possible structures
+    if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
+      // Lichess format
+      isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+
+      if (isWhitePlayer) {
+        rating = game.players?.white?.rating;
+      } else if (isBlackPlayer) {
+        rating = game.players?.black?.rating;
+      }
+    } else if (game.white_player || game.black_player) {
+      // Custom format
+      isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = game.raw_json || game.game?.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    } else if (game.game) {
+      // Nested game structure
+      const nestedGame = game.game;
+      isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
+      isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
+
+      const rawJson = nestedGame.raw_json;
+      if (rawJson) {
+        if (isWhitePlayer) {
+          rating = rawJson.players?.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = rawJson.players?.black?.rating;
+        }
+      }
+    }
+
+    if (rating !== null) {
+      totalRating += rating;
+      count++;
+    }
+  });
+
+  return count > 0 ? totalRating / count : null;
+};
+
 interface GameOpening {
   id?: string;
   players?: {
@@ -30,9 +99,56 @@ interface GameOpening {
   game?: any;
 }
 
+interface EloAveragesData {
+  bullet?: {
+    [key: string]: {
+      mean: number;
+      std: number;
+      skew: number;
+    };
+  };
+  blitz?: {
+    [key: string]: {
+      mean: number;
+      std: number;
+      skew: number;
+    };
+  };
+  rapid?: {
+    [key: string]: {
+      mean: number;
+      std: number;
+      skew: number;
+    };
+  };
+  openings?: {
+    [timeControl: string]: {
+      [openingName: string]: {
+        eco: string;
+        opening_inaccuracies_per_game: {
+          mean: number;
+          std: number;
+          skew: number;
+        };
+        opening_mistakes_per_game: {
+          mean: number;
+          std: number;
+          skew: number;
+        };
+        opening_blunders_per_game: {
+          mean: number;
+          std: number;
+          skew: number;
+        };
+      };
+    };
+  };
+}
+
 interface OpeningAnalysisProps {
   enrichedGames: GameOpening[];
   username: string;
+  eloAveragesData?: EloAveragesData | null;
 }
 
 interface OpeningVariation {
@@ -67,7 +183,8 @@ interface OpeningData {
 
 export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   enrichedGames = [],
-  username
+  username,
+  eloAveragesData = null
 }) => {
   const [filteredGames, setFilteredGames] = useState<GameOpening[]>([]);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
@@ -605,9 +722,53 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               gap: '12px'
             }}>
               {(() => {
+                // Calculate user's ELO and get population averages
+                const avgElo = calculateAverageElo(filteredGames, username);
+                const eloBracket = avgElo ? getEloBracket(avgElo) : null;
+
+                // Determine which time control to use based on current filter
+                const speedFilter = gameFilterManager.getCurrentSpeedFilter();
+                let timeControl: string | null = null;
+
+                if (Array.isArray(speedFilter) && speedFilter.length === 1) {
+                  timeControl = speedFilter[0];
+                } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
+                  // Use the most common time control in the filtered games
+                  const speeds = filteredGames.map(g => g.speed).filter(Boolean);
+                  if (speeds.length > 0) {
+                    const speedCounts = speeds.reduce((acc, s) => {
+                      acc[s] = (acc[s] || 0) + 1;
+                      return acc;
+                    }, {} as Record<string, number>);
+                    timeControl = Object.entries(speedCounts).sort((a, b) => b[1] - a[1])[0][0];
+                  }
+                } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
+                  timeControl = speedFilter[0];
+                }
+
+
+                // Get population averages for this opening
+                let popAvgInaccuracies = 0;
+                let popAvgMistakes = 0;
+                let popAvgBlunders = 0;
+
+                if (eloAveragesData && timeControl && selectedOpening) {
+                  // openings is at the root level of eloAveragesData
+                  if (eloAveragesData.openings?.[timeControl]) {
+                    // Use base opening name (lowercase) to look up population stats
+                    const openingKey = selectedOpening.baseName.toLowerCase();
+                    const openingStats = eloAveragesData.openings[timeControl][openingKey];
+
+                    if (openingStats) {
+                      popAvgInaccuracies = openingStats.opening_inaccuracies_per_game?.mean || 0;
+                      popAvgMistakes = openingStats.opening_mistakes_per_game?.mean || 0;
+                      popAvgBlunders = openingStats.opening_blunders_per_game?.mean || 0;
+                    }
+                  }
+                }
+
                 // Get the current variation's stats or fall back to opening stats or show zeros
                 if (!selectedOpening) {
-                  const emptyStats = { avgInaccuracies: 0, avgMistakes: 0, avgBlunders: 0 };
                   return (
                     <>
                       {/* Inaccuracies */}
@@ -627,7 +788,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           height: '20px',
                           backgroundColor: 'var(--background-secondary)',
                           borderRadius: '4px',
-                          overflow: 'hidden'
+                          overflow: 'hidden',
+                          position: 'relative'
                         }}>
                           <div style={{
                             height: '100%',
@@ -655,7 +817,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           height: '20px',
                           backgroundColor: 'var(--background-secondary)',
                           borderRadius: '4px',
-                          overflow: 'hidden'
+                          overflow: 'hidden',
+                          position: 'relative'
                         }}>
                           <div style={{
                             height: '100%',
@@ -683,7 +846,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           height: '20px',
                           backgroundColor: 'var(--background-secondary)',
                           borderRadius: '4px',
-                          overflow: 'hidden'
+                          overflow: 'hidden',
+                          position: 'relative'
                         }}>
                           <div style={{
                             height: '100%',
@@ -714,22 +878,49 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           fontSize: '12px'
                         }}>
                           <span style={{ color: 'var(--text-secondary)' }}>Inaccuracies</span>
-                          <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
-                            {stats.avgInaccuracies.toFixed(1)}
-                          </span>
                         </div>
-                        <div style={{
-                          height: '20px',
-                          backgroundColor: 'var(--background-secondary)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            height: '100%',
-                            backgroundColor: '#FFA726',
-                            width: `${Math.min((stats.avgInaccuracies / 10) * 100, 100)}%`,
-                            transition: 'width 0.3s ease'
-                          }} />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {/* User's bar */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+                              You: {stats.avgInaccuracies.toFixed(1)}
+                            </div>
+                            <div style={{
+                              height: '16px',
+                              backgroundColor: 'var(--background-secondary)',
+                              borderRadius: '3px',
+                              overflow: 'hidden'
+                            }}>
+                              <div style={{
+                                height: '100%',
+                                backgroundColor: '#FFA726',
+                                width: `${Math.min((stats.avgInaccuracies / 10) * 100, 100)}%`,
+                                transition: 'width 0.3s ease'
+                              }} />
+                            </div>
+                          </div>
+                          {/* Population average bar */}
+                          {popAvgInaccuracies > 0 && (
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>
+                                Avg: {popAvgInaccuracies.toFixed(1)}
+                              </div>
+                              <div style={{
+                                height: '16px',
+                                backgroundColor: 'var(--background-secondary)',
+                                borderRadius: '3px',
+                                overflow: 'hidden'
+                              }}>
+                                <div style={{
+                                  height: '100%',
+                                  backgroundColor: '#FFA726',
+                                  opacity: 0.5,
+                                  width: `${Math.min((popAvgInaccuracies / 10) * 100, 100)}%`,
+                                  transition: 'width 0.3s ease'
+                                }} />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -742,22 +933,49 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           fontSize: '12px'
                         }}>
                           <span style={{ color: 'var(--text-secondary)' }}>Mistakes</span>
-                          <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
-                            {stats.avgMistakes.toFixed(1)}
-                          </span>
                         </div>
-                        <div style={{
-                          height: '20px',
-                          backgroundColor: 'var(--background-secondary)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            height: '100%',
-                            backgroundColor: '#FF7043',
-                            width: `${Math.min((stats.avgMistakes / 10) * 100, 100)}%`,
-                            transition: 'width 0.3s ease'
-                          }} />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {/* User's bar */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+                              You: {stats.avgMistakes.toFixed(1)}
+                            </div>
+                            <div style={{
+                              height: '16px',
+                              backgroundColor: 'var(--background-secondary)',
+                              borderRadius: '3px',
+                              overflow: 'hidden'
+                            }}>
+                              <div style={{
+                                height: '100%',
+                                backgroundColor: '#FF7043',
+                                width: `${Math.min((stats.avgMistakes / 10) * 100, 100)}%`,
+                                transition: 'width 0.3s ease'
+                              }} />
+                            </div>
+                          </div>
+                          {/* Population average bar */}
+                          {popAvgMistakes > 0 && (
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>
+                                Avg: {popAvgMistakes.toFixed(1)}
+                              </div>
+                              <div style={{
+                                height: '16px',
+                                backgroundColor: 'var(--background-secondary)',
+                                borderRadius: '3px',
+                                overflow: 'hidden'
+                              }}>
+                                <div style={{
+                                  height: '100%',
+                                  backgroundColor: '#FF7043',
+                                  opacity: 0.5,
+                                  width: `${Math.min((popAvgMistakes / 10) * 100, 100)}%`,
+                                  transition: 'width 0.3s ease'
+                                }} />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -770,22 +988,49 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                           fontSize: '12px'
                         }}>
                           <span style={{ color: 'var(--text-secondary)' }}>Blunders</span>
-                          <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
-                            {stats.avgBlunders.toFixed(1)}
-                          </span>
                         </div>
-                        <div style={{
-                          height: '20px',
-                          backgroundColor: 'var(--background-secondary)',
-                          borderRadius: '4px',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            height: '100%',
-                            backgroundColor: '#EF5350',
-                            width: `${Math.min((stats.avgBlunders / 10) * 100, 100)}%`,
-                            transition: 'width 0.3s ease'
-                          }} />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {/* User's bar */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+                              You: {stats.avgBlunders.toFixed(1)}
+                            </div>
+                            <div style={{
+                              height: '16px',
+                              backgroundColor: 'var(--background-secondary)',
+                              borderRadius: '3px',
+                              overflow: 'hidden'
+                            }}>
+                              <div style={{
+                                height: '100%',
+                                backgroundColor: '#EF5350',
+                                width: `${Math.min((stats.avgBlunders / 10) * 100, 100)}%`,
+                                transition: 'width 0.3s ease'
+                              }} />
+                            </div>
+                          </div>
+                          {/* Population average bar */}
+                          {popAvgBlunders > 0 && (
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>
+                                Avg: {popAvgBlunders.toFixed(1)}
+                              </div>
+                              <div style={{
+                                height: '16px',
+                                backgroundColor: 'var(--background-secondary)',
+                                borderRadius: '3px',
+                                overflow: 'hidden'
+                              }}>
+                                <div style={{
+                                  height: '100%',
+                                  backgroundColor: '#EF5350',
+                                  opacity: 0.5,
+                                  width: `${Math.min((popAvgBlunders / 10) * 100, 100)}%`,
+                                  transition: 'width 0.3s ease'
+                                }} />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </>

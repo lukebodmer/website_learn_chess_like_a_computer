@@ -722,7 +722,20 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
   }, [filteredGames, username]);
 
   const hasData = timeUsageData.totalGames > 0;
-  const colors = ['var(--primary-color)', 'var(--success-color)', 'var(--warning-color)'];
+
+  // Color mapping for each phase in the chart
+  const getColorForPhase = (phase: string) => {
+    switch (phase) {
+      case 'Opening':
+        return 'var(--primary-color)';
+      case 'Middle Game':
+        return 'var(--info-color)';
+      case 'Endgame':
+        return 'var(--secondary-color)';
+      default:
+        return 'transparent';
+    }
+  };
 
   const renderCustomTooltip = (props: any) => {
     if (!props.active || !props.payload || !props.payload.length) return null;
@@ -1001,14 +1014,14 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
             {/* User's actual time usage */}
             <Bar yAxisId="left" dataKey="percentage" name="You" radius={[4, 4, 0, 0]}>
               {timeUsageData.chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index]} />
+                <Cell key={`cell-${index}`} fill={getColorForPhase(entry.phase)} />
               ))}
             </Bar>
             {/* Population average */}
             {timeUsageData.eloBracket && (
               <Bar yAxisId="left" dataKey="popAvg" name={`Avg (${timeUsageData.eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
                 {timeUsageData.chartData.map((entry, index) => (
-                  <Cell key={`cell-pop-${index}`} fill={colors[index]} />
+                  <Cell key={`cell-pop-${index}`} fill={getColorForPhase(entry.phase)} />
                 ))}
               </Bar>
             )}
@@ -1485,7 +1498,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 color: 'var(--text-primary)',
                 lineHeight: '1.5'
               }}>
-                <strong>💡 Insight:</strong> You've lost {timeManagementData.raw_metrics.timeouts} game{timeManagementData.raw_metrics.timeouts > 1 ? 's' : ''} on time.
+                <strong>Insight:</strong> You've lost {timeManagementData.raw_metrics.timeouts} game{timeManagementData.raw_metrics.timeouts > 1 ? 's' : ''} on time.
                 {timeManagementData.raw_metrics.time_pressure_blunders > 0 &&
                   ` Additionally, you made ${timeManagementData.raw_metrics.time_pressure_blunders} blunder${timeManagementData.raw_metrics.time_pressure_blunders > 1 ? 's' : ''} while under time pressure (< 10 seconds).`
                 }
@@ -1507,7 +1520,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 color: 'var(--text-primary)',
                 lineHeight: '1.5'
               }}>
-                <strong>💡 Insight:</strong> You lost {timeManagementData.raw_metrics.lost_with_time_remaining} game{timeManagementData.raw_metrics.lost_with_time_remaining > 1 ? 's' : ''} while having more than 60 seconds remaining.
+                <strong>Insight:</strong> You lost {timeManagementData.raw_metrics.lost_with_time_remaining} game{timeManagementData.raw_metrics.lost_with_time_remaining > 1 ? 's' : ''} while having more than 60 seconds remaining.
                 This suggests you could benefit from using more time to calculate critical positions.
               </div>
             </div>
