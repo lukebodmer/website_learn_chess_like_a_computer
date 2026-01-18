@@ -15,6 +15,37 @@ const getEloBracket = (rating: number): string => {
   return '2000+';
 };
 
+// Helper function to calculate z-score and convert to percentile
+const calculatePercentile = (
+  userErrorScore: number,
+  popMeanErrorScore: number,
+  popStdErrorScore: number,
+  sampleSize: number
+): number | null => {
+  if (popStdErrorScore === 0 || sampleSize === 0) return null;
+
+  // Adjust standard deviation for sample size (standard error of the mean)
+  const standardError = popStdErrorScore / Math.sqrt(sampleSize);
+
+  // Calculate z-score
+  const zScore = (userErrorScore - popMeanErrorScore) / standardError;
+
+  // Convert z-score to percentile using approximation (cumulative distribution function)
+  // Note: Lower error score is better, so we invert the percentile
+  const percentile = 100 * (1 - normalCDF(zScore));
+
+  return Math.max(0, Math.min(100, percentile));
+};
+
+// Approximation of the cumulative distribution function for standard normal distribution
+const normalCDF = (z: number): number => {
+  // Using the error function approximation
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp(-z * z / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - p : p;
+};
+
 // Helper function to calculate average ELO from games
 const calculateAverageElo = (games: any[], username: string): number | null => {
   let totalRating = 0;
@@ -94,9 +125,17 @@ interface GameOpening {
     eco: string;
     name: string;
     ply: number;
+    fen?: string;
+    moves?: string;
   };
   raw_json?: any;
   game?: any;
+  winner?: string | null;
+  analysis?: any[];
+  division?: {
+    middle?: number;
+  };
+  speed?: string;
 }
 
 interface EloAveragesData {
@@ -179,6 +218,7 @@ interface OpeningData {
   draws: number;
   losses: number;
   variations: OpeningVariation[];
+  percentile?: number | null;
 }
 
 export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
@@ -196,6 +236,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   const [canonicalOpenings, setCanonicalOpenings] = useState<Map<string, { name: string, pgn: string, fen: string }>>(new Map());
   const [selectedVariationName, setSelectedVariationName] = useState<string | null>(null);
   const [boardSize, setBoardSize] = useState<number>(400);
+  const [sortBy, setSortBy] = useState<'percentile' | 'name' | 'games'>('percentile');
 
   // Responsive board size based on window width
   useEffect(() => {
@@ -332,8 +373,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       const fullOpeningName = gameOpening.name || 'Unknown Opening';
       const baseName = fullOpeningName.split(':')[0].trim();
 
-      // Create a unique key for the base opening
-      const openingKey = `${gameOpening.eco}-${baseName}`;
+      // Create a unique key for the base opening (group by base name only, not ECO)
+      const openingKey = baseName;
 
       // Count user's mistakes from analysis data
       let inaccuracyCount = 0;
@@ -467,14 +508,132 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       }
     });
 
-    // Convert to array and sort by frequency (most common first)
-    const openingsData = Array.from(openingsMap.values()).sort((a, b) => b.count - a.count);
+    // Convert to array (will sort after calculating percentiles)
+    const openingsData = Array.from(openingsMap.values());
+
+    // Calculate percentiles for each opening if eloAveragesData is available
+    if (eloAveragesData) {
+      // Determine which time control to use based on current filter
+      const speedFilter = gameFilterManager.getCurrentSpeedFilter();
+      let timeControl: string | null = null;
+
+      if (Array.isArray(speedFilter) && speedFilter.length === 1) {
+        timeControl = speedFilter[0];
+      } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
+        // Use the most common time control in the filtered games
+        const speeds = filteredGames.map(g => g.speed).filter((s): s is string => Boolean(s));
+        if (speeds.length > 0) {
+          const speedCounts = speeds.reduce((acc, s) => {
+            acc[s] = (acc[s] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+          const entries = Object.entries(speedCounts).sort((a, b) => b[1] - a[1]);
+          timeControl = entries[0]?.[0] ?? null;
+        }
+      } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
+        timeControl = speedFilter[0];
+      }
+
+      if (timeControl && eloAveragesData.openings?.[timeControl]) {
+        openingsData.forEach(opening => {
+          const openingKey = opening.baseName.toLowerCase();
+          const openingStats = eloAveragesData.openings![timeControl!][openingKey];
+
+          if (openingStats) {
+            // Calculate user's error score
+            const userErrorScore = opening.avgInaccuracies + 2 * opening.avgMistakes + 3 * opening.avgBlunders;
+
+            // Calculate population mean error score
+            const popMeanInaccuracies = openingStats.opening_inaccuracies_per_game?.mean || 0;
+            const popMeanMistakes = openingStats.opening_mistakes_per_game?.mean || 0;
+            const popMeanBlunders = openingStats.opening_blunders_per_game?.mean || 0;
+            const popMeanErrorScore = popMeanInaccuracies + 2 * popMeanMistakes + 3 * popMeanBlunders;
+
+            // Calculate population standard deviation of error score
+            // σ² = σ²_I + 4σ²_M + 9σ²_B
+            const popStdInaccuracies = openingStats.opening_inaccuracies_per_game?.std || 0;
+            const popStdMistakes = openingStats.opening_mistakes_per_game?.std || 0;
+            const popStdBlunders = openingStats.opening_blunders_per_game?.std || 0;
+            const popVarianceErrorScore =
+              Math.pow(popStdInaccuracies, 2) +
+              4 * Math.pow(popStdMistakes, 2) +
+              9 * Math.pow(popStdBlunders, 2);
+            const popStdErrorScore = Math.sqrt(popVarianceErrorScore);
+
+            // Calculate percentile
+            opening.percentile = calculatePercentile(
+              userErrorScore,
+              popMeanErrorScore,
+              popStdErrorScore,
+              opening.count
+            );
+          }
+        });
+      }
+    }
+
+    // Initial sort by percentile (lowest first, meaning worst performance first)
+    // This will be re-sorted based on sortBy state in a separate useMemo
+    openingsData.sort((a, b) => {
+      const hasPercentileA = a.percentile !== undefined && a.percentile !== null;
+      const hasPercentileB = b.percentile !== undefined && b.percentile !== null;
+
+      if (hasPercentileA && hasPercentileB) {
+        // Both have percentiles - sort by percentile (lowest first)
+        return a.percentile! - b.percentile!;
+      } else if (hasPercentileA) {
+        // Only A has percentile - A comes first
+        return -1;
+      } else if (hasPercentileB) {
+        // Only B has percentile - B comes first
+        return 1;
+      } else {
+        // Neither has percentile - sort by frequency (most common first)
+        return b.count - a.count;
+      }
+    });
 
     return {
       openingsData,
       totalGames: validGameCount
     };
-  }, [filteredGames, username, currentFilter]);
+  }, [filteredGames, username, currentFilter, eloAveragesData]);
+
+  // Sort openings based on the selected sort method
+  const sortedOpeningsData = useMemo(() => {
+    const sorted = [...openingsData];
+
+    switch (sortBy) {
+      case 'name':
+        // Sort alphabetically by base name
+        sorted.sort((a, b) => a.baseName.localeCompare(b.baseName));
+        break;
+      case 'games':
+        // Sort by number of games (most first)
+        sorted.sort((a, b) => b.count - a.count);
+        break;
+      case 'percentile':
+      default:
+        // Sort by percentile (lowest/worst first)
+        sorted.sort((a, b) => {
+          const hasPercentileA = a.percentile !== undefined && a.percentile !== null;
+          const hasPercentileB = b.percentile !== undefined && b.percentile !== null;
+
+          if (hasPercentileA && hasPercentileB) {
+            return a.percentile! - b.percentile!;
+          } else if (hasPercentileA) {
+            return -1;
+          } else if (hasPercentileB) {
+            return 1;
+          } else {
+            return b.count - a.count;
+          }
+        });
+        break;
+    }
+
+    return sorted;
+  }, [openingsData, sortBy]);
 
   // Auto-select the first opening and its first variation when openingsData changes
   useEffect(() => {
@@ -734,13 +893,14 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   timeControl = speedFilter[0];
                 } else if (speedFilter === 'all' || (Array.isArray(speedFilter) && speedFilter.length === 0)) {
                   // Use the most common time control in the filtered games
-                  const speeds = filteredGames.map(g => g.speed).filter(Boolean);
+                  const speeds = filteredGames.map(g => g.speed).filter((s): s is string => Boolean(s));
                   if (speeds.length > 0) {
                     const speedCounts = speeds.reduce((acc, s) => {
                       acc[s] = (acc[s] || 0) + 1;
                       return acc;
                     }, {} as Record<string, number>);
-                    timeControl = Object.entries(speedCounts).sort((a, b) => b[1] - a[1])[0][0];
+                    const entries = Object.entries(speedCounts).sort((a, b) => b[1] - a[1]);
+                    timeControl = entries[0]?.[0] ?? null;
                   }
                 } else if (Array.isArray(speedFilter) && speedFilter.length > 1) {
                   timeControl = speedFilter[0];
@@ -1050,7 +1210,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               flexDirection: 'column'
             }}>
               <h4 style={{
-                margin: '0 0 12px 0',
+                margin: '0 0 8px 0',
                 fontSize: '14px',
                 fontWeight: '600',
                 color: 'var(--text-primary)',
@@ -1058,6 +1218,34 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               }}>
                 {selectedOpening ? selectedOpening.baseName : 'Opening'} Variations
               </h4>
+              {/* Percentile Bar for Selected Opening */}
+              {selectedOpening?.percentile !== undefined && selectedOpening?.percentile !== null && (
+                <div style={{
+                  marginBottom: '12px',
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{
+                    width: '80%',
+                    height: '12px',
+                    backgroundColor: 'var(--background-secondary)',
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border-color)'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${selectedOpening.percentile}%`,
+                      backgroundColor: selectedOpening.percentile >= 75
+                        ? '#4CAF50'
+                        : selectedOpening.percentile >= 50
+                          ? '#FFA726'
+                          : '#F44336',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+              )}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1120,61 +1308,12 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                         </div>
                       </div>
 
-                      {/* Win/Draw/Loss for base opening (total stats) */}
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        minWidth: '60px'
-                      }}>
-                        <div style={{
-                          width: '100%',
-                          height: '12px',
-                          display: 'flex',
-                          borderRadius: '3px',
-                          overflow: 'hidden',
-                          border: '1px solid var(--border-color)'
-                        }}>
-                          {selectedOpening.wins > 0 && (
-                            <div
-                              style={{
-                                width: `${(selectedOpening.wins / selectedOpening.count) * 100}%`,
-                                backgroundColor: '#4CAF50',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${selectedOpening.wins} wins`}
-                            />
-                          )}
-                          {selectedOpening.draws > 0 && (
-                            <div
-                              style={{
-                                width: `${(selectedOpening.draws / selectedOpening.count) * 100}%`,
-                                backgroundColor: '#9E9E9E',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${selectedOpening.draws} draws`}
-                            />
-                          )}
-                          {selectedOpening.losses > 0 && (
-                            <div
-                              style={{
-                                width: `${(selectedOpening.losses / selectedOpening.count) * 100}%`,
-                                backgroundColor: '#F44336',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${selectedOpening.losses} losses`}
-                            />
-                          )}
-                        </div>
-                      </div>
-
                       <div style={{
                         minWidth: '30px',
                         textAlign: 'center',
                         fontSize: '12px',
                         fontWeight: 'bold',
-                        color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--primary-color)',
-                        marginLeft: '8px'
+                        color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--primary-color)'
                       }}>
                         {selectedOpening.count}
                       </div>
@@ -1241,61 +1380,12 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                         </div>
                       </div>
 
-                      {/* Win/Draw/Loss for variation */}
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        minWidth: '60px'
-                      }}>
-                        <div style={{
-                          width: '100%',
-                          height: '12px',
-                          display: 'flex',
-                          borderRadius: '3px',
-                          overflow: 'hidden',
-                          border: '1px solid var(--border-color)'
-                        }}>
-                          {variation.wins > 0 && (
-                            <div
-                              style={{
-                                width: `${(variation.wins / variation.count) * 100}%`,
-                                backgroundColor: '#4CAF50',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${variation.wins} wins`}
-                            />
-                          )}
-                          {variation.draws > 0 && (
-                            <div
-                              style={{
-                                width: `${(variation.draws / variation.count) * 100}%`,
-                                backgroundColor: '#9E9E9E',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${variation.draws} draws`}
-                            />
-                          )}
-                          {variation.losses > 0 && (
-                            <div
-                              style={{
-                                width: `${(variation.losses / variation.count) * 100}%`,
-                                backgroundColor: '#F44336',
-                                transition: 'width 0.3s ease'
-                              }}
-                              title={`${variation.losses} losses`}
-                            />
-                          )}
-                        </div>
-                      </div>
-
                       <div style={{
                         minWidth: '30px',
                         textAlign: 'center',
                         fontSize: '12px',
                         fontWeight: 'bold',
-                        color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--primary-color)',
-                        marginLeft: '8px'
+                        color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--primary-color)'
                       }}>
                         {variation.count}
                       </div>
@@ -1533,16 +1623,82 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
             </p>
           </div>
         ) : (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            minHeight: '300px',
-            maxHeight: '300px',
-            overflowY: 'auto',
-            paddingRight: '8px'
-          }}>
-            {openingsData.map((opening, index) => (
+          <>
+            {/* Column Headers */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '8px 16px',
+              borderBottom: '2px solid var(--border-color)',
+              marginBottom: '8px'
+            }}>
+              <div
+                style={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+                onClick={() => setSortBy('name')}
+              >
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: sortBy === 'name' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  textTransform: 'uppercase'
+                }}>
+                  Opening Name {sortBy === 'name' && '▼'}
+                </span>
+              </div>
+              <div
+                style={{
+                  minWidth: '100px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  marginRight: '20px'
+                }}
+                onClick={() => setSortBy('percentile')}
+              >
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: sortBy === 'percentile' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  textTransform: 'uppercase'
+                }}>
+                  Performance {sortBy === 'percentile' && '▼'}
+                </span>
+              </div>
+              <div
+                style={{
+                  minWidth: '60px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+                onClick={() => setSortBy('games')}
+              >
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: sortBy === 'games' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  textTransform: 'uppercase'
+                }}>
+                  Games {sortBy === 'games' && '▼'}
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              minHeight: '260px',
+              maxHeight: '260px',
+              overflowY: 'auto',
+              paddingRight: '8px'
+            }}>
+              {sortedOpeningsData.map((opening, index) => (
               <div
                 key={`${opening.eco}-${index}`}
                 onClick={() => {
@@ -1622,64 +1778,35 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   )}
                 </div>
 
-                {/* Win/Draw/Loss Bar */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  minWidth: '120px',
-                  gap: '4px'
-                }}>
+                {/* Percentile Bar */}
+                {opening.percentile !== undefined && opening.percentile !== null && (
                   <div style={{
-                    width: '100%',
-                    height: '20px',
                     display: 'flex',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    border: '1px solid var(--border-color)'
+                    alignItems: 'center',
+                    minWidth: '100px',
+                    marginRight: '20px'
                   }}>
-                    {opening.wins > 0 && (
-                      <div
-                        style={{
-                          width: `${(opening.wins / opening.count) * 100}%`,
-                          backgroundColor: '#4CAF50',
-                          transition: 'width 0.3s ease'
-                        }}
-                        title={`${opening.wins} wins`}
-                      />
-                    )}
-                    {opening.draws > 0 && (
-                      <div
-                        style={{
-                          width: `${(opening.draws / opening.count) * 100}%`,
-                          backgroundColor: '#9E9E9E',
-                          transition: 'width 0.3s ease'
-                        }}
-                        title={`${opening.draws} draws`}
-                      />
-                    )}
-                    {opening.losses > 0 && (
-                      <div
-                        style={{
-                          width: `${(opening.losses / opening.count) * 100}%`,
-                          backgroundColor: '#F44336',
-                          transition: 'width 0.3s ease'
-                        }}
-                        title={`${opening.losses} losses`}
-                      />
-                    )}
+                    <div style={{
+                      width: '100%',
+                      height: '12px',
+                      backgroundColor: 'var(--background-secondary)',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--border-color)'
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${opening.percentile}%`,
+                        backgroundColor: opening.percentile >= 75
+                          ? '#4CAF50'
+                          : opening.percentile >= 50
+                            ? '#FFA726'
+                            : '#F44336',
+                        transition: 'width 0.3s ease'
+                      }} />
+                    </div>
                   </div>
-                  <div style={{
-                    fontSize: '10px',
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    gap: '8px'
-                  }}>
-                    <span style={{ color: '#4CAF50' }}>{opening.wins}W</span>
-                    <span style={{ color: '#9E9E9E' }}>{opening.draws}D</span>
-                    <span style={{ color: '#F44336' }}>{opening.losses}L</span>
-                  </div>
-                </div>
+                )}
 
                 <div style={{
                   display: 'flex',
@@ -1697,7 +1824,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>

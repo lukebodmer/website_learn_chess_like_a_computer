@@ -24,6 +24,7 @@
                
             packages = [
             # General packages
+	      pkgs.jq
 	      pkgs.typescript
 	      pkgs.nodejs_24
 	      pkgs.stockfish

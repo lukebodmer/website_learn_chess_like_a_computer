@@ -1294,20 +1294,20 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                   tickFormatter={(value) => `${value}%`}
                 />
                 <Tooltip content={renderDrawsTooltip} />
-                {/* Population Average - Semi-transparent background bar */}
-                {eloBracket && (
-                  <Bar dataKey="popAvg" radius={[4, 4, 0, 0]} fillOpacity={0.3}>
-                    {drawsData.map((entry, index) => (
-                      <Cell key={`cell-pop-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                )}
                 {/* User's actual draws - Solid bar */}
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {drawsData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Bar>
+                {/* Population Average - Semi-transparent background bar */}
+                {eloBracket && (
+                  <Bar dataKey="popAvg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                    {drawsData.map((entry, index) => (
+                      <Cell key={`cell-pop-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                )}
               </BarChart>
             </ResponsiveContainer>
           ) : (

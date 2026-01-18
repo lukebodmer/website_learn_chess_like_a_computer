@@ -49,6 +49,7 @@
         {% if user.is_authenticated %}
             <a href="{% url 'analysis:user_reports' %}">My Reports</a>
         {% endif %}
+        <a href="{% url 'analysis:learn' %}">Learn</a>
         <a href="{% url 'analysis:games' %}">Games</a>
     </div>
 

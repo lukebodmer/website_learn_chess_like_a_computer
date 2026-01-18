@@ -278,6 +278,31 @@ def games(request):
     return render(request, 'analysis/games.html')
 
 
+def learn(request):
+    """Learn page"""
+    return render(request, 'analysis/learn.html')
+
+
+def learn_openings(request):
+    """Learn about openings"""
+    return render(request, 'analysis/learn/openings.html')
+
+
+def learn_evaluations(request):
+    """Learn about how evaluations work"""
+    return render(request, 'analysis/learn/evaluations.html')
+
+
+def learn_cheating(request):
+    """Learn about how cheating is detected"""
+    return render(request, 'analysis/learn/cheating.html')
+
+
+def learn_chess_data(request):
+    """Learn about how chess data works"""
+    return render(request, 'analysis/learn/chess_data.html')
+
+
 def lichess_login(request):
     """Initiate Lichess OAuth flow or redirect to analysis if already connected"""
     # Check if user is authenticated and already has a connected Lichess account
