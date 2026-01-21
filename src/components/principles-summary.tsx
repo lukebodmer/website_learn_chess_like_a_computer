@@ -27,9 +27,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
       'endgame_technique': 'Endgame Technique',
       'king_safety': 'King Safety',
       'checkmate_ability': 'Checkmate Ability',
-      'tactics_vision': 'Tactics Vision',
       'defensive_skill': 'Defensive Skill',
-      'big_picture': 'Big Picture',
       'precision_move_quality': 'Precision & Quality',
       'planning_calculating': 'Planning & Calculating',
       'time_management': 'Time Management'

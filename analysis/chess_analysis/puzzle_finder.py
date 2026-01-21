@@ -82,22 +82,22 @@ class PuzzleFinder:
             "doubleBishopMate",
             "dovetailMate"
         ],
-        "tactics_vision": [
-            "fork",
-            "pin",
-            "skewer",
-            "discoveredAttack",
-            "discoveredCheck",
-            "doubleCheck",
-            "hangingPiece",
-            "trappedPiece",
-            "capturingDefender",
-            "attraction",
-            "deflection",
-            "clearance",
-            "interference",
-            "xRayAttack"
-        ],
+        # "tactics_vision": [
+        #     "fork",
+        #     "pin",
+        #     "skewer",
+        #     "discoveredAttack",
+        #     "discoveredCheck",
+        #     "doubleCheck",
+        #     "hangingPiece",
+        #     "trappedPiece",
+        #     "capturingDefender",
+        #     "attraction",
+        #     "deflection",
+        #     "clearance",
+        #     "interference",
+        #     "xRayAttack"
+        # ],
         "defensive_skill": [
             "defensiveMove",
             "equality",
@@ -105,13 +105,13 @@ class PuzzleFinder:
             "intermezzo",
             "zugzwang"
         ],
-        "big_picture": [
-            "hangingPiece",
-            "trappedPiece",
-            "capturingDefender",
-            "advantage",
-            "crushing"
-        ],
+        # "big_picture": [
+        #     "hangingPiece",
+        #     "trappedPiece",
+        #     "capturingDefender",
+        #     "advantage",
+        #     "crushing"
+        # ],
         "precision_move_quality": [
             "quietMove",
             "advantage",

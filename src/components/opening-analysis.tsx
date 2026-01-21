@@ -7,12 +7,26 @@ import { SendToBuddyBoardIcon } from './send-to-buddy-board-icon';
 
 // Helper function to determine ELO bracket
 const getEloBracket = (rating: number): string => {
-  if (rating < 1200) return '800-1200';
-  if (rating < 1400) return '1200-1400';
-  if (rating < 1600) return '1400-1600';
-  if (rating < 1800) return '1600-1800';
-  if (rating < 2000) return '1800-2000';
-  return '2000+';
+  if (rating < 600) return 'below-600';
+  if (rating < 700) return '600-700';
+  if (rating < 800) return '700-800';
+  if (rating < 900) return '800-900';
+  if (rating < 1000) return '900-1000';
+  if (rating < 1100) return '1000-1100';
+  if (rating < 1200) return '1100-1200';
+  if (rating < 1300) return '1200-1300';
+  if (rating < 1400) return '1300-1400';
+  if (rating < 1500) return '1400-1500';
+  if (rating < 1600) return '1500-1600';
+  if (rating < 1700) return '1600-1700';
+  if (rating < 1800) return '1700-1800';
+  if (rating < 1900) return '1800-1900';
+  if (rating < 2000) return '1900-2000';
+  if (rating < 2100) return '2000-2100';
+  if (rating < 2200) return '2100-2200';
+  if (rating < 2300) return '2200-2300';
+  if (rating < 2400) return '2300-2400';
+  return '2400+';
 };
 
 // Helper function to calculate z-score and convert to percentile
@@ -160,25 +174,28 @@ interface EloAveragesData {
       skew: number;
     };
   };
-  openings?: {
-    [timeControl: string]: {
-      [openingName: string]: {
-        eco: string;
-        opening_inaccuracies_per_game: {
-          mean: number;
-          std: number;
-          skew: number;
-        };
-        opening_mistakes_per_game: {
-          mean: number;
-          std: number;
-          skew: number;
-        };
-        opening_blunders_per_game: {
-          mean: number;
-          std: number;
-          skew: number;
-        };
+}
+
+interface OpeningStatsData {
+  [timeControl: string]: {
+    [openingName: string]: {
+      eco: string;
+      sample_size: number;
+      number_of_times_played: number;
+      opening_inaccuracies_per_game: {
+        mean: number;
+        std: number;
+        skew: number;
+      };
+      opening_mistakes_per_game: {
+        mean: number;
+        std: number;
+        skew: number;
+      };
+      opening_blunders_per_game: {
+        mean: number;
+        std: number;
+        skew: number;
       };
     };
   };
@@ -188,6 +205,7 @@ interface OpeningAnalysisProps {
   enrichedGames: GameOpening[];
   username: string;
   eloAveragesData?: EloAveragesData | null;
+  openingStatsData?: OpeningStatsData | null;
 }
 
 interface OpeningVariation {
@@ -224,7 +242,8 @@ interface OpeningData {
 export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   enrichedGames = [],
   username,
-  eloAveragesData = null
+  eloAveragesData = null,
+  openingStatsData = null
 }) => {
   const [filteredGames, setFilteredGames] = useState<GameOpening[]>([]);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
@@ -237,6 +256,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   const [selectedVariationName, setSelectedVariationName] = useState<string | null>(null);
   const [boardSize, setBoardSize] = useState<number>(400);
   const [sortBy, setSortBy] = useState<'percentile' | 'name' | 'games'>('percentile');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Responsive board size based on window width
   useEffect(() => {
@@ -511,8 +531,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
     // Convert to array (will sort after calculating percentiles)
     const openingsData = Array.from(openingsMap.values());
 
-    // Calculate percentiles for each opening if eloAveragesData is available
-    if (eloAveragesData) {
+    // Calculate percentiles for each opening if openingStatsData is available
+    if (openingStatsData) {
       // Determine which time control to use based on current filter
       const speedFilter = gameFilterManager.getCurrentSpeedFilter();
       let timeControl: string | null = null;
@@ -534,10 +554,11 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         timeControl = speedFilter[0];
       }
 
-      if (timeControl && eloAveragesData.openings?.[timeControl]) {
+      if (timeControl && openingStatsData[timeControl]) {
         openingsData.forEach(opening => {
-          const openingKey = opening.baseName.toLowerCase();
-          const openingStats = eloAveragesData.openings![timeControl!][openingKey];
+          // Try to find the opening stats using the base name
+          // The data uses title case, so we need to match exactly
+          const openingStats = openingStatsData[timeControl!][opening.baseName];
 
           if (openingStats) {
             // Calculate user's error score
@@ -597,43 +618,51 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       openingsData,
       totalGames: validGameCount
     };
-  }, [filteredGames, username, currentFilter, eloAveragesData]);
+  }, [filteredGames, username, currentFilter, openingStatsData]);
 
-  // Sort openings based on the selected sort method
+  // Sort openings based on the selected sort method and direction
   const sortedOpeningsData = useMemo(() => {
     const sorted = [...openingsData];
 
     switch (sortBy) {
       case 'name':
         // Sort alphabetically by base name
-        sorted.sort((a, b) => a.baseName.localeCompare(b.baseName));
+        sorted.sort((a, b) => {
+          const comparison = a.baseName.localeCompare(b.baseName);
+          return sortDirection === 'asc' ? comparison : -comparison;
+        });
         break;
       case 'games':
-        // Sort by number of games (most first)
-        sorted.sort((a, b) => b.count - a.count);
+        // Sort by number of games
+        sorted.sort((a, b) => {
+          const comparison = b.count - a.count;
+          return sortDirection === 'asc' ? comparison : -comparison;
+        });
         break;
       case 'percentile':
       default:
-        // Sort by percentile (lowest/worst first)
+        // Sort by percentile
         sorted.sort((a, b) => {
           const hasPercentileA = a.percentile !== undefined && a.percentile !== null;
           const hasPercentileB = b.percentile !== undefined && b.percentile !== null;
 
+          let comparison: number;
           if (hasPercentileA && hasPercentileB) {
-            return a.percentile! - b.percentile!;
+            comparison = a.percentile! - b.percentile!;
           } else if (hasPercentileA) {
-            return -1;
+            comparison = -1;
           } else if (hasPercentileB) {
-            return 1;
+            comparison = 1;
           } else {
-            return b.count - a.count;
+            comparison = b.count - a.count;
           }
+          return sortDirection === 'asc' ? comparison : -comparison;
         });
         break;
     }
 
     return sorted;
-  }, [openingsData, sortBy]);
+  }, [openingsData, sortBy, sortDirection]);
 
   // Auto-select the first opening and its first variation when openingsData changes
   useEffect(() => {
@@ -666,6 +695,18 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       }
     }
   }, [openingsData]);
+
+  // Handler to toggle sort column and direction
+  const handleSortColumnClick = (column: 'percentile' | 'name' | 'games') => {
+    if (sortBy === column) {
+      // Clicking the same column toggles direction
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Clicking a new column sets it as the sort column with ascending direction
+      setSortBy(column);
+      setSortDirection('asc');
+    }
+  };
 
   // Handler to send games with selected opening to buddy board
   const handleSendToBuddyBoard = () => {
@@ -912,12 +953,11 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 let popAvgMistakes = 0;
                 let popAvgBlunders = 0;
 
-                if (eloAveragesData && timeControl && selectedOpening) {
-                  // openings is at the root level of eloAveragesData
-                  if (eloAveragesData.openings?.[timeControl]) {
-                    // Use base opening name (lowercase) to look up population stats
-                    const openingKey = selectedOpening.baseName.toLowerCase();
-                    const openingStats = eloAveragesData.openings[timeControl][openingKey];
+                if (openingStatsData && timeControl && selectedOpening) {
+                  // openingStatsData is organized by time control
+                  if (openingStatsData[timeControl]) {
+                    // Use base opening name to look up population stats (exact case match)
+                    const openingStats = openingStatsData[timeControl][selectedOpening.baseName];
 
                     if (openingStats) {
                       popAvgInaccuracies = openingStats.opening_inaccuracies_per_game?.mean || 0;
@@ -1639,7 +1679,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   cursor: 'pointer',
                   userSelect: 'none'
                 }}
-                onClick={() => setSortBy('name')}
+                onClick={() => handleSortColumnClick('name')}
               >
                 <span style={{
                   fontSize: '12px',
@@ -1647,7 +1687,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   color: sortBy === 'name' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
                 }}>
-                  Opening Name {sortBy === 'name' && '▼'}
+                  Opening Name {sortBy === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </span>
               </div>
               <div
@@ -1658,7 +1698,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   userSelect: 'none',
                   marginRight: '20px'
                 }}
-                onClick={() => setSortBy('percentile')}
+                onClick={() => handleSortColumnClick('percentile')}
               >
                 <span style={{
                   fontSize: '12px',
@@ -1666,7 +1706,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   color: sortBy === 'percentile' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
                 }}>
-                  Performance {sortBy === 'percentile' && '▼'}
+                  Performance {sortBy === 'percentile' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </span>
               </div>
               <div
@@ -1676,7 +1716,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   cursor: 'pointer',
                   userSelect: 'none'
                 }}
-                onClick={() => setSortBy('games')}
+                onClick={() => handleSortColumnClick('games')}
               >
                 <span style={{
                   fontSize: '12px',
@@ -1684,7 +1724,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                   color: sortBy === 'games' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
                 }}>
-                  Games {sortBy === 'games' && '▼'}
+                  Games {sortBy === 'games' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </span>
               </div>
             </div>

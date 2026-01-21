@@ -12,7 +12,7 @@
             Generate Lichess Report
         </a>
         {% if user.userprofile.chess_com_username %}
-        <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="chess-com-button-small">
+        <a href="{% url 'analysis:generate_report_page' platform='chess.com' username=user.userprofile.chess_com_username %}" class="chess-com-button-small">
             <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="chess-com-logo">
             Generate Chess.com Report
         </a>

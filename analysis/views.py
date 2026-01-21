@@ -29,6 +29,7 @@ from .chess_analysis import ChessAnalyzer
 from .chess_analysis.game_enricher import GameEnricher
 from django.http import StreamingHttpResponse
 from .report_generation import generate_html_report
+from .opening_classifier import classify_opening_by_moves, lookup_opening_in_database
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
@@ -311,7 +312,7 @@ def lichess_login(request):
             profile = UserProfile.objects.get(user=request.user)
             if profile.lichess_username and profile.lichess_access_token:
                 # User is already connected, redirect directly to analysis
-                return redirect('analysis:user_analysis', username=profile.lichess_username)
+                return redirect('analysis:generate_report_page', platform='lichess', username=profile.lichess_username)
         except UserProfile.DoesNotExist:
             pass  # Continue with OAuth flow
 
@@ -387,27 +388,33 @@ def lichess_callback(request):
         request.session.pop('code_verifier', None)
         request.session.pop('oauth_state', None)
 
-        return redirect('analysis:user_analysis', username=lichess_username)
+        return redirect('analysis:generate_report_page', platform='lichess', username=lichess_username)
 
     except Exception as e:
         return HttpResponse(f"Authentication error: {str(e)}", status=500)
 
 
 @login_required
-def user_analysis(request, username):
-    """Render Lichess analysis page immediately, then fetch games asynchronously"""
-    # Get access token
-    profile = get_object_or_404(UserProfile, user=request.user, lichess_username=username)
-    access_token = profile.lichess_access_token
+def generate_report_page(request, platform, username):
+    """Unified report generation page for both Lichess and Chess.com"""
+    if platform == 'lichess':
+        # Verify Lichess authentication
+        profile = get_object_or_404(UserProfile, user=request.user, lichess_username=username)
+        access_token = profile.lichess_access_token
 
-    if not access_token:
-        messages.error(request, "No valid Lichess authentication found")
-        return redirect('analysis:lichess_login')
+        if not access_token:
+            messages.error(request, "No valid Lichess authentication found")
+            return redirect('analysis:lichess_login')
+    elif platform == 'chess.com':
+        # Verify Chess.com account
+        profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
+    else:
+        return HttpResponse("Invalid platform", status=400)
 
-    # Render page immediately without waiting for games
-    return render(request, 'analysis/user_analysis.html', {
+    # Render unified page with React component
+    return render(request, 'analysis/generate_report.html', {
         'username': username,
-        'loading': True  # Indicate we're in loading state
+        'platform': platform
     })
 
 @login_required
@@ -455,6 +462,13 @@ def fetch_lichess_games(request, username):
             game_data['newest_game_date']
         )
 
+        # Get latest ELO ratings by time control
+        elo_by_time_control = get_latest_elo_by_time_control(
+            game_data['ndjson_data'],
+            username,
+            'lichess'
+        )
+
         return JsonResponse({
             'success': True,
             'games_count': game_data['games_count'],
@@ -463,7 +477,9 @@ def fetch_lichess_games(request, username):
             'data_size': len(game_data['ndjson_data']),
             'date_range': date_range_str,
             'oldest_game_date': game_data['oldest_game_date'].strftime("%B %d, %Y") if game_data['oldest_game_date'] else None,
-            'newest_game_date': game_data['newest_game_date'].strftime("%B %d, %Y") if game_data['newest_game_date'] else None
+            'newest_game_date': game_data['newest_game_date'].strftime("%B %d, %Y") if game_data['newest_game_date'] else None,
+            'elo_ratings': elo_by_time_control,
+            'ndjson_data': game_data['ndjson_data']
         })
 
     except Exception as e:
@@ -571,34 +587,29 @@ def load_elo_averages_for_time_controls(elo_by_time_control):
     Returns:
         Dictionary with structure:
         {
-            'bullet': { 'bracket': '1200-1400', 'data': {...} },
-            'blitz': { 'bracket': '800-1200', 'data': {...} },
-            'rapid': { 'bracket': '800-1200', 'data': {...} },
-            'openings': { 'bullet': {...}, 'blitz': {...}, 'rapid': {...} }
+            'bullet': { 'bracket': '1300-1400', 'data': {...} },
+            'blitz': { 'bracket': '700-800', 'data': {...} },
+            'rapid': { 'bracket': '800-900', 'data': {...} }
         }
     """
     result = {}
-    openings_data = None
 
     for time_control, elo_rating in elo_by_time_control.items():
-        # Determine bracket for this ELO
-        if elo_rating < 1200:
-            bracket = '800-1200'
-        elif elo_rating < 1400:
-            bracket = '1200-1400'
-        elif elo_rating < 1600:
-            bracket = '1400-1600'
-        elif elo_rating < 1800:
-            bracket = '1600-1800'
-        elif elo_rating < 2000:
-            bracket = '1800-2000'
+        # Determine bracket for this ELO (100-point buckets)
+        if elo_rating < 600:
+            bracket = 'below-600'
+        elif elo_rating >= 2400:
+            bracket = '2400+'
         else:
-            bracket = '2000+'
+            # Round down to nearest 100 and create bracket
+            lower_bound = (elo_rating // 100) * 100
+            upper_bound = lower_bound + 100
+            bracket = f'{lower_bound}-{upper_bound}'
 
         # Load the JSON file for this bracket
         try:
             from django.conf import settings
-            json_path = os.path.join(settings.BASE_DIR, 'data', 'elo_averages', f'{bracket}.json')
+            json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'elo_averages', f'{bracket}.json')
 
             if os.path.exists(json_path):
                 with open(json_path, 'r') as f:
@@ -612,20 +623,83 @@ def load_elo_averages_for_time_controls(elo_by_time_control):
                     'elo': elo_rating,
                     'data': time_control_data
                 }
-
-                # Extract openings data (only once, since it's the same for all time controls in a bracket)
-                if openings_data is None and 'openings' in bracket_data:
-                    openings_data = bracket_data['openings']
             else:
                 print(f"ELO averages file not found: {json_path}")
         except Exception as e:
             print(f"Error loading ELO averages for {time_control} at bracket {bracket}: {e}")
 
-    # Add openings data to result if found
-    if openings_data:
-        result['openings'] = openings_data
-
     return result
+
+
+def load_opening_stats_for_elo(elo_by_time_control):
+    """Load opening statistics based on user's ELO rating for each time control
+
+    For each time control, determines the appropriate ELO bracket and loads the
+    corresponding opening stats for that bracket.
+
+    Args:
+        elo_by_time_control: Dictionary with time controls and ELO ratings
+                            Example: {'bullet': 1377, 'blitz': 1248, 'rapid': 878}
+
+    Returns:
+        Dictionary with opening stats organized by time control, or None if not found
+        Example: {
+            'bullet': {
+                'Sicilian Defense': {
+                    'eco': 'B20',
+                    'sample_size': 1000,
+                    'number_of_times_played': 12375,
+                    'opening_inaccuracies_per_game': {...},
+                    ...
+                }
+            },
+            'blitz': {...},
+            'rapid': {...}
+        }
+    """
+    if not elo_by_time_control:
+        return None
+
+    from django.conf import settings
+
+    # Result dictionary to hold opening stats for each time control
+    result = {}
+
+    # For each time control, load the appropriate bracket file
+    for time_control, elo in elo_by_time_control.items():
+        # Determine bracket for this ELO (100-point buckets)
+        if elo < 600:
+            bracket = 'below-600'
+        elif elo >= 2400:
+            bracket = '2400+'
+        else:
+            # Round down to nearest 100 and create bracket
+            lower_bound = (int(elo) // 100) * 100
+            upper_bound = lower_bound + 100
+            bracket = f'{lower_bound}-{upper_bound}'
+
+        # Load the opening stats JSON file for this bracket
+        try:
+            json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'opening_stats', f'{bracket}.json')
+
+            if os.path.exists(json_path):
+                with open(json_path, 'r') as f:
+                    bracket_data = json.load(f)
+
+                # Extract just the data for this time control from the bracket file
+                if time_control in bracket_data:
+                    result[time_control] = bracket_data[time_control]
+                else:
+                    print(f"Warning: Time control '{time_control}' not found in {json_path}")
+            else:
+                print(f"Opening stats file not found: {json_path}")
+        except Exception as e:
+            print(f"Error loading opening stats for bracket {bracket}, time control {time_control}: {e}")
+            import traceback
+            traceback.print_exc()
+
+    # Return None if we didn't load any data
+    return result if result else None
 
 
 def _render_completed_report(request, report, platform, username, game_dataset):
@@ -666,6 +740,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
 
     # Load ELO averages data based on user's ratings by time control
     elo_averages_data = "{}"
+    opening_stats_data = "{}"
     if game_dataset.raw_data:
         elo_by_time_control = get_latest_elo_by_time_control(
             game_dataset.raw_data,
@@ -677,6 +752,11 @@ def _render_completed_report(request, report, platform, username, game_dataset):
             if elo_averages:
                 elo_averages_data = json.dumps(elo_averages, indent=2)
 
+            # Load opening stats separately
+            opening_stats = load_opening_stats_for_elo(elo_by_time_control)
+            if opening_stats:
+                opening_stats_data = json.dumps(opening_stats, indent=2)
+
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
@@ -686,6 +766,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
         'stockfish_analysis': stockfish_analysis_display,
         'custom_puzzles': custom_puzzles_display,
         'elo_averages': elo_averages_data,
+        'opening_stats': opening_stats_data,
         'auto_start': False,  # Don't auto-start streaming for existing reports
         'platform': platform
     })
@@ -762,6 +843,7 @@ def _generate_unified_analysis_report(request, username, dataset_id):
 
     # Load ELO averages data based on user's ratings by time control
     elo_averages_data = "{}"
+    opening_stats_data = "{}"
     if game_dataset.raw_data:
         elo_by_time_control = get_latest_elo_by_time_control(
             game_dataset.raw_data,
@@ -773,6 +855,11 @@ def _generate_unified_analysis_report(request, username, dataset_id):
             if elo_averages:
                 elo_averages_data = json.dumps(elo_averages, indent=2)
 
+            # Load opening stats separately
+            opening_stats = load_opening_stats_for_elo(elo_by_time_control)
+            if opening_stats:
+                opening_stats_data = json.dumps(opening_stats, indent=2)
+
     # Show the unified report page
     return render(request, 'analysis/report.html', {
         'username': username,
@@ -782,6 +869,7 @@ def _generate_unified_analysis_report(request, username, dataset_id):
         'stockfish_analysis': json.dumps({}),  # Empty initially, will be populated during streaming
         'custom_puzzles': json.dumps([]),  # Empty initially, will be populated after analysis
         'elo_averages': elo_averages_data,
+        'opening_stats': opening_stats_data,
         'auto_start': True,  # Tell template to auto-start streaming
         'platform': platform  # Tell template which platform this is
     })
@@ -1068,19 +1156,6 @@ def chess_com_disconnect(request):
     return redirect('analysis:home')
 
 
-@login_required
-def chess_com_analysis(request, username):
-    """Render Chess.com analysis page immediately, then fetch games asynchronously"""
-    # Verify this is the user's chess.com account
-    profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
-
-    # Render page immediately without waiting for games
-    return render(request, 'analysis/chess_com_analysis.html', {
-        'username': username,
-        'loading': True  # Indicate we're in loading state
-    })
-
-
 def parse_pgn_moves_and_clocks(pgn_text, initial_time=300, increment=0):
     """Extract moves and clock times from Chess.com PGN format"""
     import re
@@ -1181,197 +1256,6 @@ def extract_opening_name_from_eco_url(eco_url):
         return "Unknown Opening"
     except:
         return "Unknown Opening"
-
-
-# Global cache for opening database
-_opening_database = None
-
-
-def load_opening_database():
-    """Load and parse the lichess ECO database with FEN positions"""
-    global _opening_database
-
-    if _opening_database is not None:
-        return _opening_database
-
-    try:
-        import os
-        import csv
-        import re
-        from django.conf import settings
-
-        # Path to the TSV file
-        tsv_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'openings', 'lichess_eco_database.tsv')
-
-        _opening_database = []
-
-        with open(tsv_path, 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file, delimiter='\t')
-            for row in reader:
-                # Extract moves from PGN and convert to list
-                pgn_moves = row['pgn'].strip()
-                epd_fen = row['epd'].strip()
-
-                if not pgn_moves or not epd_fen:
-                    continue
-
-                # Remove move numbers like "1. ", "2. " etc and split into moves
-                # Handle patterns like "1. Nh3", "1. Nh3 d5 2. g3 e5 3. f4"
-                moves_only = re.sub(r'\d+\.\s*', '', pgn_moves).strip()
-                moves_list = moves_only.split() if moves_only else []
-
-                _opening_database.append({
-                    'eco': row['eco'].strip(),
-                    'name': row['name'].strip(),
-                    'moves': ' '.join(moves_list),  # Store as space-separated string
-                    'ply_count': len(moves_list),
-                    'fen': epd_fen
-                })
-
-        # Sort by ply count descending for backward matching (deepest positions first)
-        _opening_database.sort(key=lambda x: x['ply_count'], reverse=True)
-
-        print(f"Loaded {len(_opening_database)} openings from database")
-
-        return _opening_database
-
-    except Exception as e:
-        print(f"Error loading opening database: {e}")
-        return []
-
-
-def normalize_fen(fen):
-    """Normalize FEN by removing move counters and keeping only position data"""
-    # FEN format: position castling en_passant halfmove fullmove
-    # Database EPD format: position castling en_passant halfmove (no fullmove)
-    # We want to match the database format
-    parts = fen.split()
-    if len(parts) >= 4:
-        return ' '.join(parts[:4])  # Keep position, castling, en_passant, halfmove
-    return fen
-
-
-def moves_to_fen_positions(moves_string):
-    """Convert a moves string to a list of normalized FEN positions at each move"""
-    if not moves_string:
-        return []
-
-    try:
-        import chess
-
-        board = chess.Board()
-        fen_positions = []
-
-        moves_list = moves_string.strip().split()
-
-        for move_str in moves_list:
-            try:
-                move = board.parse_san(move_str)
-                board.push(move)
-                # Normalize FEN to match database format
-                normalized_fen = normalize_fen(board.fen())
-                fen_positions.append(normalized_fen)
-            except (chess.InvalidMoveError, chess.IllegalMoveError):
-                # Stop at first invalid move
-                break
-
-        return fen_positions
-
-    except Exception as e:
-        print(f"Error converting moves to FEN: {e}")
-        return []
-
-
-def classify_opening_by_moves(moves_string):
-    """
-    Classify opening by FEN-based backward matching (handles transpositions)
-
-    Args:
-        moves_string: Space-separated moves like "Nf3 e6 e4 d5 e5 c5"
-
-    Returns:
-        dict with 'eco', 'name', 'ply', 'fen', and 'moves' keys (moves is a space-separated string)
-    """
-    if not moves_string:
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
-
-    try:
-        database = load_opening_database()
-        if not database:
-            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
-
-        # Convert moves to FEN positions
-        fen_positions = moves_to_fen_positions(moves_string)
-        if not fen_positions:
-            return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
-
-        # Try backward matching - start from move 20 (40th ply) or end of game, whichever is shorter
-        max_check_moves = min(40, len(fen_positions))
-
-        # Go backwards through positions to find the deepest (most specific) match
-        for check_ply in range(max_check_moves, 0, -1):
-            game_fen = fen_positions[check_ply - 1]  # Convert to 0-based index
-
-            # Look for exact FEN match in database
-            for opening in database:
-                if opening['ply_count'] == check_ply and opening['fen'] == game_fen:
-                    return {
-                        'eco': opening['eco'],
-                        'name': opening['name'],
-                        'ply': opening['ply_count'],
-                        'fen': opening['fen'],
-                        'moves': opening['moves']
-                    }
-
-        # No match found
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
-
-    except Exception as e:
-        print(f"Error classifying opening: {e}")
-        return {'eco': 'Unknown', 'name': 'Unknown', 'ply': 0, 'fen': '', 'moves': ''}
-
-
-def lookup_opening_in_database(eco, name, ply):
-    """
-    Look up opening in database by ECO, name, and ply to get FEN and moves
-
-    Args:
-        eco: ECO code like "A00"
-        name: Opening name like "Amar Opening"
-        ply: Ply count
-
-    Returns:
-        dict with 'fen' and 'moves' keys (moves is a space-separated string), or empty strings if not found
-    """
-    try:
-        database = load_opening_database()
-        if not database:
-            return {'fen': '', 'moves': ''}
-
-        # Try exact match on all three fields
-        for opening in database:
-            if (opening['eco'] == eco and
-                opening['name'] == name and
-                opening['ply_count'] == ply):
-                return {
-                    'fen': opening['fen'],
-                    'moves': opening['moves']
-                }
-
-        # If no exact match, try matching just ECO and ply
-        for opening in database:
-            if opening['eco'] == eco and opening['ply_count'] == ply:
-                return {
-                    'fen': opening['fen'],
-                    'moves': opening['moves']
-                }
-
-        # No match found
-        return {'fen': '', 'moves': ''}
-
-    except Exception as e:
-        print(f"Error looking up opening in database: {e}")
-        return {'fen': '', 'moves': ''}
 
 
 def parse_chess_com_time_control(time_control_str):
@@ -1913,7 +1797,7 @@ def fetch_chess_com_games(request, username):
         # Configure User-Agent for chess.com API
         Client.request_config["headers"]["User-Agent"] = (
             "Learn Chess Like a Computer - Chess Analysis Tool. "
-            "Contact: admin@learnchesslikeacomputer.com"
+            "Contact: learnchesslikeacomputer@gmail.com"
         )
 
         # Get player's game archives to find most recent games
@@ -2020,13 +1904,22 @@ def fetch_chess_com_games(request, username):
             game_dataset.newest_game_date
         )
 
+        # Get latest ELO ratings by time control
+        elo_by_time_control = get_latest_elo_by_time_control(
+            ndjson_data,
+            username,
+            'chess.com'
+        )
+
         return JsonResponse({
             'success': True,
             'games_count': len(qualified_games),
             'game_dataset_id': game_dataset.id,
             'date_range': date_range_str or "Date range unavailable",
             'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
-            'data_size': len(ndjson_data)
+            'data_size': len(ndjson_data),
+            'elo_ratings': elo_by_time_control,
+            'ndjson_data': ndjson_data
         })
 
     except Exception as e:
@@ -2231,7 +2124,8 @@ def get_lichess_puzzle_data():
             puzzle_fen = get_position_fen_from_pgn(game['pgn'], puzzle['initialPly'])
 
             # Get the last move that led to the puzzle position
-            last_move = get_last_move_from_pgn(game['pgn'], puzzle['initialPly'])
+            # Disabled: Don't show last move highlighting for cleaner puzzle presentation
+            # last_move = get_last_move_from_pgn(game['pgn'], puzzle['initialPly'])
 
             puzzle_data = {
                 'id': puzzle['id'],
@@ -2243,7 +2137,7 @@ def get_lichess_puzzle_data():
                 'plays': puzzle['plays'],
                 'themes': puzzle['themes'],
                 'source': 'lichess',
-                'lastMove': last_move  # Add last move info
+                'lastMove': None  # Don't highlight last move
             }
 
             # Cache until next puzzle (same logic as Chess.com)
@@ -2436,55 +2330,14 @@ def get_last_move_from_chess_com_pgn(pgn, target_fen):
     """
     Get the last move from Chess.com PGN that led to the puzzle position
     Returns dict with 'from' and 'to' squares, or None if not available
+
+    Note: Chess.com puzzles only provide the starting FEN and solution moves.
+    They do NOT provide the game history before the puzzle, so there is no
+    "last move" to highlight. This function returns None for Chess.com puzzles.
     """
-    if not pgn:
-        return None
-
-    try:
-        import chess
-        import chess.pgn
-        from io import StringIO
-
-        # Parse the PGN
-        pgn_io = StringIO(pgn)
-        game = chess.pgn.read_game(pgn_io)
-
-        if not game:
-            return None
-
-        board = game.board()
-        last_move = None
-
-        # Play through all moves until we reach the target FEN
-        for move in game.mainline_moves():
-            # Check if after this move we reach the target position
-            board.push(move)
-
-            # Compare positions (ignore move counters)
-            current_fen_base = ' '.join(board.fen().split()[:4])
-            target_fen_base = ' '.join(target_fen.split()[:4])
-
-            if current_fen_base == target_fen_base:
-                # This is the move that led to the puzzle position
-                return {
-                    'from': chess.square_name(move.from_square),
-                    'to': chess.square_name(move.to_square)
-                }
-
-            last_move = move
-
-        # If we didn't find exact match, return the last move played
-        if last_move:
-            return {
-                'from': chess.square_name(last_move.from_square),
-                'to': chess.square_name(last_move.to_square)
-            }
-
-        return None
-
-    except Exception as e:
-        print(f"Error getting last move from Chess.com PGN: {e}")
-        return None
+    # Chess.com API doesn't provide the move that led to the puzzle position
+    # The puzzle just starts from the given FEN with no prior move history
+    return None
 
 
 def extract_solution_from_pgn(pgn):
@@ -2516,9 +2369,10 @@ def extract_solution_from_pgn(pgn):
                 move_part = part.strip().split()
                 for move in move_part:
                     move = move.strip()
+                    # Filter out placeholders, result indicators, and empty moves
                     if move and not move.startswith('(') and not move.endswith(')'):
-                        # Remove result indicators like 1-0, 0-1, 1/2-1/2
-                        if move not in ['1-0', '0-1', '1/2-1/2', '*']:
+                        # Remove result indicators, placeholders, and ellipsis
+                        if move not in ['1-0', '0-1', '1/2-1/2', '*', '..', '...']:
                             moves.append(move)
 
         return moves[:10]  # Limit to reasonable number of moves

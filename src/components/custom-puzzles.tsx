@@ -44,9 +44,9 @@ const PRINCIPLE_THEME_MAPPING: { [key: string]: string[] } = {
   'endgame_technique': ['endgame', 'pawnEndgame', 'knightEndgame', 'bishopEndgame', 'rookEndgame', 'queenEndgame', 'queenRookEndgame', 'promotion', 'underPromotion'],
   'king_safety': ['exposedKing', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate', 'cornerMate', 'hookMate', 'operaMate', 'balestraMate', 'blindSwineMate', 'pillsburysMate', 'morphysMate', 'triangleMate', 'vukovicMate', 'killBoxMate'],
   'checkmate_ability': ['mate', 'mateIn1', 'mateIn2', 'mateIn3', 'mateIn4', 'mateIn5', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate'],
-  'tactics_vision': ['fork', 'pin', 'skewer', 'discoveredAttack', 'discoveredCheck', 'doubleCheck', 'hangingPiece', 'trappedPiece', 'capturingDefender', 'attraction', 'deflection', 'clearance', 'interference', 'xRayAttack'],
+  // 'tactics_vision': ['fork', 'pin', 'skewer', 'discoveredAttack', 'discoveredCheck', 'doubleCheck', 'hangingPiece', 'trappedPiece', 'capturingDefender', 'attraction', 'deflection', 'clearance', 'interference', 'xRayAttack'],
   'defensive_skill': ['defensiveMove', 'equality', 'quietMove', 'intermezzo', 'zugzwang'],
-  'big_picture': ['hangingPiece', 'trappedPiece', 'capturingDefender', 'advantage', 'crushing'],
+  // 'big_picture': ['hangingPiece', 'trappedPiece', 'capturingDefender', 'advantage', 'crushing'],
   'precision_move_quality': ['quietMove', 'advantage', 'defensiveMove', 'clearance', 'intermezzo'],
   'planning_calculating': ['quietMove', 'long', 'veryLong', 'sacrifice', 'clearance', 'intermezzo'],
   'time_management': ['short', 'oneMove', 'mateIn1', 'mateIn2']
@@ -535,147 +535,310 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     }
   }
 
-  if (!puzzles || puzzles.length === 0) {
-    return (
-      <div className="empty-state" style={{
-        padding: '40px',
-        textAlign: 'center',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ fontSize: '48px', marginBottom: '15px' }}>🧩</div>
-        <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
-          No puzzles available
-        </div>
-        <div style={{ fontSize: '14px' }}>
-          Generate an analysis report to get personalized training puzzles
-        </div>
-      </div>
-    )
-  }
-
-  if (filteredPuzzles.length === 0) {
-    return (
-      <div className="empty-state" style={{
-        padding: '40px',
-        textAlign: 'center',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ fontSize: '48px', marginBottom: '15px' }}>🔍</div>
-        <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
-          No puzzles for this principle
-        </div>
-        <div style={{ fontSize: '14px' }}>
-          Try selecting a different principle or view all puzzles
-        </div>
-      </div>
-    )
-  }
-
-  // Don't render if position isn't loaded yet
-  if (!position) {
-    return (
-      <div className="puzzle-loading" style={{
-        padding: '40px',
-        textAlign: 'center'
-      }}>
-        <div className="loading-spinner" style={{ margin: '0 auto 15px' }}></div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-          Loading puzzle...
-        </div>
-      </div>
-    )
-  }
-
   const solvedCount = solvedPuzzles.size
 
   return (
-    <div className="puzzle-column" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '12px',
-      maxWidth: '100%'
+    <div className="custom-puzzles" style={{
+      padding: '20px',
+      backgroundColor: 'var(--background-secondary)',
+      minHeight: '700px'
     }}>
-      {/* Header */}
+      {/* Main Layout */}
       <div style={{
-        width: '100%',
-        maxWidth: '500px',
-        padding: '12px',
-        backgroundColor: 'var(--background-primary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        textAlign: 'center'
-      }}>
-        <div className="puzzle-title" style={{
-          fontSize: '14px',
-          fontWeight: '600',
-          color: 'var(--text-primary)',
-          marginBottom: '4px'
-        }}>
-          Puzzle {currentPuzzleIndex + 1} of {filteredPuzzles.length}
-        </div>
-        <div className="puzzle-status" style={{
-          fontSize: '13px',
-          color: 'var(--text-secondary)'
-        }}>
-          Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
-        </div>
-      </div>
-
-      {/* Status Message */}
-      <div style={{
-        width: '100%',
-        maxWidth: '500px',
-        padding: '8px',
-        backgroundColor: puzzleState.status === 'solved' ? 'rgba(0, 255, 0, 0.1)' : puzzleState.status === 'failed' ? 'rgba(255, 0, 0, 0.1)' : 'var(--background-primary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        textAlign: 'center',
-        fontSize: '14px',
-        fontWeight: '600',
-        color: puzzleState.status === 'solved' ? '#00aa00' : puzzleState.status === 'failed' ? '#cc0000' : 'var(--text-primary)'
-      }}>
-        {getStatusMessage()}
-      </div>
-
-      {/* Chess Board */}
-      <div style={{
-        width: '100%',
-        maxWidth: '500px',
-        backgroundColor: 'var(--background-primary)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        padding: '16px',
         display: 'flex',
-        justifyContent: 'center'
-      }}>
-        <BaseChessBoard
-          size={size}
-          position={position}
-          pieceTheme={pieceTheme}
-          orientation="white"
-          coordinates={true}
-          interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
-          selectedSquare={selectedSquare}
-          legalMoves={legalMoves}
-          highlightedSquares={highlightedSquares}
-          arrows={arrows}
-          lastMove={lastMoveSquares}
-          animationData={animationData}
-          onSquareClick={handleSquareClick}
-          onAnimationComplete={handleAnimationComplete}
-        />
-      </div>
-
-      {/* Controls */}
-      <div className="puzzle-controls" style={{
-        display: 'flex',
-        gap: '8px',
+        gap: '20px',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        width: '100%',
-        maxWidth: '500px'
+        minHeight: '650px'
       }}>
+        {/* Content Area */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+          flex: '1',
+          minWidth: '320px',
+          maxWidth: '500px'
+        }}>
+          {!puzzles || puzzles.length === 0 ? (
+            <>
+              {/* Header Placeholder */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                padding: '12px',
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                textAlign: 'center'
+              }}>
+                <div className="puzzle-title" style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: 'var(--text-primary)',
+                  marginBottom: '4px'
+                }}>
+                  Puzzle
+                </div>
+                <div className="puzzle-status" style={{
+                  fontSize: '13px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Rating: - • Solved: 0/0
+                </div>
+              </div>
+
+              {/* Status Message Placeholder */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                padding: '8px',
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: 'var(--text-secondary)'
+              }}>
+                No puzzles available yet
+              </div>
+
+              {/* Chess Board with Starting Position */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  flexShrink: 0
+                }}>
+                  <BaseChessBoard
+                    size={size}
+                    position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+                    pieceTheme={pieceTheme}
+                    orientation="white"
+                    coordinates={true}
+                    interactive={false}
+                    highlightedSquares={[]}
+                    arrows={[]}
+                  />
+                </div>
+              </div>
+
+              {/* Controls Placeholder */}
+              <div className="puzzle-controls" style={{
+                display: 'flex',
+                gap: '8px',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                width: '100%',
+                maxWidth: '500px'
+              }}>
+                <button
+                  className="btn"
+                  disabled={true}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--background-tertiary)',
+                    color: 'var(--text-muted)',
+                    cursor: 'not-allowed',
+                    fontWeight: '600',
+                    opacity: 0.6
+                  }}
+                >
+                  ← Previous
+                </button>
+
+                <button
+                  className="btn"
+                  disabled={true}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--background-tertiary)',
+                    color: 'var(--text-muted)',
+                    cursor: 'not-allowed',
+                    fontWeight: '600',
+                    opacity: 0.6
+                  }}
+                >
+                  Reset
+                </button>
+
+                <button
+                  className="btn"
+                  disabled={true}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--background-tertiary)',
+                    color: 'var(--text-muted)',
+                    cursor: 'not-allowed',
+                    fontWeight: '600',
+                    opacity: 0.6
+                  }}
+                >
+                  Hint
+                </button>
+
+                <button
+                  className="btn btn-success"
+                  disabled={true}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '14px',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--background-tertiary)',
+                    color: 'var(--text-muted)',
+                    cursor: 'not-allowed',
+                    fontWeight: '600',
+                    opacity: 0.6
+                  }}
+                >
+                  Next →
+                </button>
+              </div>
+            </>
+          ) : filteredPuzzles.length === 0 ? (
+            <div className="empty-state" style={{
+              padding: '40px',
+              textAlign: 'center',
+              color: 'var(--text-secondary)',
+              backgroundColor: 'var(--background-primary)',
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)',
+              width: '100%'
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '15px' }}>🔍</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
+                No puzzles for this principle
+              </div>
+              <div style={{ fontSize: '14px' }}>
+                Try selecting a different principle or view all puzzles
+              </div>
+            </div>
+          ) : !position ? (
+            <div className="puzzle-loading" style={{
+              padding: '40px',
+              textAlign: 'center',
+              backgroundColor: 'var(--background-primary)',
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)',
+              width: '100%'
+            }}>
+              <div className="loading-spinner" style={{ margin: '0 auto 15px' }}></div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                Loading puzzle...
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                padding: '12px',
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                textAlign: 'center'
+              }}>
+                <div className="puzzle-title" style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: 'var(--text-primary)',
+                  marginBottom: '4px'
+                }}>
+                  Puzzle {currentPuzzleIndex + 1} of {filteredPuzzles.length}
+                </div>
+                <div className="puzzle-status" style={{
+                  fontSize: '13px',
+                  color: 'var(--text-secondary)'
+                }}>
+                  Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
+                </div>
+              </div>
+
+              {/* Status Message */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                padding: '8px',
+                backgroundColor: puzzleState.status === 'solved' ? 'rgba(0, 255, 0, 0.1)' : puzzleState.status === 'failed' ? 'rgba(255, 0, 0, 0.1)' : 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: puzzleState.status === 'solved' ? '#00aa00' : puzzleState.status === 'failed' ? '#cc0000' : 'var(--text-primary)'
+              }}>
+                {getStatusMessage()}
+              </div>
+
+              {/* Chess Board */}
+              <div style={{
+                width: '100%',
+                maxWidth: '500px',
+                backgroundColor: 'var(--background-primary)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  flexShrink: 0
+                }}>
+                  <BaseChessBoard
+                    size={size}
+                  position={position}
+                  pieceTheme={pieceTheme}
+                  orientation="white"
+                  coordinates={true}
+                  interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
+                  selectedSquare={selectedSquare}
+                  legalMoves={legalMoves}
+                  highlightedSquares={highlightedSquares}
+                  arrows={arrows}
+                  lastMove={lastMoveSquares}
+                  animationData={animationData}
+                  onSquareClick={handleSquareClick}
+                  onAnimationComplete={handleAnimationComplete}
+                />
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="puzzle-controls" style={{
+                display: 'flex',
+                gap: '8px',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                width: '100%',
+                maxWidth: '500px'
+              }}>
         <button
           className="btn"
           onClick={previousPuzzle}
@@ -817,6 +980,10 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
         >
           Next →
         </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

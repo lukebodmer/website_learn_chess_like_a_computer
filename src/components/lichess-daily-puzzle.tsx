@@ -506,21 +506,6 @@ const LichessDailyPuzzle: React.FC<LichessDailyPuzzleProps> = ({
         )}
 
       </div>
-
-      {/* Hint Display */}
-      {puzzleState.showHint && (
-        <div style={{
-          marginTop: '8px',
-          padding: '8px',
-          background: '#e9ecef',
-          borderRadius: '4px',
-          fontSize: '12px',
-          textAlign: 'center',
-          color: '#495057'
-        }}>
-          💡 Hint: {puzzleData?.solution?.[puzzleState.currentMoveIndex] || 'No more hints available'}
-        </div>
-      )}
     </div>
   )
 }

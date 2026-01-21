@@ -1,0 +1,4128 @@
+{
+  "bullet": {
+    "Alekhine Defense": {
+      "eco": "B02",
+      "sample_size": 887,
+      "number_of_times_played": 719,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.04,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.48,
+        "std": 1.43,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.58,
+        "std": 0.87,
+        "skew": 1.82
+      }
+    },
+    "Barnes Opening": {
+      "eco": "A00",
+      "sample_size": 146,
+      "number_of_times_played": 115,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.75,
+        "std": 1.4,
+        "skew": 0.58
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.86,
+        "std": 1.6,
+        "skew": 0.76
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.97,
+        "std": 1.39,
+        "skew": 2.23
+      }
+    },
+    "Benoni Defense": {
+      "eco": "A43",
+      "sample_size": 339,
+      "number_of_times_played": 269,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.3,
+        "std": 1.06,
+        "skew": 0.82
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.36,
+        "std": 1.37,
+        "skew": 1.24
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.88,
+        "skew": 2.47
+      }
+    },
+    "Bird Opening": {
+      "eco": "A02",
+      "sample_size": 672,
+      "number_of_times_played": 548,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.11,
+        "std": 1.11,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.39,
+        "std": 1.47,
+        "skew": 1.35
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.57,
+        "std": 0.96,
+        "skew": 2.44
+      }
+    },
+    "Bishop's Opening": {
+      "eco": "C23",
+      "sample_size": 1000,
+      "number_of_times_played": 1461,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.66,
+        "std": 0.89,
+        "skew": 1.4
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.21,
+        "std": 1.29,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.79,
+        "std": 0.94,
+        "skew": 1.3
+      }
+    },
+    "Blackmar-Diemer Gambit": {
+      "eco": "D00",
+      "sample_size": 340,
+      "number_of_times_played": 276,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.05,
+        "std": 1.01,
+        "skew": 1.01
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.75,
+        "std": 1.45,
+        "skew": 0.73
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.98,
+        "skew": 2.17
+      }
+    },
+    "Borg Defense": {
+      "eco": "A40",
+      "sample_size": 123,
+      "number_of_times_played": 105,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.99,
+        "std": 0.92,
+        "skew": 0.84
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.05,
+        "std": 1.55,
+        "skew": 0.76
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 0.91,
+        "skew": 1.32
+      }
+    },
+    "Caro-Kann Defense": {
+      "eco": "B10",
+      "sample_size": 1000,
+      "number_of_times_played": 2140,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.9,
+        "skew": 1.19
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.94,
+        "std": 1.2,
+        "skew": 1.56
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.77,
+        "skew": 2.07
+      }
+    },
+    "Center Game": {
+      "eco": "C20",
+      "sample_size": 797,
+      "number_of_times_played": 628,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.87,
+        "std": 0.96,
+        "skew": 1.13
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.59,
+        "std": 1.41,
+        "skew": 0.92
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.91,
+        "skew": 1.61
+      }
+    },
+    "Clemenz Opening": {
+      "eco": "A00",
+      "sample_size": 100,
+      "number_of_times_played": 85,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.52,
+        "std": 1.34,
+        "skew": 0.87
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.12,
+        "std": 1.95,
+        "skew": 0.94
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.09,
+        "std": 1.74,
+        "skew": 2.09
+      }
+    },
+    "Duras Gambit": {
+      "eco": "B00",
+      "sample_size": 106,
+      "number_of_times_played": 79,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.04,
+        "skew": 1.29
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.15,
+        "std": 1.29,
+        "skew": 0.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.8,
+        "skew": 2.2
+      }
+    },
+    "Dutch Defense": {
+      "eco": "A80",
+      "sample_size": 202,
+      "number_of_times_played": 165,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.9,
+        "std": 1.03,
+        "skew": 1.44
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.21,
+        "std": 1.37,
+        "skew": 2.43
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.37,
+        "std": 0.66,
+        "skew": 1.87
+      }
+    },
+    "Elephant Gambit": {
+      "eco": "C40",
+      "sample_size": 383,
+      "number_of_times_played": 300,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.24,
+        "std": 0.94,
+        "skew": 0.87
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.48,
+        "std": 1.37,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.77,
+        "std": 0.94,
+        "skew": 1.46
+      }
+    },
+    "English Defense": {
+      "eco": "A40",
+      "sample_size": 206,
+      "number_of_times_played": 167,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.49,
+        "std": 1.13,
+        "skew": 0.69
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.24,
+        "std": 1.36,
+        "skew": 1.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.7,
+        "skew": 2.04
+      }
+    },
+    "English Opening": {
+      "eco": "A10",
+      "sample_size": 1000,
+      "number_of_times_played": 1024,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.87,
+        "std": 0.96,
+        "skew": 1.34
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.19,
+        "std": 1.29,
+        "skew": 1.2
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.76,
+        "skew": 1.98
+      }
+    },
+    "Englund Gambit": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 1065,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.41,
+        "std": 1.11,
+        "skew": 0.72
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.34,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 1.0,
+        "skew": 2.56
+      }
+    },
+    "Englund Gambit Declined": {
+      "eco": "A40",
+      "sample_size": 562,
+      "number_of_times_played": 467,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.4,
+        "std": 1.1,
+        "skew": 0.73
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.67,
+        "std": 1.49,
+        "skew": 1.08
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.94,
+        "skew": 1.56
+      }
+    },
+    "Four Knights Game": {
+      "eco": "C47",
+      "sample_size": 1000,
+      "number_of_times_played": 1520,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.66,
+        "std": 0.82,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.85,
+        "std": 1.02,
+        "skew": 1.27
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.39,
+        "std": 0.64,
+        "skew": 1.7
+      }
+    },
+    "French Defense": {
+      "eco": "C00",
+      "sample_size": 1000,
+      "number_of_times_played": 2662,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.06,
+        "std": 1.08,
+        "skew": 1.08
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.26,
+        "std": 1.32,
+        "skew": 1.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.81,
+        "skew": 1.66
+      }
+    },
+    "Grob Opening": {
+      "eco": "A00",
+      "sample_size": 195,
+      "number_of_times_played": 162,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.26,
+        "std": 1.08,
+        "skew": 0.76
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.31,
+        "std": 1.73,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 0.92,
+        "skew": 1.5
+      }
+    },
+    "Horwitz Defense": {
+      "eco": "A40",
+      "sample_size": 626,
+      "number_of_times_played": 519,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 1.03,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.09,
+        "std": 1.24,
+        "skew": 1.24
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.89,
+        "skew": 2.22
+      }
+    },
+    "Hungarian Opening": {
+      "eco": "A00",
+      "sample_size": 807,
+      "number_of_times_played": 653,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.02,
+        "std": 1.05,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.44,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.8,
+        "skew": 1.78
+      }
+    },
+    "Indian Defense": {
+      "eco": "A45",
+      "sample_size": 733,
+      "number_of_times_played": 599,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.97,
+        "skew": 1.28
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.01,
+        "std": 1.25,
+        "skew": 1.66
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.43,
+        "std": 0.78,
+        "skew": 2.3
+      }
+    },
+    "Italian Game": {
+      "eco": "C50",
+      "sample_size": 1000,
+      "number_of_times_played": 2396,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.6,
+        "std": 0.76,
+        "skew": 1.2
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.93,
+        "std": 1.1,
+        "skew": 1.33
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.47,
+        "std": 0.75,
+        "skew": 1.82
+      }
+    },
+    "King's Gambit": {
+      "eco": "C30",
+      "sample_size": 129,
+      "number_of_times_played": 100,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.4,
+        "std": 1.11,
+        "skew": 0.67
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.05,
+        "std": 1.64,
+        "skew": 0.8
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.78,
+        "skew": 1.23
+      }
+    },
+    "King's Gambit Accepted": {
+      "eco": "C33",
+      "sample_size": 408,
+      "number_of_times_played": 334,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.33,
+        "std": 1.06,
+        "skew": 0.73
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.62,
+        "std": 1.29,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.91,
+        "skew": 2.45
+      }
+    },
+    "King's Indian Attack": {
+      "eco": "A05",
+      "sample_size": 178,
+      "number_of_times_played": 146,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.83,
+        "std": 0.87,
+        "skew": 1.61
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.29,
+        "skew": 1.33
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.34,
+        "std": 0.69,
+        "skew": 2.48
+      }
+    },
+    "King's Indian Defense": {
+      "eco": "E60",
+      "sample_size": 111,
+      "number_of_times_played": 89,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.51,
+        "std": 0.84,
+        "skew": 2.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.55,
+        "std": 0.76,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.16,
+        "std": 0.44,
+        "skew": 2.75
+      }
+    },
+    "King's Knight Opening": {
+      "eco": "C40",
+      "sample_size": 700,
+      "number_of_times_played": 554,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.78,
+        "std": 0.89,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.37,
+        "skew": 1.33
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.94,
+        "skew": 1.7
+      }
+    },
+    "King's Pawn Game": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 4153,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.83,
+        "std": 1.0,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.55,
+        "std": 1.48,
+        "skew": 1.03
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.97,
+        "skew": 1.76
+      }
+    },
+    "K\u00e1das Opening": {
+      "eco": "A00",
+      "sample_size": 217,
+      "number_of_times_played": 173,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.1,
+        "skew": 0.83
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.0,
+        "std": 1.72,
+        "skew": 0.97
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.92,
+        "std": 1.31,
+        "skew": 2.09
+      }
+    },
+    "Mieses Opening": {
+      "eco": "A00",
+      "sample_size": 602,
+      "number_of_times_played": 490,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 1.16,
+        "skew": 1.53
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.36,
+        "std": 1.35,
+        "skew": 1.05
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.9,
+        "skew": 1.89
+      }
+    },
+    "Mikenas Defense": {
+      "eco": "A40",
+      "sample_size": 274,
+      "number_of_times_played": 218,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.73,
+        "std": 0.91,
+        "skew": 1.27
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.14,
+        "std": 1.19,
+        "skew": 1.2
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.65,
+        "std": 0.91,
+        "skew": 1.7
+      }
+    },
+    "Modern Defense": {
+      "eco": "A41",
+      "sample_size": 817,
+      "number_of_times_played": 666,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 0.98,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.28,
+        "std": 1.37,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.77,
+        "skew": 1.82
+      }
+    },
+    "Nimzo-Larsen Attack": {
+      "eco": "A01",
+      "sample_size": 611,
+      "number_of_times_played": 503,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.01,
+        "std": 1.01,
+        "skew": 1.06
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.28,
+        "skew": 1.24
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.42,
+        "std": 0.71,
+        "skew": 2.2
+      }
+    },
+    "Nimzowitsch Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 1029,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.12,
+        "std": 1.06,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.39,
+        "std": 1.36,
+        "skew": 1.38
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.66,
+        "std": 0.92,
+        "skew": 1.61
+      }
+    },
+    "Owen Defense": {
+      "eco": "B00",
+      "sample_size": 613,
+      "number_of_times_played": 494,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.15,
+        "std": 1.14,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.29,
+        "skew": 1.14
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.57,
+        "std": 0.86,
+        "skew": 1.77
+      }
+    },
+    "Petrov's Defense": {
+      "eco": "C42",
+      "sample_size": 1000,
+      "number_of_times_played": 1233,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.93,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.36,
+        "std": 1.27,
+        "skew": 0.99
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.94,
+        "skew": 1.42
+      }
+    },
+    "Philidor Defense": {
+      "eco": "C41",
+      "sample_size": 1000,
+      "number_of_times_played": 1253,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.87,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.19,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.43,
+        "std": 0.71,
+        "skew": 1.77
+      }
+    },
+    "Pirc Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 1202,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.88,
+        "std": 1.05,
+        "skew": 1.41
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.14,
+        "std": 1.31,
+        "skew": 1.53
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.86,
+        "skew": 2.64
+      }
+    },
+    "Polish Opening": {
+      "eco": "A00",
+      "sample_size": 139,
+      "number_of_times_played": 115,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.92,
+        "std": 0.93,
+        "skew": 0.69
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.46,
+        "std": 1.29,
+        "skew": 0.9
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 1.11,
+        "skew": 2.06
+      }
+    },
+    "Ponziani Opening": {
+      "eco": "C44",
+      "sample_size": 250,
+      "number_of_times_played": 203,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.91,
+        "std": 0.94,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.15,
+        "skew": 0.9
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.49,
+        "std": 0.71,
+        "skew": 1.31
+      }
+    },
+    "Queen's Gambit Accepted": {
+      "eco": "D20",
+      "sample_size": 596,
+      "number_of_times_played": 471,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.78,
+        "std": 0.88,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.23,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.5,
+        "std": 0.75,
+        "skew": 1.54
+      }
+    },
+    "Queen's Gambit Declined": {
+      "eco": "D02",
+      "sample_size": 1000,
+      "number_of_times_played": 828,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.88,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.04,
+        "std": 1.17,
+        "skew": 1.23
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.74,
+        "skew": 1.96
+      }
+    },
+    "Queen's Pawn Game": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 5330,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.9,
+        "skew": 1.19
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.99,
+        "std": 1.21,
+        "skew": 2.03
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.8,
+        "skew": 2.73
+      }
+    },
+    "Rapport-Jobava System": {
+      "eco": "D01",
+      "sample_size": 195,
+      "number_of_times_played": 153,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.6,
+        "std": 0.77,
+        "skew": 1.3
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.79,
+        "std": 1.06,
+        "skew": 1.28
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.38,
+        "std": 0.6,
+        "skew": 1.62
+      }
+    },
+    "Ruy Lopez": {
+      "eco": "C60",
+      "sample_size": 1000,
+      "number_of_times_played": 861,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.83,
+        "skew": 1.34
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.86,
+        "std": 1.08,
+        "skew": 1.73
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.31,
+        "std": 0.63,
+        "skew": 2.54
+      }
+    },
+    "Saragossa Opening": {
+      "eco": "A00",
+      "sample_size": 188,
+      "number_of_times_played": 146,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.12,
+        "std": 1.12,
+        "skew": 0.8
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.26,
+        "skew": 1.22
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.94,
+        "skew": 2.15
+      }
+    },
+    "Scandinavian Defense": {
+      "eco": "B01",
+      "sample_size": 1000,
+      "number_of_times_played": 3371,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.92,
+        "std": 0.92,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.27,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.92,
+        "skew": 1.96
+      }
+    },
+    "Scotch Game": {
+      "eco": "C44",
+      "sample_size": 1000,
+      "number_of_times_played": 1173,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.77,
+        "std": 0.87,
+        "skew": 1.06
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.08,
+        "std": 1.13,
+        "skew": 0.97
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.47,
+        "std": 0.78,
+        "skew": 2.08
+      }
+    },
+    "Sicilian Defense": {
+      "eco": "B20",
+      "sample_size": 1000,
+      "number_of_times_played": 2659,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.82,
+        "std": 0.95,
+        "skew": 1.34
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.08,
+        "std": 1.23,
+        "skew": 1.52
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.71,
+        "skew": 2.33
+      }
+    },
+    "Slav Defense": {
+      "eco": "D10",
+      "sample_size": 277,
+      "number_of_times_played": 225,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.75,
+        "std": 0.93,
+        "skew": 1.3
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.79,
+        "std": 1.12,
+        "skew": 1.67
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.27,
+        "std": 0.54,
+        "skew": 2.07
+      }
+    },
+    "St. George Defense": {
+      "eco": "B00",
+      "sample_size": 112,
+      "number_of_times_played": 94,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.31,
+        "std": 1.19,
+        "skew": 0.82
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.65,
+        "std": 1.49,
+        "skew": 1.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.66,
+        "std": 1.2,
+        "skew": 3.1
+      }
+    },
+    "Three Knights Opening": {
+      "eco": "C46",
+      "sample_size": 726,
+      "number_of_times_played": 582,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.85,
+        "skew": 1.38
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.92,
+        "std": 1.09,
+        "skew": 1.41
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.75,
+        "skew": 1.97
+      }
+    },
+    "Van Geet Opening": {
+      "eco": "A00",
+      "sample_size": 450,
+      "number_of_times_played": 363,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.09,
+        "skew": 0.88
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.43,
+        "std": 1.33,
+        "skew": 0.83
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 1.08,
+        "skew": 2.26
+      }
+    },
+    "Van't Kruijs Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 1321,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.22,
+        "std": 1.21,
+        "skew": 1.21
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.4,
+        "std": 1.52,
+        "skew": 1.6
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.77,
+        "std": 1.1,
+        "skew": 2.28
+      }
+    },
+    "Vienna Game": {
+      "eco": "C25",
+      "sample_size": 1000,
+      "number_of_times_played": 926,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.89,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.26,
+        "std": 1.27,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.83,
+        "skew": 1.77
+      }
+    },
+    "Ware Defense": {
+      "eco": "B00",
+      "sample_size": 108,
+      "number_of_times_played": 88,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.92,
+        "skew": 0.85
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.74,
+        "std": 1.36,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 1.01,
+        "skew": 1.5
+      }
+    },
+    "Ware Opening": {
+      "eco": "A00",
+      "sample_size": 145,
+      "number_of_times_played": 125,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.26,
+        "std": 1.11,
+        "skew": 0.79
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.84,
+        "std": 1.65,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 1.0,
+        "skew": 1.71
+      }
+    },
+    "Zukertort Opening": {
+      "eco": "A04",
+      "sample_size": 1000,
+      "number_of_times_played": 1933,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.98,
+        "skew": 1.13
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.59,
+        "std": 1.43,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.96,
+        "skew": 1.76
+      }
+    }
+  },
+  "blitz": {
+    "Alekhine Defense": {
+      "eco": "B02",
+      "sample_size": 1000,
+      "number_of_times_played": 1461,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.14,
+        "std": 1.05,
+        "skew": 0.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.58,
+        "std": 1.44,
+        "skew": 0.91
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.87,
+        "skew": 1.78
+      }
+    },
+    "Amar Opening": {
+      "eco": "A00",
+      "sample_size": 165,
+      "number_of_times_played": 141,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.64,
+        "std": 1.31,
+        "skew": 0.8
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.02,
+        "std": 1.77,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.2,
+        "std": 1.22,
+        "skew": 1.31
+      }
+    },
+    "Amazon Attack": {
+      "eco": "A45",
+      "sample_size": 193,
+      "number_of_times_played": 157,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.43,
+        "std": 1.28,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.66,
+        "std": 1.43,
+        "skew": 0.96
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 0.95,
+        "skew": 1.52
+      }
+    },
+    "Anderssen's Opening": {
+      "eco": "A00",
+      "sample_size": 124,
+      "number_of_times_played": 98,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.28,
+        "std": 1.26,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.79,
+        "std": 1.54,
+        "skew": 0.97
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.81,
+        "std": 1.1,
+        "skew": 1.89
+      }
+    },
+    "Barnes Defense": {
+      "eco": "B00",
+      "sample_size": 204,
+      "number_of_times_played": 156,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.68,
+        "std": 1.21,
+        "skew": 0.57
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.63,
+        "std": 1.62,
+        "skew": 1.2
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.87,
+        "std": 1.24,
+        "skew": 1.89
+      }
+    },
+    "Barnes Opening": {
+      "eco": "A00",
+      "sample_size": 256,
+      "number_of_times_played": 212,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.54,
+        "std": 1.11,
+        "skew": 0.46
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.14,
+        "std": 1.79,
+        "skew": 1.24
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.09,
+        "std": 1.48,
+        "skew": 2.2
+      }
+    },
+    "Benoni Defense": {
+      "eco": "A43",
+      "sample_size": 472,
+      "number_of_times_played": 383,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.38,
+        "std": 1.13,
+        "skew": 0.88
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.53,
+        "std": 1.48,
+        "skew": 1.29
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.76,
+        "skew": 1.77
+      }
+    },
+    "Bird Opening": {
+      "eco": "A02",
+      "sample_size": 1000,
+      "number_of_times_played": 1193,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.95,
+        "std": 1.0,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.51,
+        "std": 1.57,
+        "skew": 1.27
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 1.08,
+        "skew": 3.1
+      }
+    },
+    "Bishop's Opening": {
+      "eco": "C23",
+      "sample_size": 1000,
+      "number_of_times_played": 3625,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.88,
+        "skew": 1.2
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.33,
+        "skew": 1.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 0.9,
+        "skew": 1.46
+      }
+    },
+    "Blackmar-Diemer Gambit": {
+      "eco": "D00",
+      "sample_size": 793,
+      "number_of_times_played": 632,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.1,
+        "std": 1.01,
+        "skew": 0.94
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.84,
+        "std": 1.5,
+        "skew": 0.81
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.68,
+        "std": 0.91,
+        "skew": 1.59
+      }
+    },
+    "Borg Defense": {
+      "eco": "A40",
+      "sample_size": 281,
+      "number_of_times_played": 223,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.04,
+        "std": 1.03,
+        "skew": 0.78
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.47,
+        "std": 1.64,
+        "skew": 0.54
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 1.12,
+        "skew": 2.7
+      }
+    },
+    "Caro-Kann Defense": {
+      "eco": "B10",
+      "sample_size": 1000,
+      "number_of_times_played": 6188,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.81,
+        "std": 0.95,
+        "skew": 1.21
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.02,
+        "std": 1.24,
+        "skew": 1.32
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.38,
+        "std": 0.7,
+        "skew": 2.3
+      }
+    },
+    "Center Game": {
+      "eco": "C20",
+      "sample_size": 1000,
+      "number_of_times_played": 1766,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.93,
+        "std": 0.99,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.78,
+        "std": 1.53,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.91,
+        "skew": 1.34
+      }
+    },
+    "Clemenz Opening": {
+      "eco": "A00",
+      "sample_size": 232,
+      "number_of_times_played": 195,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.35,
+        "std": 1.28,
+        "skew": 0.89
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.31,
+        "std": 2.1,
+        "skew": 1.59
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.19,
+        "std": 1.59,
+        "skew": 1.8
+      }
+    },
+    "Danish Gambit Accepted": {
+      "eco": "C21",
+      "sample_size": 188,
+      "number_of_times_played": 146,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.6,
+        "std": 0.78,
+        "skew": 1.16
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.51,
+        "std": 1.17,
+        "skew": 0.84
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.93,
+        "skew": 2.56
+      }
+    },
+    "Duras Gambit": {
+      "eco": "B00",
+      "sample_size": 190,
+      "number_of_times_played": 160,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.06,
+        "std": 1.06,
+        "skew": 1.03
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.44,
+        "std": 1.45,
+        "skew": 0.66
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.85,
+        "std": 1.15,
+        "skew": 2.28
+      }
+    },
+    "Dutch Defense": {
+      "eco": "A80",
+      "sample_size": 601,
+      "number_of_times_played": 473,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.85,
+        "skew": 1.03
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.19,
+        "std": 1.28,
+        "skew": 1.12
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.78,
+        "skew": 2.58
+      }
+    },
+    "East Indian Defense": {
+      "eco": "A48",
+      "sample_size": 125,
+      "number_of_times_played": 97,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.96,
+        "skew": 0.94
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.02,
+        "std": 1.19,
+        "skew": 1.41
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.33,
+        "std": 0.55,
+        "skew": 1.44
+      }
+    },
+    "Elephant Gambit": {
+      "eco": "C40",
+      "sample_size": 752,
+      "number_of_times_played": 591,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.31,
+        "std": 1.02,
+        "skew": 0.75
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.79,
+        "std": 1.44,
+        "skew": 0.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 0.94,
+        "skew": 1.93
+      }
+    },
+    "English Defense": {
+      "eco": "A40",
+      "sample_size": 466,
+      "number_of_times_played": 361,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.58,
+        "std": 1.13,
+        "skew": 0.72
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.32,
+        "std": 1.33,
+        "skew": 0.91
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.49,
+        "std": 0.78,
+        "skew": 1.97
+      }
+    },
+    "English Opening": {
+      "eco": "A10",
+      "sample_size": 1000,
+      "number_of_times_played": 2901,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.92,
+        "std": 1.0,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.25,
+        "std": 1.34,
+        "skew": 1.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.73,
+        "skew": 2.48
+      }
+    },
+    "Englund Gambit": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 1724,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.47,
+        "std": 1.13,
+        "skew": 0.65
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.5,
+        "std": 1.37,
+        "skew": 0.95
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.87,
+        "skew": 1.65
+      }
+    },
+    "Englund Gambit Declined": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 803,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.41,
+        "std": 1.13,
+        "skew": 0.84
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.59,
+        "std": 1.36,
+        "skew": 0.91
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 0.92,
+        "skew": 2.15
+      }
+    },
+    "Four Knights Game": {
+      "eco": "C47",
+      "sample_size": 1000,
+      "number_of_times_played": 5435,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.71,
+        "std": 0.87,
+        "skew": 1.25
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.95,
+        "std": 1.07,
+        "skew": 1.34
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.43,
+        "std": 0.75,
+        "skew": 2.06
+      }
+    },
+    "French Defense": {
+      "eco": "C00",
+      "sample_size": 1000,
+      "number_of_times_played": 6815,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.07,
+        "std": 1.04,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.35,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.87,
+        "skew": 1.78
+      }
+    },
+    "Goldsmith Defense": {
+      "eco": "B00",
+      "sample_size": 196,
+      "number_of_times_played": 153,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.55,
+        "std": 1.25,
+        "skew": 0.68
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.03,
+        "std": 1.58,
+        "skew": 0.67
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 1.03,
+        "skew": 2.51
+      }
+    },
+    "Grob Opening": {
+      "eco": "A00",
+      "sample_size": 774,
+      "number_of_times_played": 610,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.14,
+        "std": 1.08,
+        "skew": 0.89
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.49,
+        "std": 1.88,
+        "skew": 2.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.79,
+        "std": 1.22,
+        "skew": 3.64
+      }
+    },
+    "Gunderam Defense": {
+      "eco": "C40",
+      "sample_size": 223,
+      "number_of_times_played": 169,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.25,
+        "std": 0.98,
+        "skew": 0.6
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.7,
+        "std": 1.47,
+        "skew": 0.64
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.58,
+        "std": 0.8,
+        "skew": 1.37
+      }
+    },
+    "Horwitz Defense": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 1481,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.07,
+        "std": 1.05,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.26,
+        "std": 1.29,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.47,
+        "std": 0.81,
+        "skew": 2.16
+      }
+    },
+    "Hungarian Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 1478,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.07,
+        "skew": 1.08
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.31,
+        "std": 1.35,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.75,
+        "skew": 1.73
+      }
+    },
+    "Indian Defense": {
+      "eco": "A43",
+      "sample_size": 1000,
+      "number_of_times_played": 1617,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.81,
+        "std": 0.96,
+        "skew": 1.37
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.25,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.71,
+        "skew": 2.7
+      }
+    },
+    "Italian Game": {
+      "eco": "C50",
+      "sample_size": 1000,
+      "number_of_times_played": 8127,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.66,
+        "std": 0.81,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.04,
+        "std": 1.14,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.76,
+        "skew": 1.86
+      }
+    },
+    "King's Gambit": {
+      "eco": "C30",
+      "sample_size": 235,
+      "number_of_times_played": 184,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.43,
+        "std": 1.15,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.83,
+        "std": 1.42,
+        "skew": 0.82
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.84,
+        "skew": 1.39
+      }
+    },
+    "King's Gambit Accepted": {
+      "eco": "C33",
+      "sample_size": 675,
+      "number_of_times_played": 523,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.31,
+        "std": 0.99,
+        "skew": 0.73
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.75,
+        "std": 1.33,
+        "skew": 0.77
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.94,
+        "skew": 2.15
+      }
+    },
+    "King's Indian Attack": {
+      "eco": "A05",
+      "sample_size": 578,
+      "number_of_times_played": 456,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.96,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.18,
+        "std": 1.31,
+        "skew": 1.23
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.37,
+        "std": 0.68,
+        "skew": 2.86
+      }
+    },
+    "King's Indian Defense": {
+      "eco": "E60",
+      "sample_size": 272,
+      "number_of_times_played": 212,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.87,
+        "skew": 1.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.79,
+        "std": 0.92,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.19,
+        "std": 0.47,
+        "skew": 2.68
+      }
+    },
+    "King's Knight Opening": {
+      "eco": "C40",
+      "sample_size": 1000,
+      "number_of_times_played": 1721,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.95,
+        "skew": 1.17
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.51,
+        "std": 1.42,
+        "skew": 0.99
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.91,
+        "skew": 2.34
+      }
+    },
+    "King's Pawn Game": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 11939,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.87,
+        "std": 0.96,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.66,
+        "std": 1.46,
+        "skew": 0.79
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.84,
+        "skew": 1.85
+      }
+    },
+    "King's Pawn Opening": {
+      "eco": "C20",
+      "sample_size": 143,
+      "number_of_times_played": 115,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.4,
+        "std": 1.05,
+        "skew": 0.8
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.85,
+        "std": 1.51,
+        "skew": 0.66
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.83,
+        "skew": 1.55
+      }
+    },
+    "K\u00e1das Opening": {
+      "eco": "A00",
+      "sample_size": 740,
+      "number_of_times_played": 606,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.24,
+        "std": 1.16,
+        "skew": 1.19
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.34,
+        "std": 1.92,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.96,
+        "std": 1.34,
+        "skew": 2.03
+      }
+    },
+    "Latvian Gambit": {
+      "eco": "C40",
+      "sample_size": 156,
+      "number_of_times_played": 120,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.83,
+        "std": 0.9,
+        "skew": 0.87
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.49,
+        "std": 1.49,
+        "skew": 0.44
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.88,
+        "std": 0.98,
+        "skew": 1.15
+      }
+    },
+    "Mieses Opening": {
+      "eco": "A00",
+      "sample_size": 982,
+      "number_of_times_played": 823,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.1,
+        "std": 1.09,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.33,
+        "skew": 1.0
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.65,
+        "std": 1.04,
+        "skew": 2.73
+      }
+    },
+    "Mikenas Defense": {
+      "eco": "A40",
+      "sample_size": 960,
+      "number_of_times_played": 764,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.85,
+        "std": 0.99,
+        "skew": 1.51
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.35,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.88,
+        "skew": 1.86
+      }
+    },
+    "Modern Defense": {
+      "eco": "A41",
+      "sample_size": 1000,
+      "number_of_times_played": 1612,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.13,
+        "std": 1.09,
+        "skew": 0.94
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.33,
+        "std": 1.3,
+        "skew": 1.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.43,
+        "std": 0.78,
+        "skew": 2.49
+      }
+    },
+    "Nimzo-Larsen Attack": {
+      "eco": "A01",
+      "sample_size": 1000,
+      "number_of_times_played": 892,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.01,
+        "std": 1.1,
+        "skew": 1.19
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.29,
+        "std": 1.37,
+        "skew": 1.27
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.8,
+        "skew": 2.68
+      }
+    },
+    "Nimzowitsch Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 2488,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.05,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.54,
+        "std": 1.41,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.92,
+        "skew": 1.71
+      }
+    },
+    "Old Indian Defense": {
+      "eco": "A41",
+      "sample_size": 208,
+      "number_of_times_played": 156,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.83,
+        "std": 0.98,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.07,
+        "std": 1.24,
+        "skew": 1.36
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.29,
+        "std": 0.57,
+        "skew": 2.47
+      }
+    },
+    "Owen Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 864,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.11,
+        "std": 1.08,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.32,
+        "std": 1.32,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.54,
+        "std": 0.81,
+        "skew": 1.73
+      }
+    },
+    "Petrov's Defense": {
+      "eco": "C42",
+      "sample_size": 1000,
+      "number_of_times_played": 3916,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.93,
+        "std": 1.0,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.42,
+        "std": 1.33,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 1.01,
+        "skew": 1.86
+      }
+    },
+    "Philidor Defense": {
+      "eco": "C41",
+      "sample_size": 1000,
+      "number_of_times_played": 3533,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.78,
+        "std": 0.89,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.19,
+        "std": 1.27,
+        "skew": 1.24
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.42,
+        "std": 0.73,
+        "skew": 2.11
+      }
+    },
+    "Pirc Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 3034,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.91,
+        "std": 0.98,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.27,
+        "std": 1.31,
+        "skew": 1.23
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.47,
+        "std": 0.81,
+        "skew": 2.33
+      }
+    },
+    "Polish Defense": {
+      "eco": "A40",
+      "sample_size": 107,
+      "number_of_times_played": 87,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.41,
+        "std": 0.99,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.93,
+        "std": 1.67,
+        "skew": 1.11
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.83,
+        "std": 1.14,
+        "skew": 1.77
+      }
+    },
+    "Polish Opening": {
+      "eco": "A00",
+      "sample_size": 412,
+      "number_of_times_played": 340,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.12,
+        "std": 1.08,
+        "skew": 0.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.58,
+        "std": 1.36,
+        "skew": 0.76
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.67,
+        "std": 0.99,
+        "skew": 2.04
+      }
+    },
+    "Ponziani Opening": {
+      "eco": "C44",
+      "sample_size": 1000,
+      "number_of_times_played": 835,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.88,
+        "std": 0.94,
+        "skew": 1.1
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.26,
+        "skew": 1.12
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.84,
+        "skew": 1.52
+      }
+    },
+    "Portuguese Opening": {
+      "eco": "C20",
+      "sample_size": 292,
+      "number_of_times_played": 248,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.73,
+        "std": 0.93,
+        "skew": 1.46
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.47,
+        "std": 1.37,
+        "skew": 0.85
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.03,
+        "std": 1.24,
+        "skew": 2.01
+      }
+    },
+    "Queen's Gambit Accepted": {
+      "eco": "D20",
+      "sample_size": 1000,
+      "number_of_times_played": 1339,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.87,
+        "skew": 0.96
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.27,
+        "skew": 0.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.41,
+        "std": 0.69,
+        "skew": 1.94
+      }
+    },
+    "Queen's Gambit Declined": {
+      "eco": "D02",
+      "sample_size": 1000,
+      "number_of_times_played": 1888,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.95,
+        "skew": 1.13
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.17,
+        "std": 1.32,
+        "skew": 1.39
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.71,
+        "skew": 2.22
+      }
+    },
+    "Queen's Pawn Game": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 15532,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.87,
+        "skew": 1.13
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.86,
+        "std": 1.14,
+        "skew": 1.8
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.35,
+        "std": 0.7,
+        "skew": 3.22
+      }
+    },
+    "Rapport-Jobava System": {
+      "eco": "D01",
+      "sample_size": 817,
+      "number_of_times_played": 636,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.69,
+        "std": 0.81,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.77,
+        "std": 1.07,
+        "skew": 1.68
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.36,
+        "std": 0.62,
+        "skew": 2.07
+      }
+    },
+    "Rapport-Jobava System, with e6": {
+      "eco": "D01",
+      "sample_size": 263,
+      "number_of_times_played": 201,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.65,
+        "std": 0.82,
+        "skew": 1.33
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.88,
+        "std": 1.09,
+        "skew": 1.43
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.35,
+        "std": 0.6,
+        "skew": 1.59
+      }
+    },
+    "Richter-Veresov Attack": {
+      "eco": "D01",
+      "sample_size": 128,
+      "number_of_times_played": 97,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.83,
+        "skew": 1.2
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.65,
+        "std": 0.89,
+        "skew": 1.48
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.39,
+        "std": 0.63,
+        "skew": 1.55
+      }
+    },
+    "Ruy Lopez": {
+      "eco": "C60",
+      "sample_size": 1000,
+      "number_of_times_played": 2601,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.66,
+        "std": 0.85,
+        "skew": 1.3
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.09,
+        "std": 1.26,
+        "skew": 1.75
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.39,
+        "std": 0.65,
+        "skew": 1.87
+      }
+    },
+    "Saragossa Opening": {
+      "eco": "A00",
+      "sample_size": 442,
+      "number_of_times_played": 349,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.17,
+        "std": 1.07,
+        "skew": 0.64
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.36,
+        "skew": 1.22
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.99,
+        "skew": 2.31
+      }
+    },
+    "Scandinavian Defense": {
+      "eco": "B01",
+      "sample_size": 1000,
+      "number_of_times_played": 7753,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.03,
+        "std": 1.0,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.46,
+        "std": 1.45,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.86,
+        "skew": 1.72
+      }
+    },
+    "Scotch Game": {
+      "eco": "C44",
+      "sample_size": 1000,
+      "number_of_times_played": 3235,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.93,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.23,
+        "std": 1.23,
+        "skew": 1.05
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.77,
+        "skew": 1.92
+      }
+    },
+    "Semi-Slav Defense": {
+      "eco": "D30",
+      "sample_size": 127,
+      "number_of_times_played": 94,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.64,
+        "std": 0.79,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.76,
+        "std": 0.99,
+        "skew": 1.44
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.17,
+        "std": 0.4,
+        "skew": 2.09
+      }
+    },
+    "Sicilian Defense": {
+      "eco": "B20",
+      "sample_size": 1000,
+      "number_of_times_played": 6123,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.81,
+        "std": 0.95,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.13,
+        "std": 1.27,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.72,
+        "skew": 2.48
+      }
+    },
+    "Slav Defense": {
+      "eco": "D10",
+      "sample_size": 630,
+      "number_of_times_played": 492,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.92,
+        "skew": 0.9
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.93,
+        "std": 1.08,
+        "skew": 1.07
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.28,
+        "std": 0.57,
+        "skew": 2.26
+      }
+    },
+    "St. George Defense": {
+      "eco": "B00",
+      "sample_size": 174,
+      "number_of_times_played": 140,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.29,
+        "std": 1.25,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.61,
+        "std": 1.35,
+        "skew": 1.05
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 1.13,
+        "skew": 1.87
+      }
+    },
+    "Three Knights Opening": {
+      "eco": "C46",
+      "sample_size": 1000,
+      "number_of_times_played": 1953,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.87,
+        "skew": 1.24
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.03,
+        "std": 1.17,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.77,
+        "skew": 2.27
+      }
+    },
+    "Van Geet Opening": {
+      "eco": "A00",
+      "sample_size": 963,
+      "number_of_times_played": 771,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.04,
+        "skew": 0.75
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.59,
+        "std": 1.5,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 1.01,
+        "skew": 2.37
+      }
+    },
+    "Van't Kruijs Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 3158,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.32,
+        "std": 1.18,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.49,
+        "std": 1.38,
+        "skew": 1.14
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.96,
+        "skew": 2.14
+      }
+    },
+    "Vienna Gambit, with Max Lange Defense": {
+      "eco": "C25",
+      "sample_size": 121,
+      "number_of_times_played": 101,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.38,
+        "std": 1.02,
+        "skew": 0.67
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.72,
+        "std": 1.36,
+        "skew": 0.52
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.7,
+        "skew": 1.05
+      }
+    },
+    "Vienna Game": {
+      "eco": "C25",
+      "sample_size": 1000,
+      "number_of_times_played": 2654,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.94,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.32,
+        "skew": 1.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.54,
+        "std": 0.79,
+        "skew": 1.79
+      }
+    },
+    "Ware Defense": {
+      "eco": "B00",
+      "sample_size": 302,
+      "number_of_times_played": 250,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.92,
+        "std": 0.93,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.68,
+        "std": 1.43,
+        "skew": 0.81
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 1.06,
+        "skew": 2.04
+      }
+    },
+    "Ware Opening": {
+      "eco": "A00",
+      "sample_size": 387,
+      "number_of_times_played": 328,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.45,
+        "std": 1.23,
+        "skew": 0.79
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.98,
+        "std": 1.78,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.84,
+        "std": 1.17,
+        "skew": 1.83
+      }
+    },
+    "Zukertort Opening": {
+      "eco": "A04",
+      "sample_size": 1000,
+      "number_of_times_played": 3346,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.96,
+        "std": 1.06,
+        "skew": 1.26
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.61,
+        "std": 1.5,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.94,
+        "skew": 2.2
+      }
+    }
+  },
+  "rapid": {
+    "Alekhine Defense": {
+      "eco": "B02",
+      "sample_size": 1000,
+      "number_of_times_played": 1906,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.24,
+        "std": 1.12,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.57,
+        "std": 1.44,
+        "skew": 1.0
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.94,
+        "skew": 1.46
+      }
+    },
+    "Amar Opening": {
+      "eco": "A00",
+      "sample_size": 107,
+      "number_of_times_played": 86,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.66,
+        "std": 1.08,
+        "skew": 0.48
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.21,
+        "std": 1.82,
+        "skew": 1.22
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.06,
+        "std": 1.16,
+        "skew": 1.26
+      }
+    },
+    "Amazon Attack": {
+      "eco": "A45",
+      "sample_size": 200,
+      "number_of_times_played": 150,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.6,
+        "std": 1.18,
+        "skew": 0.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.68,
+        "std": 1.48,
+        "skew": 0.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.9,
+        "std": 1.07,
+        "skew": 1.68
+      }
+    },
+    "Barnes Defense": {
+      "eco": "B00",
+      "sample_size": 140,
+      "number_of_times_played": 110,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.54,
+        "std": 1.2,
+        "skew": 0.74
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.79,
+        "std": 1.51,
+        "skew": 0.83
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.96,
+        "std": 1.22,
+        "skew": 1.93
+      }
+    },
+    "Barnes Opening": {
+      "eco": "A00",
+      "sample_size": 195,
+      "number_of_times_played": 151,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.63,
+        "std": 1.26,
+        "skew": 0.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.06,
+        "std": 1.66,
+        "skew": 0.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.88,
+        "std": 1.26,
+        "skew": 2.22
+      }
+    },
+    "Benoni Defense": {
+      "eco": "A43",
+      "sample_size": 288,
+      "number_of_times_played": 228,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.44,
+        "std": 1.17,
+        "skew": 0.83
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.53,
+        "std": 1.45,
+        "skew": 0.96
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.57,
+        "std": 0.85,
+        "skew": 1.56
+      }
+    },
+    "Bird Opening": {
+      "eco": "A02",
+      "sample_size": 968,
+      "number_of_times_played": 760,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.03,
+        "std": 1.01,
+        "skew": 0.76
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.6,
+        "std": 1.55,
+        "skew": 1.16
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.95,
+        "skew": 2.05
+      }
+    },
+    "Bishop's Opening": {
+      "eco": "C23",
+      "sample_size": 1000,
+      "number_of_times_played": 3674,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.9,
+        "skew": 1.53
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.36,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.79,
+        "std": 0.99,
+        "skew": 1.4
+      }
+    },
+    "Blackmar-Diemer Gambit": {
+      "eco": "D00",
+      "sample_size": 638,
+      "number_of_times_played": 495,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.13,
+        "std": 1.05,
+        "skew": 0.81
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.67,
+        "std": 1.46,
+        "skew": 0.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.67,
+        "std": 0.91,
+        "skew": 1.76
+      }
+    },
+    "Borg Defense": {
+      "eco": "A40",
+      "sample_size": 241,
+      "number_of_times_played": 198,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.0,
+        "std": 1.04,
+        "skew": 0.93
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.55,
+        "std": 1.68,
+        "skew": 0.55
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.76,
+        "std": 0.94,
+        "skew": 1.33
+      }
+    },
+    "Caro-Kann Defense": {
+      "eco": "B10",
+      "sample_size": 1000,
+      "number_of_times_played": 4395,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.98,
+        "std": 1.05,
+        "skew": 1.06
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.25,
+        "std": 1.31,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.5,
+        "std": 0.78,
+        "skew": 1.72
+      }
+    },
+    "Center Game": {
+      "eco": "C20",
+      "sample_size": 1000,
+      "number_of_times_played": 1115,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.94,
+        "skew": 1.31
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.91,
+        "std": 1.45,
+        "skew": 0.82
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.73,
+        "std": 0.91,
+        "skew": 1.48
+      }
+    },
+    "Duras Gambit": {
+      "eco": "B00",
+      "sample_size": 120,
+      "number_of_times_played": 99,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.95,
+        "std": 1.02,
+        "skew": 1.15
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.81,
+        "std": 1.81,
+        "skew": 0.58
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.1,
+        "std": 1.04,
+        "skew": 1.16
+      }
+    },
+    "Dutch Defense": {
+      "eco": "A80",
+      "sample_size": 353,
+      "number_of_times_played": 273,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.88,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.98,
+        "std": 1.2,
+        "skew": 1.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.37,
+        "std": 0.69,
+        "skew": 2.17
+      }
+    },
+    "East Indian Defense": {
+      "eco": "A48",
+      "sample_size": 114,
+      "number_of_times_played": 89,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.92,
+        "skew": 1.83
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.99,
+        "std": 1.06,
+        "skew": 1.46
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.54,
+        "std": 0.77,
+        "skew": 1.36
+      }
+    },
+    "Elephant Gambit": {
+      "eco": "C40",
+      "sample_size": 715,
+      "number_of_times_played": 563,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.29,
+        "std": 0.98,
+        "skew": 0.69
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.83,
+        "std": 1.44,
+        "skew": 0.78
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.89,
+        "std": 0.97,
+        "skew": 1.6
+      }
+    },
+    "English Defense": {
+      "eco": "A40",
+      "sample_size": 247,
+      "number_of_times_played": 194,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.55,
+        "std": 1.16,
+        "skew": 0.53
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.4,
+        "std": 1.32,
+        "skew": 0.88
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.95,
+        "skew": 2.15
+      }
+    },
+    "English Opening": {
+      "eco": "A10",
+      "sample_size": 1000,
+      "number_of_times_played": 1816,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.85,
+        "std": 0.95,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.39,
+        "std": 1.4,
+        "skew": 1.03
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.78,
+        "skew": 1.88
+      }
+    },
+    "Englund Gambit": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 1215,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.5,
+        "std": 1.16,
+        "skew": 0.67
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.65,
+        "std": 1.53,
+        "skew": 1.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 0.99,
+        "skew": 1.83
+      }
+    },
+    "Englund Gambit Declined": {
+      "eco": "A40",
+      "sample_size": 904,
+      "number_of_times_played": 710,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.42,
+        "std": 1.14,
+        "skew": 0.81
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.88,
+        "std": 1.54,
+        "skew": 0.86
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 0.96,
+        "skew": 1.86
+      }
+    },
+    "Four Knights Game": {
+      "eco": "C47",
+      "sample_size": 1000,
+      "number_of_times_played": 6386,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.83,
+        "skew": 1.23
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.03,
+        "std": 1.14,
+        "skew": 1.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.82,
+        "skew": 1.97
+      }
+    },
+    "French Defense": {
+      "eco": "C00",
+      "sample_size": 1000,
+      "number_of_times_played": 4983,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.11,
+        "std": 1.07,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.41,
+        "std": 1.33,
+        "skew": 0.99
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.65,
+        "std": 0.87,
+        "skew": 1.71
+      }
+    },
+    "Goldsmith Defense": {
+      "eco": "B00",
+      "sample_size": 139,
+      "number_of_times_played": 112,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.58,
+        "std": 1.21,
+        "skew": 0.61
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.66,
+        "std": 1.34,
+        "skew": 0.7
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.99,
+        "skew": 1.83
+      }
+    },
+    "Grob Opening": {
+      "eco": "A00",
+      "sample_size": 358,
+      "number_of_times_played": 292,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.07,
+        "std": 1.04,
+        "skew": 0.84
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.53,
+        "std": 1.55,
+        "skew": 0.34
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 1.0,
+        "skew": 1.83
+      }
+    },
+    "Gunderam Defense": {
+      "eco": "C40",
+      "sample_size": 171,
+      "number_of_times_played": 132,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.21,
+        "std": 1.02,
+        "skew": 0.79
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.96,
+        "std": 1.59,
+        "skew": 0.86
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.84,
+        "skew": 1.29
+      }
+    },
+    "Horwitz Defense": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 1145,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.01,
+        "std": 1.03,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.25,
+        "std": 1.33,
+        "skew": 1.16
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.58,
+        "std": 0.87,
+        "skew": 2.03
+      }
+    },
+    "Hungarian Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 884,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.15,
+        "std": 1.03,
+        "skew": 0.85
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.43,
+        "std": 1.42,
+        "skew": 1.25
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.8,
+        "skew": 1.85
+      }
+    },
+    "Indian Defense": {
+      "eco": "A45",
+      "sample_size": 1000,
+      "number_of_times_played": 1050,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.94,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.31,
+        "skew": 1.2
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.5,
+        "std": 0.79,
+        "skew": 1.86
+      }
+    },
+    "Italian Game": {
+      "eco": "C50",
+      "sample_size": 1000,
+      "number_of_times_played": 7626,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.8,
+        "skew": 1.31
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.03,
+        "std": 1.11,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.74,
+        "skew": 1.36
+      }
+    },
+    "King's Gambit": {
+      "eco": "C30",
+      "sample_size": 118,
+      "number_of_times_played": 90,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.48,
+        "std": 1.09,
+        "skew": 0.7
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.95,
+        "std": 1.49,
+        "skew": 0.7
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 1.0,
+        "skew": 1.55
+      }
+    },
+    "King's Gambit Accepted": {
+      "eco": "C33",
+      "sample_size": 419,
+      "number_of_times_played": 337,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.25,
+        "std": 0.95,
+        "skew": 0.64
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.82,
+        "std": 1.43,
+        "skew": 0.77
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.81,
+        "skew": 1.46
+      }
+    },
+    "King's Indian Attack": {
+      "eco": "A05",
+      "sample_size": 360,
+      "number_of_times_played": 289,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.78,
+        "std": 0.91,
+        "skew": 1.01
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.24,
+        "std": 1.31,
+        "skew": 1.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.3,
+        "std": 0.66,
+        "skew": 2.99
+      }
+    },
+    "King's Knight Opening": {
+      "eco": "C40",
+      "sample_size": 1000,
+      "number_of_times_played": 1836,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.87,
+        "std": 0.94,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.55,
+        "std": 1.46,
+        "skew": 0.92
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.67,
+        "std": 0.88,
+        "skew": 1.44
+      }
+    },
+    "King's Pawn Game": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 11694,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.85,
+        "std": 0.97,
+        "skew": 1.14
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.73,
+        "std": 1.53,
+        "skew": 0.85
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.9,
+        "skew": 1.46
+      }
+    },
+    "King's Pawn Opening": {
+      "eco": "C20",
+      "sample_size": 139,
+      "number_of_times_played": 109,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.37,
+        "std": 1.06,
+        "skew": 0.86
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.64,
+        "std": 1.33,
+        "skew": 0.81
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.73,
+        "std": 0.89,
+        "skew": 1.12
+      }
+    },
+    "K\u00e1das Opening": {
+      "eco": "A00",
+      "sample_size": 381,
+      "number_of_times_played": 315,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.14,
+        "std": 1.06,
+        "skew": 0.96
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.07,
+        "std": 1.73,
+        "skew": 0.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.94,
+        "skew": 1.63
+      }
+    },
+    "Latvian Gambit": {
+      "eco": "C40",
+      "sample_size": 130,
+      "number_of_times_played": 101,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.78,
+        "skew": 1.06
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.62,
+        "std": 1.59,
+        "skew": 0.61
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.02,
+        "std": 1.0,
+        "skew": 0.94
+      }
+    },
+    "Mieses Opening": {
+      "eco": "A00",
+      "sample_size": 710,
+      "number_of_times_played": 577,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.09,
+        "std": 1.04,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.39,
+        "std": 1.45,
+        "skew": 1.37
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.84,
+        "skew": 1.44
+      }
+    },
+    "Mikenas Defense": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 974,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.87,
+        "std": 0.99,
+        "skew": 1.2
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.43,
+        "std": 1.37,
+        "skew": 1.17
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.58,
+        "std": 0.82,
+        "skew": 1.69
+      }
+    },
+    "Modern Defense": {
+      "eco": "A41",
+      "sample_size": 1000,
+      "number_of_times_played": 1020,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.05,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.53,
+        "std": 1.44,
+        "skew": 1.07
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.82,
+        "skew": 1.54
+      }
+    },
+    "Nimzo-Larsen Attack": {
+      "eco": "A01",
+      "sample_size": 582,
+      "number_of_times_played": 446,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.1,
+        "std": 1.05,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.49,
+        "std": 1.42,
+        "skew": 1.11
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.85,
+        "skew": 2.73
+      }
+    },
+    "Nimzowitsch Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 1933,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.14,
+        "std": 1.02,
+        "skew": 0.81
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.61,
+        "std": 1.42,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.92,
+        "skew": 1.66
+      }
+    },
+    "Owen Defense": {
+      "eco": "B00",
+      "sample_size": 637,
+      "number_of_times_played": 489,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.21,
+        "std": 1.1,
+        "skew": 0.89
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.57,
+        "std": 1.39,
+        "skew": 0.88
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.84,
+        "skew": 1.54
+      }
+    },
+    "Petrov's Defense": {
+      "eco": "C42",
+      "sample_size": 1000,
+      "number_of_times_played": 4522,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.93,
+        "std": 0.91,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.5,
+        "std": 1.32,
+        "skew": 0.86
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 0.97,
+        "skew": 1.49
+      }
+    },
+    "Philidor Defense": {
+      "eco": "C41",
+      "sample_size": 1000,
+      "number_of_times_played": 2739,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.76,
+        "std": 0.9,
+        "skew": 1.23
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.27,
+        "std": 1.27,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.57,
+        "std": 0.87,
+        "skew": 1.93
+      }
+    },
+    "Pirc Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 2290,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 1.0,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.32,
+        "skew": 1.09
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.86,
+        "skew": 1.99
+      }
+    },
+    "Polish Opening": {
+      "eco": "A00",
+      "sample_size": 328,
+      "number_of_times_played": 255,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.06,
+        "skew": 0.74
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.81,
+        "std": 1.4,
+        "skew": 0.56
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 0.88,
+        "skew": 1.67
+      }
+    },
+    "Ponziani Opening": {
+      "eco": "C44",
+      "sample_size": 965,
+      "number_of_times_played": 733,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.88,
+        "std": 0.9,
+        "skew": 1.01
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.31,
+        "skew": 1.14
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.66,
+        "std": 0.88,
+        "skew": 1.47
+      }
+    },
+    "Portuguese Opening": {
+      "eco": "C20",
+      "sample_size": 368,
+      "number_of_times_played": 293,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.88,
+        "std": 0.93,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.52,
+        "std": 1.4,
+        "skew": 1.0
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.94,
+        "skew": 1.87
+      }
+    },
+    "Queen's Gambit Accepted": {
+      "eco": "D20",
+      "sample_size": 1000,
+      "number_of_times_played": 865,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.78,
+        "std": 0.88,
+        "skew": 1.27
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.26,
+        "skew": 1.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.75,
+        "skew": 1.81
+      }
+    },
+    "Queen's Gambit Declined": {
+      "eco": "D02",
+      "sample_size": 1000,
+      "number_of_times_played": 1051,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.81,
+        "std": 0.91,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.28,
+        "std": 1.31,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.51,
+        "std": 0.84,
+        "skew": 2.06
+      }
+    },
+    "Queen's Pawn Game": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 11821,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.92,
+        "skew": 1.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.05,
+        "std": 1.21,
+        "skew": 1.14
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.49,
+        "std": 0.78,
+        "skew": 1.82
+      }
+    },
+    "Rapport-Jobava System": {
+      "eco": "D01",
+      "sample_size": 565,
+      "number_of_times_played": 446,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.85,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.91,
+        "std": 1.11,
+        "skew": 1.37
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.68,
+        "skew": 1.86
+      }
+    },
+    "Rapport-Jobava System, with e6": {
+      "eco": "D01",
+      "sample_size": 149,
+      "number_of_times_played": 114,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.89,
+        "skew": 1.66
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.99,
+        "std": 1.27,
+        "skew": 2.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.67,
+        "skew": 1.51
+      }
+    },
+    "Richter-Veresov Attack": {
+      "eco": "D01",
+      "sample_size": 118,
+      "number_of_times_played": 89,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.7,
+        "std": 0.87,
+        "skew": 1.31
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.86,
+        "std": 1.06,
+        "skew": 1.32
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.34,
+        "std": 0.57,
+        "skew": 1.47
+      }
+    },
+    "Ruy Lopez": {
+      "eco": "C60",
+      "sample_size": 1000,
+      "number_of_times_played": 1798,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.64,
+        "std": 0.85,
+        "skew": 1.56
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.12,
+        "std": 1.16,
+        "skew": 1.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.47,
+        "std": 0.77,
+        "skew": 2.01
+      }
+    },
+    "Saragossa Opening": {
+      "eco": "A00",
+      "sample_size": 389,
+      "number_of_times_played": 297,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.17,
+        "std": 1.17,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.57,
+        "std": 1.44,
+        "skew": 0.99
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.97,
+        "skew": 2.88
+      }
+    },
+    "Scandinavian Defense": {
+      "eco": "B01",
+      "sample_size": 1000,
+      "number_of_times_played": 5180,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.03,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.57,
+        "std": 1.44,
+        "skew": 1.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.99,
+        "skew": 1.78
+      }
+    },
+    "Scotch Game": {
+      "eco": "C44",
+      "sample_size": 1000,
+      "number_of_times_played": 2256,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.9,
+        "std": 0.92,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.33,
+        "std": 1.24,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.56,
+        "std": 0.76,
+        "skew": 1.4
+      }
+    },
+    "Sicilian Defense": {
+      "eco": "B20",
+      "sample_size": 1000,
+      "number_of_times_played": 3701,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.94,
+        "skew": 1.05
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.25,
+        "std": 1.28,
+        "skew": 1.32
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.78,
+        "skew": 1.68
+      }
+    },
+    "Slav Defense": {
+      "eco": "D10",
+      "sample_size": 292,
+      "number_of_times_played": 233,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 0.93,
+        "skew": 0.86
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.08,
+        "std": 1.32,
+        "skew": 1.49
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.34,
+        "std": 0.61,
+        "skew": 2.06
+      }
+    },
+    "Three Knights Opening": {
+      "eco": "C46",
+      "sample_size": 1000,
+      "number_of_times_played": 1893,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.84,
+        "skew": 1.19
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.11,
+        "std": 1.2,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.78,
+        "skew": 1.67
+      }
+    },
+    "Van Geet Opening": {
+      "eco": "A00",
+      "sample_size": 778,
+      "number_of_times_played": 604,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.11,
+        "std": 1.07,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.54,
+        "std": 1.44,
+        "skew": 1.03
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.99,
+        "skew": 1.98
+      }
+    },
+    "Van't Kruijs Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 2369,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.21,
+        "std": 1.1,
+        "skew": 0.84
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.57,
+        "std": 1.49,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.88,
+        "skew": 1.78
+      }
+    },
+    "Vienna Gambit, with Max Lange Defense": {
+      "eco": "C25",
+      "sample_size": 102,
+      "number_of_times_played": 83,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.3,
+        "std": 0.94,
+        "skew": 0.58
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.53,
+        "std": 1.33,
+        "skew": 0.68
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.87,
+        "skew": 3.22
+      }
+    },
+    "Vienna Game": {
+      "eco": "C25",
+      "sample_size": 1000,
+      "number_of_times_played": 2532,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.83,
+        "std": 0.91,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.38,
+        "std": 1.33,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.83,
+        "skew": 1.46
+      }
+    },
+    "Ware Defense": {
+      "eco": "B00",
+      "sample_size": 164,
+      "number_of_times_played": 135,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.95,
+        "std": 1.02,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.76,
+        "std": 1.49,
+        "skew": 0.98
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 1.06,
+        "skew": 1.4
+      }
+    },
+    "Ware Opening": {
+      "eco": "A00",
+      "sample_size": 235,
+      "number_of_times_played": 194,
+      "opening_inaccuracies_per_game": {
+        "mean": 1.06,
+        "std": 1.03,
+        "skew": 1.15
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.87,
+        "std": 1.52,
+        "skew": 1.53
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.71,
+        "std": 1.06,
+        "skew": 1.84
+      }
+    },
+    "Zukertort Opening": {
+      "eco": "A04",
+      "sample_size": 1000,
+      "number_of_times_played": 2289,
+      "opening_inaccuracies_per_game": {
+        "mean": 0.95,
+        "std": 1.05,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.7,
+        "std": 1.5,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.97,
+        "skew": 1.69
+      }
+    }
+  }
+}

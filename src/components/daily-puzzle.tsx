@@ -93,8 +93,14 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
     fetchPuzzle()
   }, [chess])
 
-  // Parse solution moves from PGN
+  // Get solution moves from puzzle data (already parsed by backend)
   const getSolutionMoves = (): string[] => {
+    // Use the pre-parsed solution from the backend if available
+    if (puzzleData?.solution && puzzleData.solution.length > 0) {
+      return puzzleData.solution
+    }
+
+    // Fallback: parse from PGN if solution not provided
     if (!puzzleData?.pgn) return []
 
     try {
@@ -109,7 +115,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
           const parts = moveText.replace(/\d+\.\s*/, '').split(/\s+/)
 
           for (const moveStr of parts) {
-            if (moveStr && moveStr !== '1-0' && moveStr !== '0-1' && moveStr !== '1/2-1/2') {
+            if (moveStr && moveStr !== '1-0' && moveStr !== '0-1' && moveStr !== '1/2-1/2' && moveStr !== '..' && moveStr !== '...') {
               try {
                 const move = tempChess.move(moveStr)
                 if (move) {
@@ -542,21 +548,6 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         )}
 
       </div>
-
-      {/* Hint Display */}
-      {puzzleState.showHint && (
-        <div style={{
-          marginTop: '8px',
-          padding: '8px',
-          background: '#e9ecef',
-          borderRadius: '4px',
-          fontSize: '12px',
-          textAlign: 'center',
-          color: '#495057'
-        }}>
-          💡 Hint: {getSolutionMoves()[puzzleState.currentMoveIndex] || 'No more hints available'}
-        </div>
-      )}
     </div>
   )
 }

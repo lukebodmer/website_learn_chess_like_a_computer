@@ -28,6 +28,7 @@
 	      pkgs.typescript
 	      pkgs.nodejs_24
 	      pkgs.stockfish
+	      pkgs.sqlite
 	      pkgs.postgresql
 	      pkgs.vscode-json-languageserver
 	      pkgs.zstd

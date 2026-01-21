@@ -47,7 +47,7 @@
                 </a>
 
                 {% if user.userprofile.chess_com_username %}
-                <a href="{% url 'analysis:chess_com_analysis' user.userprofile.chess_com_username %}" class="generate-report-card chess-com-card">
+                <a href="{% url 'analysis:generate_report_page' platform='chess.com' username=user.userprofile.chess_com_username %}" class="generate-report-card chess-com-card">
                     <div class="report-button-content">
                         <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" class="report-logo">
                         <span class="report-label">Chess.com</span>

@@ -4,12 +4,26 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 // Helper function to determine ELO bracket
 const getEloBracket = (rating: number): string => {
-  if (rating < 1200) return '800-1200';
-  if (rating < 1400) return '1200-1400';
-  if (rating < 1600) return '1400-1600';
-  if (rating < 1800) return '1600-1800';
-  if (rating < 2000) return '1800-2000';
-  return '2000+';
+  if (rating < 600) return 'below-600';
+  if (rating < 700) return '600-700';
+  if (rating < 800) return '700-800';
+  if (rating < 900) return '800-900';
+  if (rating < 1000) return '900-1000';
+  if (rating < 1100) return '1000-1100';
+  if (rating < 1200) return '1100-1200';
+  if (rating < 1300) return '1200-1300';
+  if (rating < 1400) return '1300-1400';
+  if (rating < 1500) return '1400-1500';
+  if (rating < 1600) return '1500-1600';
+  if (rating < 1700) return '1600-1700';
+  if (rating < 1800) return '1700-1800';
+  if (rating < 1900) return '1800-1900';
+  if (rating < 2000) return '1900-2000';
+  if (rating < 2100) return '2000-2100';
+  if (rating < 2200) return '2100-2200';
+  if (rating < 2300) return '2200-2300';
+  if (rating < 2400) return '2300-2400';
+  return '2400+';
 };
 
 // Helper function to calculate average ELO from games
@@ -73,14 +87,10 @@ const calculateAverageElo = (games: any[], username: string): number | null => {
 
 interface EloAveragesData {
   [timeControl: string]: {
-    bracket: string;
-    elo: number;
-    data: {
-      [key: string]: {
-        mean: number;
-        std: number;
-        skew: number;
-      };
+    [key: string]: {
+      mean: number;
+      std: number;
+      skew: number;
     };
   };
 }

@@ -93,9 +93,10 @@ class StockfishEvaluator:
             target_pool_size = max((concurrency // workers) // 2, cpu_count // workers)
 
             # Memory constraints: each engine uses ~100MB (64MB hash + overhead)
-            # With 4Gi memory and multiple workers, limit total engines across all workers
-            # 4 workers × 5 engines = 20 total engines = ~2GB, safe margin
-            max_engines_per_worker = 5
+            # With 8Gi memory and 8 workers, we can fit more engines
+            # 8 workers × 10 engines = 80 total engines = ~8GB, using full memory
+            # With 10 CPUs and concurrency 1000, this gives good throughput
+            max_engines_per_worker = 10
 
             self.pool_size = min(target_pool_size, max_engines_per_worker)
             logger.info(f"Auto-sizing pool: concurrency={concurrency}, workers={workers}, cpu_count={cpu_count}, pool_size={self.pool_size}")

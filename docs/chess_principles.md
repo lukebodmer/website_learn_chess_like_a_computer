@@ -7,7 +7,7 @@ The Chess Principles Analysis System quantitatively measures 10 key chess skill 
 **Backend**: All 10 principles implemented in `analysis/chess_analysis/principles_analyzer.py`
 **Data Storage**: Results saved in `AnalysisReport.stockfish_analysis['principles']`
 **Frontend**: Radar chart visualization in `src/components/principles-summary.tsx`
-**Baseline Data**: ELO range averages stored in `data/elo_averages.json` (6 rating ranges: 800-1200, 1200-1400, 1400-1600, 1600-1800, 1800-2000, 2000+)
+**Baseline Data**: ELO range averages stored in `data/elo_averages.json`
 
 ## How It Works
 
@@ -188,7 +188,7 @@ class ChessPrinciplesAnalyzer:
 ## 5. Baseline Data (`data/elo_averages.json`)
 ```json
 {
-  "800-1200": {
+  "800-900": {
     "opening_inaccuracies_per_game": {"mean": 3.2, "std": 1.2, "skew": 0.8},
     "opening_mistakes_per_game": {"mean": 1.8, "std": 0.7, "skew": 0.9},
     // ... 18 total metrics per rating range
@@ -205,16 +205,3 @@ class ChessPrinciplesAnalyzer:
   - Positive skew: Most players cluster below mean with long tail above (e.g., blunders)
   - Negative skew: Most players cluster above mean with long tail below (e.g., conversion rates)
   - Uses scipy.stats.skewnorm for percentile calculations
-
-# Testing
-
-Run principles analysis on existing report:
-```bash
-python test_principles.py
-```
-
-This script:
-- Loads most recent `AnalysisReport` from database
-- Creates `ChessPrinciplesAnalyzer` with report's enriched games
-- Tests individual principle calculations
-- Verifies data format and scoring

@@ -149,50 +149,73 @@ class ChessPrinciplesAnalyzer:
     def _detect_elo_range(self) -> str:
         """
         Auto-detect the user's ELO rating range from their games.
+        Uses the rating from the most recent game as the current ELO.
 
         Returns:
-            ELO range string (e.g., "1200-1400")
+            ELO range string (e.g., "1200-1300")
         """
         if not self.user_games:
-            return "1200-1400"  # Default
+            return "1200-1300"  # Default
 
-        # Get user's ratings from games
-        ratings = []
-        for game in self.user_games:
-            raw_json = self._get_raw_json(game)
-            players = raw_json.get("players", {})
+        # Get user's rating from the most recent game
+        # Games are assumed to be in chronological order, so take the last one
+        last_game = self.user_games[-1]
+        raw_json = self._get_raw_json(last_game)
+        players = raw_json.get("players", {})
 
-            white_user = players.get("white", {}).get("user", {}).get("name", "").lower()
-            black_user = players.get("black", {}).get("user", {}).get("name", "").lower()
+        white_user = players.get("white", {}).get("user", {}).get("name", "").lower()
+        black_user = players.get("black", {}).get("user", {}).get("name", "").lower()
 
-            if white_user == self.username:
-                rating = players.get("white", {}).get("rating")
-                if rating:
-                    ratings.append(rating)
-            elif black_user == self.username:
-                rating = players.get("black", {}).get("rating")
-                if rating:
-                    ratings.append(rating)
+        current_rating = None
+        if white_user == self.username:
+            current_rating = players.get("white", {}).get("rating")
+        elif black_user == self.username:
+            current_rating = players.get("black", {}).get("rating")
 
-        if not ratings:
-            return "1200-1400"  # Default
+        if not current_rating:
+            return "1200-1300"  # Default
 
-        # Calculate average rating
-        avg_rating = sum(ratings) / len(ratings)
-
-        # Map to ELO ranges (200-point buckets)
-        if avg_rating < 1200:
-            return "800-1200"
-        elif avg_rating < 1400:
-            return "1200-1400"
-        elif avg_rating < 1600:
-            return "1400-1600"
-        elif avg_rating < 1800:
-            return "1600-1800"
-        elif avg_rating < 2000:
-            return "1800-2000"
+        # Map to ELO ranges (100-point buckets)
+        if current_rating < 600:
+            return "below-600"
+        elif current_rating < 700:
+            return "600-700"
+        elif current_rating < 800:
+            return "700-800"
+        elif current_rating < 900:
+            return "800-900"
+        elif current_rating < 1000:
+            return "900-1000"
+        elif current_rating < 1100:
+            return "1000-1100"
+        elif current_rating < 1200:
+            return "1100-1200"
+        elif current_rating < 1300:
+            return "1200-1300"
+        elif current_rating < 1400:
+            return "1300-1400"
+        elif current_rating < 1500:
+            return "1400-1500"
+        elif current_rating < 1600:
+            return "1500-1600"
+        elif current_rating < 1700:
+            return "1600-1700"
+        elif current_rating < 1800:
+            return "1700-1800"
+        elif current_rating < 1900:
+            return "1800-1900"
+        elif current_rating < 2000:
+            return "1900-2000"
+        elif current_rating < 2100:
+            return "2000-2100"
+        elif current_rating < 2200:
+            return "2100-2200"
+        elif current_rating < 2300:
+            return "2200-2300"
+        elif current_rating < 2400:
+            return "2300-2400"
         else:
-            return "2000+"
+            return "2400+"
 
     def _get_raw_json(self, game: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -355,9 +378,7 @@ class ChessPrinciplesAnalyzer:
         results["principles"]["endgame_technique"] = self.calculate_endgame_technique()
         results["principles"]["king_safety"] = self.calculate_king_safety()
         results["principles"]["checkmate_ability"] = self.calculate_checkmate_ability()
-        results["principles"]["tactics_vision"] = self.calculate_tactics_vision()
         results["principles"]["defensive_skill"] = self.calculate_defensive_skill()
-        results["principles"]["big_picture"] = self.calculate_big_picture()
         results["principles"]["precision_move_quality"] = self.calculate_precision_move_quality()
         results["principles"]["planning_calculating"] = self.calculate_planning_calculating()
         results["principles"]["time_management"] = self.calculate_time_management()
@@ -1687,18 +1708,8 @@ class ChessPrinciplesAnalyzer:
         timeout_rate = timeouts / total_games if total_games > 0 else 0.0
         time_pressure_blunder_rate = time_pressure_blunders / total_games if total_games > 0 else 0.0
 
-        # Get ELO average
-        elo_data = self.elo_averages.get(self.elo_range, {})
-        elo_timeout_rate = elo_data.get("timeout_rate", {}).get("mean", 0)
-
-        # Calculate difference
-        difference = timeout_rate - elo_timeout_rate
-
-        # Calculate percentile
-        if elo_timeout_rate > 0:
-            percentile = max(0, min(100, 50 - (difference / elo_timeout_rate) * 50))
-        else:
-            percentile = 50
+        # Calculate percentile using proper statistical distribution (lower timeout rate is better)
+        score_data = self._calculate_percentile_from_single_metric(timeout_rate, "timeout_rate", lower_is_better=True)
 
         return {
             "raw_metrics": {
@@ -1711,8 +1722,8 @@ class ChessPrinciplesAnalyzer:
             },
             "elo_comparison": {
                 "user_timeout_rate": round(timeout_rate, 3),
-                "elo_average": round(elo_timeout_rate, 3),
-                "difference": round(difference, 3),
-                "percentile": round(percentile, 1)
+                "elo_average": round(score_data["elo_average"], 3),
+                "difference": round(score_data["difference"], 3),
+                "percentile": round(score_data["percentile"], 1)
             }
         }

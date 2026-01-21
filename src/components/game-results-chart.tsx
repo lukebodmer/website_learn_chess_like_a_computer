@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ReferenceArea } from 'recharts';
 import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager';
+import { eloDataManager } from '../elo-data-manager';
 
 interface GameResult {
   id?: string;
@@ -90,71 +91,79 @@ const TIME_CONTROL_COLORS: Record<string, string> = {
 
 // Helper function to determine ELO bracket
 const getEloBracket = (rating: number): string => {
-  if (rating < 1200) return '800-1200';
-  if (rating < 1400) return '1200-1400';
-  if (rating < 1600) return '1400-1600';
-  if (rating < 1800) return '1600-1800';
-  if (rating < 2000) return '1800-2000';
-  return '2000+';
+  if (rating < 600) return 'below-600';
+  if (rating < 700) return '600-700';
+  if (rating < 800) return '700-800';
+  if (rating < 900) return '800-900';
+  if (rating < 1000) return '900-1000';
+  if (rating < 1100) return '1000-1100';
+  if (rating < 1200) return '1100-1200';
+  if (rating < 1300) return '1200-1300';
+  if (rating < 1400) return '1300-1400';
+  if (rating < 1500) return '1400-1500';
+  if (rating < 1600) return '1500-1600';
+  if (rating < 1700) return '1600-1700';
+  if (rating < 1800) return '1700-1800';
+  if (rating < 1900) return '1800-1900';
+  if (rating < 2000) return '1900-2000';
+  if (rating < 2100) return '2000-2100';
+  if (rating < 2200) return '2100-2200';
+  if (rating < 2300) return '2200-2300';
+  if (rating < 2400) return '2300-2400';
+  return '2400+';
 };
 
-// Helper function to calculate average ELO from games
-const calculateAverageElo = (games: GameResult[], username: string): number | null => {
-  let totalRating = 0;
-  let count = 0;
+// Helper function to get current ELO from most recent game
+const getCurrentElo = (games: GameResult[], username: string): number | null => {
+  if (!games || games.length === 0) return null;
 
-  games.forEach(game => {
-    let rating = null;
-    let isWhitePlayer = false;
-    let isBlackPlayer = false;
+  // Get the most recent game (assumes games are in chronological order)
+  const mostRecentGame = games[games.length - 1];
+  let rating = null;
+  let isWhitePlayer = false;
+  let isBlackPlayer = false;
 
-    // Try to extract data from different possible structures
-    if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-      // Lichess format
-      isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+  // Try to extract data from different possible structures
+  if (mostRecentGame.players?.white?.user?.name || mostRecentGame.players?.black?.user?.name) {
+    // Lichess format
+    isWhitePlayer = mostRecentGame.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+    isBlackPlayer = mostRecentGame.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
 
+    if (isWhitePlayer) {
+      rating = mostRecentGame.players?.white?.rating;
+    } else if (isBlackPlayer) {
+      rating = mostRecentGame.players?.black?.rating;
+    }
+  } else if (mostRecentGame.white_player || mostRecentGame.black_player) {
+    // Custom format
+    isWhitePlayer = mostRecentGame.white_player?.toLowerCase() === username.toLowerCase();
+    isBlackPlayer = mostRecentGame.black_player?.toLowerCase() === username.toLowerCase();
+
+    const rawJson = mostRecentGame.raw_json || mostRecentGame.game?.raw_json;
+    if (rawJson) {
       if (isWhitePlayer) {
-        rating = game.players?.white?.rating;
+        rating = rawJson.players?.white?.rating;
       } else if (isBlackPlayer) {
-        rating = game.players?.black?.rating;
-      }
-    } else if (game.white_player || game.black_player) {
-      // Custom format
-      isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-
-      const rawJson = game.raw_json || game.game?.raw_json;
-      if (rawJson) {
-        if (isWhitePlayer) {
-          rating = rawJson.players?.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = rawJson.players?.black?.rating;
-        }
-      }
-    } else if (game.game) {
-      // Nested game structure
-      const nestedGame = game.game;
-      isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
-
-      const rawJson = nestedGame.raw_json;
-      if (rawJson) {
-        if (isWhitePlayer) {
-          rating = rawJson.players?.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = rawJson.players?.black?.rating;
-        }
+        rating = rawJson.players?.black?.rating;
       }
     }
+  } else if (mostRecentGame.game) {
+    // Nested game structure
+    const nestedGame = mostRecentGame.game;
+    isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
+    isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
 
-    if (rating !== null) {
-      totalRating += rating;
-      count++;
+    const rawJson = nestedGame.raw_json;
+    if (rawJson) {
+      if (isWhitePlayer) {
+        rating = rawJson.players?.white?.rating;
+      } else if (isBlackPlayer) {
+        rating = rawJson.players?.black?.rating;
+      }
     }
-  });
+  }
 
-  return count > 0 ? totalRating / count : null;
+  return rating;
 };
 
 export const GameResultsChart: React.FC<GameResultsChartProps> = ({
@@ -166,6 +175,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   const [filteredGames, setFilteredGames] = useState<GameResult[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [currentSpeedFilter, setCurrentSpeedFilter] = useState<any>('all');
+  const [filteredEloData, setFilteredEloData] = useState<any>(null);
 
   // ELO chart zoom state
   const [eloZoomLeft, setEloZoomLeft] = useState<number | null>(null);
@@ -240,6 +250,11 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     setCurrentFilter(gameFilterManager.getCurrentFilter());
     setCurrentSpeedFilter(gameFilterManager.getCurrentSpeedFilter());
 
+    // Get initial filtered ELO data
+    const initialEloData = eloDataManager.getFilteredEloAverages();
+    console.log('GameResultsChart: Initial filtered ELO data:', initialEloData);
+    setFilteredEloData(initialEloData);
+
     // Listen for filter changes
     const handleFilterChange = (event: FilterEvent) => {
       setFilteredGames(event.filteredGames);
@@ -247,11 +262,19 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       setCurrentSpeedFilter(event.speedFilter);
     };
 
-    gameFilterManager.addListener(handleFilterChange);
+    // Listen for ELO data changes
+    const handleDataChange = (event: any) => {
+      console.log('GameResultsChart: Received ELO data change event:', event.eloAveragesData);
+      setFilteredEloData(event.eloAveragesData);
+    };
 
-    // Clean up listener on unmount
+    gameFilterManager.addListener(handleFilterChange);
+    eloDataManager.addListener(handleDataChange);
+
+    // Clean up listeners on unmount
     return () => {
       gameFilterManager.removeListener(handleFilterChange);
+      eloDataManager.removeListener(handleDataChange);
     };
   }, []);
 
@@ -411,9 +434,9 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       };
     }
 
-    // Calculate user's average ELO and bracket
-    const avgElo = calculateAverageElo(filteredGames, username);
-    const eloBracket = avgElo ? getEloBracket(avgElo) : null;
+    // Get user's current ELO from most recent game and determine bracket
+    const currentElo = getCurrentElo(filteredGames, username);
+    const eloBracket = currentElo ? getEloBracket(currentElo) : null;
 
     // Initialize counters
     const results = {
@@ -564,24 +587,37 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       timeControl = speedFilter[0];
     }
 
-    if (eloBracket && eloAveragesData && timeControl && eloAveragesData[timeControl]) {
-      const timeControlData = eloAveragesData[timeControl].data;
+    console.log('GameResultsChart: eloBracket:', eloBracket, 'filteredEloData:', filteredEloData);
+    if (eloBracket && filteredEloData) {
+      const timeControlData = filteredEloData;
+      console.log('GameResultsChart: Using timeControlData:', timeControlData);
+
+      // Helper function to extract rate value (handles both number and {mean, std, skew} formats)
+      const getRate = (value: any): number => {
+        if (typeof value === 'number') {
+          return value * 100;
+        } else if (value && typeof value === 'object' && 'mean' in value) {
+          return (value.mean || 0) * 100;
+        }
+        return 0;
+      };
+
       popAvgWinPercentages = {
-        mate: (timeControlData.win_by_checkmate_rate?.mean || 0) * 100,
-        resign: (timeControlData.win_by_resignation_rate?.mean || 0) * 100,
-        timeout: (timeControlData.win_by_timeout_rate?.mean || 0) * 100
+        mate: getRate(timeControlData.win_by_checkmate_rate),
+        resign: getRate(timeControlData.win_by_resignation_rate),
+        timeout: getRate(timeControlData.win_by_timeout_rate)
       };
       popAvgLossPercentages = {
-        mate: (timeControlData.loss_by_checkmate_rate?.mean || 0) * 100,
-        resign: (timeControlData.loss_by_resignation_rate?.mean || 0) * 100,
-        timeout: (timeControlData.loss_by_timeout_rate?.mean || 0) * 100
+        mate: getRate(timeControlData.loss_by_checkmate_rate),
+        resign: getRate(timeControlData.loss_by_resignation_rate),
+        timeout: getRate(timeControlData.loss_by_timeout_rate)
       };
       popAvgDrawPercentages = {
-        stalemate: (timeControlData.draw_by_stalemate_rate?.mean || 0) * 100,
-        agreement: (timeControlData.draw_by_agreement_rate?.mean || 0) * 100,
-        repetition: (timeControlData.draw_by_repetition_rate?.mean || 0) * 100,
-        '50moveRule': (timeControlData.draw_by_50move_rate?.mean || 0) * 100,
-        insufficientMaterial: (timeControlData.draw_by_insufficient_material_rate?.mean || 0) * 100
+        stalemate: getRate(timeControlData.draw_by_stalemate_rate),
+        agreement: getRate(timeControlData.draw_by_agreement_rate),
+        repetition: getRate(timeControlData.draw_by_repetition_rate),
+        '50moveRule': getRate(timeControlData.draw_by_50move_rate),
+        insufficientMaterial: getRate(timeControlData.draw_by_insufficient_material_rate)
       };
     }
 
@@ -684,7 +720,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       maxYAxisValue,
       eloBracket
     };
-  }, [filteredGames, username, currentFilter, currentSpeedFilter, eloAveragesData]);
+  }, [filteredGames, username, currentFilter, currentSpeedFilter, filteredEloData]);
 
   const renderCustomTooltip = (props: any) => {
     if (!props.active || !props.payload || !props.payload.length) return null;
@@ -693,11 +729,11 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     const userBar = props.payload.find((p: any) => p.dataKey === 'value');
     const popAvgBar = props.payload.find((p: any) => p.dataKey === 'popAvg');
 
-    if (!userBar) return null;
+    if (!userBar && !popAvgBar) return null;
 
-    const name = userBar.payload.name;
-    const userPercentage = userBar.value;
-    const rawCount = userBar.payload.rawCount;
+    const name = userBar?.payload.name || popAvgBar?.payload.name;
+    const userPercentage = userBar?.value || 0;
+    const rawCount = userBar?.payload.rawCount || 0;
     const popAvgPercentage = popAvgBar?.value || 0;
 
     return (
@@ -720,21 +756,23 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           {name}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <p style={{
-            margin: 0,
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <span style={{
-              color: userBar.color,
-              fontSize: '14px',
-              filter: 'brightness(1.1)'
-            }}>●</span>
-            <span><strong>You:</strong> {userPercentage.toFixed(1)}% ({rawCount} games)</span>
-          </p>
+          {userBar && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: userBar.color,
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>You:</strong> {userPercentage.toFixed(1)}% ({rawCount} games)</span>
+            </p>
+          )}
           {eloBracket && popAvgPercentage > 0 && (
             <p style={{
               margin: 0,
@@ -764,11 +802,11 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     const userBar = props.payload.find((p: any) => p.dataKey === 'value');
     const popAvgBar = props.payload.find((p: any) => p.dataKey === 'popAvg');
 
-    if (!userBar) return null;
+    if (!userBar && !popAvgBar) return null;
 
-    const name = userBar.payload.name;
-    const userPercentage = userBar.value;
-    const rawCount = userBar.payload.rawCount;
+    const name = userBar?.payload.name || popAvgBar?.payload.name;
+    const userPercentage = userBar?.value || 0;
+    const rawCount = userBar?.payload.rawCount || 0;
     const popAvgPercentage = popAvgBar?.value || 0;
 
     return (
@@ -791,21 +829,23 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           {name}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <p style={{
-            margin: 0,
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <span style={{
-              color: userBar.color,
-              fontSize: '14px',
-              filter: 'brightness(1.1)'
-            }}>●</span>
-            <span><strong>You:</strong> {userPercentage.toFixed(1)}% ({rawCount} games)</span>
-          </p>
+          {userBar && (
+            <p style={{
+              margin: 0,
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{
+                color: userBar.color,
+                fontSize: '14px',
+                filter: 'brightness(1.1)'
+              }}>●</span>
+              <span><strong>You:</strong> {userPercentage.toFixed(1)}% ({rawCount} games)</span>
+            </p>
+          )}
           {eloBracket && popAvgPercentage > 0 && (
             <p style={{
               margin: 0,
@@ -1108,8 +1148,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           }}>
             Wins ({userStats.wins})
           </h4>
-          {userStats.wins > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
+          {(userStats.wins > 0 || (eloBracket && winsData.some(d => d.popAvg > 0))) ? (
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart
                 data={winsData}
                 margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
@@ -1160,7 +1200,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             </ResponsiveContainer>
           ) : (
             <div style={{
-              height: '200px',
+              height: '180px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1188,8 +1228,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           }}>
             Losses ({userStats.losses})
           </h4>
-          {userStats.losses > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
+          {(userStats.losses > 0 || (eloBracket && lossesData.some(d => d.popAvg > 0))) ? (
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart
                 data={lossesData}
                 margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
@@ -1240,7 +1280,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             </ResponsiveContainer>
           ) : (
             <div style={{
-              height: '200px',
+              height: '180px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1268,11 +1308,12 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           }}>
             Draws ({userStats.draws})
           </h4>
-          {userStats.draws > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
+          {(userStats.draws > 0 || (eloBracket && drawsData.some(d => d.popAvg > 0))) ? (
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart
                 data={drawsData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                style={{ cursor: 'default' }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                 <XAxis
@@ -1293,7 +1334,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                   domain={[0, maxYAxisValue]}
                   tickFormatter={(value) => `${value}%`}
                 />
-                <Tooltip content={renderDrawsTooltip} />
+                <Tooltip content={renderDrawsTooltip} cursor={false} />
                 {/* User's actual draws - Solid bar */}
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {drawsData.map((entry, index) => (
@@ -1396,7 +1437,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                 cursor={{ fill: 'var(--hover-background)' }}
               />
               <Bar dataKey="Wins" stackId="a" fill="var(--success-color)" />
-              <Bar dataKey="Draws" stackId="a" fill="#8B9DC3" />
+              <Bar dataKey="Draws" stackId="a" fill="#C9ADA7" />
               <Bar dataKey="Losses" stackId="a" fill="var(--danger-color)" />
             </BarChart>
           </ResponsiveContainer>

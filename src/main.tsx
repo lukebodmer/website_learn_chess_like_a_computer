@@ -17,12 +17,17 @@ import TimeAnalysis from './components/time-analysis'
 import PrinciplesSummary from './components/principles-summary'
 import CustomPuzzles from './components/custom-puzzles'
 import PrincipleSelector from './components/principle-selector'
+import OpeningStatsByElo from './components/opening-stats-by-elo'
+import LearnTopicBoard from './components/learn-topic-board'
+import GenerateReport from './components/generate-report'
 import { gameFilterManager } from './game-filter-manager'
+import { eloDataManager } from './elo-data-manager'
 
 // Make React available globally for template scripts
 ;(window as any).React = React
 ;(window as any).ReactDOM = ReactDOM
 ;(window as any).gameFilterManager = gameFilterManager
+;(window as any).eloDataManager = eloDataManager
 ;(window as any).TopFilters = TopFilters
 
 // This is the main entry point for Vite
@@ -30,6 +35,33 @@ console.log('Main Vite entry point loaded')
 
 // Auto-mount components based on DOM elements
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize EloDataManager with data from the page (if available)
+  try {
+    // Load ELO averages data
+    const eloAveragesElement = document.getElementById('elo-averages-data')
+    if (eloAveragesElement && eloAveragesElement.textContent) {
+      const eloAveragesText = eloAveragesElement.textContent.trim()
+      if (eloAveragesText && eloAveragesText.startsWith('{')) {
+        const eloAveragesData = JSON.parse(eloAveragesText)
+        console.log('Initializing EloDataManager with ELO averages data:', eloAveragesData)
+        eloDataManager.setEloAveragesData(eloAveragesData)
+      }
+    }
+
+    // Load opening stats data
+    const openingStatsElement = document.getElementById('opening-stats-data')
+    if (openingStatsElement && openingStatsElement.textContent) {
+      const openingStatsText = openingStatsElement.textContent.trim()
+      if (openingStatsText && openingStatsText.startsWith('{')) {
+        const openingStatsData = JSON.parse(openingStatsText)
+        console.log('Initializing EloDataManager with opening stats data:', openingStatsData)
+        eloDataManager.setOpeningStatsData(openingStatsData)
+      }
+    }
+  } catch (error) {
+    console.log('Error initializing EloDataManager:', error.message)
+  }
+
   // Mount GamesGrid on games page
   const chessBoardContainer = document.getElementById('chess-board-container')
   if (chessBoardContainer) {
@@ -277,8 +309,23 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Error parsing ELO averages data for opening analysis:', error.message)
     }
 
+    // Try to get opening stats data from the page
+    let openingStatsData = null
+    try {
+      const openingStatsElement = document.getElementById('opening-stats-data')
+      if (openingStatsElement && openingStatsElement.textContent) {
+        const openingStatsText = openingStatsElement.textContent.trim()
+        if (openingStatsText && openingStatsText.startsWith('{')) {
+          openingStatsData = JSON.parse(openingStatsText)
+          console.log('Parsed opening stats data for opening analysis:', openingStatsData)
+        }
+      }
+    } catch (error) {
+      console.log('Error parsing opening stats data for opening analysis:', error.message)
+    }
+
     // Render chart with initial data
-    root.render(<OpeningAnalysis enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} />)
+    root.render(<OpeningAnalysis enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} openingStatsData={openingStatsData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).openingAnalysisRoot = root
@@ -536,5 +583,37 @@ document.addEventListener('DOMContentLoaded', () => {
     ;(window as any).customPuzzlesRoot = root
     ;(window as any).CustomPuzzles = CustomPuzzles
     ;(window as any).PrincipleSelector = PrincipleSelector
+  }
+
+  // Mount OpeningStatsByElo on openings page
+  const openingStatsByEloContainer = document.getElementById('opening-stats-by-elo-root')
+  if (openingStatsByEloContainer) {
+    const root = ReactDOM.createRoot(openingStatsByEloContainer)
+    root.render(<OpeningStatsByElo />)
+
+    // Store the root reference globally
+    ;(window as any).openingStatsByEloRoot = root
+    ;(window as any).OpeningStatsByElo = OpeningStatsByElo
+  }
+
+  // Mount LearnTopicBoard instances on learn page
+  const learnTopicBoards = document.querySelectorAll('[data-learn-topic-board]')
+  learnTopicBoards.forEach((container) => {
+    const position = container.getAttribute('data-position')
+    const size = parseInt(container.getAttribute('data-size') || '200')
+
+    if (position) {
+      const root = ReactDOM.createRoot(container)
+      root.render(<LearnTopicBoard position={position} size={size} />)
+    }
+  })
+
+  // Mount GenerateReport component on generate-report page
+  const generateReportContainer = document.getElementById('generate-report-root')
+  if (generateReportContainer) {
+    const username = generateReportContainer.dataset.username || ''
+    const platform = (generateReportContainer.dataset.platform || 'lichess') as 'lichess' | 'chess.com'
+    const root = ReactDOM.createRoot(generateReportContainer)
+    root.render(<GenerateReport username={username} platform={platform} />)
   }
 })

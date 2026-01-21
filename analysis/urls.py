@@ -11,11 +11,13 @@ urlpatterns = [
     path('chess-com/connect/', views.chess_com_connect, name='chess_com_connect'),
     path('chess-com/save/', views.chess_com_save, name='chess_com_save'),
     path('chess-com/disconnect/', views.chess_com_disconnect, name='chess_com_disconnect'),
-    path('chess-com/analyze/<str:username>/', views.chess_com_analysis, name='chess_com_analysis'),
+    # Unified generate-report URLs
+    path('generate-report/<str:platform>/<str:username>/', views.generate_report_page, name='generate_report_page'),
+    # API endpoints for fetching games
     path('chess-com/fetch-games/<str:username>/', views.fetch_chess_com_games, name='fetch_chess_com_games'),
-    path('chess-com/report/<str:username>/<int:dataset_id>/', views.generate_chess_com_analysis_report, name='chess_com_generate_report_legacy'),
-    path('analyze/<str:username>/', views.user_analysis, name='user_analysis'),
     path('fetch-games/<str:username>/', views.fetch_lichess_games, name='fetch_lichess_games'),
+    # Report generation and viewing
+    path('chess-com/report/<str:username>/<int:dataset_id>/', views.generate_chess_com_analysis_report, name='chess_com_generate_report_legacy'),
     path('report/<str:username>/<int:dataset_id>/', views.generate_analysis_report, name='generate_report'),
     path('stream-analysis/<str:username>/<int:dataset_id>/', views.stream_analysis_progress, name='stream_analysis'),
     path('report-data/<int:report_id>/', views.get_report_data, name='get_report_data'),

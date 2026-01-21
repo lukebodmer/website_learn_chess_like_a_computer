@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { Chess } from 'chess.js'
+import { BoardTheme, getBoardThemeColors } from '../board-theme-utils'
 
 export interface BaseChessBoardProps {
   size?: number
@@ -20,6 +21,7 @@ export interface BaseChessBoardProps {
   currentTurn?: 'w' | 'b' // Add current turn to determine piece selection
   gameResult?: { winner?: string | null, isCheckmate?: boolean, isDraw?: boolean, drawReason?: string } | null // External game result
   animationData?: { piece: any, from: string, to: string } | null // External animation control
+  boardTheme?: BoardTheme // Board color theme (blue, green, brown)
   onSquareClick?: (square: string) => void
   onSquareRightClick?: (square: string) => void
   onPieceDrag?: (from: string, to: string) => boolean
@@ -58,6 +60,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   currentTurn,
   gameResult,
   animationData,
+  boardTheme = 'blue',
   onSquareClick,
   onSquareRightClick,
   onPieceDrag,
@@ -415,9 +418,18 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
       const images: {[key: string]: HTMLImageElement} = {}
       const loadPromises: Promise<void>[] = []
 
+      // Calculate the size at which pieces will be rendered (with high DPI)
+      const dpr = window.devicePixelRatio || 1
+      const squareSize = size / 8
+      const pieceSize = squareSize * 0.8
+      const renderSize = Math.ceil(pieceSize * dpr)
+
       for (const [piece, filename] of Object.entries(pieceToFilename)) {
         const promise = new Promise<void>((resolve) => {
           const img = new Image()
+          // Set size before loading to ensure SVG is rasterized at correct size
+          img.width = renderSize
+          img.height = renderSize
           img.onload = () => resolve()
           img.onerror = () => resolve() // Continue even if image fails to load
           img.src = `${pieceTheme}${filename}`
@@ -454,7 +466,7 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     if (showGameEndSymbols) {
       loadSymbols()
     }
-  }, [pieceTheme, symbolTheme, showGameEndSymbols])
+  }, [pieceTheme, symbolTheme, showGameEndSymbols, size])
 
   // Main rendering effect
   useEffect(() => {
@@ -478,11 +490,14 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
 
     const squareSize = displaySize / 8
 
+    // Get theme colors
+    const themeColors = getBoardThemeColors(boardTheme)
+
     // Draw board squares
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         const isLightSquare = (row + col) % 2 === 0
-        ctx.fillStyle = isLightSquare ? '#f0d9b5' : '#b58863'
+        ctx.fillStyle = isLightSquare ? themeColors.light : themeColors.dark
         ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize)
       }
     }
@@ -491,9 +506,9 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     if (coordinates) {
       ctx.font = `${displaySize / 40}px Arial`
 
-      // Define square colors
-      const lightSquareColor = '#f0d9b5'
-      const darkSquareColor = '#b58863'
+      // Use theme colors for coordinate labels
+      const lightSquareColor = themeColors.light
+      const darkSquareColor = themeColors.dark
 
       // File labels (a-h)
       for (let col = 0; col < 8; col++) {
@@ -821,7 +836,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
     size, position, chess, selectedSquare, legalMoves, lastMove, highlightedSquares, arrows,
     pieceImages, symbolImages, isDragging, draggedPiece, mousePos, animatingPiece,
     animationProgress, coordinates, orientation, showGameEndSymbols, showCheckHighlight,
-    gameResult, rightClickHighlights, userArrows, rightClickDragging, rightClickStart, getSquareCoords, getKingSquare, getGameResult
+    gameResult, rightClickHighlights, userArrows, rightClickDragging, rightClickStart, boardTheme,
+    getSquareCoords, getKingSquare, getGameResult
   ])
 
   // Cleanup animation on unmount
@@ -834,11 +850,9 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
   }, [])
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'relative', display: 'inline-block', width: `${size}px`, height: `${size}px` }}>
       <canvas
         ref={canvasRef}
-        width={size}
-        height={size}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -847,7 +861,8 @@ const BaseChessBoard: React.FC<BaseChessBoardProps> = ({
         onContextMenu={handleRightClick}
         style={{
           cursor: interactive ? 'pointer' : 'default',
-          userSelect: 'none'
+          userSelect: 'none',
+          display: 'block'
         }}
       />
       {customOverlays}

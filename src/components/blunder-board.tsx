@@ -435,10 +435,16 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
         border: '1px solid var(--border-color)',
         padding: '16px',
         display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        alignItems: 'center'
       }}>
-        <BaseChessBoard
-          size={size}
+        <div style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          flexShrink: 0
+        }}>
+          <BaseChessBoard
+            size={size}
           position={position}
           orientation={boardOrientation}
           coordinates={true}
@@ -454,6 +460,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
           onSquareClick={handleSquareClick}
           onAnimationComplete={handleAnimationComplete}
         />
+        </div>
       </div>
 
       {/* Controls */}

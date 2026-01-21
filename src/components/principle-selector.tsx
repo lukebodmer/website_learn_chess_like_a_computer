@@ -18,9 +18,9 @@ const PrincipleSelector: React.FC<PrincipleSelectorProps> = ({
     'endgame_technique': 'Endgame Technique',
     'king_safety': 'King Safety',
     'checkmate_ability': 'Checkmate Ability',
-    'tactics_vision': 'Tactics Vision',
+    // 'tactics_vision': 'Tactics Vision',
     'defensive_skill': 'Defensive Skill',
-    'big_picture': 'Big Picture',
+    // 'big_picture': 'Big Picture',
     'precision_move_quality': 'Precision & Quality',
     'planning_calculating': 'Planning & Calculating',
     'time_management': 'Time Management'
@@ -56,19 +56,22 @@ const PrincipleSelector: React.FC<PrincipleSelectorProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '700px',
-      backgroundColor: 'var(--background-primary)',
-      borderRadius: '8px',
-      border: '1px solid var(--border-color)',
-      padding: '20px'
+      minHeight: '700px'
     }}>
       <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
+        backgroundColor: 'var(--background-primary)',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        padding: '20px',
         width: '100%',
-        maxWidth: '280px'
+        maxWidth: '320px'
       }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%'
+        }}>
         {/* Header */}
         <div style={{
           fontSize: '16px',
@@ -165,6 +168,7 @@ const PrincipleSelector: React.FC<PrincipleSelectorProps> = ({
           </button>
         );
       })}
+        </div>
         </div>
       </div>
     </div>

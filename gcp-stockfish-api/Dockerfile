@@ -26,7 +26,7 @@ COPY stockfish_api.py .
 # Set environment variables
 ENV PORT=8080
 ENV HOST=0.0.0.0
-ENV WORKERS=4
+ENV WORKERS=8
 
 # Expose port
 EXPOSE 8080

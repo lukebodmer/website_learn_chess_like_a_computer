@@ -23,11 +23,11 @@ gcloud run deploy $SERVICE_NAME \
   --platform managed \
   --region $REGION \
   --project=$PROJECT_ID \
-  --memory 4Gi \
-  --cpu 4 \
+  --memory 8Gi \
+  --cpu 8 \
   --min-instances 0 \
-  --max-instances 5 \
-  --concurrency 80 \
+  --max-instances 12 \
+  --concurrency 1000 \
   --timeout 120s \
   --set-env-vars DEFAULT_STOCKFISH_DEPTH=20 \
   --no-allow-unauthenticated

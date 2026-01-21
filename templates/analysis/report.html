@@ -23,7 +23,7 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
 
     {% if auto_start %}
     <!-- Analysis Progress Section -->
-    <div id="analysis-progress" style="margin: 20px 0; padding: 20px; border-left: 4px solid #007bff;">
+    <div id="analysis-progress" style="position: sticky; top: 0; z-index: 100; margin: 20px 0; padding: 20px; background-color: var(--background-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 6px var(--shadow-light);">
         <h2>🔄 Analysis Progress</h2>
         <div id="progress-status">Initializing analysis...</div>
         <div id="progress-bar" style="background: #e0e0e0; height: 20px; border-radius: 10px; margin: 10px 0;">
@@ -78,6 +78,9 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
 
     <!-- Hidden element to store ELO averages data for React components -->
     <div id="elo-averages-data" style="display: none;">{{ elo_averages|safe }}</div>
+
+    <!-- Hidden element to store opening stats data for React components -->
+    <div id="opening-stats-data" style="display: none;">{{ opening_stats|safe }}</div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleRawGameData()">
         <span id="raw-game-data-toggle">▶</span> Raw Game Data (All Games)
@@ -260,6 +263,14 @@ function handleAnalysisUpdate(data) {
                 updatePrinciplesSummary(data.stockfish_analysis.principles);
             }
 
+            // Update custom puzzles if data is available
+            if (data.custom_puzzles) {
+                const principlesData = data.stockfish_analysis && data.stockfish_analysis.principles
+                    ? data.stockfish_analysis.principles
+                    : null;
+                updateCustomPuzzles(data.custom_puzzles, principlesData);
+            }
+
             if (eventSource) {
                 eventSource.close();
             }
@@ -403,10 +414,34 @@ function updateOpeningAnalysisChart() {
     if (window.openingAnalysisRoot && window.OpeningAnalysis && window.React) {
         const username = document.querySelector('#report-username').textContent;
 
+        // Parse ELO averages data from hidden div
+        let eloAveragesData = null;
+        try {
+            const eloAveragesEl = document.getElementById('elo-averages-data');
+            if (eloAveragesEl && eloAveragesEl.textContent.trim()) {
+                eloAveragesData = JSON.parse(eloAveragesEl.textContent);
+            }
+        } catch (error) {
+            console.warn('Could not parse ELO averages data:', error);
+        }
+
+        // Parse opening stats data from hidden div
+        let openingStatsData = null;
+        try {
+            const openingStatsEl = document.getElementById('opening-stats-data');
+            if (openingStatsEl && openingStatsEl.textContent.trim()) {
+                openingStatsData = JSON.parse(openingStatsEl.textContent);
+            }
+        } catch (error) {
+            console.warn('Could not parse opening stats data:', error);
+        }
+
         console.log('Updating OpeningAnalysis with:', {
             gamesCount: enrichedGamesArray.length,
             username: username,
-            sampleGame: enrichedGamesArray[0]
+            sampleGame: enrichedGamesArray[0],
+            hasEloAverages: !!eloAveragesData,
+            hasOpeningStats: !!openingStatsData
         });
 
         try {
@@ -414,7 +449,9 @@ function updateOpeningAnalysisChart() {
             window.openingAnalysisRoot.render(
                 window.React.createElement(window.OpeningAnalysis, {
                     enrichedGames: enrichedGamesArray,
-                    username: username
+                    username: username,
+                    eloAveragesData: eloAveragesData,
+                    openingStatsData: openingStatsData
                 })
             );
             console.log('OpeningAnalysis render successful');
@@ -538,6 +575,88 @@ function updatePrinciplesSummary(principlesData) {
         console.log('PrinciplesSummary not ready yet:', {
             hasRoot: !!window.principlesSummaryRoot,
             hasComponent: !!window.PrinciplesSummary,
+            hasReact: !!window.React
+        });
+    }
+}
+
+function updateCustomPuzzles(puzzlesData, principlesData) {
+    // Check if we have the React root and components available
+    if (window.customPuzzlesRoot && window.CustomPuzzles && window.PrincipleSelector && window.React) {
+        console.log('Updating CustomPuzzles with:', {
+            puzzlesCount: puzzlesData ? puzzlesData.length : 0,
+            hasPrinciples: !!principlesData
+        });
+
+        try {
+            // Update the hidden custom-puzzles-data element for persistent storage
+            const customPuzzlesEl = document.getElementById('custom-puzzles-data');
+            if (customPuzzlesEl) {
+                customPuzzlesEl.textContent = JSON.stringify(puzzlesData);
+            }
+
+            // Create the wrapper component with updated data
+            const PuzzlesWithSelector = () => {
+                const [selectedPrinciple, setSelectedPrinciple] = window.React.useState(null);
+
+                return window.React.createElement('div', {
+                    style: {
+                        display: 'flex',
+                        gap: '20px',
+                        alignItems: 'flex-start',
+                        justifyContent: 'center',
+                        flexWrap: 'wrap'
+                    }
+                }, [
+                    // Principle Selector
+                    window.React.createElement('div', {
+                        key: 'selector',
+                        style: {
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                            minWidth: '320px',
+                            maxWidth: '400px',
+                            flex: '1'
+                        }
+                    }, window.React.createElement(window.PrincipleSelector, {
+                        principlesData: principlesData,
+                        selectedPrinciple: selectedPrinciple,
+                        onSelectPrinciple: setSelectedPrinciple
+                    })),
+                    // Custom Puzzles
+                    window.React.createElement('div', {
+                        key: 'puzzles',
+                        style: {
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
+                            flex: '1',
+                            minWidth: '320px',
+                            maxWidth: '550px'
+                        }
+                    }, window.React.createElement(window.CustomPuzzles, {
+                        puzzles: puzzlesData,
+                        size: 480,
+                        selectedPrinciple: selectedPrinciple
+                    }))
+                ]);
+            };
+
+            // Re-render the component with updated data
+            window.customPuzzlesRoot.render(
+                window.React.createElement(PuzzlesWithSelector)
+            );
+            console.log('CustomPuzzles render successful');
+        } catch (error) {
+            console.error('Error rendering CustomPuzzles:', error);
+        }
+    } else {
+        console.log('CustomPuzzles not ready yet:', {
+            hasRoot: !!window.customPuzzlesRoot,
+            hasCustomPuzzles: !!window.CustomPuzzles,
+            hasPrincipleSelector: !!window.PrincipleSelector,
             hasReact: !!window.React
         });
     }
