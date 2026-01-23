@@ -334,11 +334,124 @@ class ReportTaskProcessor:
                     }
                     analysis_summary['puzzle_recommendations'] = None
 
+                # Generate LLM insights
+                task.progress = 98
+                task.current_game = "Generating insights from game data..."
+                task.save()
+
+                llm_insights = {}
+                try:
+                    from .llm_insights import InsightsGenerator, DeepSeekClient
+                    from django.conf import settings
+
+                    deepseek_api_key = getattr(settings, 'DEEPSEEK_API_KEY', None)
+                    if deepseek_api_key and task.analysis_report:
+                        print(f"📊 Generating LLM insights for report {task.analysis_report.id}")
+
+                        # Get ELO averages data
+                        from .views import get_latest_elo_by_time_control, load_elo_averages_for_time_controls
+
+                        platform = 'lichess' if task.game_dataset.lichess_username else 'chess.com'
+                        elo_by_time_control = get_latest_elo_by_time_control(
+                            task.game_dataset.raw_data,
+                            username,
+                            platform
+                        )
+                        elo_averages_data = None
+                        if elo_by_time_control:
+                            elo_averages_data = load_elo_averages_for_time_controls(elo_by_time_control)
+
+                        # Initialize LLM client and generator
+                        llm_client = DeepSeekClient(api_key=deepseek_api_key)
+                        generator = InsightsGenerator(llm_client)
+
+                        # Generate game results insights
+                        result = generator.generate_game_results_insights(
+                            username=username,
+                            enriched_games=completed_enriched_games,
+                            elo_averages_data=elo_averages_data,
+                            elo_chart_data=task.game_dataset.elo_chart_data
+                        )
+
+                        if result['success']:
+                            llm_insights['game_results'] = {
+                                'insights': result['insights'],
+                                'generated_at': timezone.now().isoformat(),
+                                'tokens_used': result.get('tokens_used'),
+                                'metadata': result.get('metadata', {})
+                            }
+                            print(f"✅ Game results insights generated successfully ({result.get('tokens_used', 0)} tokens)")
+                        else:
+                            print(f"⚠️ Game results insights generation failed: {result.get('error')}")
+
+                        # Generate mistakes insights
+                        mistakes_result = generator.generate_mistakes_insights(
+                            username=username,
+                            stockfish_analysis=analysis_summary,
+                            elo_averages_data=elo_averages_data
+                        )
+
+                        if mistakes_result['success']:
+                            llm_insights['mistakes_analysis'] = {
+                                'insights': mistakes_result['insights'],
+                                'generated_at': timezone.now().isoformat(),
+                                'tokens_used': mistakes_result.get('tokens_used'),
+                                'metadata': mistakes_result.get('metadata', {})
+                            }
+                            print(f"✅ Mistakes insights generated successfully ({mistakes_result.get('tokens_used', 0)} tokens)")
+                        else:
+                            print(f"⚠️ Mistakes insights generation failed: {mistakes_result.get('error')}")
+
+                        # Generate blunder insights
+                        blunder_result = generator.generate_blunder_insights(
+                            username=username,
+                            stockfish_analysis=analysis_summary,
+                            elo_averages_data=elo_averages_data
+                        )
+
+                        if blunder_result['success']:
+                            llm_insights['blunder_analysis'] = {
+                                'insights': blunder_result['insights'],
+                                'generated_at': timezone.now().isoformat(),
+                                'tokens_used': blunder_result.get('tokens_used'),
+                                'metadata': blunder_result.get('metadata', {})
+                            }
+                            print(f"✅ Blunder insights generated successfully ({blunder_result.get('tokens_used', 0)} tokens)")
+                        else:
+                            print(f"⚠️ Blunder insights generation failed: {blunder_result.get('error')}")
+
+                        # Generate time management insights
+                        time_result = generator.generate_time_insights(
+                            username=username,
+                            stockfish_analysis=analysis_summary,
+                            elo_averages_data=elo_averages_data
+                        )
+
+                        if time_result['success']:
+                            llm_insights['time_analysis'] = {
+                                'insights': time_result['insights'],
+                                'generated_at': timezone.now().isoformat(),
+                                'tokens_used': time_result.get('tokens_used'),
+                                'metadata': time_result.get('metadata', {})
+                            }
+                            print(f"✅ Time management insights generated successfully ({time_result.get('tokens_used', 0)} tokens)")
+                        else:
+                            print(f"⚠️ Time management insights generation failed: {time_result.get('error')}")
+                    else:
+                        if not deepseek_api_key:
+                            print("⚠️ DeepSeek API key not configured, skipping LLM insights")
+                        if not task.analysis_report:
+                            print("⚠️ No analysis report available for LLM insights")
+
+                except Exception as e:
+                    print(f"❌ LLM insights generation failed: {e}")
+                    # Continue even if LLM insights fail
+
                 # Update final progress
                 task.progress = 100
-                task.current_game = f"Complete - {len(completed_enriched_games)} games analyzed with principles"
+                task.current_game = f"Complete - {len(completed_enriched_games)} games analyzed with AI insights"
 
-                # Update report with final stats including principles and puzzles
+                # Update report with final stats including principles, puzzles, and LLM insights
                 if task.analysis_report:
                     with transaction.atomic():
                         report = task.analysis_report
@@ -349,6 +462,10 @@ class ReportTaskProcessor:
                         # Store puzzle data in dedicated field
                         if hasattr(task, 'puzzle_data') and task.puzzle_data:
                             report.custom_puzzles = task.puzzle_data.get('puzzles', [])
+
+                        # Store LLM insights
+                        if llm_insights:
+                            report.llm_insights = llm_insights
 
                         from django.utils import timezone
                         report.analysis_duration = timezone.now() - task.started_at

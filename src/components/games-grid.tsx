@@ -1,5 +1,6 @@
-import React from 'react'
-import PlayableChessBoard from './playable-chess-board'
+import React, { useState, useEffect } from 'react'
+import BaseChessBoard from './base-chess-board'
+import { getCurrentBoardTheme, BoardTheme } from '../board-theme-utils'
 
 export interface GamesGridProps {
   onGameSelect: (gameId: string) => void
@@ -8,22 +9,26 @@ export interface GamesGridProps {
 interface GameConfig {
   id: string
   title: string
+  position?: string // FEN position for static board display
   pieceTheme?: string
 }
 
 const games: GameConfig[] = [
   {
     id: 'classic',
-    title: 'Classic Chess'
+    title: 'Classic Chess',
+    position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   },
   {
     id: 'disguised',
     title: 'Half-Blindfold Chess',
+    position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     pieceTheme: '/static/images/chesspieces/disguised/'
   },
   {
     id: 'almost-blindfold',
     title: 'Almost-Blindfold Chess',
+    position: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     pieceTheme: '/static/images/chesspieces/invisible/'
   },
   {
@@ -33,6 +38,33 @@ const games: GameConfig[] = [
 ]
 
 const GamesGrid: React.FC<GamesGridProps> = ({ onGameSelect }) => {
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
+
+  // Listen for board theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setBoardTheme(getCurrentBoardTheme())
+    }
+
+    // Watch for class changes on the HTML element
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          handleThemeChange()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
   return (
     <div style={{
       display: 'flex',
@@ -96,7 +128,8 @@ const GamesGrid: React.FC<GamesGridProps> = ({ onGameSelect }) => {
               backgroundColor: 'var(--background-secondary)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              pointerEvents: 'none'
             }}>
               {game.id === 'blindfold' ? (
                 <div style={{
@@ -111,12 +144,17 @@ const GamesGrid: React.FC<GamesGridProps> = ({ onGameSelect }) => {
                   <span style={{ fontSize: '32px' }}>♟</span>
                 </div>
               ) : (
-                <PlayableChessBoard
+                <BaseChessBoard
                   size={200}
+                  position={game.position || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}
                   pieceTheme={game.pieceTheme}
+                  orientation="white"
                   coordinates={false}
+                  interactive={false}
+                  allowPieceDragging={false}
                   showGameEndSymbols={false}
                   showCheckHighlight={false}
+                  boardTheme={boardTheme}
                 />
               )}
             </div>

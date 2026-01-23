@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ReferenceArea } from 'recharts';
 import { gameFilterManager, FilterEvent, FilterType } from '../game-filter-manager';
 import { eloDataManager } from '../elo-data-manager';
@@ -48,6 +48,7 @@ interface GameResultsChartProps {
   username: string;
   chartType?: 'pie' | 'bar';
   eloAveragesData?: EloAveragesData | null;
+  analysisComplete?: boolean;
 }
 
 interface ChartData {
@@ -180,13 +181,20 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   enrichedGames = [],
   username,
   chartType = 'bar',
-  eloAveragesData = null
+  eloAveragesData = null,
+  analysisComplete = false
 }) => {
   const [filteredGames, setFilteredGames] = useState<GameResult[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [currentSpeedFilter, setCurrentSpeedFilter] = useState<any>('all');
   const [filteredEloData, setFilteredEloData] = useState<any>(null);
   const [precomputedEloData, setPrecomputedEloData] = useState<any[] | null>(null);
+
+  // LLM insights state
+  const [llmInsights, setLlmInsights] = useState<string | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
 
   // ELO chart zoom state
   const [eloZoomLeft, setEloZoomLeft] = useState<number | null>(null);
@@ -254,6 +262,91 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     setEloZoomRight(null);
   };
 
+  // Fetch LLM insights for this component
+  const fetchLlmInsights = async () => {
+    try {
+      setInsightsLoading(true);
+      setInsightsError(null);
+
+      // First, check if insights were provided via streaming (stored in window.llmInsights)
+      if ((window as any).llmInsights?.game_results?.insights) {
+        console.log('Using LLM insights from streaming data');
+        setLlmInsights((window as any).llmInsights.game_results.insights);
+        setInsightsLoading(false);
+        return;
+      }
+
+      // Get report ID from the page
+      const reportIdEl = document.getElementById('report-id');
+      if (!reportIdEl) {
+        setInsightsLoading(false);
+        return;
+      }
+      const reportId = reportIdEl.textContent?.trim();
+
+      if (!reportId) {
+        setInsightsLoading(false);
+        return;
+      }
+
+      // Fetch insights from API (for existing reports or if streaming data not available)
+      const response = await fetch(`/api/generate-insights/${reportId}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          component: 'game_results'
+        })
+      });
+
+      // Get response text first to handle both JSON and HTML errors
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        setInsightsError(`API error (${response.status})`);
+        setInsightsLoading(false);
+        return;
+      }
+
+      // Try to parse JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        setInsightsError('Server returned invalid response.');
+        setInsightsLoading(false);
+        return;
+      }
+
+      if (data.success) {
+        setLlmInsights(data.insights);
+      } else {
+        const errorMsg = data.error || 'Failed to generate insights';
+        setInsightsError(errorMsg);
+      }
+    } catch (e) {
+      console.error('Error fetching LLM insights:', e);
+      setInsightsError(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  // Helper to get CSRF token
+  const getCsrfToken = () => {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const trimmed = cookie.trim();
+      if (trimmed.startsWith(name + '=')) {
+        return trimmed.substring(name.length + 1);
+      }
+    }
+    return '';
+  };
+
   // Read pre-computed ELO chart data from hidden div on mount
   useEffect(() => {
     try {
@@ -262,13 +355,38 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
         const data = JSON.parse(eloChartDataEl.textContent);
         if (data && data.length > 0) {
           setPrecomputedEloData(data);
-          console.log('Loaded pre-computed ELO chart data:', data.length, 'data points');
         }
       }
     } catch (e) {
       console.error('Error loading pre-computed ELO chart data:', e);
     }
   }, []);
+
+  // Track if insights have been fetched to avoid duplicate calls
+  const insightsFetchedRef = useRef(false);
+
+  // On mount, check if insights are already available in the report
+  useEffect(() => {
+    // Try to load pre-existing insights from the report (for existing reports)
+    if (enrichedGames && enrichedGames.length > 0 && !insightsFetchedRef.current) {
+      // Check if we can fetch from API (will return cached if available)
+      const reportIdEl = document.getElementById('report-id');
+      if (reportIdEl && reportIdEl.textContent?.trim()) {
+        insightsFetchedRef.current = true;
+        fetchLlmInsights();
+      }
+    }
+  }, []); // Run once on mount
+
+  // Listen for when analysis completes during streaming
+  useEffect(() => {
+    if (analysisComplete && enrichedGames && enrichedGames.length > 0 && !insightsFetchedRef.current) {
+      // Analysis is complete and data is available, fetch insights
+      console.log('Analysis complete, fetching LLM insights for game results...');
+      insightsFetchedRef.current = true;
+      fetchLlmInsights();
+    }
+  }, [analysisComplete, enrichedGames]);
 
   // Set up filter manager when component mounts
   useEffect(() => {
@@ -293,13 +411,24 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       setFilteredEloData(event.eloAveragesData);
     };
 
+    // Listen for LLM insights arriving from streaming
+    const handleLlmInsightsReady = () => {
+      if (!insightsFetchedRef.current && (window as any).llmInsights?.game_results?.insights) {
+        console.log('LLM insights ready event received, fetching...');
+        insightsFetchedRef.current = true;
+        fetchLlmInsights();
+      }
+    };
+
     gameFilterManager.addListener(handleFilterChange);
     eloDataManager.addListener(handleDataChange);
+    window.addEventListener('llmInsightsReady', handleLlmInsightsReady);
 
     // Clean up listeners on unmount
     return () => {
       gameFilterManager.removeListener(handleFilterChange);
       eloDataManager.removeListener(handleDataChange);
+      window.removeEventListener('llmInsightsReady', handleLlmInsightsReady);
     };
   }, []);
 
@@ -307,7 +436,6 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   const eloOverTimeData = useMemo(() => {
     // If we have pre-computed ELO data, use it instead of computing from games
     if (precomputedEloData && precomputedEloData.length > 0) {
-      console.log('Using pre-computed ELO chart data');
 
       // Convert pre-computed data to the expected format
       const bySpeed: Record<string, any[]> = {};
@@ -395,72 +523,20 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     }
 
     // Extract rating data from each game - this processes ALL games
+    // All games should be in enriched format with players.white.user.name structure
     const gamesWithRating = allGames.map(game => {
+      const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+
       let rating = null;
-      let timestamp = null;
-      let speed = null;
-      let isWhitePlayer = false;
-      let isBlackPlayer = false;
-
-      // Try to extract data from different possible structures
-      if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-        // Lichess format
-        isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-        isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
-
-        if (isWhitePlayer) {
-          rating = game.players?.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = game.players?.black?.rating;
-        }
-
-        timestamp = game.createdAt;
-        speed = game.speed || game.perf;
-      } else if (game.white?.username || game.black?.username) {
-        // Chess.com format (direct structure)
-        isWhitePlayer = game.white?.username?.toLowerCase() === username.toLowerCase();
-        isBlackPlayer = game.black?.username?.toLowerCase() === username.toLowerCase();
-
-        if (isWhitePlayer) {
-          rating = game.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = game.black?.rating;
-        }
-
-        timestamp = game.end_time ? game.end_time * 1000 : null;
-        speed = game.time_class;
-      } else if (game.white_player || game.black_player) {
-        // Custom format (enriched games)
-        isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-        isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-
-        const rawJson = game.raw_json || game.game?.raw_json;
-        if (rawJson) {
-          if (isWhitePlayer) {
-            rating = rawJson.players?.white?.rating || rawJson.white?.rating;
-          } else if (isBlackPlayer) {
-            rating = rawJson.players?.black?.rating || rawJson.black?.rating;
-          }
-          timestamp = rawJson.createdAt || (rawJson.end_time ? rawJson.end_time * 1000 : null);
-          speed = rawJson.speed || rawJson.perf || rawJson.time_class;
-        }
-      } else if (game.game) {
-        // Nested game structure
-        const nestedGame = game.game;
-        isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
-        isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
-
-        const rawJson = nestedGame.raw_json;
-        if (rawJson) {
-          if (isWhitePlayer) {
-            rating = rawJson.players?.white?.rating;
-          } else if (isBlackPlayer) {
-            rating = rawJson.players?.black?.rating;
-          }
-          timestamp = rawJson.createdAt;
-          speed = rawJson.speed || rawJson.perf;
-        }
+      if (isWhitePlayer) {
+        rating = game.players?.white?.rating;
+      } else if (isBlackPlayer) {
+        rating = game.players?.black?.rating;
       }
+
+      const timestamp = game.createdAt;
+      const speed = game.speed || game.perf;
 
       return {
         rating,
@@ -1563,6 +1639,122 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             fontSize: '14px'
           }}>
             No games in selected filter
+          </div>
+        )}
+      </div>
+
+      {/* Insights Section - Collapsible */}
+      <div
+        style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          marginTop: '20px',
+          minHeight: '100px',
+          cursor: llmInsights ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (llmInsights) setInsightsExpanded(!insightsExpanded);
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px'
+          }}
+        >
+          <h4 style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)'
+          }}>
+            AI Insights
+          </h4>
+          {llmInsights && (
+            <span style={{
+              fontSize: '16px',
+              color: 'var(--text-secondary)',
+              userSelect: 'none',
+              transform: insightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block'
+            }}>
+              ▼
+            </span>
+          )}
+        </div>
+
+        {insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            fontStyle: 'italic'
+          }}>
+            Generating insights...
+          </div>
+        )}
+
+        {insightsError && !insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--danger-color)',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            padding: '8px',
+            borderRadius: '4px'
+          }}>
+            {insightsError}
+          </div>
+        )}
+
+        {llmInsights && !insightsLoading && !insightsError && (
+          <div
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: 'var(--text-primary)',
+              whiteSpace: 'pre-wrap',
+              maxHeight: insightsExpanded ? 'none' : '2.4em',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'max-height 0.3s ease'
+            }}
+          >
+            <div
+              dangerouslySetInnerHTML={{
+                __html: llmInsights
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
+                  .replace(/\n/g, '<br />') // Line breaks
+              }}
+            />
+            {!insightsExpanded && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                background: 'linear-gradient(to right, transparent, var(--background-primary) 50%)',
+                width: '100px',
+                height: '100%',
+                pointerEvents: 'none'
+              }} />
+            )}
+          </div>
+        )}
+
+        {!insightsLoading && !insightsError && !llmInsights && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60px'
+          }}>
+            Waiting for game analysis to complete...
           </div>
         )}
       </div>

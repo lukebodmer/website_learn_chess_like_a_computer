@@ -176,25 +176,9 @@ export class GameFilterManager {
       let passesColorFilter = true;
 
       if (this.currentFilter !== 'all') {
-        // Handle different data structures
-        let isWhitePlayer = false;
-        let isBlackPlayer = false;
-
-        // Try to extract player info from different possible structures
-        if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-          // Lichess format
-          isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === this.username.toLowerCase();
-        } else if (game.white_player || game.black_player) {
-          // Custom format
-          isWhitePlayer = game.white_player?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = game.black_player?.toLowerCase() === this.username.toLowerCase();
-        } else if (game.game) {
-          // Nested game structure
-          const nestedGame = game.game;
-          isWhitePlayer = nestedGame.white_player?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = nestedGame.black_player?.toLowerCase() === this.username.toLowerCase();
-        }
+        // Extract player info from enriched game format
+        const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === this.username.toLowerCase();
+        const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === this.username.toLowerCase();
 
         // Check color filter
         if (this.currentFilter === 'white') {
@@ -208,16 +192,8 @@ export class GameFilterManager {
       let passesSpeedFilter = true;
 
       if (this.currentSpeedFilter !== 'all') {
-        // Try to extract speed from different data structures
-        let gameSpeed = null;
-
-        if (game.speed) {
-          gameSpeed = game.speed;
-        } else if (game.raw_json?.speed) {
-          gameSpeed = game.raw_json.speed;
-        } else if (game.game?.raw_json?.speed) {
-          gameSpeed = game.game.raw_json.speed;
-        }
+        // Extract speed from enriched game format
+        const gameSpeed = game.speed || game.perf;
 
         // Check if game speed matches any of the selected speeds
         if (Array.isArray(this.currentSpeedFilter)) {
@@ -231,31 +207,12 @@ export class GameFilterManager {
       let passesResultFilter = true;
 
       if (this.currentResultFilter !== 'all') {
-        // Determine if user is white or black
-        let isWhitePlayer = false;
-        let isBlackPlayer = false;
+        // Determine if user is white or black from enriched game format
+        const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === this.username.toLowerCase();
+        const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === this.username.toLowerCase();
 
-        if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-          isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === this.username.toLowerCase();
-        } else if (game.white_player || game.black_player) {
-          isWhitePlayer = game.white_player?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = game.black_player?.toLowerCase() === this.username.toLowerCase();
-        } else if (game.game) {
-          const nestedGame = game.game;
-          isWhitePlayer = nestedGame.white_player?.toLowerCase() === this.username.toLowerCase();
-          isBlackPlayer = nestedGame.black_player?.toLowerCase() === this.username.toLowerCase();
-        }
-
-        // Extract winner from different data structures
-        let winner = null;
-        if (game.winner !== undefined) {
-          winner = game.winner;
-        } else if (game.raw_json?.winner) {
-          winner = game.raw_json.winner;
-        } else if (game.game?.raw_json?.winner) {
-          winner = game.game.raw_json.winner;
-        }
+        // Extract winner from enriched game format
+        const winner = game.winner;
 
         // Determine result from user's perspective
         let userResult = 'draw';

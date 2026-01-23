@@ -623,7 +623,7 @@ def load_opening_stats_for_elo(elo_by_time_control):
 
 def _render_completed_report(request, report, platform, username, game_dataset):
     """Render a completed analysis report"""
-    # Get enriched games for display
+    # Get enriched games for JavaScript components
     enriched_games_display = "No enriched game data available"
     if report.enriched_games:
         enriched_games_display = json.dumps(report.enriched_games, indent=2)
@@ -666,6 +666,11 @@ def _render_completed_report(request, report, platform, username, game_dataset):
     if report.elo_chart_data:
         elo_chart_data_display = json.dumps(report.elo_chart_data, indent=2)
 
+    # Prepare LLM insights for template
+    llm_insights_display = "{}"
+    if report.llm_insights:
+        llm_insights_display = json.dumps(report.llm_insights, indent=2)
+
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
@@ -677,6 +682,7 @@ def _render_completed_report(request, report, platform, username, game_dataset):
         'elo_averages': elo_averages_data,
         'opening_stats': opening_stats_data,
         'elo_chart_data': elo_chart_data_display,
+        'llm_insights': llm_insights_display,
         'auto_start': False,  # Don't auto-start streaming for existing reports
         'platform': platform
     })
@@ -880,7 +886,8 @@ def stream_analysis_progress(request, username, dataset_id):
                         },
                         "enriched_games_count": len(report.enriched_games) if report.enriched_games else 0,
                         "stockfish_analysis": report.stockfish_analysis,
-                        "custom_puzzles": report.custom_puzzles if report.custom_puzzles else []
+                        "custom_puzzles": report.custom_puzzles if report.custom_puzzles else [],
+                        "llm_insights": report.llm_insights if report.llm_insights else {}
                     }
                     yield f"data: {json.dumps(completion_data)}\n\n"
 
@@ -1334,21 +1341,6 @@ def convert_chess_com_to_universal_format(chess_com_game):
                 "initial": initial_time,
                 "increment": increment,
                 "totalTime": initial_time + increment  # Approximate total time
-            },
-
-            # Preserve Chess.com specific data
-            "chess_com_data": {
-                "url": chess_com_game.get('url', ''),
-                "pgn": chess_com_game.get('pgn', ''),
-                "time_control": chess_com_game.get('time_control', ''),
-                "end_time": chess_com_game.get('end_time', 0),
-                "uuid": chess_com_game.get('uuid', ''),
-                "initial_setup": chess_com_game.get('initial_setup', ''),
-                "fen": chess_com_game.get('fen', ''),
-                "time_class": chess_com_game.get('time_class', ''),
-                "rules": chess_com_game.get('rules', 'chess'),
-                "eco_url": chess_com_game.get('eco', ''),
-                "accuracies": chess_com_game.get('accuracies', {})
             }
         }
 
@@ -1861,10 +1853,14 @@ def get_daily_puzzle_data():
     Fetch daily puzzle from Chess.com with caching
     Cache expires at 12:05 AM EST to align with Chess.com's daily puzzle release
     Returns dict with puzzle data or None if failed
+
+    This function uses a Celery task to fetch the puzzle, which ensures
+    we don't hit Chess.com's rate limits by coordinating with other API calls.
     """
     from django.utils import timezone
     import pytz
     from datetime import datetime, timedelta
+    from .tasks import fetch_daily_puzzle_task
 
     # Create cache key that includes the date to ensure daily refresh
     est = pytz.timezone('US/Eastern')
@@ -1878,40 +1874,23 @@ def get_daily_puzzle_data():
         return puzzle_data
 
     try:
-        # Fetch daily puzzle from Chess.com
-        # User-Agent and rate limiting are handled by chess_com_client
-        response = get_current_daily_puzzle()
+        # Use Celery task to fetch puzzle with proper rate limiting
+        # Use apply_async with queue specified for Chess.com API coordination
+        result = fetch_daily_puzzle_task.apply_async(
+            queue='chess_com_api'
+        )
 
-        if response and response.puzzle:
-            puzzle = response.puzzle
+        # Wait up to 30 seconds for the task to complete
+        puzzle_data = result.get(timeout=30)
 
-            # Extract solution moves from PGN
-            solution_moves = extract_solution_from_pgn(puzzle.pgn)
-
-            # Get the last move from the PGN (the move that led to the puzzle position)
-            last_move = get_last_move_from_chess_com_pgn(puzzle.pgn, puzzle.fen)
-
-            puzzle_data = {
-                'title': puzzle.title or 'Chess.com Daily Puzzle',
-                'fen': puzzle.fen,
-                'pgn': puzzle.pgn,
-                'url': puzzle.url,
-                'image': puzzle.image,
-                'solution': solution_moves,
-                'publish_time': puzzle.publish_time,
-                'publish_datetime': getattr(puzzle, 'publish_datetime', None),
-                'source': 'chess.com',
-                'lastMove': last_move  # Add last move info
-            }
-
+        if puzzle_data:
             # Cache until next 12:05 AM EST (when new puzzle is released)
             cache_timeout = get_seconds_until_next_puzzle_release()
             cache.set(cache_key, puzzle_data, cache_timeout)
-
             return puzzle_data
 
     except Exception as e:
-        print(f"Error fetching daily puzzle: {e}")
+        print(f"Error fetching daily puzzle via Celery task: {e}")
 
     # Return fallback puzzle if API fails
     return get_fallback_puzzle()
@@ -2215,18 +2194,20 @@ def extract_solution_from_pgn(pgn):
 def get_fallback_puzzle():
     """
     Return a fallback puzzle when API fails
+    This is a classic back rank mate pattern
     """
     return {
         'title': 'Chess.com Puzzle (Fallback)',
-        'fen': 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 4 4',
-        'pgn': '1. Bxf7+ Kf8 2. Qh5',
+        'fen': 'r5k1/pp3ppp/2p5/8/8/5Q2/PPP2qPP/R3R1K1 w - - 0 1',
+        'pgn': '1. Qf8+ Rxf8 2. Re8#',
         'url': 'https://chess.com/puzzles',
         'image': None,
-        'solution': ['Bxf7+', 'Kf8', 'Qh5'],
+        'solution': ['Qf8+', 'Rxf8', 'Re8#'],
         'publish_time': None,
         'publish_datetime': None,
         'source': 'chess.com',
-        'fallback': True
+        'fallback': True,
+        'lastMove': None
     }
 
 
@@ -2432,6 +2413,145 @@ def store_elo_chart_data(request, dataset_id):
             'message': 'ELO chart data stored successfully'
         })
     except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def generate_llm_insights(request, report_id):
+    """
+    Generate LLM insights for a specific report component
+
+    POST body should contain:
+    - component: The component to generate insights for (e.g., 'game_results')
+    - force_regenerate: Optional boolean to regenerate even if insights exist
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    try:
+        # Get the report and verify ownership
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Parse request body
+        data = json.loads(request.body)
+        component = data.get('component', 'game_results')
+        force_regenerate = data.get('force_regenerate', False)
+
+        # Check if insights already exist
+        if not force_regenerate and report.llm_insights and component in report.llm_insights:
+            cached_data = report.llm_insights[component]
+            # Extract the insights text from the cached data structure
+            insights_text = cached_data.get('insights') if isinstance(cached_data, dict) else cached_data
+            return JsonResponse({
+                'success': True,
+                'insights': insights_text,
+                'cached': True
+            })
+
+        # Determine platform and username
+        if report.game_dataset.lichess_username:
+            username = report.game_dataset.lichess_username
+            platform = 'lichess'
+        elif report.game_dataset.chess_com_username:
+            username = report.game_dataset.chess_com_username
+            platform = 'chess.com'
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Unable to determine platform for report'
+            }, status=400)
+
+        # Load ELO averages data
+        elo_by_time_control = get_latest_elo_by_time_control(
+            report.game_dataset.raw_data,
+            username,
+            platform
+        )
+        elo_averages_data = None
+        if elo_by_time_control:
+            elo_averages_data = load_elo_averages_for_time_controls(elo_by_time_control)
+
+        # Import the insights generator
+        from .llm_insights import InsightsGenerator, DeepSeekClient
+
+        # Get DeepSeek API key from settings
+        deepseek_api_key = getattr(settings, 'DEEPSEEK_API_KEY', None)
+        if not deepseek_api_key:
+            return JsonResponse({
+                'success': False,
+                'error': 'DeepSeek API key not configured. Please add DEEPSEEK_API_KEY to settings.'
+            }, status=500)
+
+        # Initialize the LLM client
+        llm_client = DeepSeekClient(api_key=deepseek_api_key)
+
+        # Generate insights based on component
+        generator = InsightsGenerator(llm_client)
+        result = None
+
+        if component == 'game_results':
+            result = generator.generate_game_results_insights(
+                username=username,
+                enriched_games=report.enriched_games,
+                elo_averages_data=elo_averages_data,
+                elo_chart_data=report.elo_chart_data
+            )
+        elif component == 'mistakes_analysis':
+            result = generator.generate_mistakes_insights(
+                username=username,
+                stockfish_analysis=report.stockfish_analysis,
+                elo_averages_data=elo_averages_data
+            )
+        elif component == 'blunder_analysis':
+            result = generator.generate_blunder_insights(
+                username=username,
+                stockfish_analysis=report.stockfish_analysis,
+                elo_averages_data=elo_averages_data
+            )
+        elif component == 'time_analysis':
+            result = generator.generate_time_insights(
+                username=username,
+                stockfish_analysis=report.stockfish_analysis,
+                elo_averages_data=elo_averages_data
+            )
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f'Unsupported component: {component}'
+            }, status=400)
+
+        if result and result['success']:
+            # Store the insights in the report
+            if not report.llm_insights:
+                report.llm_insights = {}
+
+            report.llm_insights[component] = {
+                'insights': result['insights'],
+                'generated_at': timezone.now().isoformat(),
+                'tokens_used': result.get('tokens_used'),
+                'metadata': result.get('metadata', {})
+            }
+            report.save()
+
+            return JsonResponse({
+                'success': True,
+                'insights': result['insights'],
+                'cached': False,
+                'tokens_used': result.get('tokens_used'),
+                'metadata': result.get('metadata', {})
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', 'Unknown error generating insights') if result else 'Failed to generate insights'
+            }, status=500)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

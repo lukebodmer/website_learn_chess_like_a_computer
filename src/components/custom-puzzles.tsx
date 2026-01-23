@@ -110,7 +110,6 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   // Force update when puzzles become available
   React.useEffect(() => {
     if (puzzles && puzzles.length > 0) {
-      console.log('CustomPuzzles: Received puzzles data', puzzles.length);
       // Reset to first puzzle when puzzles are loaded
       setCurrentPuzzleIndex(0);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import BaseChessBoard from './base-chess-board'
 import { Chess } from 'chess.js'
+import { getCurrentBoardTheme, BoardTheme } from '../board-theme-utils'
 
 export interface LichessDailyPuzzleProps {
   size?: number
@@ -50,6 +51,31 @@ const LichessDailyPuzzle: React.FC<LichessDailyPuzzleProps> = ({
   const [arrows, setArrows] = useState<{ from: string, to: string, color: string }[]>([])
   const [orientation, setOrientation] = useState<'white' | 'black'>('white')
   const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
+
+  // Listen for board theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setBoardTheme(getCurrentBoardTheme())
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          handleThemeChange()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Fetch daily puzzle data
   useEffect(() => {
@@ -461,6 +487,7 @@ const LichessDailyPuzzle: React.FC<LichessDailyPuzzleProps> = ({
         arrows={arrows}
         lastMove={lastMoveSquares}
         animationData={animationData}
+        boardTheme={boardTheme}
         onSquareClick={handleSquareClick}
         onAnimationComplete={handleAnimationComplete}
       />

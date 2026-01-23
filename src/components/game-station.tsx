@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import AIChessBoard from './ai-chess-board'
 import BlindfoldChessBoard from './blindfold-chess-board'
+import BaseChessBoard from './base-chess-board'
 import { games } from './games-grid'
 import { Character } from '../types/character'
 import { getDefaultCharacter, getCharacterById } from '../data/characters'
+import { getCurrentBoardTheme, BoardTheme } from '../board-theme-utils'
 
 export interface GameStationProps {}
 
@@ -41,9 +43,34 @@ const GameStation: React.FC<GameStationProps> = () => {
     }
     return getDefaultCharacter()
   })
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
 
   // Check if we're on a report page
   const isReportPage = window.location.pathname.includes('/report/') || window.location.pathname.includes('/reports/')
+
+  // Listen for board theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setBoardTheme(getCurrentBoardTheme())
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          handleThemeChange()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Listen for game selection events from the games grid
   useEffect(() => {
@@ -73,6 +100,19 @@ const GameStation: React.FC<GameStationProps> = () => {
 
   const toggleStation = () => {
     setIsVisible(!isVisible)
+  }
+
+  const handleGameSelect = (gameId: string) => {
+    setSelectedGameId(gameId)
+    setSavedFen(undefined) // Reset FEN when selecting a new game
+
+    // Persist to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY_GAME, gameId)
+      localStorage.removeItem(STORAGE_KEY_FEN) // Clear old FEN
+    } catch (error) {
+      console.error('Failed to save game selection:', error)
+    }
   }
 
   const handleExitGame = () => {
@@ -309,40 +349,103 @@ const GameStation: React.FC<GameStationProps> = () => {
             )}
           </div>
         ) : (
-          // Prompt when no game is selected
+          // Mini games grid when no game is selected
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '60px 40px',
-            textAlign: 'center',
+            padding: '20px 20px 40px',
             gap: '24px'
           }}>
-            <div style={{
-              fontSize: '64px',
-              color: 'var(--text-muted)',
-              opacity: 0.3
-            }}>
-              ♟
-            </div>
             <h3 style={{
               margin: 0,
               fontSize: '24px',
               color: 'var(--text-primary)',
-              fontWeight: '600'
+              fontWeight: '600',
+              textAlign: 'center'
             }}>
-              No Game Selected
+              Select a Game
             </h3>
-            <p style={{
-              margin: 0,
-              fontSize: '16px',
-              color: 'var(--text-secondary)',
-              lineHeight: '1.6',
-              maxWidth: '400px'
+
+            {/* Mini games grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '20px',
+              maxWidth: '450px'
             }}>
-              Go to the Games page and select a game to get started. Your game will be saved here so you can come back anytime!
-            </p>
+              {games.map(game => (
+                <div
+                  key={game.id}
+                  onClick={() => handleGameSelect(game.id)}
+                  style={{
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '10px',
+                    transition: 'transform 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }}
+                >
+                  {/* Board preview */}
+                  <div style={{
+                    width: '160px',
+                    height: '160px',
+                    border: '3px solid var(--border-color)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 12px var(--shadow-medium)',
+                    backgroundColor: 'var(--background-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none'
+                  }}>
+                    {game.id === 'blindfold' ? (
+                      <div style={{
+                        fontSize: '38px',
+                        color: 'var(--text-secondary)',
+                        fontFamily: 'monospace',
+                        textAlign: 'center',
+                        padding: '16px'
+                      }}>
+                        1.e4
+                        <br />
+                        <span style={{ fontSize: '28px' }}>♟</span>
+                      </div>
+                    ) : (
+                      <BaseChessBoard
+                        size={160}
+                        position={game.position || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}
+                        pieceTheme={game.pieceTheme}
+                        orientation="white"
+                        coordinates={false}
+                        interactive={false}
+                        allowPieceDragging={false}
+                        showGameEndSymbols={false}
+                        showCheckHighlight={false}
+                        boardTheme={boardTheme}
+                      />
+                    )}
+                  </div>
+                  {/* Game title */}
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--text-primary)',
+                    textAlign: 'center'
+                  }}>
+                    {game.title}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

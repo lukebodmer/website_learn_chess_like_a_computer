@@ -55,6 +55,7 @@
 		scipy
 		psycopg2
 		pycountry
+		python-dotenv
 		pytz
 		zstandard
 		celery

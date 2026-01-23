@@ -28,7 +28,6 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
   // Force re-render when principlesData becomes available
   useEffect(() => {
     if (principlesData && Object.keys(principlesData).length > 0) {
-      console.log('PrinciplesSummary: Received new principles data', principlesData);
       setForceUpdate(prev => prev + 1);
     }
   }, [principlesData]);

@@ -41,7 +41,7 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Mistakes Analysis Chart:</h2>
-    <div id="mistakes-analysis-chart-container" data-username="{{ username }}" >
+    <div id="mistakes-analysis-chart-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} >
         <!-- React MistakesAnalysisChart will be mounted here -->
     </div>
 
@@ -85,27 +85,17 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     <!-- Hidden element to store pre-computed ELO chart data for React components -->
     <div id="elo-chart-data" style="display: none;">{{ elo_chart_data|safe }}</div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleEnrichedGamesData()">
-        <span id="enriched-games-toggle">▶</span> Enriched Games Data
-    </h2>
-    <pre id="enriched-games" style="display: none; background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px; margin: 20px 0;">{{ enriched_games|safe }}</pre>
-
-    <script>
-    function toggleEnrichedGamesData() {
-        const pre = document.getElementById('enriched-games');
-        const toggle = document.getElementById('enriched-games-toggle');
-        if (pre.style.display === 'none') {
-            pre.style.display = 'block';
-            toggle.textContent = '▼';
-        } else {
-            pre.style.display = 'none';
-            toggle.textContent = '▶';
-        }
-    }
-    </script>
+    <!-- Hidden element for enriched games data (used by JavaScript) -->
+    <pre id="enriched-games" style="display: none;">{{ enriched_games|safe }}</pre>
 
     <!-- Hidden element for report username -->
     <span id="report-username" style="display: none;">{{ username }}</span>
+
+    <!-- Hidden element for report ID (used by LLM insights) -->
+    <span id="report-id" style="display: none;">{{ report_id }}</span>
+
+    <!-- Hidden element to store LLM insights data for React components -->
+    <div id="llm-insights-data" style="display: none;">{{ llm_insights|safe }}</div>
 </div>
 
 <script>
@@ -136,13 +126,55 @@ function startStreaming() {
 
 // Auto-start if flag is set
 document.addEventListener('DOMContentLoaded', function() {
+    {% if auto_start %}
+    // Will stream and set analysisCompleteFlag when done
+    startStreaming();
+    {% else %}
+    // Report already complete, set flag immediately
+    analysisCompleteFlag = true;
+
+    // Load enriched games from hidden element into enrichedGamesArray
+    try {
+        const enrichedGamesEl = document.getElementById('enriched-games');
+        if (enrichedGamesEl && enrichedGamesEl.textContent.trim()) {
+            const parsedGames = JSON.parse(enrichedGamesEl.textContent);
+            if (Array.isArray(parsedGames) && parsedGames.length > 0) {
+                enrichedGamesArray = parsedGames;
+                console.log('Loaded enriched games from template:', enrichedGamesArray.length);
+
+                // Initialize the game filter manager with all games
+                if (window.gameFilterManager) {
+                    window.gameFilterManager.updateAllGames(enrichedGamesArray);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading enriched games from template:', error);
+    }
+
+    // Load LLM insights from hidden element for existing reports
+    try {
+        const llmInsightsEl = document.getElementById('llm-insights-data');
+        if (llmInsightsEl && llmInsightsEl.textContent.trim()) {
+            const parsedInsights = JSON.parse(llmInsightsEl.textContent);
+            if (parsedInsights && Object.keys(parsedInsights).length > 0) {
+                window.llmInsights = parsedInsights;
+                console.log('Loaded LLM insights from template:', parsedInsights);
+
+                // Dispatch event to notify React components that insights are ready
+                window.dispatchEvent(new CustomEvent('llmInsightsReady', {
+                    detail: { insights: parsedInsights }
+                }));
+            }
+        }
+    } catch (error) {
+        console.error('Error loading LLM insights from template:', error);
+    }
+    {% endif %}
+
     // Initialize the ELO chart with pre-computed data (if available)
     // The chart component will read pre-computed ELO data from the hidden div
     updateGameResultsChart();
-
-    {% if auto_start %}
-    startStreaming();
-    {% endif %}
 
     // Initialize top filters as a React component
     initializeTopFilters();
@@ -169,8 +201,6 @@ function initializeTopFilters() {
         window.topFiltersRoot = window.ReactDOM.createRoot(container);
     }
 
-    console.log('Rendering TopFilters with username:', username);
-
     window.topFiltersRoot.render(
         window.React.createElement(window.TopFilters, { username: username })
     );
@@ -179,6 +209,7 @@ function initializeTopFilters() {
 // Track enriched games as they complete
 let enrichedGamesArray = [];
 let totalExpectedGames = 0;
+let analysisCompleteFlag = false;
 
 function handleAnalysisUpdate(data) {
     const progressStatus = document.getElementById('progress-status');
@@ -245,6 +276,9 @@ function handleAnalysisUpdate(data) {
             progressStatus.innerText = `Analysis complete! ${enrichedGamesArray.length} games processed.`;
             progressFill.style.width = '100%';
 
+            // Set analysis complete flag
+            analysisCompleteFlag = true;
+
             // Final update to enriched games display
             updateEnrichedGamesDisplay();
 
@@ -260,6 +294,17 @@ function handleAnalysisUpdate(data) {
                     ? data.stockfish_analysis.principles.aggregated
                     : null;
                 updateCustomPuzzles(data.custom_puzzles, principlesData);
+            }
+
+            // Store LLM insights globally so the GameResultsChart can access them
+            if (data.llm_insights) {
+                window.llmInsights = data.llm_insights;
+                console.log('LLM insights received from streaming:', data.llm_insights);
+
+                // Dispatch event to notify React components that insights are ready
+                window.dispatchEvent(new CustomEvent('llmInsightsReady', {
+                    detail: { insights: data.llm_insights }
+                }));
             }
 
             // Hide the progress bar after a short delay to show completion
@@ -353,10 +398,10 @@ function updateGameResultsChart() {
                     enrichedGames: gamesToDisplay,
                     username: username,
                     chartType: 'pie',
-                    eloAveragesData: eloAveragesData
+                    eloAveragesData: eloAveragesData,
+                    analysisComplete: analysisCompleteFlag
                 })
             );
-            console.log('GameResultsChart render successful');
         } catch (error) {
             console.error('Error rendering GameResultsChart:', error);
         }
@@ -402,7 +447,6 @@ function updateMistakesAnalysisChart() {
                     eloAveragesData: eloAveragesData
                 })
             );
-            console.log('MistakesAnalysisChart render successful');
         } catch (error) {
             console.error('Error rendering MistakesAnalysisChart:', error);
         }
@@ -441,15 +485,7 @@ function updateOpeningAnalysisChart() {
             }
         } catch (error) {
             console.warn('Could not parse opening stats data:', error);
-        }
-
-        console.log('Updating OpeningAnalysis with:', {
-            gamesCount: enrichedGamesArray.length,
-            username: username,
-            sampleGame: enrichedGamesArray[0],
-            hasEloAverages: !!eloAveragesData,
-            hasOpeningStats: !!openingStatsData
-        });
+        };
 
         try {
             // Re-render the chart with updated data
@@ -461,7 +497,6 @@ function updateOpeningAnalysisChart() {
                     openingStatsData: openingStatsData
                 })
             );
-            console.log('OpeningAnalysis render successful');
         } catch (error) {
             console.error('Error rendering OpeningAnalysis:', error);
         }
@@ -522,14 +557,7 @@ function updateTimeAnalysis() {
             }
         } catch (error) {
             console.warn('Could not parse ELO averages data:', error);
-        }
-
-        console.log('Updating TimeAnalysis with:', {
-            gamesCount: enrichedGamesArray.length,
-            username: username,
-            sampleGame: enrichedGamesArray[0],
-            hasEloAverages: !!eloAveragesData
-        });
+        };
 
         try {
             // Re-render the component with updated data
@@ -540,7 +568,6 @@ function updateTimeAnalysis() {
                     eloAveragesData: eloAveragesData
                 })
             );
-            console.log('TimeAnalysis render successful');
         } catch (error) {
             console.error('Error rendering TimeAnalysis:', error);
         }

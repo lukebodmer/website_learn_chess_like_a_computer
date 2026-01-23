@@ -36,6 +36,89 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
   const [selectedBlunder, setSelectedBlunder] = useState<BlunderData | null>(null);
   const [solvedBlunders, setSolvedBlunders] = useState<Set<string>>(new Set());
 
+  // LLM insights state
+  const [llmInsights, setLlmInsights] = useState<string | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
+
+  // Helper to get CSRF token from cookie
+  const getCsrfToken = () => {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+  // Fetch LLM insights for this component
+  const fetchLlmInsights = async () => {
+    try {
+      setInsightsLoading(true);
+      setInsightsError(null);
+
+      // First, check if insights were provided via streaming (stored in window.llmInsights)
+      if ((window as any).llmInsights?.blunder_analysis?.insights) {
+        console.log('Using blunder insights from streaming data');
+        setLlmInsights((window as any).llmInsights.blunder_analysis.insights);
+        setInsightsLoading(false);
+        return;
+      }
+
+      // If not available via streaming, fetch from API (for existing reports)
+      if (!reportId) {
+        console.log('No report ID found, waiting for streaming data...');
+        setInsightsLoading(false);
+        return;
+      }
+
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        console.error('CSRF token not found');
+        setInsightsError('Security token not found. Please refresh the page.');
+        setInsightsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/generate-insights/${reportId}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          component: 'blunder_analysis',
+          force_regenerate: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.insights) {
+        setLlmInsights(data.insights);
+      } else {
+        setInsightsError(data.error || 'Failed to generate insights');
+      }
+    } catch (e) {
+      console.error('Error fetching blunder insights:', e);
+      setInsightsError(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
   // Fetch solved blunders when component mounts
   React.useEffect(() => {
     if (reportId) {
@@ -51,6 +134,38 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
         });
     }
   }, [reportId]);
+
+  // Listen for LLM insights arriving from streaming and fetch when report is loaded
+  React.useEffect(() => {
+    // Check if insights are already available on mount
+    if ((window as any).llmInsights?.blunder_analysis?.insights) {
+      console.log('Blunder insights already available on mount');
+      setLlmInsights((window as any).llmInsights.blunder_analysis.insights);
+      setInsightsLoading(false);
+      return;
+    }
+
+    // If we have enriched games and a report ID, fetch insights
+    if (enrichedGames && enrichedGames.length > 0 && reportId) {
+      console.log('Fetching blunder insights for existing report...');
+      fetchLlmInsights();
+    }
+
+    // Listen for streaming insights
+    const handleLlmInsightsReady = () => {
+      if ((window as any).llmInsights?.blunder_analysis?.insights) {
+        console.log('Blunder insights ready event received');
+        setLlmInsights((window as any).llmInsights.blunder_analysis.insights);
+        setInsightsLoading(false);
+      }
+    };
+
+    window.addEventListener('llmInsightsReady', handleLlmInsightsReady);
+
+    return () => {
+      window.removeEventListener('llmInsightsReady', handleLlmInsightsReady);
+    };
+  }, []);
 
   // Set up filter manager when component mounts
   React.useEffect(() => {
@@ -136,8 +251,8 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
     if (!blunder.gameData) return;
 
     // Determine which color the user is playing to calculate the correct move index
-    const whitePlayer = blunder.gameData.players?.white?.user?.name || blunder.gameData.white_player || 'Unknown';
-    const blackPlayer = blunder.gameData.players?.black?.user?.name || blunder.gameData.black_player || 'Unknown';
+    const whitePlayer = blunder.gameData.players?.white?.user?.name || 'Unknown';
+    const blackPlayer = blunder.gameData.players?.black?.user?.name || 'Unknown';
 
     let userColor: 'w' | 'b' | null = null;
     if (whitePlayer.toLowerCase() === username.toLowerCase()) {
@@ -176,9 +291,9 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
     filteredGames.forEach(game => {
       if (!game.analysis || !game.moves) return;
 
-      // Extract player names from nested structure
-      const whitePlayer = game.players?.white?.user?.name || game.white_player || 'Unknown';
-      const blackPlayer = game.players?.black?.user?.name || game.black_player || 'Unknown';
+      // Extract player names from enriched game format
+      const whitePlayer = game.players?.white?.user?.name || 'Unknown';
+      const blackPlayer = game.players?.black?.user?.name || 'Unknown';
 
       // Determine which color the user is playing
       let userColor: 'w' | 'b' | null = null;
@@ -277,6 +392,122 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       boxShadow: '0 2px 6px var(--shadow-light)',
       minHeight: '700px'
     }}>
+      {/* AI Insights Section */}
+      <div
+        style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '20px',
+          minHeight: '100px',
+          cursor: llmInsights ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (llmInsights) setInsightsExpanded(!insightsExpanded);
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px'
+          }}
+        >
+          <h4 style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)'
+          }}>
+            AI Insights
+          </h4>
+          {llmInsights && (
+            <span style={{
+              fontSize: '16px',
+              color: 'var(--text-secondary)',
+              userSelect: 'none',
+              transform: insightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block'
+            }}>
+              ▼
+            </span>
+          )}
+        </div>
+
+        {insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            fontStyle: 'italic'
+          }}>
+            Generating insights...
+          </div>
+        )}
+
+        {insightsError && !insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--danger-color)',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            padding: '8px',
+            borderRadius: '4px'
+          }}>
+            {insightsError}
+          </div>
+        )}
+
+        {llmInsights && !insightsLoading && !insightsError && (
+          <div
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: 'var(--text-primary)',
+              whiteSpace: 'pre-wrap',
+              maxHeight: insightsExpanded ? 'none' : '2.4em',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'max-height 0.3s ease'
+            }}
+          >
+            <div
+              dangerouslySetInnerHTML={{
+                __html: llmInsights
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
+                  .replace(/\n/g, '<br />') // Line breaks
+              }}
+            />
+            {!insightsExpanded && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                background: 'linear-gradient(to right, transparent, var(--background-primary) 50%)',
+                width: '100px',
+                height: '100%',
+                pointerEvents: 'none'
+              }} />
+            )}
+          </div>
+        )}
+
+        {!insightsLoading && !insightsError && !llmInsights && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60px'
+          }}>
+            Waiting for analysis to complete...
+          </div>
+        )}
+      </div>
+
       {/* Main Layout: List on Left, Board on Right */}
       <div style={{
         display: 'flex',

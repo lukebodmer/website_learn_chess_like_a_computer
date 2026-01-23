@@ -91,6 +91,7 @@ class AnalysisReport(models.Model):
     enriched_games = models.JSONField(default=list)  # Store enriched games data
     custom_puzzles = models.JSONField(default=list, blank=True)  # Store custom training puzzles
     elo_chart_data = models.JSONField(default=list, blank=True)  # Pre-computed ELO chart data from game fetch
+    llm_insights = models.JSONField(default=dict, blank=True)  # AI-generated insights for each component
 
     # Report metadata
     created_at = models.DateTimeField(auto_now_add=True)

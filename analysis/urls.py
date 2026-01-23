@@ -38,4 +38,5 @@ urlpatterns = [
     path('api/solved-puzzles/<int:report_id>/', views.get_solved_puzzles, name='get_solved_puzzles'),
     path('api/mark-puzzle-solved/<int:report_id>/', views.mark_puzzle_solved, name='mark_puzzle_solved'),
     path('api/store-elo-data/<int:dataset_id>/', views.store_elo_chart_data, name='store_elo_chart_data'),
+    path('api/generate-insights/<int:report_id>/', views.generate_llm_insights, name='generate_llm_insights'),
 ]

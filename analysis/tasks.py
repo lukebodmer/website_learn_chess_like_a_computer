@@ -554,3 +554,71 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
         print(f"Error in fetch_lichess_games_task: {e}")
         # Retry the task if it fails
         raise self.retry(exc=e, countdown=60)  # Retry after 1 minute
+
+
+@shared_task(bind=True, max_retries=3)
+def fetch_daily_puzzle_task(self):
+    """
+    Background task to fetch Chess.com daily puzzle with serial access rate limiting
+
+    This task ensures we don't hit Chess.com's rate limits by using the same
+    Redis lock mechanism as other Chess.com API calls.
+
+    Returns:
+        Dictionary with puzzle data or None if failed
+    """
+    from chessdotcom import get_current_daily_puzzle
+    from .views import extract_solution_from_pgn, get_last_move_from_chess_com_pgn
+
+    try:
+        # Update task state
+        self.update_state(
+            state='PROGRESS',
+            meta={'status': 'Fetching daily puzzle from Chess.com...'}
+        )
+
+        # Acquire lock for Chess.com API (ensures serial access)
+        wait_for_api_access()
+
+        try:
+            # Fetch daily puzzle from Chess.com
+            response = get_current_daily_puzzle()
+
+            if response and response.puzzle:
+                puzzle = response.puzzle
+
+                # Extract solution moves from PGN
+                solution_moves = extract_solution_from_pgn(puzzle.pgn)
+
+                # Get the last move from the PGN (the move that led to the puzzle position)
+                last_move = get_last_move_from_chess_com_pgn(puzzle.pgn, puzzle.fen)
+
+                puzzle_data = {
+                    'title': puzzle.title or 'Chess.com Daily Puzzle',
+                    'fen': puzzle.fen,
+                    'pgn': puzzle.pgn,
+                    'url': puzzle.url,
+                    'image': puzzle.image,
+                    'solution': solution_moves,
+                    'publish_time': puzzle.publish_time,
+                    'publish_datetime': getattr(puzzle, 'publish_datetime', None),
+                    'source': 'chess.com',
+                    'lastMove': last_move
+                }
+
+                print(f"✓ Successfully fetched daily puzzle from Chess.com")
+                return puzzle_data
+            else:
+                print("❌ No puzzle data in Chess.com response")
+                return None
+
+        finally:
+            # Always release the lock
+            release_chess_com_api_lock()
+
+    except Exception as e:
+        print(f"❌ Error fetching daily puzzle: {e}")
+        # Release lock in case of error
+        release_chess_com_api_lock()
+        # Don't retry - return None to trigger fallback
+        return None

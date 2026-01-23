@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import BaseChessBoard from './base-chess-board'
 import CharacterSelector from './character-selector'
 import { Character } from '../types/character'
 import { getDefaultCharacter } from '../data/characters'
 import { useStockfishOpponent } from '../hooks/useStockfishOpponent'
 import { useChessGame } from '../hooks/useChessGame'
+import { getCurrentBoardTheme, BoardTheme } from '../board-theme-utils'
 
 export interface AIChessBoardProps {
   size?: number
@@ -49,6 +50,31 @@ const AIChessBoard: React.FC<AIChessBoardProps> = ({
 
   const [draggedSquare, setDraggedSquare] = useState<string | null>(null)
   const [dragLegalMoves, setDragLegalMoves] = useState<string[]>([])
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
+
+  // Listen for board theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setBoardTheme(getCurrentBoardTheme())
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          handleThemeChange()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   const {
     position,
@@ -219,6 +245,7 @@ const AIChessBoard: React.FC<AIChessBoardProps> = ({
         currentTurn={getCurrentTurn()}
         gameResult={gameResult}
         animationData={animationData}
+        boardTheme={boardTheme}
         interactive={!promotionData && isPlayerTurn && !isThinking}
         onSquareClick={handleSquareClickWithPromotion}
         onPieceDrag={handlePieceDragWithPromotion}

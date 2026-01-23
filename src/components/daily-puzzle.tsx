@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import BaseChessBoard from './base-chess-board'
 import { Chess } from 'chess.js'
+import { getCurrentBoardTheme, BoardTheme } from '../board-theme-utils'
 
 export interface DailyPuzzleProps {
   size?: number
@@ -49,6 +50,31 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
   const [arrows, setArrows] = useState<{ from: string, to: string, color: string }[]>([])
   const [orientation, setOrientation] = useState<'white' | 'black'>('white')
   const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
+
+  // Listen for board theme changes
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setBoardTheme(getCurrentBoardTheme())
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          handleThemeChange()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Fetch daily puzzle data
   useEffect(() => {
@@ -62,6 +88,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         const data = await response.json()
         if (data.success && data.puzzles['chess.com']) {
           const puzzle = data.puzzles['chess.com']
+          console.log('Loaded puzzle data:', puzzle)
           setPuzzleData(puzzle)
 
           // Set up initial position
@@ -366,38 +393,52 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
 
     const nextMove = solutionMoves[puzzleState.currentMoveIndex]
 
-    if (hintLevel === 0) {
-      // First hint: highlight the piece to move
-      try {
-        const tempChess = new Chess(chess.fen())
-        const move = tempChess.move(nextMove)
-        if (move) {
-          setHighlightedSquares([
-            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
-          ])
-          setHintLevel(1)
-          setPuzzleState(prev => ({ ...prev, showHint: true }))
-        }
-      } catch (e) {
-        console.error('Error showing hint:', e)
+    console.log('Hint Debug:', {
+      currentMoveIndex: puzzleState.currentMoveIndex,
+      nextMove,
+      currentFen: chess.fen(),
+      currentTurn: chess.turn(),
+      solutionMoves,
+      userMoves: puzzleState.userMoves
+    })
+
+    // Verify the move is for the current player
+    const currentTurn = chess.turn()
+    try {
+      const tempChess = new Chess(chess.fen())
+      const moveObj = tempChess.move(nextMove)
+
+      if (!moveObj) {
+        console.error('Invalid move in solution')
+        return
       }
-    } else if (hintLevel === 1) {
-      // Second hint: show arrow to destination
-      try {
-        const tempChess = new Chess(chess.fen())
-        const move = tempChess.move(nextMove)
-        if (move) {
-          setHighlightedSquares([
-            { square: move.from, color: 'rgba(255, 255, 0, 0.5)' }
-          ])
-          setArrows([
-            { from: move.from, to: move.to, color: '#ffff00' }
-          ])
-          setHintLevel(2)
-        }
-      } catch (e) {
-        console.error('Error showing hint arrow:', e)
+
+      // Check if the move color matches whose turn it is
+      const moveColor = moveObj.color
+      if (moveColor !== currentTurn) {
+        console.error(`Hint move color (${moveColor}) doesn't match current turn (${currentTurn})`)
+        return
       }
+
+      if (hintLevel === 0) {
+        // First hint: highlight the piece to move
+        setHighlightedSquares([
+          { square: moveObj.from, color: 'rgba(255, 255, 0, 0.5)' }
+        ])
+        setHintLevel(1)
+        setPuzzleState(prev => ({ ...prev, showHint: true }))
+      } else if (hintLevel === 1) {
+        // Second hint: show arrow to destination
+        setHighlightedSquares([
+          { square: moveObj.from, color: 'rgba(255, 255, 0, 0.5)' }
+        ])
+        setArrows([
+          { from: moveObj.from, to: moveObj.to, color: '#ffff00' }
+        ])
+        setHintLevel(2)
+      }
+    } catch (e) {
+      console.error('Error showing hint:', e)
     }
   }
 
@@ -503,6 +544,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         arrows={arrows}
         lastMove={lastMoveSquares}
         animationData={animationData}
+        boardTheme={boardTheme}
         onSquareClick={handleSquareClick}
         onAnimationComplete={handleAnimationComplete}
       />

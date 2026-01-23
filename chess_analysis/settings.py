@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -161,6 +166,10 @@ LICHESS_CLIENT_ID = 'chess-analysis-app'
 # Set this to your deployed GCP Cloud Run URL
 GCP_STOCKFISH_URL = 'https://stockfish-api-552342702662.us-west1.run.app'
 
+# DeepSeek API settings for LLM insights
+# Get your API key from https://platform.deepseek.com/
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
+
 # Login/logout URLs
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -183,6 +192,10 @@ CELERY_TASK_ROUTES = {
     'analysis.tasks.fetch_chess_com_games_task': {
         'queue': 'chess_com_api',
         # No rate limit needed - Redis locks ensure serial access
+    },
+    'analysis.tasks.fetch_daily_puzzle_task': {
+        'queue': 'chess_com_api',
+        # Uses same queue as other Chess.com tasks for coordinated rate limiting
     },
     'analysis.tasks.fetch_lichess_games_task': {
         'queue': 'lichess_api',

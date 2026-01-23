@@ -32,48 +32,15 @@ const calculateAverageElo = (games: any[], username: string): number | null => {
   let count = 0;
 
   games.forEach(game => {
+    // All games are in enriched format with players.white.user.name structure
+    const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+    const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+
     let rating = null;
-    let isWhitePlayer = false;
-    let isBlackPlayer = false;
-
-    // Try to extract data from different possible structures
-    if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-      // Lichess format
-      isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
-
-      if (isWhitePlayer) {
-        rating = game.players?.white?.rating;
-      } else if (isBlackPlayer) {
-        rating = game.players?.black?.rating;
-      }
-    } else if (game.white_player || game.black_player) {
-      // Custom format
-      isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-
-      const rawJson = game.raw_json || game.game?.raw_json;
-      if (rawJson) {
-        if (isWhitePlayer) {
-          rating = rawJson.players?.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = rawJson.players?.black?.rating;
-        }
-      }
-    } else if (game.game) {
-      // Nested game structure
-      const nestedGame = game.game;
-      isWhitePlayer = nestedGame.white_player?.toLowerCase() === username.toLowerCase();
-      isBlackPlayer = nestedGame.black_player?.toLowerCase() === username.toLowerCase();
-
-      const rawJson = nestedGame.raw_json;
-      if (rawJson) {
-        if (isWhitePlayer) {
-          rating = rawJson.players?.white?.rating;
-        } else if (isBlackPlayer) {
-          rating = rawJson.players?.black?.rating;
-        }
-      }
+    if (isWhitePlayer) {
+      rating = game.players?.white?.rating;
+    } else if (isBlackPlayer) {
+      rating = game.players?.black?.rating;
     }
 
     if (rating !== null) {
@@ -111,6 +78,124 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
   const [filteredGames, setFilteredGames] = useState<any[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+
+  // LLM insights state
+  const [llmInsights, setLlmInsights] = useState<string | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
+
+  // Helper to get CSRF token from cookie
+  const getCsrfToken = () => {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+  // Fetch LLM insights for this component
+  const fetchLlmInsights = async () => {
+    try {
+      setInsightsLoading(true);
+      setInsightsError(null);
+
+      // First, check if insights were provided via streaming (stored in window.llmInsights)
+      if ((window as any).llmInsights?.time_analysis?.insights) {
+        console.log('Using time analysis insights from streaming data');
+        setLlmInsights((window as any).llmInsights.time_analysis.insights);
+        setInsightsLoading(false);
+        return;
+      }
+
+      // If not available via streaming, fetch from API (for existing reports)
+      const reportId = document.querySelector('[data-report-id]')?.getAttribute('data-report-id');
+
+      if (!reportId) {
+        console.log('No report ID found, waiting for streaming data...');
+        setInsightsLoading(false);
+        return;
+      }
+
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        console.error('CSRF token not found');
+        setInsightsError('Security token not found. Please refresh the page.');
+        setInsightsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/generate-insights/${reportId}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          component: 'time_analysis',
+          force_regenerate: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.insights) {
+        setLlmInsights(data.insights);
+      } else {
+        setInsightsError(data.error || 'Failed to generate insights');
+      }
+    } catch (e) {
+      console.error('Error fetching time analysis insights:', e);
+      setInsightsError(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  // Listen for LLM insights arriving from streaming and fetch when report is loaded
+  React.useEffect(() => {
+    // Check if insights are already available on mount
+    if ((window as any).llmInsights?.time_analysis?.insights) {
+      console.log('Time analysis insights already available on mount');
+      setLlmInsights((window as any).llmInsights.time_analysis.insights);
+      setInsightsLoading(false);
+      return;
+    }
+
+    // If we have enriched games and a report ID, fetch insights
+    const reportId = document.querySelector('[data-report-id]')?.getAttribute('data-report-id');
+    if (enrichedGames && enrichedGames.length > 0 && reportId) {
+      console.log('Fetching time analysis insights for existing report...');
+      fetchLlmInsights();
+    }
+
+    // Listen for streaming insights
+    const handleLlmInsightsReady = () => {
+      if ((window as any).llmInsights?.time_analysis?.insights) {
+        console.log('Time analysis insights ready event received');
+        setLlmInsights((window as any).llmInsights.time_analysis.insights);
+        setInsightsLoading(false);
+      }
+    };
+
+    window.addEventListener('llmInsightsReady', handleLlmInsightsReady);
+
+    return () => {
+      window.removeEventListener('llmInsightsReady', handleLlmInsightsReady);
+    };
+  }, []);
 
   // Set up filter manager when component mounts
   React.useEffect(() => {
@@ -159,28 +244,18 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     let winPctGameCount = 0;
 
     filteredGames.forEach(game => {
-      // Check if user is in this game
-      let isUserInGame = false;
-      let userColor: 'white' | 'black' | null = null;
-
-      if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-        const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      } else if (game.white_player || game.black_player) {
-        const isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      }
+      // Check if user is in this game (enriched format)
+      const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isUserInGame = isWhitePlayer || isBlackPlayer;
+      const userColor: 'white' | 'black' | null = isWhitePlayer ? 'white' : isBlackPlayer ? 'black' : null;
 
       if (!isUserInGame || !userColor) return;
 
-      // Get clocks and clock data
-      const clocks = game.clocks || game.raw_json?.clocks || game.game?.clocks || game.game?.raw_json?.clocks;
-      const clock = game.clock || game.raw_json?.clock || game.game?.clock || game.game?.raw_json?.clock;
-      const division = game.division || game.raw_json?.division || game.game?.division || game.game?.raw_json?.division;
+      // Get clocks and clock data from enriched game format
+      const clocks = game.clocks;
+      const clock = game.clock;
+      const division = game.division;
 
       if (!clocks || !clock || !clock.initial) return;
 
@@ -273,9 +348,9 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       totalEndTime += endTime;
 
       // Calculate win percentages at different phases
-      const analysis = game.analysis || game.raw_json?.analysis || game.game?.analysis || game.game?.raw_json?.analysis;
-      const winner = game.winner || game.raw_json?.winner || game.game?.winner || game.game?.raw_json?.winner;
-      const status = game.status || game.raw_json?.status || game.game?.status || game.game?.raw_json?.status;
+      const analysis = game.analysis;
+      const winner = game.winner;
+      const status = game.status;
 
       if (analysis && analysis.length > 0) {
         const isWhite = userColor === 'white';
@@ -336,7 +411,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
 
     // Get average initial time (in centiseconds)
     const totalInitialTime = filteredGames.reduce((sum, game) => {
-      const clock = game.clock || game.raw_json?.clock || game.game?.clock || game.game?.raw_json?.clock;
+      const clock = game.clock;
       return sum + (clock?.initial ? clock.initial * 100 : 0);
     }, 0);
     const avgInitialTime = totalInitialTime / validGameCount;
@@ -459,28 +534,18 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     let validGameCount = 0;
 
     filteredGames.forEach(game => {
-      // Check if user is in this game
-      let isUserInGame = false;
-      let userColor: 'white' | 'black' | null = null;
-
-      if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-        const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      } else if (game.white_player || game.black_player) {
-        const isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      }
+      // Check if user is in this game (enriched format)
+      const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isUserInGame = isWhitePlayer || isBlackPlayer;
+      const userColor: 'white' | 'black' | null = isWhitePlayer ? 'white' : isBlackPlayer ? 'black' : null;
 
       if (!isUserInGame || !userColor) return;
 
       // Get clocks and game result
-      const clocks = game.clocks || game.raw_json?.clocks || game.game?.clocks || game.game?.raw_json?.clocks;
-      const winner = game.winner || game.raw_json?.winner || game.game?.winner || game.game?.raw_json?.winner;
-      const status = game.status || game.raw_json?.status || game.game?.status || game.game?.raw_json?.status;
+      const clocks = game.clocks;
+      const winner = game.winner;
+      const status = game.status;
 
       if (!clocks || clocks.length === 0) return;
 
@@ -688,27 +753,17 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     const moveData: any[] = [];
 
     filteredGames.forEach(game => {
-      // Check if user is in this game
-      let isUserInGame = false;
-      let userColor: 'white' | 'black' | null = null;
-
-      if (game.players?.white?.user?.name || game.players?.black?.user?.name) {
-        const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      } else if (game.white_player || game.black_player) {
-        const isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
-        const isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
-        isUserInGame = isWhitePlayer || isBlackPlayer;
-        userColor = isWhitePlayer ? 'white' : 'black';
-      }
+      // Check if user is in this game (enriched format)
+      const isWhitePlayer = game.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isBlackPlayer = game.players?.black?.user?.name?.toLowerCase() === username.toLowerCase();
+      const isUserInGame = isWhitePlayer || isBlackPlayer;
+      const userColor: 'white' | 'black' | null = isWhitePlayer ? 'white' : isBlackPlayer ? 'black' : null;
 
       if (!isUserInGame || !userColor) return;
 
       // Get clocks and analysis
-      const clocks = game.clocks || game.raw_json?.clocks || game.game?.clocks || game.game?.raw_json?.clocks;
-      const analysis = game.analysis || game.raw_json?.analysis || game.game?.analysis || game.game?.raw_json?.analysis;
+      const clocks = game.clocks;
+      const analysis = game.analysis;
 
       if (!clocks || !analysis || clocks.length === 0 || analysis.length === 0) return;
 
@@ -922,6 +977,122 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
+      {/* AI Insights Section */}
+      <div
+        style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '20px',
+          minHeight: '100px',
+          cursor: llmInsights ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (llmInsights) setInsightsExpanded(!insightsExpanded);
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px'
+          }}
+        >
+          <h4 style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)'
+          }}>
+            AI Insights
+          </h4>
+          {llmInsights && (
+            <span style={{
+              fontSize: '16px',
+              color: 'var(--text-secondary)',
+              userSelect: 'none',
+              transform: insightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block'
+            }}>
+              ▼
+            </span>
+          )}
+        </div>
+
+        {insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            fontStyle: 'italic'
+          }}>
+            Generating insights...
+          </div>
+        )}
+
+        {insightsError && !insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--danger-color)',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            padding: '8px',
+            borderRadius: '4px'
+          }}>
+            {insightsError}
+          </div>
+        )}
+
+        {llmInsights && !insightsLoading && !insightsError && (
+          <div
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: 'var(--text-primary)',
+              whiteSpace: 'pre-wrap',
+              maxHeight: insightsExpanded ? 'none' : '2.4em',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'max-height 0.3s ease'
+            }}
+          >
+            <div
+              dangerouslySetInnerHTML={{
+                __html: llmInsights
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
+                  .replace(/\n/g, '<br />') // Line breaks
+              }}
+            />
+            {!insightsExpanded && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                background: 'linear-gradient(to right, transparent, var(--background-primary) 50%)',
+                width: '100px',
+                height: '100%',
+                pointerEvents: 'none'
+              }} />
+            )}
+          </div>
+        )}
+
+        {!insightsLoading && !insightsError && !llmInsights && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60px'
+          }}>
+            Waiting for analysis to complete...
+          </div>
+        )}
+      </div>
+
       <div style={{ marginBottom: '16px', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{
