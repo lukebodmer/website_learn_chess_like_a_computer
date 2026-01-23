@@ -26,6 +26,8 @@ const PrincipleSelector: React.FC<PrincipleSelectorProps> = ({
     'time_management': 'Time Management'
   };
 
+  // PrincipleSelector receives aggregated principles data directly from main.tsx
+  // This is the averaged data across all time controls, used for puzzle selection
   if (!principlesData || !principlesData.principles) {
     return (
       <div style={{

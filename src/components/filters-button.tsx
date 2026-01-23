@@ -123,6 +123,10 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
     gameFilterManager.toggleSpeed(speed)
   }
 
+  const handleSpeedDoubleClick = (speed: string) => {
+    gameFilterManager.setSingleSpeed(speed)
+  }
+
   const handleSpeedAllClick = () => {
     gameFilterManager.setSpeedFilter('all')
   }
@@ -355,6 +359,7 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
                   <button
                     key={speed}
                     onClick={() => handleSpeedToggle(speed)}
+                    onDoubleClick={() => handleSpeedDoubleClick(speed)}
                     style={{
                       padding: '8px 12px',
                       fontSize: '12px',

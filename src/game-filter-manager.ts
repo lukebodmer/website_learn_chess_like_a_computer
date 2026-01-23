@@ -97,6 +97,12 @@ export class GameFilterManager {
     this.notifyListeners();
   }
 
+  // Set a single speed (for double-click - deselects all others)
+  setSingleSpeed(speed: string): void {
+    this.currentSpeedFilter = [speed];
+    this.notifyListeners();
+  }
+
   // Check if a specific speed is selected
   isSpeedSelected(speed: string): boolean {
     if (this.currentSpeedFilter === 'all') {

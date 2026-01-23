@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const eloAveragesText = eloAveragesElement.textContent.trim()
       if (eloAveragesText && eloAveragesText.startsWith('{')) {
         const eloAveragesData = JSON.parse(eloAveragesText)
-        console.log('Initializing EloDataManager with ELO averages data:', eloAveragesData)
         eloDataManager.setEloAveragesData(eloAveragesData)
       }
     }
@@ -54,12 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const openingStatsText = openingStatsElement.textContent.trim()
       if (openingStatsText && openingStatsText.startsWith('{')) {
         const openingStatsData = JSON.parse(openingStatsText)
-        console.log('Initializing EloDataManager with opening stats data:', openingStatsData)
         eloDataManager.setOpeningStatsData(openingStatsData)
       }
     }
   } catch (error) {
-    console.log('Error initializing EloDataManager:', error.message)
+    console.log('Error initializing EloDataManager:', (error as Error).message)
   }
 
   // Mount GamesGrid on games page
@@ -143,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const enrichedText = enrichedGamesElement.textContent.trim()
 
         // Check if it's actual games data (not a status message)
-        if (enrichedText && (enrichedText.startsWith('[') || enrichedText.startsWith('{'))) {
+        if (enrichedText && enrichedText.startsWith('[')) {
           const parsedData = JSON.parse(enrichedText)
 
           // Handle both array format and single object format
@@ -153,19 +151,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if it's a nested structure with games
             if (parsedData.games && Array.isArray(parsedData.games)) {
               initialGamesData = parsedData.games
-            } else {
+            } else if (!parsedData.status) {
+              // Not a status message, treat as single game
               initialGamesData = [parsedData]
             }
           }
-
-        } else {
-          console.log('Enriched games element contains status message, not actual games')
         }
-      } else {
-        console.log('No enriched games element found or empty')
+      }
+
+      // If no enriched games found, try to get raw game data for initial ELO display
+      if (initialGamesData.length === 0) {
+        const rawGameDataElement = document.getElementById('raw-game-data')
+        if (rawGameDataElement && rawGameDataElement.textContent) {
+          const rawText = rawGameDataElement.textContent.trim()
+
+          if (rawText && rawText !== 'Loading...' && rawText.startsWith('[')) {
+            const parsedData = JSON.parse(rawText)
+            if (Array.isArray(parsedData)) {
+              initialGamesData = parsedData
+              console.log('Using raw game data for initial ELO chart:', initialGamesData.length, 'games')
+            }
+          }
+        }
       }
     } catch (error) {
-      console.log('Error parsing enriched games data:', error.message, error)
+      console.log('Error parsing games data:', (error as Error).message, error)
     }
 
     // Try to get ELO averages data from the page
@@ -176,31 +186,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const eloAveragesText = eloAveragesElement.textContent.trim()
         if (eloAveragesText && eloAveragesText.startsWith('{')) {
           eloAveragesData = JSON.parse(eloAveragesText)
-          console.log('Parsed ELO averages data:', eloAveragesData)
         }
       }
     } catch (error) {
-      console.log('Error parsing ELO averages data:', error.message)
+      console.log('Error parsing ELO averages data:', (error as Error).message)
     }
 
     // Load initial games into the filter manager
     if (initialGamesData.length > 0) {
-      console.log('Loading initial games into filter manager:', initialGamesData.length)
-      gameFilterManager.setUsername(username)
       gameFilterManager.updateAllGames(initialGamesData)
     }
 
-    // Render chart with initial data (empty for new reports, populated for completed reports)
+    // Render chart with initial data
     root.render(<GameResultsChart enrichedGames={initialGamesData} username={username} eloAveragesData={eloAveragesData} />)
 
     // Store the root reference globally so we can update it from the streaming handler
     ;(window as any).gameResultsChartRoot = root
     ;(window as any).GameResultsChart = GameResultsChart
-
-    // If we found initial data, also store it globally for streaming updates
-    if (initialGamesData.length > 0) {
-      ;(window as any).enrichedGamesArray = initialGamesData
-    }
   }
 
   // Mount MistakesAnalysisChart on report pages
@@ -209,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = mistakesAnalysisContainer.dataset.username || ''
     const root = ReactDOM.createRoot(mistakesAnalysisContainer)
 
-    // Use the same initial games data as the GameResultsChart
+    // Try to get existing enriched games data from the page
     let initialGamesData = []
     try {
       const enrichedGamesElement = document.getElementById('enriched-games')
@@ -217,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const enrichedText = enrichedGamesElement.textContent.trim()
 
         // Check if it's actual games data (not a status message)
-        if (enrichedText && (enrichedText.startsWith('[') || enrichedText.startsWith('{'))) {
+        if (enrichedText && enrichedText.startsWith('[')) {
           const parsedData = JSON.parse(enrichedText)
 
           // Handle both array format and single object format
@@ -227,14 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if it's a nested structure with games
             if (parsedData.games && Array.isArray(parsedData.games)) {
               initialGamesData = parsedData.games
-            } else {
+            } else if (!parsedData.status) {
+              // Not a status message, treat as single game
               initialGamesData = [parsedData]
             }
           }
         }
       }
     } catch (error) {
-      console.log('Error parsing enriched games data for mistakes chart:', error.message)
+      console.log('Error parsing enriched games data for mistakes chart:', (error as Error).message)
     }
 
     // Try to get ELO averages data from the page
@@ -245,11 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const eloAveragesText = eloAveragesElement.textContent.trim()
         if (eloAveragesText && eloAveragesText.startsWith('{')) {
           eloAveragesData = JSON.parse(eloAveragesText)
-          console.log('Parsed ELO averages data for mistakes chart:', eloAveragesData)
         }
       }
     } catch (error) {
-      console.log('Error parsing ELO averages data for mistakes chart:', error.message)
+      console.log('Error parsing ELO averages data for mistakes chart:', (error as Error).message)
     }
 
     // Render chart with initial data
@@ -291,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      console.log('Error parsing enriched games data for opening analysis:', error.message)
+      console.log('Error parsing enriched games data for opening analysis:', (error as Error).message)
     }
 
     // Try to get ELO averages data from the page
@@ -302,11 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const eloAveragesText = eloAveragesElement.textContent.trim()
         if (eloAveragesText && eloAveragesText.startsWith('{')) {
           eloAveragesData = JSON.parse(eloAveragesText)
-          console.log('Parsed ELO averages data for opening analysis:', eloAveragesData)
         }
       }
     } catch (error) {
-      console.log('Error parsing ELO averages data for opening analysis:', error.message)
+      console.log('Error parsing ELO averages data for opening analysis:', (error as Error).message)
     }
 
     // Try to get opening stats data from the page
@@ -317,11 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const openingStatsText = openingStatsElement.textContent.trim()
         if (openingStatsText && openingStatsText.startsWith('{')) {
           openingStatsData = JSON.parse(openingStatsText)
-          console.log('Parsed opening stats data for opening analysis:', openingStatsData)
         }
       }
     } catch (error) {
-      console.log('Error parsing opening stats data for opening analysis:', error.message)
+      console.log('Error parsing opening stats data for opening analysis:', (error as Error).message)
     }
 
     // Render chart with initial data
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      console.log('Error parsing enriched games data for blunder analysis:', error.message)
+      console.log('Error parsing enriched games data for blunder analysis:', (error as Error).message)
     }
 
     // Render component with initial data
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      console.log('Error parsing enriched games data for time analysis:', error.message)
+      console.log('Error parsing enriched games data for time analysis:', (error as Error).message)
     }
 
     // Get time management data from stockfish_analysis
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      console.log('Error parsing stockfish analysis data for time management:', error.message)
+      console.log('Error parsing stockfish analysis data for time management:', (error as Error).message)
     }
 
     // Get ELO averages data
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      console.log('Error parsing ELO averages data for time analysis:', error.message)
+      console.log('Error parsing ELO averages data for time analysis:', (error as Error).message)
     }
 
     // Render component with initial data
@@ -462,12 +462,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const stockfishText = stockfishAnalysisElement.textContent.trim()
 
         if (stockfishText && (stockfishText.startsWith('{') || stockfishText.startsWith('['))) {
-          const parsedData = JSON.parse(stockfishText)
-          principlesData = parsedData.principles || null
+          // The stockfish-analysis element contains principles data with by_time_control and aggregated
+          principlesData = JSON.parse(stockfishText)
         }
       }
     } catch (error) {
-      console.log('Error parsing stockfish analysis data for principles summary:', error.message)
+      console.log('Error parsing stockfish analysis data for principles summary:', (error as Error).message)
     }
 
     // Get ELO averages data
@@ -478,11 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const eloAveragesText = eloAveragesElement.textContent.trim()
         if (eloAveragesText && eloAveragesText.startsWith('{')) {
           eloAveragesData = JSON.parse(eloAveragesText)
-          console.log('Parsed ELO averages data for principles summary:', eloAveragesData)
         }
       }
     } catch (error) {
-      console.log('Error parsing ELO averages data for principles summary:', error.message)
+      console.log('Error parsing ELO averages data for principles summary:', (error as Error).message)
     }
 
     // Render component with initial data
@@ -497,6 +496,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const customPuzzlesContainer = document.getElementById('custom-puzzles-container')
 
   if (customPuzzlesContainer) {
+    // Get report ID from data attribute
+    const reportId = customPuzzlesContainer.dataset.reportId ? parseInt(customPuzzlesContainer.dataset.reportId) : undefined
+
+    // Store reportId globally for the template's updateCustomPuzzles function
+    ;(window as any).reportId = reportId
+
     // Get puzzle data from dedicated custom-puzzles-data element
     let puzzlesData = []
     try {
@@ -513,15 +518,19 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('🧩 Error parsing custom puzzles data:', error)
     }
 
-    // Get principles data
-    let principlesData = null
+    // Get principles data - extract aggregated for PrincipleSelector
+    let aggregatedPrinciplesData = null
     try {
       const stockfishAnalysisEl = document.getElementById('stockfish-analysis')
       if (stockfishAnalysisEl && stockfishAnalysisEl.textContent) {
         const analysisText = stockfishAnalysisEl.textContent.trim()
         if (analysisText && analysisText !== '{}') {
-          const analysis = JSON.parse(analysisText)
-          principlesData = analysis.principles || analysis
+          const principlesData = JSON.parse(analysisText)
+
+          // For PrincipleSelector, use aggregated data (averaged across all time controls)
+          // This ensures puzzle selection is based on overall performance, not specific time controls
+          // The principles data structure has: { by_time_control: {...}, aggregated: { elo_range, games_analyzed, principles: {...} } }
+          aggregatedPrinciplesData = principlesData.aggregated || principlesData
         }
       }
     } catch (error) {
@@ -550,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             flex: '1'
           }}>
             <PrincipleSelector
-              principlesData={principlesData}
+              principlesData={aggregatedPrinciplesData}
               selectedPrinciple={selectedPrinciple}
               onSelectPrinciple={setSelectedPrinciple}
             />
@@ -570,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
               puzzles={puzzlesData}
               size={480}
               selectedPrinciple={selectedPrinciple}
+              reportId={reportId}
             />
           </div>
         </div>

@@ -94,7 +94,7 @@ class ChessPrinciplesAnalyzer:
 
         elo_file_path = os.path.join(
             os.path.dirname(__file__),
-            '..', '..', 'data', 'elo_averages', f'{self.elo_range}.json'
+            '..', '..', 'static', 'data', 'elo_averages', f'{self.elo_range}.json'
         )
 
         try:
@@ -122,19 +122,33 @@ class ChessPrinciplesAnalyzer:
 
             # For each metric, average across time controls
             for metric_key in metric_keys:
-                values = []
+                dict_values = []
+                single_values = []
                 for tc in time_controls:
                     if tc in bracket_data and metric_key in bracket_data[tc]:
                         metric_data = bracket_data[tc][metric_key]
                         if isinstance(metric_data, dict):
-                            values.append(metric_data)
+                            dict_values.append(metric_data)
+                        elif isinstance(metric_data, (int, float)):
+                            single_values.append(metric_data)
 
-                if values:
+                # Handle metrics with mean/std/skew structure
+                if dict_values:
                     # Average the mean, std, and skew values
                     aggregated[metric_key] = {
-                        'mean': sum(v.get('mean', 0) for v in values) / len(values),
-                        'std': sum(v.get('std', 0) for v in values) / len(values),
-                        'skew': sum(v.get('skew', 0) for v in values) / len(values)
+                        'mean': sum(v.get('mean', 0) for v in dict_values) / len(dict_values),
+                        'std': sum(v.get('std', 0) for v in dict_values) / len(dict_values),
+                        'skew': sum(v.get('skew', 0) for v in dict_values) / len(dict_values)
+                    }
+                # Handle single-value metrics (like win_by_checkmate_rate)
+                elif single_values:
+                    # For single values, create a minimal distribution with mean only
+                    # Use a small std to avoid division by zero
+                    avg_value = sum(single_values) / len(single_values)
+                    aggregated[metric_key] = {
+                        'mean': avg_value,
+                        'std': 0.01,  # Small std to avoid division by zero
+                        'skew': 0
                     }
 
             return {self.elo_range: aggregated}
@@ -357,33 +371,112 @@ class ChessPrinciplesAnalyzer:
 
     def analyze_all_principles(self) -> Dict[str, Any]:
         """
-        Run analysis for all 10 chess principles.
+        Run analysis for all 10 chess principles, grouped by time control.
 
         Returns:
-            Dictionary with analysis results for all principles
+            Dictionary with analysis results per time control and aggregated
+            {
+                "username": str,
+                "total_games_analyzed": int,
+                "by_time_control": {
+                    "bullet": {"elo_range": str, "games_analyzed": int, "principles": {...}},
+                    "blitz": {...},
+                    "rapid": {...}
+                },
+                "aggregated": {"elo_range": str, "games_analyzed": int, "principles": {...}}
+            }
         """
+        # Group games by time control
+        games_by_time_control = self._group_games_by_time_control()
+
+        results = {
+            "username": self.username,
+            "total_games_analyzed": len(self.user_games),
+            "by_time_control": {},
+            "aggregated": {}
+        }
+
+        # Analyze each time control separately
+        for time_control, games in games_by_time_control.items():
+            if not games:
+                continue
+
+            # Create a temporary analyzer for this time control
+            tc_analyzer = ChessPrinciplesAnalyzer(
+                enriched_games=games,
+                username=self.username,
+                elo_range=None  # Auto-detect for this time control
+            )
+
+            tc_results = {
+                "elo_range": tc_analyzer.elo_range,
+                "time_control": time_control,
+                "games_analyzed": len(games),
+                "principles": {}
+            }
+
+            # Calculate each principle for this time control
+            tc_results["principles"]["opening_awareness"] = tc_analyzer.calculate_opening_awareness()
+            tc_results["principles"]["middlegame_planning"] = tc_analyzer.calculate_middlegame_planning()
+            tc_results["principles"]["endgame_technique"] = tc_analyzer.calculate_endgame_technique()
+            tc_results["principles"]["king_safety"] = tc_analyzer.calculate_king_safety()
+            tc_results["principles"]["checkmate_ability"] = tc_analyzer.calculate_checkmate_ability()
+            tc_results["principles"]["defensive_skill"] = tc_analyzer.calculate_defensive_skill()
+            tc_results["principles"]["precision_move_quality"] = tc_analyzer.calculate_precision_move_quality()
+            tc_results["principles"]["planning_calculating"] = tc_analyzer.calculate_planning_calculating()
+            tc_results["principles"]["time_management"] = tc_analyzer.calculate_time_management()
+
+            results["by_time_control"][time_control] = tc_results
+
+        # Calculate aggregated results across all games
         if self.elo_range is None:
             self.elo_range = self._detect_elo_range()
 
-        results = {
+        aggregated = {
             "elo_range": self.elo_range,
-            "total_games_analyzed": len(self.user_games),
-            "username": self.username,
+            "games_analyzed": len(self.user_games),
             "principles": {}
         }
 
-        # Calculate each principle
-        results["principles"]["opening_awareness"] = self.calculate_opening_awareness()
-        results["principles"]["middlegame_planning"] = self.calculate_middlegame_planning()
-        results["principles"]["endgame_technique"] = self.calculate_endgame_technique()
-        results["principles"]["king_safety"] = self.calculate_king_safety()
-        results["principles"]["checkmate_ability"] = self.calculate_checkmate_ability()
-        results["principles"]["defensive_skill"] = self.calculate_defensive_skill()
-        results["principles"]["precision_move_quality"] = self.calculate_precision_move_quality()
-        results["principles"]["planning_calculating"] = self.calculate_planning_calculating()
-        results["principles"]["time_management"] = self.calculate_time_management()
+        # Calculate each principle for all games combined
+        aggregated["principles"]["opening_awareness"] = self.calculate_opening_awareness()
+        aggregated["principles"]["middlegame_planning"] = self.calculate_middlegame_planning()
+        aggregated["principles"]["endgame_technique"] = self.calculate_endgame_technique()
+        aggregated["principles"]["king_safety"] = self.calculate_king_safety()
+        aggregated["principles"]["checkmate_ability"] = self.calculate_checkmate_ability()
+        aggregated["principles"]["defensive_skill"] = self.calculate_defensive_skill()
+        aggregated["principles"]["precision_move_quality"] = self.calculate_precision_move_quality()
+        aggregated["principles"]["planning_calculating"] = self.calculate_planning_calculating()
+        aggregated["principles"]["time_management"] = self.calculate_time_management()
+
+        results["aggregated"] = aggregated
 
         return results
+
+    def _group_games_by_time_control(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Group user games by time control (bullet, blitz, rapid).
+
+        Returns:
+            Dictionary mapping time control to list of games
+        """
+        grouped = {
+            "bullet": [],
+            "blitz": [],
+            "rapid": []
+        }
+
+        for game in self.user_games:
+            raw_json = self._get_raw_json(game)
+
+            # Get time control from game
+            # Lichess uses "speed", Chess.com uses "time_class"
+            time_control = raw_json.get("speed") or raw_json.get("perf") or raw_json.get("time_class")
+
+            if time_control and time_control.lower() in grouped:
+                grouped[time_control.lower()].append(game)
+
+        return grouped
 
     # =============================================================================
     # PRINCIPLE 1: OPENING AWARENESS

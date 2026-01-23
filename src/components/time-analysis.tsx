@@ -592,7 +592,9 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
     // Create smooth curve data points
     const curvePoints = 200; // Number of points for smooth curve
     const chartData: any[] = [];
-    const densityThreshold = 0.01;
+    // Adaptive density threshold based on total games (lower threshold for fewer games)
+    const totalGames = winTimes.length + lossTimes.length + drawTimes.length;
+    const densityThreshold = Math.max(0.0001, 0.02 * (totalGames / 50));
 
     // Track which result types have data
     const hasWinData = winTimes.length > 0;
@@ -601,7 +603,8 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
 
     for (let i = 0; i <= curvePoints; i++) {
       const time = (maxTime * i) / curvePoints;
-      if (time < 0.1) continue; // Skip near-zero values for log-normal
+      // Use a minimum time of 0.01 instead of 0.1 for better coverage
+      if (time < 0.01) continue;
 
       const point: any = { time: parseFloat(time.toFixed(1)) };
 
@@ -624,6 +627,43 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       // Only add points where at least one density is above threshold
       if (maxDensity >= densityThreshold) {
         chartData.push(point);
+      }
+    }
+
+    // If no points passed the threshold but we have data, include all points with non-zero density
+    if (chartData.length === 0 && totalGames > 0) {
+      for (let i = 0; i <= curvePoints; i++) {
+        const time = (maxTime * i) / curvePoints;
+        if (time < 0.01) continue;
+
+        const point: any = { time: parseFloat(time.toFixed(1)) };
+        let hasDensity = false;
+
+        if (winParams && hasWinData) {
+          const density = logNormalPDF(time, winParams.mu, winParams.sigma) * winTimes.length * (maxTime / curvePoints);
+          if (density > 0) {
+            point.winsPDF = density;
+            hasDensity = true;
+          }
+        }
+        if (lossParams && hasLossData) {
+          const density = logNormalPDF(time, lossParams.mu, lossParams.sigma) * lossTimes.length * (maxTime / curvePoints);
+          if (density > 0) {
+            point.lossesPDF = density;
+            hasDensity = true;
+          }
+        }
+        if (drawParams && hasDrawData) {
+          const density = logNormalPDF(time, drawParams.mu, drawParams.sigma) * drawTimes.length * (maxTime / curvePoints);
+          if (density > 0) {
+            point.drawsPDF = density;
+            hasDensity = true;
+          }
+        }
+
+        if (hasDensity) {
+          chartData.push(point);
+        }
       }
     }
 

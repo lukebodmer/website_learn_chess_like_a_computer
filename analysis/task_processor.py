@@ -188,6 +188,7 @@ class ReportTaskProcessor:
                             accuracy_analysis={},
                             stockfish_analysis=analysis_summary,
                             enriched_games=[],  # Start with empty list
+                            elo_chart_data=task.game_dataset.elo_chart_data,  # Copy pre-computed ELO data
                             analysis_duration=timezone.now() - task.started_at,
                             stockfish_games_analyzed=0
                         )

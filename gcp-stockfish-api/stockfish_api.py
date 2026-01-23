@@ -80,26 +80,22 @@ class StockfishEvaluator:
             pool_size: Number of concurrent Stockfish processes (default: based on concurrency)
             stockfish_path: Path to Stockfish binary (auto-detected if None)
         """
-        # Scale pool size based on expected concurrency for Cloud Run
+        # Scale pool size based on CPU cores for optimal performance
+        # Each Stockfish engine is CPU-intensive, so we want total_engines ≈ total_cores
         if pool_size is None:
             cpu_count = os.cpu_count() or 4
-            # Get Cloud Run concurrency setting (default 80)
-            concurrency = int(os.environ.get('CLOUD_RUN_CONCURRENCY', '80'))
-            # Get number of Gunicorn workers (default 4)
-            workers = int(os.environ.get('WORKERS', '4'))
+            # Get number of Gunicorn workers (default 2)
+            workers = int(os.environ.get('WORKERS', '2'))
 
-            # Size pool for expected load: target ~2 requests per engine under normal load
-            # But divide by number of workers since each worker gets its own pool
-            target_pool_size = max((concurrency // workers) // 2, cpu_count // workers)
+            # Key insight: Stockfish engines are CPU-bound, not I/O-bound
+            # Optimal performance: total engines across all workers ≈ CPU cores
+            # This prevents context switching and resource contention
+            # Each worker gets an equal share of engines
+            engines_per_worker = max(cpu_count // workers, 1)
 
-            # Memory constraints: each engine uses ~100MB (64MB hash + overhead)
-            # With 8Gi memory and 8 workers, we can fit more engines
-            # 8 workers × 10 engines = 80 total engines = ~8GB, using full memory
-            # With 10 CPUs and concurrency 1000, this gives good throughput
-            max_engines_per_worker = 10
+            self.pool_size = engines_per_worker
 
-            self.pool_size = min(target_pool_size, max_engines_per_worker)
-            logger.info(f"Auto-sizing pool: concurrency={concurrency}, workers={workers}, cpu_count={cpu_count}, pool_size={self.pool_size}")
+            logger.info(f"Auto-sizing pool: cpu_count={cpu_count}, workers={workers}, engines_per_worker={self.pool_size}, total_engines={self.pool_size * workers}")
         else:
             self.pool_size = pool_size
 
@@ -147,9 +143,11 @@ class StockfishEvaluator:
         for i in range(self.pool_size):
             try:
                 engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
-                # Configure engine for memory-efficient performance with smaller hash
+                # Configure engine for speed with memory efficiency
+                # 8GB / 2 workers = 4GB per worker
+                # 4GB / 8 engines = 500MB per engine, use 128MB for safety
                 engine.configure({"Threads": 1})  # Single thread per engine instance
-                engine.configure({"Hash": 64})    # 64MB hash table per instance (reduced for larger pool)
+                engine.configure({"Hash": 128})   # 128MB hash table per instance
                 self.engine_pool.put(engine)
                 logger.debug(f"Initialized engine {i+1}/{self.pool_size}")
             except Exception as e:
@@ -237,8 +235,9 @@ class StockfishEvaluator:
 
             board = chess.Board(fen)
 
-            # Use time + depth limit for faster analysis
-            time_limit = min(10.0, depth * 0.5)  # Max 10s, or 0.5s per depth
+            # Use aggressive time limits for speed
+            # Target: ~0.15s per position at depth 12
+            time_limit = 0.2  # Max 200ms per position
             analysis = engine.analyse(
                 board,
                 chess.engine.Limit(depth=depth, time=time_limit)
@@ -321,7 +320,7 @@ class StockfishEvaluator:
                 try:
                     new_engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
                     new_engine.configure({"Threads": 1})
-                    new_engine.configure({"Hash": 64})
+                    new_engine.configure({"Hash": 128})
                     self.engine_pool.put_nowait(new_engine)
                 except Exception as engine_err:
                     logger.error(f"Failed to replace corrupted engine: {engine_err}")
@@ -455,7 +454,7 @@ def evaluate_positions():
 
         positions = data.get('positions', [])
         # Allow environment variable to override default depth for performance tuning
-        default_depth = int(os.environ.get('DEFAULT_STOCKFISH_DEPTH', '15'))
+        default_depth = int(os.environ.get('DEFAULT_STOCKFISH_DEPTH', '12'))
         depth = data.get('depth', default_depth)
 
         # Validate inputs
@@ -465,8 +464,8 @@ def evaluate_positions():
         if not positions:
             return jsonify({"error": "No positions provided"}), 400
 
-        if len(positions) > 1000:
-            return jsonify({"error": "Too many positions (max 1000 per request)"}), 400
+        if len(positions) > 80:
+            return jsonify({"error": "Too many positions (max 80 per request)"}), 400
 
         if not isinstance(depth, int) or depth < 1 or depth > 50:
             return jsonify({"error": "depth must be an integer between 1 and 50"}), 400

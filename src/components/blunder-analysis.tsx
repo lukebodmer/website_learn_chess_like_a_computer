@@ -244,15 +244,28 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
 
   // Auto-select the first blunder when blunders list changes
   React.useEffect(() => {
-    if (allBlunders.length > 0 && !selectedBlunder) {
-      setSelectedBlunder(allBlunders[0]);
-    } else if (allBlunders.length === 0) {
+    if (allBlunders.length === 0) {
       setSelectedBlunder(null);
-    } else if (selectedBlunder && !allBlunders.includes(selectedBlunder)) {
+      return;
+    }
+
+    // If no blunder is selected, select the first one
+    if (!selectedBlunder) {
+      setSelectedBlunder(allBlunders[0]);
+      return;
+    }
+
+    // Check if the currently selected blunder still exists in the new list
+    // by comparing the blunder key instead of object reference
+    const selectedBlunderKey = getBlunderKey(selectedBlunder);
+    const stillExists = allBlunders.some(b => getBlunderKey(b) === selectedBlunderKey);
+
+    if (!stillExists) {
       // If the currently selected blunder is no longer in the list (due to filtering),
       // select the first one
       setSelectedBlunder(allBlunders[0]);
     }
+    // If it still exists, keep the current selection (don't update state unnecessarily)
   }, [allBlunders]);
 
   return (

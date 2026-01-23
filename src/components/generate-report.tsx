@@ -9,6 +9,9 @@ interface GenerateReportProps {
 interface GamesFetchResponse {
   success: boolean
   error?: string
+  task_id?: string
+  status?: string
+  message?: string
   games_count?: number
   game_dataset_id?: number
   created_at?: string
@@ -24,6 +27,16 @@ interface GamesFetchResponse {
   ndjson_data?: string
 }
 
+interface TaskStatusResponse {
+  state: string
+  current?: number
+  total?: number
+  status?: string
+  games_found?: number
+  result?: GamesFetchResponse
+  error?: string
+}
+
 // Color scheme for time controls
 const TIME_CONTROL_COLORS: Record<string, string> = {
   bullet: '#FF6B6B',
@@ -35,6 +48,7 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [statusText, setStatusText] = useState('')
   const [progressText, setProgressText] = useState('Fetching games...')
+  const [progressPercent, setProgressPercent] = useState<number>(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [gameData, setGameData] = useState<GamesFetchResponse | null>(null)
   const [ndjsonData, setNdjsonData] = useState<string>('')
@@ -49,24 +63,19 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
       ? `/fetch-games/${username}/`
       : `/chess-com/fetch-games/${username}/`
 
-    // Start fetching games immediately
+    // Both platforms now use Celery task polling
     fetch(fetchUrl)
       .then(response => response.json())
       .then((data: GamesFetchResponse) => {
-        if (data.success) {
-          // Success - show completed state
-          setStatus('success')
-          setStatusText('Games Retrieved Successfully')
-          setProgressText(`Found ${data.games_count} games`)
-          setGameData(data)
-          if (data.ndjson_data) {
-            setNdjsonData(data.ndjson_data)
-          }
+        if (data.success && data.task_id) {
+          // Task started, begin polling for status
+          setProgressText(data.message || 'Processing...')
+          pollTaskStatus(data.task_id)
         } else {
-          // Error - show error state
+          // Error starting task
           setStatus('error')
           setStatusText('Error Fetching Games')
-          setProgressText('Failed to fetch games')
+          setProgressText('Failed to start fetch')
           setErrorMessage(data.error || 'Unknown error occurred')
         }
       })
@@ -78,6 +87,81 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
         setErrorMessage('Network error occurred. Please try again.')
       })
   }, [username, platform])
+
+  // Poll for task status (works for both Chess.com and Lichess)
+  const pollTaskStatus = (taskId: string) => {
+    const pollInterval = setInterval(() => {
+      fetch(`/task-status/${taskId}/`)
+        .then(response => response.json())
+        .then((data: TaskStatusResponse) => {
+          if (data.state === 'PENDING') {
+            setProgressText(data.status || 'Task is queued...')
+            setProgressPercent(0)
+          } else if (data.state === 'PROGRESS') {
+            // Use games_found for progress if available, otherwise fall back to current/total
+            let percent = 0
+            let statusMessage = data.status || 'Processing...'
+
+            if (data.games_found !== undefined && data.games_found > 0) {
+              // Calculate progress based on games found vs target (default 100)
+              const targetGames = 100 // This matches ANALYSIS_GAME_COUNT from backend
+              const gamesProgress = Math.min(data.games_found / targetGames, 1.0)
+
+              // If we also have current/total from the backend, use a weighted average
+              if (data.total && data.current !== undefined) {
+                const taskProgress = data.current / data.total
+                // Weight: 70% games found, 30% task progress
+                percent = Math.round((gamesProgress * 0.7 + taskProgress * 0.3) * 100)
+              } else {
+                // Just use games found progress, cap at 90% until complete
+                percent = Math.min(90, Math.round(gamesProgress * 100))
+              }
+
+              setProgressText(`${statusMessage}`)
+            } else if (data.total && data.current !== undefined) {
+              // No games_found data, use task progress percentage
+              percent = Math.round((data.current / data.total) * 100)
+              setProgressText(`${statusMessage}`)
+            } else {
+              // No progress info available
+              setProgressText(statusMessage)
+              percent = 10 // Show a small amount of progress
+            }
+
+            setProgressPercent(percent)
+          } else if (data.state === 'SUCCESS') {
+            // Task completed successfully
+            clearInterval(pollInterval)
+            const result = data.result!
+            setStatus('success')
+            setStatusText('Games Retrieved Successfully')
+            setProgressText(`Found ${result.games_count} games`)
+            setProgressPercent(100)
+            setGameData(result)
+            if (result.ndjson_data) {
+              setNdjsonData(result.ndjson_data)
+            }
+          } else if (data.state === 'FAILURE' || data.state === 'ERROR') {
+            // Task failed
+            clearInterval(pollInterval)
+            setStatus('error')
+            setStatusText('Error Fetching Games')
+            setProgressText('Failed to fetch games')
+            setProgressPercent(0)
+            setErrorMessage(data.error || 'Task failed. Please try again.')
+          }
+        })
+        .catch(error => {
+          console.error('Polling error:', error)
+          clearInterval(pollInterval)
+          setStatus('error')
+          setStatusText('Network Error')
+          setProgressText('Network error during polling')
+          setProgressPercent(0)
+          setErrorMessage('Network error occurred. Please try again.')
+        })
+    }, 2000) // Poll every 2 seconds
+  }
 
   // Process NDJSON data to extract ELO over time
   const eloChartData = useMemo(() => {
@@ -215,6 +299,40 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
     )
   }
 
+  const handleGenerateReport = async () => {
+    if (!gameData?.game_dataset_id || eloChartData.length === 0) {
+      window.location.href = `/report/${username}/${gameData?.game_dataset_id}/`
+      return
+    }
+
+    try {
+      // Get CSRF token from cookie
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1]
+
+      // Send ELO chart data to backend before navigating
+      await fetch(`/api/store-elo-data/${gameData.game_dataset_id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken || ''
+        },
+        body: JSON.stringify({
+          elo_chart_data: eloChartData
+        })
+      })
+
+      // Navigate to report page
+      window.location.href = `/report/${username}/${gameData.game_dataset_id}/`
+    } catch (error) {
+      console.error('Error storing ELO data:', error)
+      // Navigate anyway, even if ELO data storage failed
+      window.location.href = `/report/${username}/${gameData?.game_dataset_id}/`
+    }
+  }
+
   return (
     <div style={{ padding: '20px' }}>
       <div style={{
@@ -245,8 +363,7 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
                 ? 'linear-gradient(90deg, #f44336, #d32f2f)'
                 : 'linear-gradient(90deg, var(--primary-color), var(--primary-light))',
               transition: 'width 0.3s ease',
-              width: status === 'loading' ? '0%' : '100%',
-              animation: status === 'loading' ? 'shimmer 2s infinite' : 'none'
+              width: status === 'loading' ? `${progressPercent}%` : '100%'
             }}></div>
           </div>
         </div>
@@ -504,18 +621,20 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
               alignItems: 'center',
               marginBottom: '20px'
             }}>
-              <a
-                href={`/report/${username}/${gameData.game_dataset_id}/`}
+              <button
+                onClick={handleGenerateReport}
                 className="btn btn-primary"
                 style={{
                   background: 'var(--success-color)',
                   fontSize: '18px',
                   padding: '15px 30px',
-                  textDecoration: 'none'
+                  textDecoration: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
                 Generate Analysis Report
-              </a>
+              </button>
               <a
                 href="/"
                 className="btn btn-secondary"
@@ -541,13 +660,6 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
         )}
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes shimmer {
-          0% { width: 0%; }
-          50% { width: 60%; }
-          100% { width: 0%; }
-        }
-      `}} />
     </div>
   )
 }

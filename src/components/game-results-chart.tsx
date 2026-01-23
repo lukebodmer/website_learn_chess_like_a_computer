@@ -134,17 +134,27 @@ const getCurrentElo = (games: GameResult[], username: string): number | null => 
     } else if (isBlackPlayer) {
       rating = mostRecentGame.players?.black?.rating;
     }
+  } else if (mostRecentGame.white?.username || mostRecentGame.black?.username) {
+    // Chess.com format (direct structure)
+    isWhitePlayer = mostRecentGame.white?.username?.toLowerCase() === username.toLowerCase();
+    isBlackPlayer = mostRecentGame.black?.username?.toLowerCase() === username.toLowerCase();
+
+    if (isWhitePlayer) {
+      rating = mostRecentGame.white?.rating;
+    } else if (isBlackPlayer) {
+      rating = mostRecentGame.black?.rating;
+    }
   } else if (mostRecentGame.white_player || mostRecentGame.black_player) {
-    // Custom format
+    // Custom format (enriched games)
     isWhitePlayer = mostRecentGame.white_player?.toLowerCase() === username.toLowerCase();
     isBlackPlayer = mostRecentGame.black_player?.toLowerCase() === username.toLowerCase();
 
     const rawJson = mostRecentGame.raw_json || mostRecentGame.game?.raw_json;
     if (rawJson) {
       if (isWhitePlayer) {
-        rating = rawJson.players?.white?.rating;
+        rating = rawJson.players?.white?.rating || rawJson.white?.rating;
       } else if (isBlackPlayer) {
-        rating = rawJson.players?.black?.rating;
+        rating = rawJson.players?.black?.rating || rawJson.black?.rating;
       }
     }
   } else if (mostRecentGame.game) {
@@ -176,6 +186,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [currentSpeedFilter, setCurrentSpeedFilter] = useState<any>('all');
   const [filteredEloData, setFilteredEloData] = useState<any>(null);
+  const [precomputedEloData, setPrecomputedEloData] = useState<any[] | null>(null);
 
   // ELO chart zoom state
   const [eloZoomLeft, setEloZoomLeft] = useState<number | null>(null);
@@ -243,6 +254,22 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     setEloZoomRight(null);
   };
 
+  // Read pre-computed ELO chart data from hidden div on mount
+  useEffect(() => {
+    try {
+      const eloChartDataEl = document.getElementById('elo-chart-data');
+      if (eloChartDataEl && eloChartDataEl.textContent?.trim()) {
+        const data = JSON.parse(eloChartDataEl.textContent);
+        if (data && data.length > 0) {
+          setPrecomputedEloData(data);
+          console.log('Loaded pre-computed ELO chart data:', data.length, 'data points');
+        }
+      }
+    } catch (e) {
+      console.error('Error loading pre-computed ELO chart data:', e);
+    }
+  }, []);
+
   // Set up filter manager when component mounts
   useEffect(() => {
     // Get initial filtered games from the filter manager
@@ -252,7 +279,6 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
 
     // Get initial filtered ELO data
     const initialEloData = eloDataManager.getFilteredEloAverages();
-    console.log('GameResultsChart: Initial filtered ELO data:', initialEloData);
     setFilteredEloData(initialEloData);
 
     // Listen for filter changes
@@ -264,7 +290,6 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
 
     // Listen for ELO data changes
     const handleDataChange = (event: any) => {
-      console.log('GameResultsChart: Received ELO data change event:', event.eloAveragesData);
       setFilteredEloData(event.eloAveragesData);
     };
 
@@ -280,8 +305,84 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
 
   // Calculate ELO over time data - only filter by speed, not color or result
   const eloOverTimeData = useMemo(() => {
-    // ALWAYS get all games from the filter manager - don't use filteredGames
-    // ELO is independent of game result and color
+    // If we have pre-computed ELO data, use it instead of computing from games
+    if (precomputedEloData && precomputedEloData.length > 0) {
+      console.log('Using pre-computed ELO chart data');
+
+      // Convert pre-computed data to the expected format
+      const bySpeed: Record<string, any[]> = {};
+      let minTimestamp: number | null = null;
+      let maxTimestamp: number | null = null;
+
+      // Process each data point
+      precomputedEloData.forEach((dataPoint) => {
+        const timestamp = dataPoint.timestamp;
+
+        // Update min/max timestamps
+        if (minTimestamp === null || timestamp < minTimestamp) minTimestamp = timestamp;
+        if (maxTimestamp === null || timestamp > maxTimestamp) maxTimestamp = timestamp;
+
+        // Extract data for each time control
+        ['bullet', 'blitz', 'rapid'].forEach((speed) => {
+          if (dataPoint[speed] !== undefined) {
+            if (!bySpeed[speed]) {
+              bySpeed[speed] = [];
+            }
+
+            bySpeed[speed].push({
+              gameNumber: bySpeed[speed].length + 1,
+              rating: dataPoint[speed],
+              timestamp: timestamp,
+              date: dataPoint[`${speed}_date`] || new Date(timestamp).toLocaleDateString(),
+              speed: speed
+            });
+          }
+        });
+      });
+
+      // Get all time controls that have data
+      let allTimeControls = Object.keys(bySpeed).sort();
+
+      // Filter by speed if a specific speed filter is active
+      let filteredBySpeed = bySpeed;
+      let filteredMinTimestamp = minTimestamp;
+      let filteredMaxTimestamp = maxTimestamp;
+
+      if (currentSpeedFilter !== 'all') {
+        const selectedSpeeds = Array.isArray(currentSpeedFilter) ? currentSpeedFilter : [currentSpeedFilter];
+
+        // Filter to only show selected speeds
+        filteredBySpeed = {};
+        allTimeControls = [];
+
+        selectedSpeeds.forEach(speed => {
+          if (bySpeed[speed]) {
+            filteredBySpeed[speed] = bySpeed[speed];
+            allTimeControls.push(speed);
+          }
+        });
+
+        // Recalculate min/max timestamps for filtered data
+        const allFilteredTimestamps: number[] = [];
+        Object.values(filteredBySpeed).forEach(games => {
+          games.forEach(game => allFilteredTimestamps.push(game.timestamp));
+        });
+
+        if (allFilteredTimestamps.length > 0) {
+          filteredMinTimestamp = Math.min(...allFilteredTimestamps);
+          filteredMaxTimestamp = Math.max(...allFilteredTimestamps);
+        }
+      }
+
+      return {
+        bySpeed: filteredBySpeed,
+        allTimeControls,
+        minTimestamp: filteredMinTimestamp,
+        maxTimestamp: filteredMaxTimestamp
+      };
+    }
+
+    // Fallback: compute from games if no pre-computed data available
     const allGames = gameFilterManager.getAllGames();
 
     if (!allGames.length) {
@@ -315,20 +416,33 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
 
         timestamp = game.createdAt;
         speed = game.speed || game.perf;
+      } else if (game.white?.username || game.black?.username) {
+        // Chess.com format (direct structure)
+        isWhitePlayer = game.white?.username?.toLowerCase() === username.toLowerCase();
+        isBlackPlayer = game.black?.username?.toLowerCase() === username.toLowerCase();
+
+        if (isWhitePlayer) {
+          rating = game.white?.rating;
+        } else if (isBlackPlayer) {
+          rating = game.black?.rating;
+        }
+
+        timestamp = game.end_time ? game.end_time * 1000 : null;
+        speed = game.time_class;
       } else if (game.white_player || game.black_player) {
-        // Custom format
+        // Custom format (enriched games)
         isWhitePlayer = game.white_player?.toLowerCase() === username.toLowerCase();
         isBlackPlayer = game.black_player?.toLowerCase() === username.toLowerCase();
 
         const rawJson = game.raw_json || game.game?.raw_json;
         if (rawJson) {
           if (isWhitePlayer) {
-            rating = rawJson.players?.white?.rating;
+            rating = rawJson.players?.white?.rating || rawJson.white?.rating;
           } else if (isBlackPlayer) {
-            rating = rawJson.players?.black?.rating;
+            rating = rawJson.players?.black?.rating || rawJson.black?.rating;
           }
-          timestamp = rawJson.createdAt;
-          speed = rawJson.speed || rawJson.perf;
+          timestamp = rawJson.createdAt || (rawJson.end_time ? rawJson.end_time * 1000 : null);
+          speed = rawJson.speed || rawJson.perf || rawJson.time_class;
         }
       } else if (game.game) {
         // Nested game structure
@@ -419,7 +533,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       minTimestamp: filteredMinTimestamp,
       maxTimestamp: filteredMaxTimestamp
     };
-  }, [username, currentSpeedFilter]);
+  }, [username, currentSpeedFilter, precomputedEloData]);
 
   const { winsData, lossesData, drawsData, totalGames, userStats, maxYAxisValue, eloBracket } = useMemo(() => {
     if (!filteredGames.length) {
@@ -587,10 +701,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       timeControl = speedFilter[0];
     }
 
-    console.log('GameResultsChart: eloBracket:', eloBracket, 'filteredEloData:', filteredEloData);
     if (eloBracket && filteredEloData) {
       const timeControlData = filteredEloData;
-      console.log('GameResultsChart: Using timeControlData:', timeControlData);
 
       // Helper function to extract rate value (handles both number and {mean, std, skew} formats)
       const getRate = (value: any): number => {

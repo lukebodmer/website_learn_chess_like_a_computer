@@ -60,7 +60,6 @@ export class EloDataManager {
    * Set the raw ELO averages data loaded from the server
    */
   setEloAveragesData(data: EloAveragesData | null): void {
-    console.log('EloDataManager: Setting raw ELO averages data:', data);
     this.rawEloAveragesData = data;
     this.notifyListeners();
   }
@@ -78,24 +77,20 @@ export class EloDataManager {
    */
   getFilteredEloAverages(): any | null {
     if (!this.rawEloAveragesData) {
-      console.log('EloDataManager: No raw ELO averages data available');
       return null;
     }
 
     const speedFilter = gameFilterManager.getCurrentSpeedFilter();
-    console.log('EloDataManager: Getting filtered ELO averages for speed filter:', speedFilter);
 
     // If 'all' is selected, average across all time controls
     if (speedFilter === 'all') {
       const result = this.averageEloData(Object.keys(this.rawEloAveragesData));
-      console.log('EloDataManager: Averaged ELO data (all):', result);
       return result;
     }
 
     // If specific speeds are selected, average across those
     if (Array.isArray(speedFilter)) {
       const result = this.averageEloData(speedFilter);
-      console.log('EloDataManager: Averaged ELO data (specific):', result);
       return result;
     }
 

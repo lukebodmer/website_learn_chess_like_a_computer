@@ -1,9 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { gameFilterManager, SpeedFilter } from '../game-filter-manager';
+
+interface EloAveragesData {
+  [timeControl: string]: {
+    [key: string]: {
+      mean: number;
+      std: number;
+      skew: number;
+    } | number;
+  };
+}
 
 interface PrinciplesSummaryProps {
   principlesData: any;
-  eloAveragesData?: any;
+  eloAveragesData?: EloAveragesData | null;
 }
 
 export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
@@ -11,14 +22,55 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
   eloAveragesData = null
 }) => {
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [currentSpeedFilter, setCurrentSpeedFilter] = useState<SpeedFilter>('all');
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force re-render when principlesData becomes available
+  useEffect(() => {
+    if (principlesData && Object.keys(principlesData).length > 0) {
+      console.log('PrinciplesSummary: Received new principles data', principlesData);
+      setForceUpdate(prev => prev + 1);
+    }
+  }, [principlesData]);
+
+  // Listen for speed filter changes
+  useEffect(() => {
+    setCurrentSpeedFilter(gameFilterManager.getCurrentSpeedFilter());
+
+    const handleFilterChange = () => {
+      setCurrentSpeedFilter(gameFilterManager.getCurrentSpeedFilter());
+    };
+
+    gameFilterManager.addListener(handleFilterChange);
+
+    return () => {
+      gameFilterManager.removeListener(handleFilterChange);
+    };
+  }, []);
+
+  // Get the active principles data based on current filter
+  const activePrinciplesData = useMemo(() => {
+    if (!principlesData) return null;
+
+    // If filtering by specific time control, use that data
+    if (currentSpeedFilter !== 'all' && currentSpeedFilter !== 'multiple') {
+      const timeControlData = principlesData.by_time_control?.[currentSpeedFilter];
+      if (timeControlData) {
+        return timeControlData;
+      }
+    }
+
+    // Otherwise use aggregated data
+    return principlesData.aggregated || principlesData;
+  }, [principlesData, currentSpeedFilter]);
 
   // Extract principles data
   const radarData = useMemo(() => {
-    if (!principlesData || !principlesData.principles) {
+    if (!activePrinciplesData || !activePrinciplesData.principles) {
       return [];
     }
 
-    const principles = principlesData.principles;
+    const principles = activePrinciplesData.principles;
 
     // Map principle names to display labels
     const principleLabels: { [key: string]: string } = {
@@ -41,17 +93,31 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
       // Use percentile directly (0-100)
       return {
         principle: label,
-        score: percentile,
+        score: Math.round(percentile), // Round to nearest integer for cleaner display
         rawScore: percentile
       };
     });
 
     return data;
-  }, [principlesData]);
+  }, [activePrinciplesData]);
 
-  // Get ELO range for display
-  const eloRange = principlesData?.elo_range || 'Unknown';
-  const totalGames = principlesData?.total_games_analyzed || 0;
+  // Get ELO range for display - from active data
+  const eloRange = activePrinciplesData?.elo_range || 'Unknown';
+  const totalGames = activePrinciplesData?.games_analyzed || 0;
+
+  // Determine display label for time control
+  const timeControlLabel = useMemo(() => {
+    if (!currentSpeedFilter || currentSpeedFilter === 'all') {
+      return 'All time controls';
+    } else if (currentSpeedFilter === 'multiple') {
+      const selected = gameFilterManager.getSelectedSpeeds();
+      return `Multiple (${selected.join(', ')})`;
+    } else if (typeof currentSpeedFilter === 'string') {
+      return currentSpeedFilter.charAt(0).toUpperCase() + currentSpeedFilter.slice(1);
+    } else {
+      return 'All time controls';
+    }
+  }, [currentSpeedFilter]);
 
   // Find top 3 areas to work on (lowest percentiles = need most improvement)
   const topAreasToImprove = useMemo(() => {
@@ -82,7 +148,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
     return null;
   };
 
-  const hasData = principlesData && principlesData.principles;
+  const hasData = activePrinciplesData && activePrinciplesData.principles;
 
   return (
     <div className="section" style={{ border: '2px solid var(--primary-color)' }}>
@@ -136,7 +202,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
                 </h4>
                 <ul style={{ marginBottom: 0, paddingLeft: '18px', marginTop: '8px' }}>
                   <li style={{ marginBottom: '10px' }}>
-                    <strong>Percentiles (0-100):</strong> Show how you rank compared to players in your rating range. Higher percentiles mean better performance.
+                    <strong>Percentiles (0-100):</strong> Show how you rank compared to players in your rating range across different time controls. Higher percentiles mean better performance.
                   </li>
                   <li style={{ marginBottom: '10px' }}>
                     <strong>50th Percentile:</strong> You're performing at the average for your rating in this area.
@@ -145,7 +211,7 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
                     <strong>Lower Percentiles:</strong> Indicate areas where you're underperforming and should focus your practice.
                   </li>
                   <li>
-                    <strong>Your Rating Range ({eloRange}):</strong> Your performance is compared to thousands of players with similar ratings using statistical distributions.
+                    <strong>Your Rating Range ({eloRange}):</strong> Your performance is compared to thousands of analyzed games from players with similar ratings using statistical distributions.
                   </li>
                 </ul>
               </div>
@@ -154,7 +220,13 @@ export const PrinciplesSummary: React.FC<PrinciplesSummaryProps> = ({
         </div>
       </div>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-        Rating Range: <strong>{eloRange}</strong> | Games Analyzed: <strong>{totalGames}</strong>
+        {hasData ? (
+          <>
+            Time Control: <strong>{timeControlLabel}</strong> | Rating Range: <strong>{eloRange}</strong> | Games Analyzed: <strong>{totalGames}</strong>
+          </>
+        ) : (
+          <span style={{ fontStyle: 'italic' }}>Waiting for principles analysis...</span>
+        )}
       </p>
 
       {/* Radar Chart */}

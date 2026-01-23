@@ -22,8 +22,8 @@ import pycountry
 import pytz
 import time
 
-from .models import UserProfile, GameDataSet, AnalysisReport, ReportGenerationTask, SolvedBlunder
-from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, Client, get_current_daily_puzzle
+from .models import UserProfile, GameDataSet, AnalysisReport, ReportGenerationTask, SolvedBlunder, SolvedPuzzle
+from chessdotcom import get_player_profile, get_player_game_archives, get_player_games_by_month, get_current_daily_puzzle, ChessDotComClient, RateLimitHandler
 from django.core.cache import cache
 from .chess_analysis import ChessAnalyzer
 from .chess_analysis.game_enricher import GameEnricher
@@ -33,7 +33,21 @@ from .opening_classifier import classify_opening_by_moves, lookup_opening_in_dat
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 30
+ANALYSIS_GAME_COUNT = 20
+
+
+# Configure Chess.com client with rate limit handling
+# This client will automatically:
+# - Wait 4 seconds between retries after a 429 rate limit response
+# - Retry failed requests up to 2 times
+# - Use a proper User-Agent header
+chess_com_client = ChessDotComClient(
+    user_agent="Learn Chess Like a Computer - Chess Analysis Tool. Contact: learnchesslikeacomputer@gmail.com",
+    rate_limit_handler=RateLimitHandler(
+        tts=4,      # Wait 4 seconds between retries after 429
+        retries=2   # Retry up to 2 times
+    )
+)
 
 
 # Shared utilities for game fetching
@@ -153,74 +167,6 @@ def get_lichess_user(access_token):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     return response.json()
-
-
-def get_lichess_user_games(access_token, username, max_games=ANALYSIS_GAME_COUNT):
-    """Fetch recent rated games from Lichess API with configurable game count"""
-    response = requests.get(
-        f"https://lichess.org/api/games/user/{username}",
-        headers={
-            "Authorization": f"Bearer {access_token}",
-            "Accept": "application/x-ndjson",
-        },
-        params={
-            "max": max_games,
-            "moves": "true",
-            "tags": "true",
-            "clocks": "true",
-            "evals": "true",
-            "accuracy": "true",
-            "opening": "true",
-            "division": "true",
-            "finished": "true",
-            "rated": "true",  # Only fetch rated games
-            "sort": "dateDesc",
-        },
-    )
-
-    if response.status_code == 200:
-        ndjson_data = response.text
-        lines = [line for line in ndjson_data.strip().split('\n') if line.strip()]
-        games = []
-        filtered_ndjson_lines = []
-        allowed_speeds = {'bullet', 'blitz', 'rapid'}
-
-        # Parse games and filter for rated games with allowed speeds only
-        for line in lines:
-            try:
-                game = json.loads(line)
-                # Filter for rated games AND bullet/blitz/rapid speeds only
-                speed = game.get('speed', '').lower()
-                if game.get('rated', False) and speed in allowed_speeds:
-                    games.append(game)
-                    filtered_ndjson_lines.append(line)
-            except json.JSONDecodeError:
-                continue
-
-        # Rebuild ndjson_data with only rated bullet/blitz/rapid games
-        filtered_ndjson_data = '\n'.join(filtered_ndjson_lines)
-
-        # Use shared utility to track dates
-        oldest_date, newest_date = track_game_dates(
-            games,
-            lambda game: game.get('createdAt')
-        )
-
-        return {
-            'games': games,
-            'ndjson_data': filtered_ndjson_data,
-            'games_count': len(games),
-            'oldest_game_date': oldest_date,
-            'newest_game_date': newest_date
-        }
-
-    return {
-        'games': [],
-        'ndjson_data': '',
-        'games_count': 0,
-        'oldest_game_date': None,
-        'newest_game_date': None
-    }
 
 
 def home(request):
@@ -419,7 +365,7 @@ def generate_report_page(request, platform, username):
 
 @login_required
 def fetch_lichess_games(request, username):
-    """AJAX endpoint to fetch Lichess games asynchronously"""
+    """AJAX endpoint to dispatch Celery task for fetching Lichess games"""
     # Get access token
     profile = get_object_or_404(UserProfile, user=request.user, lichess_username=username)
     access_token = profile.lichess_access_token
@@ -438,48 +384,21 @@ def fetch_lichess_games(request, username):
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
 
-        # Fetch games with configurable count
-        game_data = get_lichess_user_games(access_token, username, max_games=max_games)
+        # Import the task
+        from .tasks import fetch_lichess_games_task
 
-        if game_data['games_count'] == 0:
-            return JsonResponse({
-                'success': False,
-                'error': 'No games found for this account'
-            })
-
-        # Create GameDataSet using shared utility
-        game_dataset = create_game_dataset(
-            user=request.user,
-            username=username,
-            games_data=game_data['games'],
-            ndjson_data=game_data['ndjson_data'],
-            platform='lichess'
+        # Dispatch Celery task to fetch games in background
+        task = fetch_lichess_games_task.apply_async(
+            args=[request.user.id, username, access_token, max_games],
+            queue='lichess_api'
         )
 
-        # Format date range using shared utility
-        date_range_str = format_date_range_for_display(
-            game_data['oldest_game_date'],
-            game_data['newest_game_date']
-        )
-
-        # Get latest ELO ratings by time control
-        elo_by_time_control = get_latest_elo_by_time_control(
-            game_data['ndjson_data'],
-            username,
-            'lichess'
-        )
-
+        # Return task ID so frontend can poll for status
         return JsonResponse({
             'success': True,
-            'games_count': game_data['games_count'],
-            'game_dataset_id': game_dataset.id,
-            'created_at': game_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
-            'data_size': len(game_data['ndjson_data']),
-            'date_range': date_range_str,
-            'oldest_game_date': game_data['oldest_game_date'].strftime("%B %d, %Y") if game_data['oldest_game_date'] else None,
-            'newest_game_date': game_data['newest_game_date'].strftime("%B %d, %Y") if game_data['newest_game_date'] else None,
-            'elo_ratings': elo_by_time_control,
-            'ndjson_data': game_data['ndjson_data']
+            'task_id': task.id,
+            'status': 'started',
+            'message': 'Game fetch started in background. Please wait...'
         })
 
     except Exception as e:
@@ -704,25 +623,6 @@ def load_opening_stats_for_elo(elo_by_time_control):
 
 def _render_completed_report(request, report, platform, username, game_dataset):
     """Render a completed analysis report"""
-    # Get ALL games from raw data for display
-    all_games_raw = "No game data available"
-    try:
-        if game_dataset.raw_data:
-            lines = game_dataset.raw_data.strip().split('\n')
-            all_games = []
-            for line in lines:  # ALL games
-                if line.strip():
-                    try:
-                        game_data = json.loads(line)
-                        # Show raw data as-is, no conversion needed for raw display
-                        all_games.append(game_data)
-                    except json.JSONDecodeError:
-                        continue
-            if all_games:
-                all_games_raw = json.dumps(all_games, indent=2)
-    except Exception as e:
-        all_games_raw = f"Error parsing game data: {e}"
-
     # Get enriched games for display
     enriched_games_display = "No enriched game data available"
     if report.enriched_games:
@@ -730,8 +630,12 @@ def _render_completed_report(request, report, platform, username, game_dataset):
 
     # Get stockfish analysis (including principles) for display
     stockfish_analysis_display = "{}"
+    principles_data_display = "{}"
     if report.stockfish_analysis:
         stockfish_analysis_display = json.dumps(report.stockfish_analysis, indent=2)
+        # Extract just the principles data for the PrinciplesSummary component
+        if 'principles' in report.stockfish_analysis:
+            principles_data_display = json.dumps(report.stockfish_analysis['principles'], indent=2)
 
     # Get custom puzzles for display
     custom_puzzles_display = "[]"
@@ -757,16 +661,22 @@ def _render_completed_report(request, report, platform, username, game_dataset):
             if opening_stats:
                 opening_stats_data = json.dumps(opening_stats, indent=2)
 
+    # Get ELO chart data from report
+    elo_chart_data_display = "[]"
+    if report.elo_chart_data:
+        elo_chart_data_display = json.dumps(report.elo_chart_data, indent=2)
+
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': game_dataset.id,
         'report_id': report.id,
-        'all_games_raw': all_games_raw,
         'enriched_games': enriched_games_display,
         'stockfish_analysis': stockfish_analysis_display,
+        'principles_data': principles_data_display,
         'custom_puzzles': custom_puzzles_display,
         'elo_averages': elo_averages_data,
         'opening_stats': opening_stats_data,
+        'elo_chart_data': elo_chart_data_display,
         'auto_start': False,  # Don't auto-start streaming for existing reports
         'platform': platform
     })
@@ -820,27 +730,6 @@ def _generate_unified_analysis_report(request, username, dataset_id):
             # Return completed report immediately
             return _render_completed_report(request, existing_report, platform, username, game_dataset)
 
-    # Get ALL games from raw data for display
-    all_games_raw = "Loading..."
-    try:
-        if game_dataset.raw_data:
-            lines = game_dataset.raw_data.strip().split('\n')
-            all_games = []  # Store all games for display
-            for line in lines:  # Process ALL games
-                if line.strip():
-                    try:
-                        game_data = json.loads(line)
-                        # Show raw data as-is, no conversion needed for raw display
-                        all_games.append(game_data)
-                    except json.JSONDecodeError:
-                        continue
-
-            if all_games:
-                all_games_raw = json.dumps(all_games, indent=2)
-
-    except Exception as e:
-        all_games_raw = f"Error parsing game data: {e}"
-
     # Load ELO averages data based on user's ratings by time control
     elo_averages_data = "{}"
     opening_stats_data = "{}"
@@ -860,16 +749,22 @@ def _generate_unified_analysis_report(request, username, dataset_id):
             if opening_stats:
                 opening_stats_data = json.dumps(opening_stats, indent=2)
 
+    # Get ELO chart data from game dataset if available
+    elo_chart_data_display = "[]"
+    if game_dataset.elo_chart_data:
+        elo_chart_data_display = json.dumps(game_dataset.elo_chart_data, indent=2)
+
     # Show the unified report page
     return render(request, 'analysis/report.html', {
         'username': username,
         'dataset_id': dataset_id,
-        'all_games_raw': all_games_raw,
         'enriched_games': json.dumps({"status": "Waiting for analysis to complete..."}, indent=2),
         'stockfish_analysis': json.dumps({}),  # Empty initially, will be populated during streaming
+        'principles_data': json.dumps({}),  # Empty initially, will be populated during streaming
         'custom_puzzles': json.dumps([]),  # Empty initially, will be populated after analysis
         'elo_averages': elo_averages_data,
         'opening_stats': opening_stats_data,
+        'elo_chart_data': elo_chart_data_display,
         'auto_start': True,  # Tell template to auto-start streaming
         'platform': platform  # Tell template which platform this is
     })
@@ -983,7 +878,9 @@ def stream_analysis_progress(request, username, dataset_id):
                             "stockfish_evaluations_used": report.stockfish_analysis.get('stockfish_evaluations_used', 0),
                             "existing_evaluations_used": report.stockfish_analysis.get('existing_evaluations_used', 0),
                         },
-                        "enriched_games_count": len(report.enriched_games) if report.enriched_games else 0
+                        "enriched_games_count": len(report.enriched_games) if report.enriched_games else 0,
+                        "stockfish_analysis": report.stockfish_analysis,
+                        "custom_puzzles": report.custom_puzzles if report.custom_puzzles else []
                     }
                     yield f"data: {json.dumps(completion_data)}\n\n"
 
@@ -1087,13 +984,8 @@ def chess_com_connect(request):
             return render(request, 'analysis/chess_com_connect.html', {'form_data': request.POST})
 
         try:
-            # Configure User-Agent for chess.com API
-            Client.request_config["headers"]["User-Agent"] = (
-                "Learn Chess Like a Computer - Chess Analysis Tool. "
-                "Contact: admin@learnchesslikeacomputer.com"
-            )
-
             # Get player profile from chess.com
+            # User-Agent and rate limiting are handled by chess_com_client
             response = get_player_profile(username)
 
             if response.player:
@@ -1782,7 +1674,7 @@ def convert_chess_com_game_to_dict(game):
 
 @login_required
 def fetch_chess_com_games(request, username):
-    """AJAX endpoint to fetch Chess.com games asynchronously"""
+    """AJAX endpoint to dispatch Celery task for fetching Chess.com games"""
     # Verify this is the user's chess.com account
     profile = get_object_or_404(UserProfile, user=request.user, chess_com_username=username)
 
@@ -1794,140 +1686,83 @@ def fetch_chess_com_games(request, username):
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
 
-        # Configure User-Agent for chess.com API
-        Client.request_config["headers"]["User-Agent"] = (
-            "Learn Chess Like a Computer - Chess Analysis Tool. "
-            "Contact: learnchesslikeacomputer@gmail.com"
+        # Import the task
+        from .tasks import fetch_chess_com_games_task
+
+        # Dispatch Celery task to fetch games in background
+        task = fetch_chess_com_games_task.apply_async(
+            args=[request.user.id, username, max_games],
+            queue='chess_com_api'
         )
 
-        # Get player's game archives to find most recent games
-        archives_response = get_player_game_archives(username)
-
-        if not archives_response.archives:
-            return JsonResponse({
-                'success': False,
-                'error': 'No game archives found for this Chess.com account.'
-            })
-
-        # Filter criteria
-        allowed_time_classes = {'bullet', 'blitz', 'rapid'}
-
-        # Smart fetching strategy: filter as we go and keep fetching until we have enough qualified games
-        qualified_games = []
-        total_games_checked = 0
-        api_calls_made = 0
-        max_api_calls = 50  # Safety limit to avoid excessive API calls
-
-        # Start from most recent and work backwards
-        archives_to_check = list(reversed(archives_response.archives))
-
-        for archive_url in archives_to_check:
-            # Stop if we have enough qualified games
-            if len(qualified_games) >= max_games:
-                break
-
-            # Safety limit on API calls
-            if api_calls_made >= max_api_calls:
-                print(f"Reached API call limit ({max_api_calls}). Collected {len(qualified_games)} qualified games.")
-                break
-
-            # Extract year and month from URL
-            url_parts = archive_url.split('/')
-            year = url_parts[-2]
-            month = url_parts[-1]
-
-            try:
-                games_response = get_player_games_by_month(username, year, month)
-                api_calls_made += 1
-
-                if games_response.games:
-                    # Process each game in the month
-                    for game in games_response.games:
-                        total_games_checked += 1
-
-                        try:
-                            game_data = convert_chess_com_game_to_dict(game)
-
-                            # Check if game meets our criteria
-                            time_class = game_data.get('time_class', '').lower()
-                            is_rated = game_data.get('rated', True)
-
-                            if time_class in allowed_time_classes and is_rated:
-                                qualified_games.append(game_data)
-                                print(f"Added qualified game ({len(qualified_games)}/{max_games}): {time_class} from {year}/{month}")
-
-                                # Stop processing this month if we have enough
-                                if len(qualified_games) >= max_games:
-                                    break
-                            else:
-                                print(f"Skipping game: time_class={time_class}, rated={is_rated}")
-
-                        except Exception as e:
-                            print(f"Error processing game: {e}")
-                            continue
-
-                    print(f"Checked {year}/{month}: {len(qualified_games)} qualified games collected so far (API calls: {api_calls_made})")
-
-            except Exception as e:
-                print(f"Error fetching games for {year}/{month}: {e}")
-                api_calls_made += 1  # Count failed requests too
-                continue
-
-        print(f"Final result: {len(qualified_games)} qualified games collected from {total_games_checked} total games using {api_calls_made} API calls")
-
-        # Check if we have any qualified games
-        if not qualified_games:
-            return JsonResponse({
-                'success': False,
-                'error': f'No rated bullet, blitz, or rapid games found after checking {total_games_checked} games. Only these time controls are supported.'
-            })
-
-        # Convert qualified games to NDJSON format
-        ndjson_lines = []
-        for game_data in qualified_games:
-            ndjson_lines.append(json.dumps(game_data))
-
-        ndjson_data = '\n'.join(ndjson_lines)
-
-        # Create GameDataSet using shared utility
-        game_dataset = create_game_dataset(
-            user=request.user,
-            username=username,
-            games_data=qualified_games,
-            ndjson_data=ndjson_data,
-            platform='chess.com'
-        )
-
-        # Format date range using shared utility
-        date_range_str = format_date_range_for_display(
-            game_dataset.oldest_game_date,
-            game_dataset.newest_game_date
-        )
-
-        # Get latest ELO ratings by time control
-        elo_by_time_control = get_latest_elo_by_time_control(
-            ndjson_data,
-            username,
-            'chess.com'
-        )
-
+        # Return task ID so frontend can poll for status
         return JsonResponse({
             'success': True,
-            'games_count': len(qualified_games),
-            'game_dataset_id': game_dataset.id,
-            'date_range': date_range_str or "Date range unavailable",
-            'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
-            'data_size': len(ndjson_data),
-            'elo_ratings': elo_by_time_control,
-            'ndjson_data': ndjson_data
+            'task_id': task.id,
+            'status': 'started',
+            'message': 'Game fetch started in background. Please wait...'
         })
 
     except Exception as e:
-        print(f"Error fetching Chess.com games: {e}")
+        print(f"Error dispatching Chess.com games fetch task: {e}")
         return JsonResponse({
             'success': False,
             'error': str(e)
         })
+
+
+@login_required
+def check_task_status(request, task_id):
+    """
+    Poll endpoint to check the status of a Celery task (works for both Chess.com and Lichess)
+    Returns task state and result/progress information
+    """
+    from celery.result import AsyncResult
+
+    try:
+        task = AsyncResult(task_id)
+
+        if task.state == 'PENDING':
+            response = {
+                'state': task.state,
+                'status': 'Task is waiting to start...'
+            }
+        elif task.state == 'PROGRESS':
+            response = {
+                'state': task.state,
+                'current': task.info.get('current', 0),
+                'total': task.info.get('total', 100),
+                'status': task.info.get('status', ''),
+                'games_found': task.info.get('games_found', 0)
+            }
+        elif task.state == 'SUCCESS':
+            # Task completed successfully
+            result = task.result
+            response = {
+                'state': task.state,
+                'result': result
+            }
+        elif task.state == 'FAILURE':
+            # Task failed
+            response = {
+                'state': task.state,
+                'status': str(task.info),
+                'error': 'Task failed. Please try again.'
+            }
+        else:
+            # Unknown state
+            response = {
+                'state': task.state,
+                'status': str(task.info)
+            }
+
+        return JsonResponse(response)
+
+    except Exception as e:
+        return JsonResponse({
+            'state': 'ERROR',
+            'error': str(e)
+        }, status=500)
 
 
 @login_required
@@ -2043,13 +1878,8 @@ def get_daily_puzzle_data():
         return puzzle_data
 
     try:
-        # Configure User-Agent for Chess.com API
-        Client.request_config["headers"]["User-Agent"] = (
-            "Learn Chess Like a Computer - Chess Analysis Tool. "
-            "Contact: admin@learnchesslikeacomputer.com"
-        )
-
         # Fetch daily puzzle from Chess.com
+        # User-Agent and rate limiting are handled by chess_com_client
         response = get_current_daily_puzzle()
 
         if response and response.puzzle:
@@ -2499,6 +2329,107 @@ def mark_blunder_solved(request, report_id):
             'success': True,
             'created': created,
             'solved_at': solved_blunder.solved_at.isoformat()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def get_solved_puzzles(request, report_id):
+    """
+    API endpoint to get all solved puzzles for a specific report
+    Returns JSON with list of puzzle IDs that have been solved
+    """
+    try:
+        # Verify report belongs to user
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Get all solved puzzles for this report
+        solved_puzzles = SolvedPuzzle.objects.filter(
+            user=request.user,
+            report=report
+        ).values_list('puzzle_id', flat=True)
+
+        return JsonResponse({
+            'success': True,
+            'solved_puzzles': list(solved_puzzles)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def mark_puzzle_solved(request, report_id):
+    """
+    API endpoint to mark a custom puzzle as solved
+    Expects POST request with puzzle_id in the body
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST request required'
+        }, status=405)
+
+    try:
+        # Verify report belongs to user
+        report = get_object_or_404(AnalysisReport, id=report_id, user=request.user)
+
+        # Parse request body
+        data = json.loads(request.body)
+        puzzle_id = data.get('puzzle_id')
+
+        if not puzzle_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'puzzle_id is required'
+            }, status=400)
+
+        # Create or get the solved puzzle record
+        solved_puzzle, created = SolvedPuzzle.objects.get_or_create(
+            user=request.user,
+            report=report,
+            puzzle_id=puzzle_id
+        )
+
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'solved_at': solved_puzzle.solved_at.isoformat()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+def store_elo_chart_data(request, dataset_id):
+    """Store pre-computed ELO chart data from the frontend"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    try:
+        # Get the dataset and verify ownership
+        game_dataset = get_object_or_404(GameDataSet, id=dataset_id, user=request.user)
+
+        # Parse the ELO chart data from request body
+        data = json.loads(request.body)
+        elo_chart_data = data.get('elo_chart_data', [])
+
+        # Store it in the dataset
+        game_dataset.elo_chart_data = elo_chart_data
+        game_dataset.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'ELO chart data stored successfully'
         })
     except Exception as e:
         return JsonResponse({

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="content" style="text-align: center; padding: 40px;">
-    <h2>✅ You've been logged out</h2>
+    <h2>You've been logged out</h2>
 
     <p style="font-size: 18px; margin: 30px 0;">Thanks for using Chess Analysis!</p>
 
@@ -13,23 +13,13 @@
 
         <div style="margin: 20px 0;">
             <a href="{% url 'analysis:home' %}" class="btn" style="margin: 10px;">
-                🏠 Go to Home Page
+                Go to Home Page
             </a>
 
             <a href="/auth/login/" class="btn" style="margin: 10px;">
-                🔑 Log Back In
+                Log Back In
             </a>
         </div>
-    </div>
-
-    <div class="section">
-        <h4>Why create an account?</h4>
-        <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
-            <li>📊 Save and view your chess analysis reports</li>
-            <li>🔗 Connect your Lichess account securely</li>
-            <li>📈 Track your progress over time</li>
-            <li>⚡ Faster analysis with cached data</li>
-        </ul>
     </div>
 </div>
 {% endblock %}

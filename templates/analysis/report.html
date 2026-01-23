@@ -24,7 +24,7 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     {% if auto_start %}
     <!-- Analysis Progress Section -->
     <div id="analysis-progress" style="position: sticky; top: 0; z-index: 100; margin: 20px 0; padding: 20px; background-color: var(--background-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 6px var(--shadow-light);">
-        <h2>🔄 Analysis Progress</h2>
+        <h2>Generating Report...</h2>
         <div id="progress-status">Initializing analysis...</div>
         <div id="progress-bar" style="background: #e0e0e0; height: 20px; border-radius: 10px; margin: 10px 0;">
             <div id="progress-fill" style="background: #007bff; height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s;"></div>
@@ -66,12 +66,12 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px;">Custom Training Puzzles:</h2>
-    <div id="custom-puzzles-container" style="padding: 20px; background-color: var(--background-secondary); border-radius: 8px; border: 2px solid var(--primary-color); box-shadow: 0 2px 6px var(--shadow-light); min-height: 700px;">
+    <div id="custom-puzzles-container" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} style="padding: 20px; background-color: var(--background-secondary); border-radius: 8px; border: 2px solid var(--primary-color); box-shadow: 0 2px 6px var(--shadow-light); min-height: 700px;">
         <!-- React CustomPuzzles with PrincipleSelector will be mounted here -->
     </div>
 
-    <!-- Hidden element to store stockfish_analysis data for React components -->
-    <div id="stockfish-analysis" style="display: none;">{{ stockfish_analysis|safe }}</div>
+    <!-- Hidden element to store principles data for React components -->
+    <div id="stockfish-analysis" style="display: none;">{{ principles_data|safe }}</div>
 
     <!-- Hidden element to store custom puzzles data for React components -->
     <div id="custom-puzzles-data" style="display: none;">{{ custom_puzzles|safe }}</div>
@@ -82,10 +82,8 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     <!-- Hidden element to store opening stats data for React components -->
     <div id="opening-stats-data" style="display: none;">{{ opening_stats|safe }}</div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleRawGameData()">
-        <span id="raw-game-data-toggle">▶</span> Raw Game Data (All Games)
-    </h2>
-    <pre id="raw-game-data" style="display: none; background: #222; color: #fff; padding: 20px; overflow: auto; max-height: 400px; margin: 20px 0;">{{ all_games_raw|safe }}</pre>
+    <!-- Hidden element to store pre-computed ELO chart data for React components -->
+    <div id="elo-chart-data" style="display: none;">{{ elo_chart_data|safe }}</div>
 
     <h2 style="margin-top: 40px; margin-bottom: 10px; cursor: pointer; user-select: none;" onclick="toggleEnrichedGamesData()">
         <span id="enriched-games-toggle">▶</span> Enriched Games Data
@@ -93,18 +91,6 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     <pre id="enriched-games" style="display: none; background: #2d1b69; color: #fff; padding: 20px; overflow: auto; max-height: 600px; margin: 20px 0;">{{ enriched_games|safe }}</pre>
 
     <script>
-    function toggleRawGameData() {
-        const pre = document.getElementById('raw-game-data');
-        const toggle = document.getElementById('raw-game-data-toggle');
-        if (pre.style.display === 'none') {
-            pre.style.display = 'block';
-            toggle.textContent = '▼';
-        } else {
-            pre.style.display = 'none';
-            toggle.textContent = '▶';
-        }
-    }
-
     function toggleEnrichedGamesData() {
         const pre = document.getElementById('enriched-games');
         const toggle = document.getElementById('enriched-games-toggle');
@@ -150,6 +136,10 @@ function startStreaming() {
 
 // Auto-start if flag is set
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the ELO chart with pre-computed data (if available)
+    // The chart component will read pre-computed ELO data from the hidden div
+    updateGameResultsChart();
+
     {% if auto_start %}
     startStreaming();
     {% endif %}
@@ -252,7 +242,7 @@ function handleAnalysisUpdate(data) {
             break;
 
         case 'complete':
-            progressStatus.innerText = `✅ Analysis complete! ${enrichedGamesArray.length} games processed.`;
+            progressStatus.innerText = `Analysis complete! ${enrichedGamesArray.length} games processed.`;
             progressFill.style.width = '100%';
 
             // Final update to enriched games display
@@ -265,11 +255,24 @@ function handleAnalysisUpdate(data) {
 
             // Update custom puzzles if data is available
             if (data.custom_puzzles) {
-                const principlesData = data.stockfish_analysis && data.stockfish_analysis.principles
-                    ? data.stockfish_analysis.principles
+                // Pass the aggregated principles data (which has the structure: { elo_range, games_analyzed, principles: {...} })
+                const principlesData = data.stockfish_analysis && data.stockfish_analysis.principles && data.stockfish_analysis.principles.aggregated
+                    ? data.stockfish_analysis.principles.aggregated
                     : null;
                 updateCustomPuzzles(data.custom_puzzles, principlesData);
             }
+
+            // Hide the progress bar after a short delay to show completion
+            setTimeout(() => {
+                const progressSection = document.getElementById('analysis-progress');
+                if (progressSection) {
+                    progressSection.style.transition = 'opacity 0.5s ease-out';
+                    progressSection.style.opacity = '0';
+                    setTimeout(() => {
+                        progressSection.style.display = 'none';
+                    }, 500);
+                }
+            }, 2000); // Wait 2 seconds before hiding
 
             if (eventSource) {
                 eventSource.close();
@@ -304,7 +307,7 @@ function updateEnrichedGamesDisplay() {
         window.gameFilterManager.updateAllGames(enrichedGamesArray);
     }
 
-    // Update both charts with the latest data
+    // Update charts with the latest enriched data
     updateCharts();
 }
 
@@ -332,10 +335,14 @@ function updateGameResultsChart() {
             console.warn('Could not parse ELO averages data:', error);
         }
 
+        // Use enriched games (ELO chart will use pre-computed data from hidden div)
+        const gamesToDisplay = enrichedGamesArray;
+
         console.log('Updating GameResultsChart with:', {
-            gamesCount: enrichedGamesArray.length,
+            gamesCount: gamesToDisplay.length,
+            enrichedCount: enrichedGamesArray.length,
             username: username,
-            sampleGame: enrichedGamesArray[0],
+            sampleGame: gamesToDisplay[0],
             hasEloAverages: !!eloAveragesData
         });
 
@@ -343,7 +350,7 @@ function updateGameResultsChart() {
             // Re-render the chart with updated data
             window.gameResultsChartRoot.render(
                 window.React.createElement(window.GameResultsChart, {
-                    enrichedGames: enrichedGamesArray,
+                    enrichedGames: gamesToDisplay,
                     username: username,
                     chartType: 'pie',
                     eloAveragesData: eloAveragesData
@@ -558,13 +565,25 @@ function updatePrinciplesSummary(principlesData) {
             // Update the hidden stockfish-analysis element for persistent storage
             const stockfishAnalysisEl = document.getElementById('stockfish-analysis');
             if (stockfishAnalysisEl) {
-                stockfishAnalysisEl.textContent = JSON.stringify({ principles: principlesData });
+                stockfishAnalysisEl.textContent = JSON.stringify(principlesData);
+            }
+
+            // Parse ELO averages data from hidden div
+            let eloAveragesData = null;
+            try {
+                const eloAveragesEl = document.getElementById('elo-averages-data');
+                if (eloAveragesEl && eloAveragesEl.textContent.trim()) {
+                    eloAveragesData = JSON.parse(eloAveragesEl.textContent);
+                }
+            } catch (error) {
+                console.warn('Could not parse ELO averages data:', error);
             }
 
             // Re-render the component with updated data
             window.principlesSummaryRoot.render(
                 window.React.createElement(window.PrinciplesSummary, {
-                    principlesData: principlesData
+                    principlesData: principlesData,
+                    eloAveragesData: eloAveragesData
                 })
             );
             console.log('PrinciplesSummary render successful');
@@ -639,7 +658,8 @@ function updateCustomPuzzles(puzzlesData, principlesData) {
                     }, window.React.createElement(window.CustomPuzzles, {
                         puzzles: puzzlesData,
                         size: 480,
-                        selectedPrinciple: selectedPrinciple
+                        selectedPrinciple: selectedPrinciple,
+                        reportId: window.reportId
                     }))
                 ]);
             };
@@ -648,7 +668,7 @@ function updateCustomPuzzles(puzzlesData, principlesData) {
             window.customPuzzlesRoot.render(
                 window.React.createElement(PuzzlesWithSelector)
             );
-            console.log('CustomPuzzles render successful');
+            console.log('CustomPuzzles render successful with', puzzlesData ? puzzlesData.length : 0, 'puzzles');
         } catch (error) {
             console.error('Error rendering CustomPuzzles:', error);
         }
@@ -661,6 +681,9 @@ function updateCustomPuzzles(puzzlesData, principlesData) {
         });
     }
 }
+
+// Add console log to track when completion event is received
+console.log('Report page loaded - waiting for analysis to complete...');
 
 function updateDisplaysWithResults(data) {
     // Fetch the actual enriched games data from the completed report

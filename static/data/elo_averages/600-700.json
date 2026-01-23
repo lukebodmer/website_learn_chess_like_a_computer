@@ -3,256 +3,278 @@
     "opening_inaccuracies_per_game": {
       "mean": 0.87,
       "std": 1.0,
-      "skew": 1.27
+      "skew": 1.32
     },
     "opening_mistakes_per_game": {
-      "mean": 1.46,
-      "std": 1.45,
-      "skew": 1.18
+      "mean": 1.45,
+      "std": 1.44,
+      "skew": 1.3
     },
     "opening_blunders_per_game": {
-      "mean": 0.87,
-      "std": 1.1,
-      "skew": 1.81
+      "mean": 0.86,
+      "std": 1.11,
+      "skew": 2.0
     },
     "middlegame_inaccuracies_per_game": {
       "mean": 0.42,
-      "std": 0.79,
-      "skew": 2.35
+      "std": 0.77,
+      "skew": 2.31
     },
     "middlegame_mistakes_per_game": {
-      "mean": 1.17,
-      "std": 1.34,
-      "skew": 1.42
+      "mean": 1.2,
+      "std": 1.39,
+      "skew": 1.55
     },
     "middlegame_blunders_per_game": {
-      "mean": 0.86,
-      "std": 1.28,
-      "skew": 2.1
+      "mean": 0.85,
+      "std": 1.27,
+      "skew": 2.25
     },
     "endgame_inaccuracies_per_game": {
       "mean": 0.2,
       "std": 0.56,
-      "skew": 3.66
+      "skew": 3.68
     },
     "endgame_mistakes_per_game": {
       "mean": 0.43,
       "std": 0.94,
-      "skew": 4.18
+      "skew": 4.52
     },
     "endgame_blunders_per_game": {
       "mean": 0.37,
-      "std": 0.95,
-      "skew": 4.25
+      "std": 0.97,
+      "skew": 4.53
     },
     "percent_time_used_in_opening": {
       "mean": 0.5,
       "std": 0.24,
-      "skew": 2.05
+      "skew": 1.61
     },
     "percent_time_used_in_middlegame": {
       "mean": 0.42,
-      "std": 0.21,
-      "skew": 1.73
+      "std": 0.2,
+      "skew": 1.08
     },
     "percent_time_used_in_endgame": {
-      "mean": 0.2,
+      "mean": 0.19,
       "std": 0.21,
-      "skew": 8.58
+      "skew": 7.88
     },
     "checkmate_rate": {
       "mean": 0.12,
       "std": 0.32,
-      "skew": 2.34
+      "skew": 2.38
     },
     "mate_conversion_rate": {
       "mean": 0.08,
       "std": 0.28,
-      "skew": 3.03
+      "skew": 3.01
     },
     "comeback_rate": {
       "mean": 0.22,
       "std": 0.42,
-      "skew": 1.32
+      "skew": 1.34
     },
     "eval_volatility": {
-      "mean": 138.3,
-      "std": 102.46,
-      "skew": 6.35
+      "mean": 139.01,
+      "std": 109.95,
+      "skew": 6.87
     },
     "quiet_move_quality": {
       "mean": 98.48,
-      "std": 65.86,
-      "skew": 0.73
+      "std": 66.29,
+      "skew": 1.9
     },
     "timeout_rate": {
-      "mean": 0.4,
-      "std": 0.49,
-      "skew": 0.43
+      "mean": 0.74,
+      "std": 0.44,
+      "skew": -1.1
     },
     "time_pressure_blunder_rate": {
-      "mean": 2.0,
-      "std": 2.07,
-      "skew": 1.92
-    }
+      "mean": 1.99,
+      "std": 2.06,
+      "skew": 1.91
+    },
+    "win_by_checkmate_rate": 0.187,
+    "win_by_resignation_rate": 0.055,
+    "win_by_timeout_rate": 0.758,
+    "loss_by_checkmate_rate": 0.214,
+    "loss_by_resignation_rate": 0.052,
+    "loss_by_timeout_rate": 0.734,
+    "draw_by_stalemate_rate": 0.24,
+    "draw_by_agreement_rate": 0.0,
+    "draw_by_repetition_rate": 0.76,
+    "draw_by_50move_rate": 0.0,
+    "draw_by_insufficient_material_rate": 0.0
   },
   "blitz": {
     "opening_inaccuracies_per_game": {
-      "mean": 0.93,
-      "std": 0.99,
-      "skew": 1.13
+      "mean": 0.96,
+      "std": 1.01,
+      "skew": 1.12
     },
     "opening_mistakes_per_game": {
-      "mean": 1.58,
-      "std": 1.49,
-      "skew": 1.11
+      "mean": 1.6,
+      "std": 1.51,
+      "skew": 1.12
     },
     "opening_blunders_per_game": {
-      "mean": 0.83,
-      "std": 1.06,
-      "skew": 1.74
+      "mean": 0.8,
+      "std": 1.02,
+      "skew": 1.73
     },
     "middlegame_inaccuracies_per_game": {
-      "mean": 0.45,
-      "std": 0.81,
-      "skew": 2.19
+      "mean": 0.44,
+      "std": 0.83,
+      "skew": 2.59
     },
     "middlegame_mistakes_per_game": {
-      "mean": 1.54,
-      "std": 1.61,
-      "skew": 1.29
+      "mean": 1.59,
+      "std": 1.69,
+      "skew": 1.49
     },
     "middlegame_blunders_per_game": {
-      "mean": 1.17,
-      "std": 1.53,
-      "skew": 2.11
+      "mean": 1.22,
+      "std": 1.55,
+      "skew": 1.93
     },
     "endgame_inaccuracies_per_game": {
-      "mean": 0.26,
-      "std": 0.65,
-      "skew": 3.49
+      "mean": 0.24,
+      "std": 0.62,
+      "skew": 3.64
     },
     "endgame_mistakes_per_game": {
-      "mean": 0.72,
-      "std": 1.24,
-      "skew": 2.41
+      "mean": 0.7,
+      "std": 1.19,
+      "skew": 2.28
     },
     "endgame_blunders_per_game": {
-      "mean": 0.63,
-      "std": 1.29,
-      "skew": 3.14
+      "mean": 0.65,
+      "std": 1.3,
+      "skew": 2.92
     },
     "percent_time_used_in_opening": {
-      "mean": 0.43,
-      "std": 0.29,
-      "skew": 5.67
+      "mean": 0.42,
+      "std": 0.27,
+      "skew": 4.1
     },
     "percent_time_used_in_middlegame": {
-      "mean": 0.45,
-      "std": 0.25,
-      "skew": 4.04
+      "mean": 0.46,
+      "std": 0.32,
+      "skew": 14.79
     },
     "percent_time_used_in_endgame": {
       "mean": 0.25,
-      "std": 0.25,
-      "skew": 10.54
+      "std": 0.29,
+      "skew": 11.27
     },
     "checkmate_rate": {
-      "mean": 0.27,
-      "std": 0.44,
-      "skew": 1.06
+      "mean": 0.28,
+      "std": 0.45,
+      "skew": 0.98
     },
     "mate_conversion_rate": {
       "mean": 0.21,
-      "std": 0.41,
-      "skew": 1.42
+      "std": 0.4,
+      "skew": 1.45
     },
     "comeback_rate": {
       "mean": 0.18,
       "std": 0.39,
-      "skew": 1.64
+      "skew": 1.63
     },
     "eval_volatility": {
-      "mean": 154.35,
-      "std": 150.35,
-      "skew": 6.04
+      "mean": 155.44,
+      "std": 154.17,
+      "skew": 5.83
     },
     "quiet_move_quality": {
-      "mean": 101.0,
-      "std": 67.83,
-      "skew": 1.87
+      "mean": 99.71,
+      "std": 65.07,
+      "skew": 1.21
     },
     "timeout_rate": {
-      "mean": 0.14,
-      "std": 0.35,
-      "skew": 2.08
+      "mean": 0.27,
+      "std": 0.45,
+      "skew": 1.01
     },
     "time_pressure_blunder_rate": {
-      "mean": 0.59,
-      "std": 1.39,
-      "skew": 3.31
-    }
+      "mean": 0.62,
+      "std": 1.37,
+      "skew": 2.97
+    },
+    "win_by_checkmate_rate": 0.471,
+    "win_by_resignation_rate": 0.245,
+    "win_by_timeout_rate": 0.284,
+    "loss_by_checkmate_rate": 0.519,
+    "loss_by_resignation_rate": 0.208,
+    "loss_by_timeout_rate": 0.273,
+    "draw_by_stalemate_rate": 0.479,
+    "draw_by_agreement_rate": 0.128,
+    "draw_by_repetition_rate": 0.223,
+    "draw_by_50move_rate": 0.021,
+    "draw_by_insufficient_material_rate": 0.149
   },
   "rapid": {
     "opening_inaccuracies_per_game": {
-      "mean": 0.9,
+      "mean": 0.88,
       "std": 0.98,
-      "skew": 1.09
+      "skew": 1.13
     },
     "opening_mistakes_per_game": {
-      "mean": 1.54,
-      "std": 1.44,
-      "skew": 0.97
+      "mean": 1.58,
+      "std": 1.48,
+      "skew": 1.09
     },
     "opening_blunders_per_game": {
-      "mean": 0.88,
-      "std": 1.07,
-      "skew": 1.76
+      "mean": 0.85,
+      "std": 1.05,
+      "skew": 1.71
     },
     "middlegame_inaccuracies_per_game": {
-      "mean": 0.45,
-      "std": 0.83,
-      "skew": 2.32
+      "mean": 0.44,
+      "std": 0.82,
+      "skew": 2.62
     },
     "middlegame_mistakes_per_game": {
-      "mean": 1.62,
-      "std": 1.76,
-      "skew": 1.47
+      "mean": 1.67,
+      "std": 1.75,
+      "skew": 1.38
     },
     "middlegame_blunders_per_game": {
-      "mean": 1.26,
-      "std": 1.62,
-      "skew": 1.86
+      "mean": 1.29,
+      "std": 1.68,
+      "skew": 1.98
     },
     "endgame_inaccuracies_per_game": {
-      "mean": 0.24,
-      "std": 0.61,
-      "skew": 3.43
+      "mean": 0.26,
+      "std": 0.65,
+      "skew": 3.46
     },
     "endgame_mistakes_per_game": {
       "mean": 0.69,
-      "std": 1.25,
-      "skew": 2.64
+      "std": 1.23,
+      "skew": 2.6
     },
     "endgame_blunders_per_game": {
-      "mean": 0.65,
-      "std": 1.35,
-      "skew": 2.99
+      "mean": 0.62,
+      "std": 1.3,
+      "skew": 3.07
     },
     "percent_time_used_in_opening": {
-      "mean": 0.47,
-      "std": 0.89,
-      "skew": 32.87
+      "mean": 0.46,
+      "std": 0.63,
+      "skew": 22.25
     },
     "percent_time_used_in_middlegame": {
-      "mean": 0.52,
-      "std": 0.99,
-      "skew": 31.29
+      "mean": 0.5,
+      "std": 0.81,
+      "skew": 47.15
     },
     "percent_time_used_in_endgame": {
-      "mean": 0.33,
-      "std": 1.62,
-      "skew": 48.82
+      "mean": 0.29,
+      "std": 0.51,
+      "skew": 23.87
     },
     "checkmate_rate": {
       "mean": 0.31,
@@ -266,28 +288,39 @@
     },
     "comeback_rate": {
       "mean": 0.17,
-      "std": 0.38,
-      "skew": 1.73
+      "std": 0.37,
+      "skew": 1.8
     },
     "eval_volatility": {
-      "mean": 160.12,
-      "std": 160.02,
-      "skew": 5.66
+      "mean": 160.99,
+      "std": 164.43,
+      "skew": 5.94
     },
     "quiet_move_quality": {
-      "mean": 103.02,
-      "std": 68.65,
-      "skew": 1.53
+      "mean": 102.46,
+      "std": 67.38,
+      "skew": 1.41
     },
     "timeout_rate": {
-      "mean": 0.06,
-      "std": 0.24,
-      "skew": 3.71
+      "mean": 0.13,
+      "std": 0.33,
+      "skew": 2.25
     },
     "time_pressure_blunder_rate": {
       "mean": 0.08,
       "std": 0.52,
-      "skew": 8.74
-    }
+      "skew": 9.76
+    },
+    "win_by_checkmate_rate": 0.562,
+    "win_by_resignation_rate": 0.313,
+    "win_by_timeout_rate": 0.125,
+    "loss_by_checkmate_rate": 0.586,
+    "loss_by_resignation_rate": 0.285,
+    "loss_by_timeout_rate": 0.129,
+    "draw_by_stalemate_rate": 0.481,
+    "draw_by_agreement_rate": 0.144,
+    "draw_by_repetition_rate": 0.183,
+    "draw_by_50move_rate": 0.01,
+    "draw_by_insufficient_material_rate": 0.183
   }
 }

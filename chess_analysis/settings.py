@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_celery_results",
     "analysis",
 ]
 
@@ -164,3 +165,27 @@ GCP_STOCKFISH_URL = 'https://stockfish-api-552342702662.us-west1.run.app'
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/auth/logout/done/'
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes max per task
+
+# Chess.com and Lichess API Rate Limiting (global across all workers)
+# Both platforms' policy: Serial access is required, parallel triggers 429
+# Our strategy: Use Redis locks to ensure only ONE request at a time (serial)
+CELERY_TASK_ROUTES = {
+    'analysis.tasks.fetch_chess_com_games_task': {
+        'queue': 'chess_com_api',
+        # No rate limit needed - Redis locks ensure serial access
+    },
+    'analysis.tasks.fetch_lichess_games_task': {
+        'queue': 'lichess_api',
+        # No rate limit needed - Redis locks ensure serial access
+    },
+}

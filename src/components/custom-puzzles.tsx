@@ -24,10 +24,12 @@ export interface CustomPuzzlesProps {
     moves: string
     rating: number
     themes: string
+    principles?: string[]
   }>
   size?: number
   pieceTheme?: string
   selectedPrinciple?: string | null
+  reportId?: number
 }
 
 interface PuzzleState {
@@ -37,42 +39,23 @@ interface PuzzleState {
   showHint: boolean
 }
 
-// Mapping of principle areas to puzzle themes (must match backend)
-const PRINCIPLE_THEME_MAPPING: { [key: string]: string[] } = {
-  'opening_awareness': ['opening', 'advancedPawn', 'kingsideAttack', 'queensideAttack', 'attackingF2F7'],
-  'middlegame_planning': ['middlegame', 'kingsideAttack', 'queensideAttack', 'clearance', 'quietMove', 'sacrifice'],
-  'endgame_technique': ['endgame', 'pawnEndgame', 'knightEndgame', 'bishopEndgame', 'rookEndgame', 'queenEndgame', 'queenRookEndgame', 'promotion', 'underPromotion'],
-  'king_safety': ['exposedKing', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate', 'cornerMate', 'hookMate', 'operaMate', 'balestraMate', 'blindSwineMate', 'pillsburysMate', 'morphysMate', 'triangleMate', 'vukovicMate', 'killBoxMate'],
-  'checkmate_ability': ['mate', 'mateIn1', 'mateIn2', 'mateIn3', 'mateIn4', 'mateIn5', 'backRankMate', 'smotheredMate', 'anastasiaMate', 'arabianMate', 'bodenMate', 'doubleBishopMate', 'dovetailMate'],
-  // 'tactics_vision': ['fork', 'pin', 'skewer', 'discoveredAttack', 'discoveredCheck', 'doubleCheck', 'hangingPiece', 'trappedPiece', 'capturingDefender', 'attraction', 'deflection', 'clearance', 'interference', 'xRayAttack'],
-  'defensive_skill': ['defensiveMove', 'equality', 'quietMove', 'intermezzo', 'zugzwang'],
-  // 'big_picture': ['hangingPiece', 'trappedPiece', 'capturingDefender', 'advantage', 'crushing'],
-  'precision_move_quality': ['quietMove', 'advantage', 'defensiveMove', 'clearance', 'intermezzo'],
-  'planning_calculating': ['quietMove', 'long', 'veryLong', 'sacrifice', 'clearance', 'intermezzo'],
-  'time_management': ['short', 'oneMove', 'mateIn1', 'mateIn2']
-};
-
 const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   puzzles,
   size = 400,
   pieceTheme,
-  selectedPrinciple = null
+  selectedPrinciple = null,
+  reportId
 }) => {
 
-  // Filter puzzles based on selected principle
+  // Filter puzzles based on selected principle (using backend-provided principles field)
   const filteredPuzzles = React.useMemo(() => {
     if (!selectedPrinciple) {
       return puzzles;
     }
 
-    const themesForPrinciple = PRINCIPLE_THEME_MAPPING[selectedPrinciple] || [];
-    if (themesForPrinciple.length === 0) {
-      return puzzles;
-    }
-
     return puzzles.filter(puzzle => {
-      const puzzleThemes = puzzle.themes.split(' ');
-      return puzzleThemes.some(theme => themesForPrinciple.includes(theme));
+      // Use the principles field provided by the backend
+      return puzzle.principles && puzzle.principles.includes(selectedPrinciple);
     });
   }, [puzzles, selectedPrinciple]);
 
@@ -97,15 +80,41 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
   const [pendingPositionUpdate, setPendingPositionUpdate] = useState<string | null>(null)
   const [pendingStateUpdate, setPendingStateUpdate] = useState<any>(null)
   const [solvedPuzzles, setSolvedPuzzles] = useState<Set<number>>(new Set())
+  const [solvedPuzzleIds, setSolvedPuzzleIds] = useState<Set<string>>(new Set())
   const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
   const [hintLevel, setHintLevel] = useState<number>(0) // 0 = no hint, 1 = highlight piece, 2 = show arrow
   const [highlightedSquares, setHighlightedSquares] = useState<{ square: string, color: string }[]>([])
   const [arrows, setArrows] = useState<{ from: string, to: string, color: string }[]>([])
 
+  // Fetch solved puzzles from backend on mount
+  React.useEffect(() => {
+    if (reportId) {
+      fetch(`/api/solved-puzzles/${reportId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.solved_puzzles) {
+            setSolvedPuzzleIds(new Set(data.solved_puzzles))
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching solved puzzles:', error)
+        })
+    }
+  }, [reportId])
+
   // Reset puzzle index when filter changes
   React.useEffect(() => {
     setCurrentPuzzleIndex(0);
   }, [selectedPrinciple]);
+
+  // Force update when puzzles become available
+  React.useEffect(() => {
+    if (puzzles && puzzles.length > 0) {
+      console.log('CustomPuzzles: Received puzzles data', puzzles.length);
+      // Reset to first puzzle when puzzles are loaded
+      setCurrentPuzzleIndex(0);
+    }
+  }, [puzzles]);
 
   const currentPuzzle = filteredPuzzles[currentPuzzleIndex]
 
@@ -357,6 +366,31 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
             // Puzzle solved!
             setPuzzleState(prev => ({ ...prev, status: 'solved' }))
             setSolvedPuzzles(prev => new Set([...prev, currentPuzzleIndex]))
+
+            // Save to backend if reportId is provided
+            if (reportId && currentPuzzle?.puzzle_id) {
+              const puzzleId = currentPuzzle.puzzle_id
+              // Only save if not already solved
+              if (!solvedPuzzleIds.has(puzzleId)) {
+                fetch(`/api/mark-puzzle-solved/${reportId}/`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.getAttribute('value') || ''
+                  },
+                  body: JSON.stringify({ puzzle_id: puzzleId })
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      setSolvedPuzzleIds(prev => new Set([...prev, puzzleId]))
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error saving solved puzzle:', error)
+                  })
+              }
+            }
           } else {
             // Auto-play opponent's response
             const nextMoveIndex = data.nextMoveIndex
@@ -535,7 +569,17 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
     }
   }
 
-  const solvedCount = solvedPuzzles.size
+  // Count solved puzzles from backend (persistent) plus any solved in current session
+  const solvedCount = React.useMemo(() => {
+    const backendSolved = new Set(solvedPuzzleIds)
+    solvedPuzzles.forEach(index => {
+      const puzzle = filteredPuzzles[index]
+      if (puzzle) {
+        backendSolved.add(puzzle.puzzle_id)
+      }
+    })
+    return backendSolved.size
+  }, [solvedPuzzleIds, solvedPuzzles, filteredPuzzles])
 
   return (
     <div className="custom-puzzles" style={{
@@ -772,9 +816,28 @@ const CustomPuzzles: React.FC<CustomPuzzlesProps> = ({
                 </div>
                 <div className="puzzle-status" style={{
                   fontSize: '13px',
-                  color: 'var(--text-secondary)'
+                  color: 'var(--text-secondary)',
+                  marginBottom: '8px'
                 }}>
                   Rating: {currentPuzzle.rating} • Solved: {solvedCount}/{filteredPuzzles.length}
+                </div>
+
+                {/* Progress Bar */}
+                <div style={{
+                  width: '100%',
+                  height: '8px',
+                  backgroundColor: 'var(--background-tertiary)',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  border: '1px solid var(--border-color)'
+                }}>
+                  <div style={{
+                    width: `${filteredPuzzles.length > 0 ? (solvedCount / filteredPuzzles.length) * 100 : 0}%`,
+                    height: '100%',
+                    backgroundColor: '#4CAF50',
+                    transition: 'width 0.3s ease',
+                    borderRadius: '4px'
+                  }}></div>
                 </div>
               </div>
 

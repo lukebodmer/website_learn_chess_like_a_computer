@@ -37,6 +37,7 @@ class GameDataSet(models.Model):
     chess_com_username = models.CharField(max_length=100, blank=True, null=True)
     total_games = models.IntegerField(default=0)
     raw_data = models.TextField()  # NDJSON data from Lichess or Chess.com
+    elo_chart_data = models.JSONField(default=list, blank=True)  # Pre-computed ELO chart data
 
     # Date range of games in this dataset
     oldest_game_date = models.DateTimeField(null=True, blank=True)
@@ -89,6 +90,7 @@ class AnalysisReport(models.Model):
     stockfish_analysis = models.JSONField(default=dict)
     enriched_games = models.JSONField(default=list)  # Store enriched games data
     custom_puzzles = models.JSONField(default=list, blank=True)  # Store custom training puzzles
+    elo_chart_data = models.JSONField(default=list, blank=True)  # Pre-computed ELO chart data from game fetch
 
     # Report metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -289,3 +291,24 @@ class SolvedBlunder(models.Model):
 
     def __str__(self):
         return f"{self.user.username} solved blunder {self.blunder_key} in report {self.report.id}"
+
+
+class SolvedPuzzle(models.Model):
+    """Track which custom puzzles a user has solved"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    report = models.ForeignKey(AnalysisReport, on_delete=models.CASCADE)
+    # Lichess puzzle ID from the custom_puzzles field in AnalysisReport
+    puzzle_id = models.CharField(max_length=20, db_index=True)
+    solved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = 'analysis'
+        db_table = 'solved_puzzles'
+        unique_together = ['user', 'report', 'puzzle_id']
+        indexes = [
+            models.Index(fields=['user', 'report']),
+            models.Index(fields=['puzzle_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} solved puzzle {self.puzzle_id} in report {self.report.id}"

@@ -1,0 +1,4 @@
+#+TITLE: How Does Chess Data Work?
+From a programming point of view, chess is simple. It's turn-based game with contained play area, limited moves, and simple visuals.
+
+Because of this, chess has become one of the most analyzed and well understood games of all time. Alan Turing, Bertrand Russell, Albert Einstein, Stephen Hawking, and more have all tried their hand at the game.

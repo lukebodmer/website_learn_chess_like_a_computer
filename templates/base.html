@@ -35,9 +35,15 @@
         <div class="user-info">
             {% if user.is_authenticated %}
                 Welcome, {{ user.username }}!
-                <a href="{% url 'analysis:settings' %}" class="settings-icon" title="Account Settings"><i class="ph ph-gear gear-icon"></i></a>
-                <a href="{% url 'analysis:user_reports' %}" style="color: white;">My Reports</a> |
-                <a href="{% url 'analysis:logout' %}" style="color: white;">Logout</a>
+                <div class="settings-dropdown">
+                    <button class="settings-icon" title="Settings">
+                        <i class="ph ph-gear gear-icon"></i>
+                    </button>
+                    <div class="settings-dropdown-menu">
+                        <a href="{% url 'analysis:settings' %}">Account Settings</a>
+                        <a href="{% url 'analysis:logout' %}">Logout</a>
+                    </div>
+                </div>
             {% else %}
                 <a href="/auth/login/" style="color: white;">Login</a>
             {% endif %}
@@ -80,6 +86,33 @@
                 body.setAttribute('data-theme', savedTheme);
             }
         })();
+
+        // Settings dropdown toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsDropdown = document.querySelector('.settings-dropdown');
+            const settingsIcon = document.querySelector('.settings-icon');
+
+            if (settingsDropdown && settingsIcon) {
+                settingsIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    settingsDropdown.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!settingsDropdown.contains(e.target)) {
+                        settingsDropdown.classList.remove('active');
+                    }
+                });
+
+                // Close dropdown when pressing Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        settingsDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
     </script>
 
 </body>

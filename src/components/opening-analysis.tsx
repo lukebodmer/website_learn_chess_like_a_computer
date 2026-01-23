@@ -346,10 +346,6 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       };
     }
 
-    // Reset selection when filter changes
-    setSelectedOpening(null);
-    setSelectedVariationName(null);
-
     // Track openings frequency
     const openingsMap = new Map<string, OpeningData>();
     let validGameCount = 0;
@@ -664,9 +660,77 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
     return sorted;
   }, [openingsData, sortBy, sortDirection]);
 
-  // Auto-select the first opening and its first variation when openingsData changes
+  // Update selected opening with fresh data when openingsData changes
   useEffect(() => {
-    if (openingsData.length > 0 && !selectedOpening) {
+    if (openingsData.length === 0) {
+      // Clear selection if no data
+      setSelectedOpening(null);
+      setSelectedVariationName(null);
+      return;
+    }
+
+    if (selectedOpening) {
+      // Find and update the currently selected opening with fresh data
+      const updatedOpening = openingsData.find(
+        o => o.baseName === selectedOpening.baseName && o.eco === selectedOpening.eco
+      );
+
+      if (updatedOpening) {
+        // Update the selected opening with fresh data
+        setSelectedOpening(updatedOpening);
+
+        // Update the selected variation if one is selected
+        if (selectedVariationName && selectedVariationName !== '__base__') {
+          const updatedVariation = updatedOpening.variations.find(
+            v => v.fullName === selectedVariationName
+          );
+
+          if (updatedVariation) {
+            // Keep the current variation selected but update moves/fen if needed
+            if (updatedVariation.moves) {
+              const moves = updatedVariation.moves.split(' ').filter(m => m.trim() !== '');
+              setOpeningMoves(moves);
+            }
+          } else {
+            // Variation no longer exists, select first variation or base
+            if (updatedOpening.variations.length > 0) {
+              const firstVariation = updatedOpening.variations[0];
+              setSelectedVariationName(firstVariation.fullName);
+              if (firstVariation.moves) {
+                const moves = firstVariation.moves.split(' ').filter(m => m.trim() !== '');
+                setOpeningMoves(moves);
+                setCurrentMoveIndex(moves.length);
+                const chess = new Chess();
+                for (let i = 0; i < moves.length; i++) {
+                  chess.move(moves[i]);
+                }
+                setSelectedOpeningFen(chess.fen());
+              }
+            }
+          }
+        }
+      } else {
+        // Selected opening no longer exists, select first available
+        const topOpening = openingsData[0];
+        setSelectedOpening(topOpening);
+
+        if (topOpening.variations.length > 0) {
+          const firstVariation = topOpening.variations[0];
+          setSelectedVariationName(firstVariation.fullName);
+          if (firstVariation.moves) {
+            const moves = firstVariation.moves.split(' ').filter(m => m.trim() !== '');
+            setOpeningMoves(moves);
+            setCurrentMoveIndex(moves.length);
+            const chess = new Chess();
+            for (let i = 0; i < moves.length; i++) {
+              chess.move(moves[i]);
+            }
+            setSelectedOpeningFen(chess.fen());
+          }
+        }
+      }
+    } else {
+      // No selection yet, auto-select the first opening
       const topOpening = openingsData[0];
       setSelectedOpening(topOpening);
 
@@ -694,7 +758,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         }
       }
     }
-  }, [openingsData]);
+  }, [openingsData, selectedOpening?.baseName, selectedOpening?.eco, selectedVariationName]);
 
   // Handler to toggle sort column and direction
   const handleSortColumnClick = (column: 'percentile' | 'name' | 'games') => {

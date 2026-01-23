@@ -12,7 +12,7 @@ import time
 class GameEnricher:
     """Enriches game data with Stockfish analysis for games lacking evaluation data"""
 
-    def __init__(self, games: List[Dict[str, Any]], max_concurrent: int = 40, stockfish_depth: int = 20):
+    def __init__(self, games: List[Dict[str, Any]], max_concurrent: int = 150, stockfish_depth: int = 12):
         self.games = games
         self.max_concurrent = max_concurrent
         self.stockfish_depth = stockfish_depth
@@ -534,21 +534,8 @@ class GameEnricher:
                         print(f"DEBUG: Mistake UCI conversion failed for '{best_move_uci}' in prev position {prev_position_fen[:30]}...")
 
             if prev_position_fen and best_variation_uci:
-                # Check if variation is already in SAN format (contains moves like "Nf3", "O-O", "dxc6")
-                # UCI format only contains coordinates like "e2e4", "g1f3"
-                is_already_san = any(
-                    len(move) > 5 or  # UCI moves are max 5 chars (e2e4q for promotion)
-                    move in ["O-O", "O-O-O"] or  # Castling in SAN
-                    any(c in move for c in ['x', '+', '#', '='])  # SAN-specific characters
-                    for move in best_variation_uci.split()[:3]  # Check first 3 moves
-                )
-
-                if is_already_san:
-                    best_variation_san = best_variation_uci
-                else:
-                    best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
-                    if best_variation_san == best_variation_uci and len(best_variation_uci.split()[0]) == 4:
-                        print(f"DEBUG: Mistake variation conversion failed for '{best_variation_uci[:50]}...' in prev position {prev_position_fen[:30]}...")
+                # Convert variation to SAN (handles both UCI and already-SAN gracefully)
+                best_variation_san = self.convert_uci_variation_to_san(prev_position_fen, best_variation_uci)
 
             mistakes.append({
                 "move_number": move_number,

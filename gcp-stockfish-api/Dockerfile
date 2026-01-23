@@ -26,7 +26,7 @@ COPY stockfish_api.py .
 # Set environment variables
 ENV PORT=8080
 ENV HOST=0.0.0.0
-ENV WORKERS=8
+ENV WORKERS=2
 
 # Expose port
 EXPOSE 8080
@@ -36,4 +36,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 # Run with Gunicorn for production
-CMD exec gunicorn --bind :$PORT --workers $WORKERS --timeout 300 --worker-class sync stockfish_api:app
+# Using gthread worker for concurrent request handling
+# 2 workers × 4 threads = 8 concurrent handlers per instance
+# 2 workers × 4 engines/worker = 8 total engines (matches 8 CPU cores)
+# Scale horizontally with multiple instances for higher throughput
+CMD exec gunicorn --bind :$PORT --workers $WORKERS --threads 4 --timeout 60 --worker-class gthread stockfish_api:app

@@ -16,6 +16,8 @@ urlpatterns = [
     # API endpoints for fetching games
     path('chess-com/fetch-games/<str:username>/', views.fetch_chess_com_games, name='fetch_chess_com_games'),
     path('fetch-games/<str:username>/', views.fetch_lichess_games, name='fetch_lichess_games'),
+    # Unified task status endpoint (works for both Chess.com and Lichess)
+    path('task-status/<str:task_id>/', views.check_task_status, name='check_task_status'),
     # Report generation and viewing
     path('chess-com/report/<str:username>/<int:dataset_id>/', views.generate_chess_com_analysis_report, name='chess_com_generate_report_legacy'),
     path('report/<str:username>/<int:dataset_id>/', views.generate_analysis_report, name='generate_report'),
@@ -33,4 +35,7 @@ urlpatterns = [
     path('api/daily-puzzle/', views.daily_puzzle_api, name='daily_puzzle_api'),
     path('api/solved-blunders/<int:report_id>/', views.get_solved_blunders, name='get_solved_blunders'),
     path('api/mark-blunder-solved/<int:report_id>/', views.mark_blunder_solved, name='mark_blunder_solved'),
+    path('api/solved-puzzles/<int:report_id>/', views.get_solved_puzzles, name='get_solved_puzzles'),
+    path('api/mark-puzzle-solved/<int:report_id>/', views.mark_puzzle_solved, name='mark_puzzle_solved'),
+    path('api/store-elo-data/<int:dataset_id>/', views.store_elo_chart_data, name='store_elo_chart_data'),
 ]

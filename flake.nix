@@ -57,8 +57,14 @@
 		pycountry
 		pytz
 		zstandard
+		celery
+		redis
+		django-celery-results
               #  matplotlib
               ]))
+
+	      # Add Redis server for Celery broker
+	      pkgs.redis
             ];
 
             # ENVIRONMENT_VARIABLE_EXAMPLE = "${pkgs.hello-nix}";
@@ -74,6 +80,7 @@
 	      echo python manage.py runserver to start Django server
               echo pg_ctl start to start database
 	      echo npm run build to rebuild javascript
+              echo Start all services for development Redis, Celery workers, Django with ./start_dev
             '';
           };
         };

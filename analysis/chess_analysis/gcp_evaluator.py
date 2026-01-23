@@ -40,8 +40,8 @@ class GCPStockfishClient:
         # Get authentication token
         self.auth_token = self._get_auth_token()
 
-        # Timeouts and retries (increased for memory-optimized API)
-        self.timeout = 600  # 10 minutes for large batches (doubled due to memory optimizations)
+        # Timeouts and retries (optimized for fast responses)
+        self.timeout = 60  # 1 minute for smaller batches
         self.max_retries = 3
 
         logger.info(f"Initialized GCP Stockfish client for {self.base_url}")
@@ -148,8 +148,8 @@ class GCPStockfishClient:
         if not positions:
             return {}
 
-        if len(positions) > 1000:
-            raise ValueError(f"Too many positions: {len(positions)} (max 1000)")
+        if len(positions) > 80:
+            raise ValueError(f"Too many positions: {len(positions)} (max 80)")
 
         payload = {
             "positions": positions,
@@ -251,8 +251,8 @@ class GCPStockfishClient:
     def evaluate_positions_chunked(
         self,
         positions: List[str],
-        depth: int = 20,
-        chunk_size: int = 500
+        depth: int = 12,
+        chunk_size: int = 80
     ) -> Dict[str, Dict]:
         """
         Evaluate positions in chunks for very large batches
@@ -300,16 +300,19 @@ class GCPStockfishClient:
     def evaluate_positions_parallel_streaming(
         self,
         positions: List[str],
-        depth: int = 20,
-        max_concurrent: int = 20
+        depth: int = 12,
+        max_concurrent: int = 150
     ):
         """
-        Generator that evaluates positions in parallel and yields individual completions
+        Generator that evaluates positions using optimal batching for maximum speed
+
+        Strategy: Send concurrent batch requests to maximize throughput while respecting
+        GCP resource limits. Each batch is 400 positions (optimal for 8-16 CPU instance).
 
         Args:
             positions: List of FEN strings to evaluate
             depth: Stockfish search depth
-            max_concurrent: Maximum number of concurrent requests
+            max_concurrent: Maximum number of concurrent batch requests (default 20)
 
         Yields:
             Individual position completions and progress updates
@@ -332,77 +335,96 @@ class GCPStockfishClient:
             yield {"type": "complete", "results": result}
             return
 
-        logger.info(f"Parallel streaming evaluation of {len(positions)} positions with max {max_concurrent} concurrent requests")
+        # Optimal batch size: 80 positions
+        # - Small enough to complete quickly (avoid timeouts, ~12s per batch)
+        # - Large enough to minimize HTTP overhead
+        # - Matches concurrency limit per instance (8 CPUs × 10 instances = 80 total)
+        OPTIMAL_BATCH_SIZE = 80
+
+        # Calculate number of batches
+        num_batches = (len(positions) + OPTIMAL_BATCH_SIZE - 1) // OPTIMAL_BATCH_SIZE
+
+        logger.info(f"Smart batching: {len(positions)} positions in {num_batches} batches of ~{OPTIMAL_BATCH_SIZE}, {max_concurrent} concurrent requests")
 
         import concurrent.futures
 
         start_time = time.time()
         all_results = {}
+        completed = 0
 
-        # Use ThreadPoolExecutor for concurrent HTTP requests
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent) as executor:
-            # Submit all positions as individual requests
-            future_to_position = {
-                executor.submit(self.evaluate_single_position_async, position, depth): position
-                for position in positions
+        # Create batches
+        position_batches = []
+        for i in range(0, len(positions), OPTIMAL_BATCH_SIZE):
+            batch = positions[i:i + OPTIMAL_BATCH_SIZE]
+            position_batches.append(batch)
+
+        # Submit all batches concurrently (each batch = 1 HTTP request)
+        # max_concurrent limits how many batches are in-flight at once
+        # Use larger pool to maximize parallelism with 32 CPU backend
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(max_concurrent, num_batches)) as executor:
+            future_to_batch = {
+                executor.submit(self.evaluate_positions_batch, batch, depth): batch
+                for batch in position_batches
             }
 
-            completed = 0
-            for future in concurrent.futures.as_completed(future_to_position):
-                position = future_to_position[future]
+            # Process batches as they complete
+            for future in concurrent.futures.as_completed(future_to_batch):
+                batch = future_to_batch[future]
                 try:
-                    result = future.result()
-                    if position in result:
-                        position_result = result[position]
-                        all_results[position] = position_result
+                    batch_results = future.result()
 
-                        # Yield individual position completion immediately
-                        yield {
-                            "type": "position_complete",
-                            "position": position,
-                            "result": position_result,
-                            "completed_count": completed + 1
-                        }
-                    else:
-                        error_result = {"error": "Position not found in response"}
+                    # Yield individual position completions from this batch
+                    for position in batch:
+                        if position in batch_results:
+                            position_result = batch_results[position]
+                            all_results[position] = position_result
+
+                            completed += 1
+
+                            # Yield individual position completion
+                            yield {
+                                "type": "position_complete",
+                                "position": position,
+                                "result": position_result,
+                                "completed_count": completed
+                            }
+
+                            # Yield progress update
+                            yield {
+                                "type": "progress",
+                                "completed": completed,
+                                "total": len(positions)
+                            }
+
+                    logger.info(f"Batch complete: {len(batch)} positions - Total: {completed}/{len(positions)}")
+
+                except Exception as e:
+                    logger.error(f"Batch evaluation failed for {len(batch)} positions: {e}")
+                    # Mark all positions in failed batch as errors
+                    for position in batch:
+                        error_result = {"error": f"Batch evaluation failed: {str(e)}"}
                         all_results[position] = error_result
+                        completed += 1
 
                         yield {
                             "type": "position_complete",
                             "position": position,
                             "result": error_result,
-                            "completed_count": completed + 1
+                            "completed_count": completed
                         }
 
-                except Exception as e:
-                    logger.error(f"Parallel evaluation failed for {position}: {e}")
-                    error_result = {"error": f"Evaluation failed: {str(e)}"}
-                    all_results[position] = error_result
-
-                    yield {
-                        "type": "position_complete",
-                        "position": position,
-                        "result": error_result,
-                        "completed_count": completed + 1
-                    }
-
-                completed += 1
-
-                # Yield progress update for every completed evaluation
-                yield {
-                    "type": "progress",
-                    "completed": completed,
-                    "total": len(positions)
-                }
-
-                if completed % 10 == 0 or completed == len(positions):
-                    logger.info(f"Parallel evaluation progress: {completed}/{len(positions)}")
+                        yield {
+                            "type": "progress",
+                            "completed": completed,
+                            "total": len(positions)
+                        }
 
         elapsed = time.time() - start_time
         success_count = len([r for r in all_results.values() if "error" not in r])
 
-        logger.info(f"Parallel evaluation complete in {elapsed:.2f}s - {success_count}/{len(positions)} successful")
-        print(f"🚀 PARALLEL: {len(positions)} positions in {elapsed:.2f}s ({elapsed/len(positions):.2f}s per position)")
+        logger.info(f"Smart batching complete in {elapsed:.2f}s - {success_count}/{len(positions)} successful")
+        logger.info(f"Performance: {num_batches} HTTP requests (was {len(positions)}), {elapsed/len(positions):.3f}s per position")
+        print(f"🚀 SMART BATCHING: {len(positions)} positions in {elapsed:.2f}s using {num_batches} batches ({elapsed/len(positions):.3f}s per position)")
 
         yield {"type": "complete", "results": all_results}
 
@@ -417,7 +439,7 @@ def get_gcp_client() -> GCPStockfishClient:
         _gcp_client = GCPStockfishClient()
     return _gcp_client
 
-def evaluate_positions(positions: List[str], depth: int = 20) -> Dict[str, Dict]:
+def evaluate_positions(positions: List[str], depth: int = 12) -> Dict[str, Dict]:
     """
     Convenience function for position evaluation
 

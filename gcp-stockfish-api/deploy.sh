@@ -25,11 +25,11 @@ gcloud run deploy $SERVICE_NAME \
   --project=$PROJECT_ID \
   --memory 8Gi \
   --cpu 8 \
-  --min-instances 0 \
+  --min-instances 1 \
   --max-instances 12 \
-  --concurrency 1000 \
-  --timeout 120s \
-  --set-env-vars DEFAULT_STOCKFISH_DEPTH=20 \
+  --concurrency 80 \
+  --timeout 60s \
+  --set-env-vars DEFAULT_STOCKFISH_DEPTH=12,WORKERS=2 \
   --no-allow-unauthenticated
 
 # Get the service URL

@@ -145,7 +145,13 @@ class PuzzleFinder:
         """
         self.principles_analysis = principles_analysis
         self.target_puzzle_count = target_puzzle_count
-        self.principles = principles_analysis.get("principles", {})
+
+        # Use aggregated principles data (averaged across all time controls)
+        if "aggregated" in principles_analysis:
+            self.principles = principles_analysis["aggregated"].get("principles", {})
+        else:
+            # Fallback for old format
+            self.principles = principles_analysis.get("principles", {})
 
     def calculate_theme_weights(self) -> Dict[str, int]:
         """
@@ -316,6 +322,15 @@ class PuzzleFinder:
         rating_max = min(3000, user_rating + 400)
 
         theme_counts = self.calculate_theme_weights()
+
+        # Create reverse mapping: theme -> principles
+        theme_to_principles = {}
+        for principle, themes in self.PRINCIPLE_THEME_MAPPING.items():
+            for theme in themes:
+                if theme not in theme_to_principles:
+                    theme_to_principles[theme] = []
+                theme_to_principles[theme].append(principle)
+
         all_puzzles = []
 
         for theme, target_count in theme_counts.items():
@@ -343,6 +358,16 @@ class PuzzleFinder:
                 'game_url',
                 'opening_tags'
             ))
+
+            # Add principle field to each puzzle
+            principles_for_theme = theme_to_principles.get(theme, [])
+            for puzzle in puzzle_list:
+                # Store all principles that this puzzle's themes match
+                puzzle['principles'] = list(set(
+                    principle
+                    for puzzle_theme in puzzle['themes'].split()
+                    for principle in theme_to_principles.get(puzzle_theme, [])
+                ))
 
             # Take only what we need
             all_puzzles.extend(puzzle_list[:target_count])

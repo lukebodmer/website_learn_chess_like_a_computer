@@ -46,6 +46,10 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
     gameFilterManager.toggleSpeed(speed)
   }
 
+  const handleSpeedDoubleClick = (speed: string) => {
+    gameFilterManager.setSingleSpeed(speed)
+  }
+
   const handleSpeedAllClick = () => {
     gameFilterManager.setSpeedFilter('all')
   }
@@ -173,6 +177,7 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
               <button
                 key={speed}
                 onClick={() => handleSpeedToggle(speed)}
+                onDoubleClick={() => handleSpeedDoubleClick(speed)}
                 style={{
                   flex: '1',
                   padding: '10px 16px',

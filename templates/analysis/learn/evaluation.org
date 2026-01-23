@@ -1,0 +1,15 @@
+#+TITLE:  How do chess evaluations work?
+I've watched a lot of videos on youtube and read a lot of blog posts online that try to explain how chess evaluations work, but I haven't found anything that actually showed exactly what is happening with chess evaluations.
+
+There are X key aspects to a chess evaluation:
+1. A chess engine
+2. An evaluation
+3. A win percentage
+
+Once we understand these three areas, we'll be able to understand what a chess evaluation is actually telling us
+
+** The chess engine
+
+** The evaluation
+
+** The win percentage
