@@ -392,122 +392,6 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       boxShadow: '0 2px 6px var(--shadow-light)',
       minHeight: '700px'
     }}>
-      {/* AI Insights Section */}
-      <div
-        style={{
-          backgroundColor: 'var(--background-primary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '8px',
-          padding: '16px',
-          marginBottom: '20px',
-          minHeight: '100px',
-          cursor: llmInsights ? 'pointer' : 'default'
-        }}
-        onClick={() => {
-          if (llmInsights) setInsightsExpanded(!insightsExpanded);
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '12px'
-          }}
-        >
-          <h4 style={{
-            margin: 0,
-            fontSize: '16px',
-            fontWeight: '600',
-            color: 'var(--text-primary)'
-          }}>
-            AI Insights
-          </h4>
-          {llmInsights && (
-            <span style={{
-              fontSize: '16px',
-              color: 'var(--text-secondary)',
-              userSelect: 'none',
-              transform: insightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-              display: 'inline-block'
-            }}>
-              ▼
-            </span>
-          )}
-        </div>
-
-        {insightsLoading && (
-          <div style={{
-            fontSize: '14px',
-            color: 'var(--text-secondary)',
-            fontStyle: 'italic'
-          }}>
-            Generating insights...
-          </div>
-        )}
-
-        {insightsError && !insightsLoading && (
-          <div style={{
-            fontSize: '14px',
-            color: 'var(--danger-color)',
-            backgroundColor: 'rgba(220, 53, 69, 0.1)',
-            padding: '8px',
-            borderRadius: '4px'
-          }}>
-            {insightsError}
-          </div>
-        )}
-
-        {llmInsights && !insightsLoading && !insightsError && (
-          <div
-            style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
-              color: 'var(--text-primary)',
-              whiteSpace: 'pre-wrap',
-              maxHeight: insightsExpanded ? 'none' : '2.4em',
-              overflow: 'hidden',
-              position: 'relative',
-              transition: 'max-height 0.3s ease'
-            }}
-          >
-            <div
-              dangerouslySetInnerHTML={{
-                __html: llmInsights
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
-                  .replace(/\n/g, '<br />') // Line breaks
-              }}
-            />
-            {!insightsExpanded && (
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                background: 'linear-gradient(to right, transparent, var(--background-primary) 50%)',
-                width: '100px',
-                height: '100%',
-                pointerEvents: 'none'
-              }} />
-            )}
-          </div>
-        )}
-
-        {!insightsLoading && !insightsError && !llmInsights && (
-          <div style={{
-            fontSize: '14px',
-            color: 'var(--text-muted)',
-            fontStyle: 'italic',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60px'
-          }}>
-            Waiting for analysis to complete...
-          </div>
-        )}
-      </div>
-
       {/* Main Layout: List on Left, Board on Right */}
       <div style={{
         display: 'flex',
@@ -778,6 +662,122 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* AI Insights Section */}
+      <div
+        style={{
+          backgroundColor: 'var(--background-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '16px',
+          marginTop: '20px',
+          minHeight: '100px',
+          cursor: llmInsights ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (llmInsights) setInsightsExpanded(!insightsExpanded);
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px'
+          }}
+        >
+          <h4 style={{
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'var(--text-primary)'
+          }}>
+            Insights
+          </h4>
+          {llmInsights && (
+            <span style={{
+              fontSize: '16px',
+              color: 'var(--text-secondary)',
+              userSelect: 'none',
+              transform: insightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block'
+            }}>
+              ▼
+            </span>
+          )}
+        </div>
+
+        {insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            fontStyle: 'italic'
+          }}>
+            Generating insights...
+          </div>
+        )}
+
+        {insightsError && !insightsLoading && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--danger-color)',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            padding: '8px',
+            borderRadius: '4px'
+          }}>
+            {insightsError}
+          </div>
+        )}
+
+        {llmInsights && !insightsLoading && !insightsError && (
+          <div
+            style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: 'var(--text-primary)',
+              whiteSpace: 'pre-wrap',
+              maxHeight: insightsExpanded ? 'none' : '2.4em',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'max-height 0.3s ease'
+            }}
+          >
+            <div
+              dangerouslySetInnerHTML={{
+                __html: llmInsights
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
+                  .replace(/\n/g, '<br />') // Line breaks
+              }}
+            />
+            {!insightsExpanded && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                background: 'linear-gradient(to right, transparent, var(--background-primary) 50%)',
+                width: '100px',
+                height: '100%',
+                pointerEvents: 'none'
+              }} />
+            )}
+          </div>
+        )}
+
+        {!insightsLoading && !insightsError && !llmInsights && (
+          <div style={{
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60px'
+          }}>
+            Waiting for analysis to complete...
+          </div>
+        )}
       </div>
     </div>
   );

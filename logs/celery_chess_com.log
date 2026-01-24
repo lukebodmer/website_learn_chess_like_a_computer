@@ -35641,3 +35641,4 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-23 21:19:47,982: INFO/MainProcess] mingle: searching for neighbors
 [2026-01-23 21:19:48,987: INFO/MainProcess] mingle: all alone
 [2026-01-23 21:19:48,992: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-24 17:54:53,729: INFO/MainProcess] missed heartbeat from lichess_worker@nemo

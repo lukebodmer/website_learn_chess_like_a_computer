@@ -1672,7 +1672,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             fontWeight: '600',
             color: 'var(--text-primary)'
           }}>
-            AI Insights
+            Insights
           </h4>
           {llmInsights && (
             <span style={{
