@@ -1,0 +1,5622 @@
+{
+  "bullet": {
+    "Van't Kruijs Opening": {
+      "eco": "A00",
+      "sample_size": 954,
+      "number_of_times_played": 789,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/8/4P3/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "g6",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/8/4PQ2/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qxf7",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/8/4PQ2/PPPP1PPP/RNB1KBNR w KQkq - 0 3",
+          "move": "Qxf7",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qf3",
+          "count": 14
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/8/4P3/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "Nf6",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "f3",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.21,
+        "std": 1.12,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.51,
+        "std": 1.52,
+        "skew": 1.41
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.78,
+        "std": 0.99,
+        "skew": 1.8
+      }
+    },
+    "Scandinavian Defense": {
+      "eco": "B01",
+      "sample_size": 919,
+      "number_of_times_played": 781,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bc4",
+          "count": 21
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nc6",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/4p3/2N5/PPPP1PPP/R1BQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "f3",
+          "count": 36
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qh5",
+          "count": 35
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qf3",
+          "count": 32
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.0,
+        "std": 1.0,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.5,
+        "std": 1.42,
+        "skew": 1.09
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.79,
+        "std": 1.0,
+        "skew": 1.51
+      }
+    },
+    "Queen's Pawn Game": {
+      "eco": "A41",
+      "sample_size": 1000,
+      "number_of_times_played": 1005,
+      "top_3_blunders": [
+        {
+          "fen": "rn1qkbnr/ppp1pppp/8/3p4/3P2b1/4P3/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "f3",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp1p1pp/3p1p2/6B1/3P4/8/PPP1PPPP/RN1QKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Bg4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+          "move": "f6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkbnr/pp1ppppp/2p5/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "d5",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.99,
+        "skew": 1.24
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.16,
+        "std": 1.36,
+        "skew": 1.37
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 0.96,
+        "skew": 3.43
+      }
+    },
+    "Philidor Defense": {
+      "eco": "C41",
+      "sample_size": 575,
+      "number_of_times_played": 474,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nxe5",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/pp3ppp/3p4/2p1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 1 4",
+          "move": "b6",
+          "count": 3
+        },
+        {
+          "fen": "rn1qkbnr/ppp2ppp/3pb3/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4",
+          "move": "Nc3",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 3",
+          "move": "f6",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "f6",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/3p1p2/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "dxe5",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.87,
+        "skew": 1.48
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.2,
+        "skew": 1.48
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.54,
+        "std": 0.87,
+        "skew": 2.95
+      }
+    },
+    "Queen's Pawn Game: Accelerated London System": {
+      "eco": "D00",
+      "sample_size": 537,
+      "number_of_times_played": 457,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3P1B2/3BP3/PPP2PPP/RN1QK1NR b KQkq - 2 4",
+          "move": "Bf5",
+          "count": 3
+        },
+        {
+          "fen": "r2q1bnr/ppNkpppp/8/3p1b2/3n1B2/8/PPP1PPPP/R2QKBNR w KQ - 1 6",
+          "move": "Nxa8",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
+          "move": "Bg4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rn1qkbnr/ppp1pppp/8/3p1b2/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
+          "move": "e5",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/5p2/3pp3/3P1B2/4P3/PPP2PPP/RN1QKBNR w KQkq - 0 4",
+          "move": "Bg3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3P1B2/2P1P3/PP3PPP/RN1QKBNR b KQkq - 0 4",
+          "move": "e5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.56,
+        "std": 0.79,
+        "skew": 1.41
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.74,
+        "std": 0.96,
+        "skew": 1.35
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.83,
+        "skew": 2.54
+      }
+    },
+    "Scandinavian Defense: Mieses-Kotroc Variation": {
+      "eco": "B01",
+      "sample_size": 496,
+      "number_of_times_played": 415,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "b3",
+          "count": 7
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
+          "move": "Qc6",
+          "count": 5
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/2q5/8/8/2N5/PPPP1PPP/R1BQKBNR w KQkq - 2 4",
+          "move": "Nf3",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1kbnr/ppp1pppp/4q3/8/8/2N5/PPPPBPPP/R1BQK1NR b KQkq - 3 4",
+          "move": "Qg6",
+          "count": 5
+        },
+        {
+          "fen": "rn2kbnr/ppp1pppp/8/4q3/6b1/2N5/PPPPBPPP/R1BQK1NR w KQkq - 4 5",
+          "move": "Nf3",
+          "count": 3
+        },
+        {
+          "fen": "rnb1kbnr/pp2pppp/2p1q3/8/8/2N2N2/PPPPBPPP/R1BQK2R b KQkq - 1 5",
+          "move": "f6",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.93,
+        "skew": 1.21
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.17,
+        "std": 1.35,
+        "skew": 1.36
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.01,
+        "skew": 1.42
+      }
+    },
+    "Pirc Defense": {
+      "eco": "B00",
+      "sample_size": 517,
+      "number_of_times_played": 429,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/ppp1pp1p/3p1np1/6N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+          "move": "Bg7",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/7Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qf5",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kbnr/ppq2ppp/3pp3/3p4/2B1P3/5Q2/PPP2PPP/RNB1K1NR w KQkq - 0 6",
+          "move": "exd5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "g6",
+          "count": 13
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "e5",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.9,
+        "std": 0.91,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.24,
+        "std": 1.25,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.93,
+        "skew": 2.04
+      }
+    },
+    "Bishop's Opening": {
+      "eco": "C23",
+      "sample_size": 485,
+      "number_of_times_played": 406,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Nh3",
+          "count": 8
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "Bxf7",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "f6",
+          "count": 11
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "Qg5",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 1 3",
+          "move": "Be6",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.85,
+        "skew": 1.36
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.31,
+        "skew": 1.3
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.84,
+        "std": 1.03,
+        "skew": 1.75
+      }
+    },
+    "King's Pawn Game: Wayward Queen Attack": {
+      "eco": "C20",
+      "sample_size": 458,
+      "number_of_times_played": 383,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "g6",
+          "count": 32
+        },
+        {
+          "fen": "rnbqkbnr/pppp1p1p/6p1/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 0 3",
+          "move": "Qf3",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Qf3",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bb5",
+          "count": 13
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "Bc5",
+          "count": 11
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qf3",
+          "count": 8
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.49,
+        "std": 0.81,
+        "skew": 1.81
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.18,
+        "std": 1.31,
+        "skew": 1.23
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 0.94,
+        "skew": 1.24
+      }
+    },
+    "King's Pawn Game: Leonardis Variation": {
+      "eco": "C20",
+      "sample_size": 455,
+      "number_of_times_played": 381,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Qg5",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "Bg5",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n5/4p3/4n3/2NP1N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Bg5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2PP4/PP3PPP/RNBQKBNR w KQkq - 1 4",
+          "move": "f3",
+          "count": 3
+        },
+        {
+          "fen": "r1bq1rk1/p1pn1ppp/1p1p1n2/2b1p3/4P3/P2P2QP/1PP1BPP1/RNB1K1NR w KQ - 0 8",
+          "move": "Bg5",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/pbpn1ppp/1p1p1n2/2b1p1B1/4P3/P2P2QP/1PP1BPP1/RN2K1NR w KQ - 2 9",
+          "move": "Bh6",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.82,
+        "std": 0.99,
+        "skew": 1.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.09,
+        "std": 1.21,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.67,
+        "std": 0.89,
+        "skew": 1.43
+      }
+    },
+    "Englund Gambit": {
+      "eco": "A40",
+      "sample_size": 446,
+      "number_of_times_played": 361,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bf4",
+          "count": 16
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bg5",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nf6",
+          "count": 5
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "c4",
+          "count": 18
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "c3",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Nc3",
+          "count": 8
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.38,
+        "std": 1.08,
+        "skew": 0.68
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.46,
+        "std": 1.39,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.97,
+        "std": 1.16,
+        "skew": 1.57
+      }
+    },
+    "Caro-Kann Defense": {
+      "eco": "B10",
+      "sample_size": 472,
+      "number_of_times_played": 392,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/pp2pppp/5n2/3p4/8/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 2 5",
+          "move": "Nxd5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "d4",
+          "count": 14
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/8/2B1p3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ne5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.73,
+        "std": 0.92,
+        "skew": 1.24
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.17,
+        "std": 1.42,
+        "skew": 1.92
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.85,
+        "skew": 1.79
+      }
+    },
+    "Zukertort Opening: Tennison Gambit": {
+      "eco": "A06",
+      "sample_size": 363,
+      "number_of_times_played": 312,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/4p3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nd4",
+          "count": 18
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/4p3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nc3",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/4p3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "d3",
+          "count": 5
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Nf3",
+          "count": 181
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Nc6",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/6N1/4p3/8/PPPP1PPP/RNBQKB1R b KQkq - 1 3",
+          "move": "f5",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.59,
+        "std": 0.86,
+        "skew": 1.82
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.83,
+        "std": 1.31,
+        "skew": 1.17
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.13,
+        "std": 1.14,
+        "skew": 1.23
+      }
+    },
+    "French Defense: Knight Variation": {
+      "eco": "C00",
+      "sample_size": 347,
+      "number_of_times_played": 306,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/3n4/pppppppp/4P3/3P4/2NBBN2/PPP2PPP/R2QR1K1 w kq - 1 10",
+          "move": "exf6",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 11
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bb4",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "e5",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.02,
+        "std": 1.09,
+        "skew": 1.03
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.29,
+        "std": 1.38,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.85,
+        "skew": 1.68
+      }
+    },
+    "Modern Defense": {
+      "eco": "B06",
+      "sample_size": 357,
+      "number_of_times_played": 288,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk1nr/pp1pppbp/2p3p1/8/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 4",
+          "move": "Bb5",
+          "count": 2
+        },
+        {
+          "fen": "rnbq4/pp1p1kbp/3p2p1/4p3/4n3/8/PPPQ1PPP/RNB1K2R w KQ - 0 11",
+          "move": "Qf4",
+          "count": 1
+        },
+        {
+          "fen": "rnbq4/pp1p1k1p/3p1npb/4p3/8/8/PPPQ1PPP/RNB1K2R w KQ - 4 13",
+          "move": "Qd1",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqk2r/ppppppbp/5np1/8/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "Bc4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pppppp1p/5np1/8/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "g4",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.96,
+        "std": 1.02,
+        "skew": 1.14
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.23,
+        "std": 1.22,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.8,
+        "skew": 1.71
+      }
+    },
+    "Three Knights Opening": {
+      "eco": "C46",
+      "sample_size": 326,
+      "number_of_times_played": 270,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/4P3/2NPBN2/PPP2PPP/R2QKB1R b KQkq - 2 5",
+          "move": "Ng4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/3PP3/2N2N2/PPP2PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "Nf6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Nd4",
+          "count": 8
+        },
+        {
+          "fen": "r1bqkbnr/ppp3pp/2np1p2/4p3/3PP3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "d5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk1nr/pppp1ppp/2n5/2b5/3pP3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Nxd4",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.9,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.96,
+        "std": 1.1,
+        "skew": 1.08
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.45,
+        "std": 0.67,
+        "skew": 1.36
+      }
+    },
+    "King's Pawn Game: Napoleon Attack": {
+      "eco": "C20",
+      "sample_size": 326,
+      "number_of_times_played": 264,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Nh3",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 6
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Qb3",
+          "count": 5
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "f6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Nh3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.81,
+        "skew": 1.21
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.35,
+        "skew": 1.01
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.89,
+        "std": 1.1,
+        "skew": 2.02
+      }
+    },
+    "Horwitz Defense": {
+      "eco": "A40",
+      "sample_size": 309,
+      "number_of_times_played": 259,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bg5",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/4pq2/8/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq - 2 3",
+          "move": "Nf3",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/4pq2/8/3P1B2/5N2/PPP1PPPP/RN1QKB1R b KQkq - 3 3",
+          "move": "c5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 4
+        },
+        {
+          "fen": "rn1qk2r/pbpp2pp/1p1bpn2/5p2/2PP1P2/3BP3/PP4PP/RNBQK1NR w KQkq - 1 7",
+          "move": "e4",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 1.02,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.36,
+        "skew": 1.36
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.98,
+        "skew": 1.96
+      }
+    },
+    "Owen Defense": {
+      "eco": "B00",
+      "sample_size": 299,
+      "number_of_times_played": 250,
+      "top_3_blunders": [
+        {
+          "fen": "r2qkb1r/p1pp1ppp/1p2pn2/8/2QP1B2/5b2/PPP2PPP/RN2K2R w KQkq - 0 10",
+          "move": "Bxc7",
+          "count": 1
+        },
+        {
+          "fen": "rn1qk1nr/pb1pp1bp/1p4p1/5p2/2BpPP2/2N1BN2/PPP3PP/R2QK2R w KQkq - 0 8",
+          "move": "O-O",
+          "count": 1
+        },
+        {
+          "fen": "r2qkbnr/2pppppp/1p6/p3n3/2P1P3/2N2N2/P1PP1PPP/R1BQK2R w KQkq - 4 7",
+          "move": "d3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rn1qkbnr/p1pppppp/1p6/8/2B1b3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Nc3",
+          "count": 3
+        },
+        {
+          "fen": "rn1qkbnr/pbpppppp/1p6/4P3/8/8/PPPP1PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "e6",
+          "count": 2
+        },
+        {
+          "fen": "rn1qkbnr/pbpppppp/1p6/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "g3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.13,
+        "std": 1.1,
+        "skew": 1.15
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.34,
+        "std": 1.26,
+        "skew": 1.09
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 0.9,
+        "skew": 2.05
+      }
+    },
+    "Four Knights Game: Italian Variation": {
+      "eco": "C50",
+      "sample_size": 400,
+      "number_of_times_played": 342,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2n2n2/3Pp3/2B5/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 0 5",
+          "move": "Nxd5",
+          "count": 7
+        },
+        {
+          "fen": "r1bq1rk1/ppp1bpp1/2np1n1p/4p3/2B1P3/2NP1N1P/PPP2PP1/R1BQ1RK1 w - - 0 8",
+          "move": "Bxh6",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk2r/ppp2Npp/2np1n2/2b1p3/2B1P3/2N5/PPPP1PPP/R1BQK2R b KQkq - 0 6",
+          "move": "O-O",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p1N1/2B1P3/2N5/PPPP1PPP/R1BQK2R b KQkq - 7 5",
+          "move": "d6",
+          "count": 3
+        },
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQ1RK1 b kq - 7 5",
+          "move": "d5",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+          "move": "Ng4",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.84,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.79,
+        "std": 1.02,
+        "skew": 1.54
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.46,
+        "std": 0.8,
+        "skew": 2.16
+      }
+    },
+    "Scotch Game": {
+      "eco": "C44",
+      "sample_size": 308,
+      "number_of_times_played": 254,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n5/4P3/4n3/3B1N2/PPP2PPP/RNBQK2R b KQkq - 1 5",
+          "move": "Ng5",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/pppp2pp/2n5/4p3/4P3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 5",
+          "move": "Nxe5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/4P3/1b2P3/5N2/PPP2PPP/RNBQKB1R w KQkq - 1 5",
+          "move": "Bd2",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "f6",
+          "count": 16
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 14
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bb4",
+          "count": 7
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.0,
+        "std": 0.93,
+        "skew": 1.0
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.28,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.81,
+        "skew": 1.29
+      }
+    },
+    "Queen's Pawn Game: Chigorin Variation": {
+      "eco": "D00",
+      "sample_size": 544,
+      "number_of_times_played": 449,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P4/2N5/PPP1PPPP/R1BQKBNR w KQkq - 2 3",
+          "move": "Nxd5",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3P4/2N5/PPP1PPPP/R1BQKBNR w KQkq - 0 3",
+          "move": "Nxd5",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P4/2N2N2/PPP1PPPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Nxd4",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3P4/2N2N2/PPP1PPPP/R1BQKB1R w KQkq - 4 4",
+          "move": "e4",
+          "count": 6
+        },
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3PP3/2N2N2/PPP2PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "e5",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3P4/2N2N2/PPP1PPPP/R1BQKB1R w KQkq - 4 4",
+          "move": "Nxd5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.82,
+        "skew": 1.53
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.06,
+        "std": 1.34,
+        "skew": 1.46
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.79,
+        "skew": 1.69
+      }
+    },
+    "King's Pawn Game: Busch-Gass Gambit": {
+      "eco": "C40",
+      "sample_size": 280,
+      "number_of_times_played": 233,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1k1nr/pppp1ppp/5q2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+          "move": "g5",
+          "count": 4
+        },
+        {
+          "fen": "rnb1k1nr/pppp1ppp/5q2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+          "move": "Nh6",
+          "count": 3
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Nf6",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bc5",
+          "count": 142
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 40
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Nc3",
+          "count": 28
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.55,
+        "std": 0.74,
+        "skew": 1.37
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.34,
+        "std": 1.36,
+        "skew": 0.58
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.79,
+        "std": 0.9,
+        "skew": 1.36
+      }
+    },
+    "French Defense": {
+      "eco": "C00",
+      "sample_size": 274,
+      "number_of_times_played": 225,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4",
+          "move": "Bxd5",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 3",
+          "move": "Qf3",
+          "count": 2
+        },
+        {
+          "fen": "r2qkbnr/p1p2ppp/2p1b3/3p4/8/4Q3/PPPP1PPP/RNB1K1NR w KQkq - 2 7",
+          "move": "Nc3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "f3",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 3
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/4p3/8/1b2P1Q1/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "c3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.05,
+        "std": 1.05,
+        "skew": 1.21
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.6,
+        "std": 1.42,
+        "skew": 0.78
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.91,
+        "std": 1.12,
+        "skew": 1.79
+      }
+    },
+    "Mieses Opening": {
+      "eco": "A00",
+      "sample_size": 269,
+      "number_of_times_played": 222,
+      "top_3_blunders": [
+        {
+          "fen": "r2qk2r/ppp2ppp/2nb1n2/3p4/3P4/2N2Q1P/PPP2PP1/R1B1KB1R w KQkq - 1 9",
+          "move": "Bf4",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/pp3ppp/3pp3/3p4/3Q4/8/PPP1PPPP/RNB1KBNR w KQkq - 0 5",
+          "move": "Qxd5",
+          "count": 1
+        },
+        {
+          "fen": "rnb1kb1r/4qppp/p1p1p3/1p1p4/4NP2/3P2P1/PPP1PN1P/R1BQKB1R w KQkq - 1 10",
+          "move": "c3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r2qkb1r/ppp2ppp/2n2n2/3p4/3P4/2N2b1P/PPP2PP1/R1BQKB1R w KQkq - 0 8",
+          "move": "Qxf3",
+          "count": 1
+        },
+        {
+          "fen": "rnbqk2r/ppp1bppp/5n2/4p3/8/2P1B3/PP2PPPP/RN1QKBNR w KQkq - 0 6",
+          "move": "c4",
+          "count": 1
+        },
+        {
+          "fen": "rnb1k2r/ppp2ppp/8/2b1p3/2P1n3/4BP2/PP2P1PP/RN1K1BNR w kq - 1 9",
+          "move": "g4",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.91,
+        "std": 1.05,
+        "skew": 1.27
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.33,
+        "std": 1.53,
+        "skew": 1.64
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 0.92,
+        "skew": 1.39
+      }
+    },
+    "Petrov's Defense: Three Knights Game": {
+      "eco": "C42",
+      "sample_size": 246,
+      "number_of_times_played": 208,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk2r/pppp1ppp/3b1n2/4p3/3PP3/2N2N2/PPP2PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "O-O",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/pp3ppp/2p2n2/3pp3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+          "move": "d3",
+          "count": 1
+        },
+        {
+          "fen": "r1b2rk1/ppp3pp/2nq4/3p1p2/1b6/3B1N2/PPPPNPPP/R1BQR1K1 w - - 4 12",
+          "move": "Bxf5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Nxe4",
+          "count": 13
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "c6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "d4",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.82,
+        "std": 0.87,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.43,
+        "std": 1.22,
+        "skew": 0.85
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.65,
+        "std": 0.82,
+        "skew": 1.13
+      }
+    },
+    "Hungarian Opening": {
+      "eco": "A00",
+      "sample_size": 230,
+      "number_of_times_played": 193,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqk3/ppp5/2n4r/3ppp2/8/4P3/PPPP1P2/RNBQKBN1 w Qq - 0 12",
+          "move": "Nh3",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/ppp2ppp/1bn2n2/3p1b2/1P6/2PPP1P1/PB3PBP/RN1QK1NR w KQ - 1 11",
+          "move": "a4",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/1pp2ppp/1b3n2/p2pnb2/PP6/2PPP1P1/1B1N1PBP/R2QK1NR w KQ - 2 13",
+          "move": "f4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/6P1/PPPPPP1P/RNBQKBNR w KQkq - 0 2",
+          "move": "Bh3",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/6P1/PPPPPP1P/RNBQKBNR w KQkq - 0 2",
+          "move": "f4",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/3p4/8/8/6P1/PPPPPPBP/RNBQK1NR b KQkq - 1 2",
+          "move": "Bg4",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.98,
+        "std": 1.05,
+        "skew": 1.27
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.43,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.84,
+        "skew": 1.66
+      }
+    },
+    "King's Knight Opening": {
+      "eco": "C40",
+      "sample_size": 219,
+      "number_of_times_played": 185,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 10
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qg5",
+          "count": 8
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/8/4p1q1/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bb4",
+          "count": 37
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "g6",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "g5",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.85,
+        "std": 0.97,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.66,
+        "std": 1.46,
+        "skew": 0.68
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.04,
+        "skew": 1.46
+      }
+    },
+    "Indian Defense": {
+      "eco": "A45",
+      "sample_size": 211,
+      "number_of_times_played": 174,
+      "top_3_blunders": [
+        {
+          "fen": "r2qr1k1/ppp2pbp/5np1/7b/2PP4/B1NB1P2/P5PP/1R1Q1RK1 w - - 1 15",
+          "move": "g4",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk2r/ppp2ppp/2nb1n2/8/3Pp3/2PBP3/PP1NN1PP/R1BQK2R w KQkq - 0 9",
+          "move": "Nxe4",
+          "count": 1
+        },
+        {
+          "fen": "rnbq1rk1/ppppppbp/6p1/4P2n/3P1B2/2N5/PPP2PPP/R2QKBNR w KQ - 1 6",
+          "move": "g4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqr1k1/ppp2pbp/2n2np1/8/2PN4/B1NBP3/P4PPP/R2Q1RK1 w - - 1 12",
+          "move": "Rb1",
+          "count": 1
+        },
+        {
+          "fen": "r2qr1k1/ppp2pbp/5np1/8/2PP2b1/B1NB4/P4PPP/1R1Q1RK1 w - - 1 14",
+          "move": "f3",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/1pp2ppp/p1n1pn2/1B1p1b2/3P1P2/2P2N2/PP1N1PPP/R2Q1RK1 w - - 0 10",
+          "move": "Ba4",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.63,
+        "std": 0.84,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.92,
+        "std": 1.18,
+        "skew": 2.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.44,
+        "std": 0.68,
+        "skew": 1.61
+      }
+    },
+    "Queen's Pawn Game: Zukertort Variation": {
+      "eco": "D02",
+      "sample_size": 189,
+      "number_of_times_played": 166,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2pp1/4p2p/3p2N1/3P4/8/PPP1PPPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Nxe6",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/1p2p1pp/p1p2p2/8/2BP4/4PN2/PP3PPP/RNBQK2R w KQkq - 0 6",
+          "move": "Ne5",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk3/ppp2pbr/8/3p3p/8/4PQ2/PPP1BPPP/RNB2RK1 w q - 2 10",
+          "move": "Qxh5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 1 2",
+          "move": "e5",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 0 2",
+          "move": "e5",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 3",
+          "move": "g3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.92,
+        "skew": 1.3
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.24,
+        "std": 1.43,
+        "skew": 1.45
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.68,
+        "std": 1.04,
+        "skew": 2.47
+      }
+    },
+    "Sicilian Defense": {
+      "eco": "B20",
+      "sample_size": 251,
+      "number_of_times_played": 206,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/1p3ppp/p1npp3/8/1p2P3/P1NP1N2/2P2PPP/R1BQKB1R w KQkq - 0 7",
+          "move": "h3",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkb1r/pp2pppp/2n5/2pn4/8/2N2Q2/PPPP1PPP/R1B1KBNR w KQkq - 0 6",
+          "move": "Ne4",
+          "count": 1
+        },
+        {
+          "fen": "r1b1qrk1/pp3Np1/3bp2p/2pnNp1Q/8/8/PPPP1PPP/R1B1KB1R w KQ - 2 13",
+          "move": "Bc4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pp1ppppp/2n5/2p4Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "g6",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pp1ppppp/5n2/2p4Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qe5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pp1p1ppp/2n1p3/2p5/2P1P3/3P4/PP3PPP/RNBQKBNR w KQkq - 0 4",
+          "move": "b3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 1.13,
+        "skew": 0.97
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.24,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.78,
+        "skew": 2.2
+      }
+    },
+    "Vienna Game": {
+      "eco": "C25",
+      "sample_size": 195,
+      "number_of_times_played": 164,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/ppp1n1pp/3p4/3Np3/4P3/8/PPPP2PP/R1BQKBNR w KQkq - 0 6",
+          "move": "g4",
+          "count": 1
+        },
+        {
+          "fen": "r1b1kb1r/pppp1ppp/n4n2/3N3q/3QP3/5N2/PPP2PPP/R1B1KB1R w KQkq - 3 7",
+          "move": "h3",
+          "count": 1
+        },
+        {
+          "fen": "r1b1kb1r/pppp1ppp/5n2/3N3q/1n1QP3/5N1P/PPP2PP1/R1B1KB1R w KQkq - 1 8",
+          "move": "g4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+          "move": "f6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 6
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.77,
+        "std": 0.89,
+        "skew": 1.08
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.62,
+        "std": 1.39,
+        "skew": 1.0
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.72,
+        "std": 1.03,
+        "skew": 2.12
+      }
+    },
+    "Scandinavian Defense: Valencian Variation": {
+      "eco": "B01",
+      "sample_size": 183,
+      "number_of_times_played": 159,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/8/2B5/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 1 5",
+          "move": "Bg4",
+          "count": 3
+        },
+        {
+          "fen": "r2qkbnr/pp3ppp/2n5/R3p3/8/2N5/1PPP1PPP/2BQK1NR w Kkq - 0 9",
+          "move": "Nb5",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkb1r/pbp2pp1/1p2pn2/8/3P3p/2NBBN1P/PPP2PP1/R2Q1RK1 w kq - 0 10",
+          "move": "Nxh4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/3P4/2N5/PPP2PPP/R1BQKBNR b KQkq - 0 4",
+          "move": "Nc6",
+          "count": 6
+        },
+        {
+          "fen": "rn1qkb1r/ppp1pppp/5n2/8/2B3b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 6",
+          "move": "h3",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/8/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 4",
+          "move": "e5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.68,
+        "std": 0.82,
+        "skew": 1.18
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.03,
+        "std": 1.17,
+        "skew": 1.42
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.74,
+        "skew": 1.24
+      }
+    },
+    "King's Pawn Game: King's Head Opening": {
+      "eco": "C20",
+      "sample_size": 183,
+      "number_of_times_played": 158,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P1P1/5P2/PPPP3P/RNBQKBNR w KQkq - 1 4",
+          "move": "h3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5P2/PPPP2PP/RNBQKBNR w KQkq - 1 3",
+          "move": "g4",
+          "count": 2
+        },
+        {
+          "fen": "r3k1nr/bpp1qpp1/p1npb2p/8/2B1P3/5P2/PP2N1PP/RNBQK2R w KQkq - 2 12",
+          "move": "Nbc3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/5PP1/PPPP3P/RNBQKBNR w KQkq - 1 4",
+          "move": "f4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/8/4Pp2/6P1/PPPP3P/RNBQKBNR w KQkq - 0 5",
+          "move": "gxf4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2np1n2/4p3/4P3/2N2P2/PPPPN1PP/R1BQKB1R w KQkq - 0 5",
+          "move": "Nd5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.6,
+        "std": 1.14,
+        "skew": 0.39
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.78,
+        "std": 1.51,
+        "skew": 1.18
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.81,
+        "std": 1.02,
+        "skew": 1.29
+      }
+    },
+    "Elephant Gambit": {
+      "eco": "C40",
+      "sample_size": 184,
+      "number_of_times_played": 151,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 6
+        },
+        {
+          "fen": "r1bqk1nr/pp1n1ppp/3p4/2b1p3/2B5/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 6",
+          "move": "Ng5",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/5p2/4N3/3Pp3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
+          "move": "Nc4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nc3",
+          "count": 10
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "e5",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Bb5",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.13,
+        "std": 0.89,
+        "skew": 0.56
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.47,
+        "std": 1.3,
+        "skew": 0.76
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 1.04,
+        "skew": 1.91
+      }
+    },
+    "King's Pawn Game: Damiano Defense": {
+      "eco": "C40",
+      "sample_size": 182,
+      "number_of_times_played": 151,
+      "top_3_blunders": [
+        {
+          "fen": "rnbq1bnr/pppp1kpp/8/4Q3/2B1P3/8/PPPP1PPP/RNB1K2R b KQ - 2 6",
+          "move": "Kg6",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pp4pp/2p2p2/3pp3/2BPP3/5N2/PPP2PPP/RNBQK2R w KQkq - 0 5",
+          "move": "Nc3",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/2pp2pp/p4p2/1p2p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+          "move": "d3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "f6",
+          "count": 95
+        },
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "fxe5",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/3p1p2/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "dxe5",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.01,
+        "std": 1.01,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.27,
+        "std": 1.51,
+        "skew": 0.64
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.59,
+        "std": 0.94,
+        "skew": 2.65
+      }
+    },
+    "Alekhine Defense": {
+      "eco": "B02",
+      "sample_size": 192,
+      "number_of_times_played": 161,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nh5",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "g6",
+          "count": 3
+        },
+        {
+          "fen": "rnbqk2r/pp1pbppp/4p3/2PpP3/3P4/5N2/PP3PPP/R1BQKB1R w KQkq - 2 9",
+          "move": "Bh6",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2",
+          "move": "f3",
+          "count": 12
+        },
+        {
+          "fen": "rnbqkb1r/pppppp1p/5np1/8/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2",
+          "move": "c3",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.9,
+        "std": 1.03,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.62,
+        "std": 1.36,
+        "skew": 0.72
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.88,
+        "std": 1.12,
+        "skew": 2.56
+      }
+    },
+    "Sicilian Defense: Old Sicilian": {
+      "eco": "B30",
+      "sample_size": 172,
+      "number_of_times_played": 148,
+      "top_3_blunders": [
+        {
+          "fen": "r2qk2r/1p1bnppp/p1n5/1Bp5/3p4/3P1N2/PPPN1PPP/R2Q1RK1 w kq - 0 11",
+          "move": "Qe1",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkbnr/pp1pp1pp/8/2p5/2BnN3/5N2/PPPP1PPP/R1BQK2R w KQkq - 1 6",
+          "move": "Nxc5",
+          "count": 1
+        },
+        {
+          "fen": "r2qkbnr/pp2pppp/3p4/2p5/3nPBb1/2NP1N2/PPP2PPP/R2QKB1R w KQkq - 3 6",
+          "move": "g3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/1p1ppppp/p1n5/2p5/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pp1ppp1p/2n3p1/2p5/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pp1p1p1p/2n1p1p1/2p3N1/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+          "move": "O-O",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.69,
+        "std": 0.87,
+        "skew": 1.13
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.97,
+        "std": 1.33,
+        "skew": 1.66
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.41,
+        "std": 0.72,
+        "skew": 2.46
+      }
+    },
+    "Bishop's Opening: Berlin Defense": {
+      "eco": "C24",
+      "sample_size": 172,
+      "number_of_times_played": 141,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "Qh5",
+          "count": 5
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 3
+        },
+        {
+          "fen": "r1bq1rk1/ppp1bpp1/2np1n1p/4p3/2B1P3/2NPBQ2/PPP2PPP/2KR2NR w - - 2 8",
+          "move": "Bxf7",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "g4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "c3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/8/PPPPQPPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Bb3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.65,
+        "std": 0.86,
+        "skew": 1.61
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.16,
+        "std": 1.29,
+        "skew": 1.34
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.7,
+        "std": 0.92,
+        "skew": 1.34
+      }
+    },
+    "King's Pawn Game: McConnell Defense": {
+      "eco": "C40",
+      "sample_size": 164,
+      "number_of_times_played": 138,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Nxe5",
+          "count": 3
+        },
+        {
+          "fen": "rnb1k1nr/pppp1ppp/5q2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+          "move": "Bxf7",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bc5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Bb4",
+          "count": 3
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "c6",
+          "count": 3
+        },
+        {
+          "fen": "rnb1kbnr/pp1p1ppp/2p2q2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 0 4",
+          "move": "Bc4",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.16,
+        "std": 0.86,
+        "skew": 0.41
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.26,
+        "std": 1.41,
+        "skew": 1.43
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.74,
+        "std": 0.85,
+        "skew": 1.0
+      }
+    },
+    "Petrov's Defense": {
+      "eco": "C42",
+      "sample_size": 167,
+      "number_of_times_played": 138,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Nxe4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/5n2/3pp3/4P3/3B1N1P/PPPP1PP1/RNBQK2R w KQkq - 0 5",
+          "move": "O-O",
+          "count": 1
+        },
+        {
+          "fen": "rnb2b1r/pp3kpp/5n2/3q4/8/8/PPPP1PPP/RNBQK2R w KQ - 0 9",
+          "move": "Qh5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bc5",
+          "count": 10
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "g4",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kb1r/ppppqppp/8/4N3/3Pn3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
+          "move": "Qe2",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 0.95,
+        "skew": 0.87
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.4,
+        "std": 1.35,
+        "skew": 1.11
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 1.09,
+        "skew": 1.91
+      }
+    },
+    "Mikenas Defense": {
+      "eco": "A40",
+      "sample_size": 166,
+      "number_of_times_played": 136,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nxd4",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/8/8/3n4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P4/2P5/PP2PPPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nxd4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 2 2",
+          "move": "Nxd4",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nxd4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 2 2",
+          "move": "e5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 0.9,
+        "skew": 0.93
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.33,
+        "skew": 0.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 0.97,
+        "skew": 1.35
+      }
+    },
+    "Englund Gambit Declined: Reversed French": {
+      "eco": "A40",
+      "sample_size": 170,
+      "number_of_times_played": 135,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4P3/8/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+          "move": "fxe5",
+          "count": 2
+        },
+        {
+          "fen": "rnb1k1nr/pp1p1ppp/5q2/2b5/8/2NB4/PP3PPP/RNBQK2R w KQkq - 1 8",
+          "move": "Be3",
+          "count": 1
+        },
+        {
+          "fen": "rnb1k1nr/p2p1ppp/1p3q2/2b5/8/2NBB3/PP3PPP/RN1QK2R w KQkq - 0 9",
+          "move": "Na4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/8/3p4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "c3",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/8/3Pp3/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Qg5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.61,
+        "std": 1.09,
+        "skew": 0.46
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.39,
+        "std": 1.39,
+        "skew": 1.15
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.03,
+        "skew": 1.28
+      }
+    },
+    "Bird Opening": {
+      "eco": "A02",
+      "sample_size": 156,
+      "number_of_times_played": 132,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqr1k1/p1pnppbp/1p1p1np1/8/3P1P2/2P1P1P1/PP1BN1BP/RN1QK2R w KQ - 0 9",
+          "move": "Na3",
+          "count": 1
+        },
+        {
+          "fen": "r2qkb1r/pp3ppp/2n1p2n/3pP3/3P1PP1/7P/PP5R/1RBQKBN1 w kq - 1 11",
+          "move": "Bb5",
+          "count": 1
+        },
+        {
+          "fen": "rnbq1rk1/ppppp1bp/6p1/5pP1/3P1n2/5N1P/PPP1P1B1/RNBQK2R w KQ - 0 8",
+          "move": "O-O",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pp1ppppp/8/2p5/5P2/8/PPPPP1PP/RNBQKBNR w KQkq - 0 2",
+          "move": "f5",
+          "count": 2
+        },
+        {
+          "fen": "rnbqk1nr/ppp2pp1/3pp3/8/5P1b/5N2/PPPPP1BP/RNBQ1RK1 w kq - 0 7",
+          "move": "Nxh4",
+          "count": 1
+        },
+        {
+          "fen": "rnb1k1nr/ppp2pp1/3pp3/8/5P1q/8/PPPPP1BP/RNBQ1RK1 w kq - 0 8",
+          "move": "Qe1",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.9,
+        "std": 0.99,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.63,
+        "std": 1.57,
+        "skew": 0.76
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.67,
+        "std": 1.01,
+        "skew": 2.43
+      }
+    },
+    "Nimzowitsch Defense": {
+      "eco": "B00",
+      "sample_size": 157,
+      "number_of_times_played": 132,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nf6",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nxd4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/8/4n3/4P1Q1/8/PPPP1PPP/RNB1KBNR w KQkq - 3 3",
+          "move": "Bc4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nf6",
+          "count": 8
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2",
+          "move": "Qh5",
+          "count": 6
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2",
+          "move": "Qg4",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 1.03,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.76,
+        "std": 1.42,
+        "skew": 0.58
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.96,
+        "std": 1.02,
+        "skew": 1.32
+      }
+    },
+    "Van Geet Opening": {
+      "eco": "A00",
+      "sample_size": 159,
+      "number_of_times_played": 132,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/2N5/PPPPPPPP/R1BQKBNR w KQkq - 0 2",
+          "move": "Nxd5",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/ppppp1pp/8/3n1p2/8/2N1PN2/PPPP1PPP/R1BQKB1R w KQkq - 1 4",
+          "move": "d3",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkb1r/p3p1pp/3p4/2B2p2/8/2PPPN2/P1P2PPP/R2QKB1R w KQkq - 0 9",
+          "move": "Bd4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/8/2N5/PPPPPPPP/R1BQKBNR w KQkq - 2 2",
+          "move": "Ne4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1",
+          "move": "Nh6",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/p1ppp1pp/8/1p3p2/8/2PPPN2/P1P2PPP/R1BQKB1R w KQkq - 0 6",
+          "move": "Ba3",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.09,
+        "std": 1.11,
+        "skew": 1.25
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.72,
+        "std": 1.35,
+        "skew": 0.67
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.88,
+        "std": 0.98,
+        "skew": 0.96
+      }
+    },
+    "King's Pawn Game: Wayward Queen Attack, Kiddie Countergambit": {
+      "eco": "C20",
+      "sample_size": 152,
+      "number_of_times_played": 130,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 3
+        },
+        {
+          "fen": "r1bqk2r/ppppbppp/2n2n2/4Q3/4P3/3P4/PPP2PPP/RNB1KBNR w KQkq - 1 5",
+          "move": "Qc3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk2r/ppppbppp/2n2n2/8/4P3/2QP4/PPP2PPP/RNB1KBNR b KQkq - 2 5",
+          "move": "d6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4Q3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3",
+          "move": "Qe7",
+          "count": 15
+        },
+        {
+          "fen": "rnbqk2r/ppppbppp/5n2/4Q3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 2 4",
+          "move": "d6",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 4 4",
+          "move": "Bc4",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.84,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.82,
+        "std": 1.5,
+        "skew": 1.28
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.99,
+        "std": 1.14,
+        "skew": 1.46
+      }
+    },
+    "Sicilian Defense: Bowdler Attack": {
+      "eco": "B20",
+      "sample_size": 152,
+      "number_of_times_played": 130,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pp1ppppp/3n4/2p5/2B5/N4Q2/PPPP1PPP/R1B1K1NR w KQkq - 2 5",
+          "move": "Qxf7",
+          "count": 1
+        },
+        {
+          "fen": "r2qkbnr/1b1p1ppp/p3p3/8/3nPB2/3P1Q2/PP2NPPP/RN3RK1 w kq - 1 11",
+          "move": "Rd1",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkbnr/pp3ppp/4p3/2pp4/2BnP3/2Q5/PPP2PPP/RNB1K1NR w KQkq - 0 6",
+          "move": "Qb4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/pp1ppppp/2n2n2/2p5/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pp1p1ppp/2n1p3/2p4Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 4",
+          "move": "f4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pp1ppppp/2n5/2p4Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "g6",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.85,
+        "std": 0.91,
+        "skew": 0.67
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.1,
+        "std": 1.16,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.83,
+        "skew": 1.73
+      }
+    },
+    "Center Game": {
+      "eco": "C20",
+      "sample_size": 205,
+      "number_of_times_played": 172,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4P3/4P3/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+          "move": "fxe5",
+          "count": 7
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Bc5",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4P3/4n3/8/PPP2PPP/RNBQKBNR w KQkq - 0 4",
+          "move": "f3",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nf6",
+          "count": 20
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "f6",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Bb4",
+          "count": 12
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.56,
+        "std": 0.81,
+        "skew": 1.58
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.99,
+        "std": 1.53,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.89,
+        "std": 1.02,
+        "skew": 1.53
+      }
+    },
+    "Petrov's Defense: Italian Variation": {
+      "eco": "C42",
+      "sample_size": 153,
+      "number_of_times_played": 126,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4p3/2B1n3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "O-O",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/2B1n3/8/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+          "move": "d6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "Bc5",
+          "count": 23
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/3p1n2/4p1N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+          "move": "Be6",
+          "count": 5
+        },
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+          "move": "Nc3",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.05,
+        "std": 0.83,
+        "skew": 0.26
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.92,
+        "std": 1.3,
+        "skew": 0.62
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.11,
+        "std": 1.23,
+        "skew": 1.44
+      }
+    },
+    "Nimzo-Larsen Attack: Modern Variation": {
+      "eco": "A01",
+      "sample_size": 152,
+      "number_of_times_played": 124,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/pppp1ppp/8/4B3/5q2/1P3N2/P1PPPPPP/RN1QKB1R b KQkq - 0 4",
+          "move": "Qxe5",
+          "count": 2
+        },
+        {
+          "fen": "2kr1b1r/ppp1qp1p/2np2p1/4p3/4P3/1PNP1b2/PBP1BP2/R2Q1RK1 w - - 0 13",
+          "move": "Nd5",
+          "count": 1
+        },
+        {
+          "fen": "r2qkbnr/pppb1ppp/8/3p4/3np3/1P2P3/PBPPBPPP/RN1QK2R w KQkq - 0 7",
+          "move": "c3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1k1nr/pppp1ppp/8/2b1B3/7q/1P6/P1PPPPPP/RN1QKBNR w KQkq - 1 4",
+          "move": "g3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p3/8/1P5P/PBPPPPP1/RN1QKBNR w KQkq - 0 4",
+          "move": "g4",
+          "count": 2
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/8/1P3N2/PBPPPPPP/RN1QKB1R b KQkq - 3 3",
+          "move": "Bc5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.03,
+        "std": 1.12,
+        "skew": 1.06
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.4,
+        "std": 1.37,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.48,
+        "std": 0.69,
+        "skew": 1.34
+      }
+    },
+    "King's Knight Opening: Normal Variation": {
+      "eco": "C44",
+      "sample_size": 149,
+      "number_of_times_played": 123,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Ng5",
+          "count": 5
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p1N1/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 3 3",
+          "move": "h6",
+          "count": 2
+        },
+        {
+          "fen": "r1b1kb1r/pppp1pp1/2n4p/2qNp3/2P1P1n1/3P1N2/PP1B1PPP/R2QKB1R w KQkq - 3 10",
+          "move": "Rb1",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Nd4",
+          "count": 2
+        },
+        {
+          "fen": "r1bq1rk1/ppp2ppp/1bnp1n2/4p3/4P3/3PBN2/PPPNQPPP/2KR1B1R w - - 0 8",
+          "move": "Ng5",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/ppp2pp1/1bn2n1p/4p3/4P3/3PB2N/bPPNQ1PP/2KR1B1R w - - 0 12",
+          "move": "Bxb6",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.66,
+        "std": 0.82,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.11,
+        "std": 1.39,
+        "skew": 2.11
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.68,
+        "std": 0.87,
+        "skew": 1.46
+      }
+    },
+    "Blackmar-Diemer Gambit": {
+      "eco": "D00",
+      "sample_size": 155,
+      "number_of_times_played": 121,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Bg4",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/3Pp3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/8/3Pp3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Qg4",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "d4",
+          "count": 32
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nf6",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/5n2/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+          "move": "Ne4",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.9,
+        "skew": 1.27
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.73,
+        "std": 1.43,
+        "skew": 0.69
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.05,
+        "skew": 1.43
+      }
+    },
+    "Italian Game: Paris Defense": {
+      "eco": "C50",
+      "sample_size": 139,
+      "number_of_times_played": 114,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Nxe5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqk1nr/ppp1bpp1/3p3p/8/2BQP3/8/PPP2PPP/RNB2RK1 w kq - 1 8",
+          "move": "Bf4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1b1kbnr/ppp2ppp/2np4/4p1q1/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+          "move": "Qf3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2np1n2/4p1N1/2B1P3/3P4/PPP2PPP/RNBQK2R b KQkq - 2 5",
+          "move": "Be6",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p1N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+          "move": "d5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.48,
+        "std": 0.65,
+        "skew": 1.17
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.78,
+        "std": 0.87,
+        "skew": 0.97
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.69,
+        "std": 0.82,
+        "skew": 1.25
+      }
+    },
+    "Four Knights Game": {
+      "eco": "C47",
+      "sample_size": 134,
+      "number_of_times_played": 112,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1pp1/2n2n1p/4p1N1/4P3/2N5/PPPP1PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Bc4",
+          "count": 1
+        },
+        {
+          "fen": "r1bq1rk1/ppp2ppp/2np4/2b1p3/N1B1P1n1/5N2/PPPP1PPP/R1BQK2R w KQ - 2 8",
+          "move": "Nxe5",
+          "count": 1
+        },
+        {
+          "fen": "r1b2rk1/ppp2ppp/3p1q2/1nb1n3/N3P2P/8/PPP1BPP1/R1BQK2R w KQ - 1 12",
+          "move": "Bg5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r2qk2r/ppp2pp1/2npbn1p/4p3/4P1P1/2NPPN1P/PPP5/R2QKB1R w KQkq - 0 9",
+          "move": "a4",
+          "count": 1
+        },
+        {
+          "fen": "r1bq1rk1/ppp2ppp/2np1n2/2b1p1N1/N1B1P3/8/PPPP1PPP/R1BQK2R w KQ - 0 7",
+          "move": "Nf3",
+          "count": 1
+        },
+        {
+          "fen": "r1b2rk1/ppp2ppp/3p1q2/2b1n3/N2nP3/8/PPP1BPPP/R1BQK2R w KQ - 0 11",
+          "move": "h4",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.53,
+        "std": 0.72,
+        "skew": 1.22
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.81,
+        "std": 1.2,
+        "skew": 2.45
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.49,
+        "std": 0.73,
+        "skew": 1.49
+      }
+    },
+    "K\u00e1das Opening": {
+      "eco": "A00",
+      "sample_size": 134,
+      "number_of_times_played": 111,
+      "top_3_blunders": [
+        {
+          "fen": "rn1qkb1r/1pp2pp1/p3pn1p/P2p3b/R7/5P2/1PPPP1P1/RNBQKBN1 w Qkq - 0 8",
+          "move": "R4a2",
+          "count": 1
+        },
+        {
+          "fen": "rn1qk2r/ppp1b1pp/3p4/8/6bP/2N2N2/PPPPP3/R1BQK2R w KQkq - 4 10",
+          "move": "Nd4",
+          "count": 1
+        },
+        {
+          "fen": "rn1qk2r/pp2b1pp/3p4/2p5/3N2bP/2N5/PPPPP3/R1BQK2R w KQkq - 0 11",
+          "move": "Ndb5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/7P/8/PPPPPPP1/RNBQKBNR w KQkq - 0 2",
+          "move": "Rh3",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/7P/8/PPPPPPP1/RNBQKBNR w KQkq - 0 2",
+          "move": "g4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/6PP/8/PPPPPP2/RNBQKBNR w KQkq - 0 3",
+          "move": "f4",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.2,
+        "std": 1.1,
+        "skew": 1.02
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.11,
+        "std": 1.85,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.16,
+        "std": 1.35,
+        "skew": 1.68
+      }
+    },
+    "King's Pawn Game": {
+      "eco": "C20",
+      "sample_size": 178,
+      "number_of_times_played": 153,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P1Q1/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P1Q1/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "Nf6",
+          "count": 2
+        },
+        {
+          "fen": "r1b1k2r/pppp1ppp/2n2q2/2b1p3/4P1n1/2PP1PP1/PP4BP/RNBQK1NR w KQkq - 1 7",
+          "move": "Be3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+          "move": "b5",
+          "count": 31
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "g4",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/p1pppppp/8/1p6/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Nc3",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.09,
+        "std": 0.98,
+        "skew": 0.5
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.98,
+        "std": 1.71,
+        "skew": 0.68
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.95,
+        "std": 1.15,
+        "skew": 1.37
+      }
+    },
+    "Scotch Game: Lolli Variation": {
+      "eco": "C44",
+      "sample_size": 127,
+      "number_of_times_played": 106,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/8/4p3/3nP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Bb5",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk1nr/1pp1b2p/p2p4/1n2Q1B1/4P3/8/PPP2PPP/RN2K2R w KQkq - 0 11",
+          "move": "O-O",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkbnr/ppp2ppp/4p3/8/3Q4/8/PPP2PPP/RNB1KB1R w KQkq - 0 8",
+          "move": "Bh6",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/8/8/3QP3/8/PPP2PPP/RNB1KB1R b KQkq - 0 5",
+          "move": "Nf6",
+          "count": 15
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/8/8/3QP3/8/PPP2PPP/RNB1KB1R b KQkq - 0 5",
+          "move": "b6",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/8/4p3/3nP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.88,
+        "skew": 0.63
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.06,
+        "std": 1.04,
+        "skew": 0.59
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.4,
+        "std": 0.63,
+        "skew": 1.5
+      }
+    },
+    "French Defense: Exchange Variation": {
+      "eco": "C01",
+      "sample_size": 132,
+      "number_of_times_played": 105,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/ppp2ppp/4p3/3q4/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4",
+          "move": "Bh6",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkb1r/ppp1n1pp/5p2/3p2B1/3P4/2N5/PPP2PPP/R2QKBNR w KQkq - 0 6",
+          "move": "Nxd5",
+          "count": 1
+        },
+        {
+          "fen": "r1b1r1k1/2p2ppp/ppn1qn2/1B1pN3/3P4/P1B4P/1PP2PP1/R2Q1RK1 w - - 2 16",
+          "move": "Ba4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pp3ppp/8/2pp4/3P4/2N2N2/PPP2PPP/R1BQKB1R b KQkq - 1 5",
+          "move": "cxd4",
+          "count": 2
+        },
+        {
+          "fen": "rn2k2r/pppb1ppp/3b1n2/3p4/1PPP4/4P3/P5PP/RNB1KBNR w KQkq - 1 10",
+          "move": "cxd5",
+          "count": 1
+        },
+        {
+          "fen": "rn2k2r/pppb1ppp/3b4/3n4/1P1P4/4P3/P5PP/RNB1KBNR w KQkq - 0 11",
+          "move": "b5",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.69,
+        "std": 0.86,
+        "skew": 1.49
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.84,
+        "std": 1.12,
+        "skew": 1.51
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.58,
+        "std": 0.92,
+        "skew": 2.02
+      }
+    },
+    "English Defense": {
+      "eco": "A40",
+      "sample_size": 137,
+      "number_of_times_played": 103,
+      "top_3_blunders": [
+        {
+          "fen": "r2qk2r/pb1nbppp/1p2pn2/2pp4/3P1B2/1NPBPN2/PP3PPP/R2QK2R w KQkq - 0 9",
+          "move": "a3",
+          "count": 1
+        },
+        {
+          "fen": "rn1qk1nr/pbppp1b1/1p3pp1/1B4Bp/3PP3/2N2N2/PPP2PPP/R2QK2R w KQkq - 0 7",
+          "move": "Bxf6",
+          "count": 1
+        },
+        {
+          "fen": "rn1qk1nr/1b1pp3/2p2bp1/pp5p/3PP3/1BN2N2/PPP2PPP/R2Q1RK1 w kq - 0 11",
+          "move": "d5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rn1qkbnr/pbpp1ppp/1p2p3/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 1 4",
+          "move": "Be2",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkb1r/pbpp1ppp/1p2pn2/8/3PP3/8/PPP1BPPP/RNBQK1NR w KQkq - 3 5",
+          "move": "Nc3",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkb1r/pbpp1ppp/1p2p3/8/3Pn3/2N5/PPP1BPPP/R1BQK1NR w KQkq - 0 6",
+          "move": "Nh3",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.69,
+        "std": 1.29,
+        "skew": 0.92
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.28,
+        "std": 1.32,
+        "skew": 1.02
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.66,
+        "std": 0.95,
+        "skew": 1.56
+      }
+    },
+    "Grob Opening": {
+      "eco": "A00",
+      "sample_size": 123,
+      "number_of_times_played": 97,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqk2r/pppp2pp/2n2n2/2b1p3/8/2N5/PPPPPPBP/R1BQK1NR w KQkq - 2 6",
+          "move": "Bd5",
+          "count": 1
+        },
+        {
+          "fen": "r2q1rk1/ppp3pp/2np4/2bbp1N1/8/4P3/PPPP1P1P/R1BQK2R w KQ - 0 11",
+          "move": "e4",
+          "count": 1
+        },
+        {
+          "fen": "rnb1kb1r/ppp2pp1/3p3p/2q5/6RP/5N2/PPPPPP2/RNBQKB2 w Qkq - 0 8",
+          "move": "c3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "move": "g4",
+          "count": 68
+        },
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1",
+          "move": "Nf6",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/6P1/8/PPPPPPBP/RNBQK1NR w KQkq - 2 3",
+          "move": "h3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.17,
+        "std": 1.15,
+        "skew": 1.03
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.47,
+        "std": 1.62,
+        "skew": 0.99
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.93,
+        "std": 1.3,
+        "skew": 2.25
+      }
+    },
+    "Italian Game": {
+      "eco": "C50",
+      "sample_size": 111,
+      "number_of_times_played": 95,
+      "top_3_blunders": [
+        {
+          "fen": "r1bq1rk1/bpp2pp1/p1np3p/4P3/2BPn3/4BN2/PP3PPP/RN1QR1K1 w - - 1 12",
+          "move": "exd6",
+          "count": 1
+        },
+        {
+          "fen": "r3kbnr/ppp2ppp/4b3/8/2N5/3P4/PPP1QPqP/RNB1K2R w KQkq - 2 9",
+          "move": "Nd6",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2n5/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "c3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "f6",
+          "count": 14
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "d5",
+          "count": 8
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 3",
+          "move": "d5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 1.0,
+        "skew": 0.98
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.46,
+        "std": 1.43,
+        "skew": 1.1
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 0.83,
+        "skew": 1.16
+      }
+    },
+    "Saragossa Opening": {
+      "eco": "A00",
+      "sample_size": 114,
+      "number_of_times_played": 93,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqk2r/pp1p1ppp/2n2b2/8/8/8/PP2PPPP/RN1QKBNR w KQkq - 0 8",
+          "move": "Qd3",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkb1r/ppp2ppp/3p1n2/5b2/2P1p3/1P1P1N2/P3PPPP/RNBQKB1R w KQkq - 0 6",
+          "move": "e3",
+          "count": 1
+        },
+        {
+          "fen": "r2qkb1r/1ppb1ppp/p2p1n2/PP2pn2/R7/2P5/2NPPPPP/2BQKBNR w Kkq - 1 9",
+          "move": "b6",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bq1rk1/ppp2pbp/2n2np1/4p3/4p3/2PP1P2/PPN2NPP/R1BQKB1R w KQ - 0 9",
+          "move": "Nxe4",
+          "count": 1
+        },
+        {
+          "fen": "r1bq1rk1/ppp2pbp/2n3p1/4p3/4n3/2PP1P2/PPN3PP/R1BQKB1R w KQ - 0 10",
+          "move": "fxe4",
+          "count": 1
+        },
+        {
+          "fen": "rnbq1rk1/pp2npbp/2p1p1p1/3p4/1P6/2P1NN1P/P2PPPP1/R1BQKB1R w KQ - 0 8",
+          "move": "Nh2",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.25,
+        "std": 1.14,
+        "skew": 0.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.28,
+        "std": 1.59,
+        "skew": 2.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.68,
+        "std": 1.01,
+        "skew": 1.85
+      }
+    },
+    "Petrov's Defense: Damiano Variation": {
+      "eco": "C42",
+      "sample_size": 116,
+      "number_of_times_played": 92,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "f3",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPPQPPP/RNB1KB1R b KQkq - 1 4",
+          "move": "Nd6",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPPQPPP/RNB1KB1R b KQkq - 1 4",
+          "move": "Nf6",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Nxf7",
+          "count": 7
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Bc4",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkb1r/pppp1Npp/8/8/4n3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 4",
+          "move": "Kxf7",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.56,
+        "std": 0.73,
+        "skew": 1.29
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.13,
+        "std": 1.1,
+        "skew": 1.09
+      },
+      "opening_blunders_per_game": {
+        "mean": 1.18,
+        "std": 1.24,
+        "skew": 1.52
+      }
+    },
+    "Queen's Pawn Game: Modern Defense": {
+      "eco": "A40",
+      "sample_size": 101,
+      "number_of_times_played": 91,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk1nr/2p1ppbp/p2p2p1/1p6/2BP4/2N1PN2/PPP2PPP/R1BQK2R w KQkq - 0 6",
+          "move": "a4",
+          "count": 1
+        },
+        {
+          "fen": "rnbqk1nr/1pppppbp/p5p1/8/3P4/3Q4/PPP1PPPP/RNB1KBNR w KQkq - 0 4",
+          "move": "Qxa6",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk2r/ppp1ppbp/5np1/4n1B1/8/2P2N2/PP3PPP/RN1QKB1R w KQkq - 0 8",
+          "move": "Nxe5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1k1nr/pp2ppbp/2p3p1/3q4/3P4/3B4/PPP2PPP/RNBQK1NR w KQkq - 0 6",
+          "move": "Qf3",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk2r/ppppppbp/2n2np1/6B1/3P4/2P2N2/PP2PPPP/RN1QKB1R w KQkq - 3 5",
+          "move": "e4",
+          "count": 1
+        },
+        {
+          "fen": "r1bqk2r/ppp1ppbp/2np1np1/6B1/3PP3/2P2N2/PP3PPP/RN1QKB1R w KQkq - 0 6",
+          "move": "e5",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.8,
+        "std": 0.83,
+        "skew": 0.59
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.86,
+        "std": 1.15,
+        "skew": 1.48
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.27,
+        "std": 0.54,
+        "skew": 1.93
+      }
+    },
+    "Bishop's Opening: Boi Variation": {
+      "eco": "C23",
+      "sample_size": 108,
+      "number_of_times_played": 89,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1k1nr/pppp1ppp/5q2/2b1p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Qxf7",
+          "count": 4
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "g6",
+          "count": 2
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "Nh6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1k1nr/pppp1p1p/5p2/2b1p3/2B1P3/5N2/PPPP1PPP/RNB1K2R b KQkq - 1 5",
+          "move": "f5",
+          "count": 3
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "Bxf7",
+          "count": 2
+        },
+        {
+          "fen": "rnb1k1nr/pppp1ppp/5q2/2b1p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Nh3",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.44,
+        "std": 0.72,
+        "skew": 1.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.06,
+        "std": 1.22,
+        "skew": 1.16
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.88,
+        "std": 0.97,
+        "skew": 1.34
+      }
+    },
+    "Englund Gambit: Hartlaub-Charlick Gambit": {
+      "eco": "A40",
+      "sample_size": 101,
+      "number_of_times_played": 87,
+      "top_3_blunders": [
+        {
+          "fen": "2kr2nr/ppp1q1pp/2nb1p2/1B6/6bB/4PN2/PPP2PPP/RN1QK2R w KQ - 3 9",
+          "move": "O-O",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/pp4pp/3p4/5p2/8/4B3/PPP1PPPP/RN1QKBNR w KQkq - 0 5",
+          "move": "Bg5",
+          "count": 1
+        },
+        {
+          "fen": "r1bk1bnr/pp3ppp/3p4/3N4/1n6/5N2/PPP1PPPP/R2QKB1R w KQ - 2 9",
+          "move": "Nf6",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4P3/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 3",
+          "move": "f4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4P3/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 3",
+          "move": "c3",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/4p3/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Nxe5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.18,
+        "std": 1.16,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.96,
+        "std": 1.13,
+        "skew": 1.63
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.8,
+        "skew": 1.04
+      }
+    },
+    "Zukertort Opening: Lemberger Gambit": {
+      "eco": "A05",
+      "sample_size": 104,
+      "number_of_times_played": 87,
+      "top_3_blunders": [
+        {
+          "fen": "rn1qkb1r/ppp3pp/3ppn2/4p1N1/4P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 6",
+          "move": "Qg4",
+          "count": 1
+        },
+        {
+          "fen": "rn2kb1r/ppp1q1p1/3ppn1p/4p1N1/4P2Q/8/PPPP1PPP/RNB1K2R w KQkq - 0 8",
+          "move": "Nxe6",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkb1r/ppp3pp/3pp3/4N3/2B1p3/8/PPPP1PPP/R1BQK2R w KQkq - 0 7",
+          "move": "Nd3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 1 2",
+          "move": "Nf3",
+          "count": 46
+        },
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 2 2",
+          "move": "Nc6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkb1r/pppppppp/5n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 2 2",
+          "move": "g6",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.86,
+        "std": 1.01,
+        "skew": 1.45
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.02,
+        "std": 1.56,
+        "skew": 0.82
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.94,
+        "std": 1.0,
+        "skew": 1.28
+      }
+    },
+    "Caro-Kann Defense: Exchange Variation": {
+      "eco": "B13",
+      "sample_size": 104,
+      "number_of_times_played": 83,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/pp2pppp/2p5/4q3/3P4/2N5/PPP2PPP/R1BQKBNR w KQkq - 2 5",
+          "move": "Be2",
+          "count": 1
+        },
+        {
+          "fen": "N1b1qbnr/1p1k2pp/p1n5/3pPp2/5B2/8/PPP2PPP/R2QKBNR w KQ - 1 10",
+          "move": "Qf3",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/pp2p1pp/5p2/3p4/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 5",
+          "move": "Ng5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r2qkb1r/pp1b1p1p/2n3p1/1B1pP1Nn/8/2N5/PPP2PPP/R1BQ1RK1 w kq - 0 10",
+          "move": "g4",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkbnr/1p3ppp/p3p1b1/3pN3/3P2P1/2N4P/PPP2P2/R1BQKB1R w KQkq - 0 9",
+          "move": "Qf3",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkb1r/1p3pp1/p3pnp1/3p4/3P2P1/2N2Q1P/PPP2P2/R1B1KB1R w KQkq - 0 11",
+          "move": "Qe3",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.54,
+        "std": 0.95,
+        "skew": 2.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.84,
+        "std": 1.16,
+        "skew": 1.57
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.28,
+        "std": 0.55,
+        "skew": 1.83
+      }
+    },
+    "Ruy Lopez: Berlin Defense": {
+      "eco": "C65",
+      "sample_size": 100,
+      "number_of_times_played": 82,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2B2n2/4p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+          "move": "Nxe4",
+          "count": 2
+        },
+        {
+          "fen": "r2qr1k1/1pp2ppp/p1pb1n2/4N1B1/3PPPb1/2P5/PP4PP/RN1Q1RK1 w - - 1 12",
+          "move": "Qe1",
+          "count": 1
+        },
+        {
+          "fen": "r1bq1rk1/p1pp2pp/2pb4/8/4p3/3N4/PPPPQ1PP/RNB1K2R w KQ - 0 10",
+          "move": "Qxe4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2p5/4N3/4n3/8/PPPPQPPP/RNB1K2R b KQkq - 1 6",
+          "move": "Bf5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4",
+          "move": "d5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 5 4",
+          "move": "Bd6",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.64,
+        "std": 0.77,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.91,
+        "std": 1.01,
+        "skew": 0.94
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.75,
+        "skew": 1.06
+      }
+    },
+    "Caro-Kann Defense: Hillbilly Attack": {
+      "eco": "B10",
+      "sample_size": 102,
+      "number_of_times_played": 81,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/8/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4",
+          "move": "Bxd5",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 3",
+          "move": "Qf3",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 3",
+          "move": "Qh5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/pp2pppp/2n2n2/8/2P5/2N5/P1PP1PPP/R1BQK1NR w KQkq - 3 7",
+          "move": "d4",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkb1r/pp2pp1p/5np1/3Pn3/2P5/2N5/P1P2PPP/R1BQK1NR w KQkq - 1 9",
+          "move": "Bf4",
+          "count": 1
+        },
+        {
+          "fen": "r1bqkb1r/pp1npp1p/5np1/3P4/2P2B2/2N5/P1P2PPP/R2QK1NR w KQkq - 3 10",
+          "move": "Nf3",
+          "count": 1
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.98,
+        "std": 1.09,
+        "skew": 1.12
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.06,
+        "std": 1.19,
+        "skew": 1.68
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.68,
+        "std": 0.83,
+        "skew": 1.79
+      }
+    }
+  },
+  "blitz": {
+    "Scandinavian Defense": {
+      "eco": "B01",
+      "sample_size": 1000,
+      "number_of_times_played": 2532,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/4p3/3pPN2/8/PPPP1PPP/R1BQKBNR w KQkq - 0 5",
+          "move": "Nd5",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qg4",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bc4",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "f3",
+          "count": 50
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qh5",
+          "count": 32
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bb5",
+          "count": 20
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.27,
+        "std": 1.12,
+        "skew": 0.77
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.74,
+        "std": 1.52,
+        "skew": 0.91
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.75,
+        "std": 1.04,
+        "skew": 2.31
+      }
+    },
+    "Van't Kruijs Opening": {
+      "eco": "A00",
+      "sample_size": 1000,
+      "number_of_times_played": 2123,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qg4",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/8/4p3/4PN2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Ng5",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/5n2/8/2B5/4PQ2/PP1P1PPP/RNB1K1NR b KQkq - 0 4",
+          "move": "Be6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qf3",
+          "count": 17
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "g4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "f3",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.21,
+        "std": 1.09,
+        "skew": 0.85
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.6,
+        "std": 1.44,
+        "skew": 0.96
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.81,
+        "std": 1.04,
+        "skew": 1.82
+      }
+    },
+    "Queen's Pawn Game": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 3064,
+      "top_3_blunders": [
+        {
+          "fen": "r1b2rk1/pp1nbppp/2p1pn2/q1Pp4/B2P4/4PQ1N/PP3PPP/RNB1K2R w KQ - 5 9",
+          "move": "b4",
+          "count": 1
+        },
+        {
+          "fen": "r2qkb1r/ppp1pp2/3p1n1p/3P2p1/3nP1b1/6B1/PPPN1PPP/R1Q1KBNR w KQkq - 1 8",
+          "move": "c4",
+          "count": 1
+        },
+        {
+          "fen": "rnbqkbnr/pp5p/2p1p1p1/3p1p2/3P3P/2P1P3/PP1B1PP1/RN1QKBNR w KQkq - 0 6",
+          "move": "Qh5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+          "move": "f6",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/2PP4/4P3/PP3PPP/RNBQKBNR b KQkq - 0 3",
+          "move": "Nb4",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 1.02,
+        "skew": 1.05
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.22,
+        "std": 1.32,
+        "skew": 1.26
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.99,
+        "skew": 2.28
+      }
+    },
+    "Philidor Defense": {
+      "eco": "C41",
+      "sample_size": 1000,
+      "number_of_times_played": 1790,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Ng5",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nxe5",
+          "count": 2
+        },
+        {
+          "fen": "rn1qkbnr/ppp2ppp/3pb3/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4",
+          "move": "Nc3",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 3",
+          "move": "f6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 2",
+          "move": "e4",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/3p1p2/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "dxe5",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.74,
+        "std": 0.89,
+        "skew": 1.25
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.18,
+        "std": 1.22,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.52,
+        "std": 0.8,
+        "skew": 1.87
+      }
+    },
+    "King's Pawn Game: Wayward Queen Attack": {
+      "eco": "C20",
+      "sample_size": 1000,
+      "number_of_times_played": 1752,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "g6",
+          "count": 77
+        },
+        {
+          "fen": "r1bqkb1r/pppp1p1p/2n2np1/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 2 5",
+          "move": "Nh3",
+          "count": 6
+        },
+        {
+          "fen": "r1bqkb1r/pppp1p1p/2n2np1/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 2 5",
+          "move": "g4",
+          "count": 6
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bb5",
+          "count": 30
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "Bc5",
+          "count": 16
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "Nh6",
+          "count": 11
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.58,
+        "std": 0.82,
+        "skew": 1.7
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.38,
+        "skew": 1.23
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.84,
+        "std": 0.93,
+        "skew": 1.28
+      }
+    },
+    "Queen's Pawn Game: Accelerated London System": {
+      "eco": "D00",
+      "sample_size": 1000,
+      "number_of_times_played": 1720,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq - 2 3",
+          "move": "Bxc7",
+          "count": 2
+        },
+        {
+          "fen": "2rqkb1r/ppp1pppp/2n2n2/1N1p1b2/3P1B2/4P3/PPP2PPP/R2QKBNR w KQk - 5 6",
+          "move": "Nxa7",
+          "count": 2
+        },
+        {
+          "fen": "rn1qkbnr/ppp1pppp/8/3p1b2/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
+          "move": "Qd6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/ppp3pp/2n2p2/3pp3/3P1B2/3BP3/PPP2PPP/RN1QK1NR w KQkq - 0 5",
+          "move": "Bg3",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp3pp/8/3pp3/5B2/4P3/PPP2PPP/RN1QKBNR w KQkq - 0 5",
+          "move": "Bxe5",
+          "count": 2
+        },
+        {
+          "fen": "r2qkbnr/ppp1pppp/2n5/3p1b2/3P1B2/4P3/PPP2PPP/RN1QKBNR w KQkq - 1 4",
+          "move": "Qh5",
+          "count": 2
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.59,
+        "std": 0.83,
+        "skew": 1.48
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.81,
+        "std": 1.08,
+        "skew": 1.64
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.42,
+        "std": 0.75,
+        "skew": 2.39
+      }
+    },
+    "Pirc Defense": {
+      "eco": "B00",
+      "sample_size": 1000,
+      "number_of_times_played": 1509,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/3p4/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Bg4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pppp/3p4/1B6/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "Qd7",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp1pp1p/3p2p1/7Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 0 3",
+          "move": "Bb5",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 26
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "g6",
+          "count": 18
+        },
+        {
+          "fen": "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "e5",
+          "count": 15
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.98,
+        "std": 1.03,
+        "skew": 1.07
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.4,
+        "skew": 1.19
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.91,
+        "skew": 2.2
+      }
+    },
+    "King's Pawn Game: Leonardis Variation": {
+      "eco": "C20",
+      "sample_size": 1000,
+      "number_of_times_played": 1205,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 1 3",
+          "move": "Bg5",
+          "count": 2
+        },
+        {
+          "fen": "r1bqr1k1/ppp2ppp/8/2Q5/5n2/7P/PP1NNPP1/R1B1K2R w KQ - 1 14",
+          "move": "Ne4",
+          "count": 1
+        },
+        {
+          "fen": "rnbqk1nr/pp3ppp/8/2b1N3/3p4/2NP4/PPP2PPP/R1BQKB1R w KQkq - 0 7",
+          "move": "Nb5",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/4p3/4P3/2bP4/PP3PPP/RNBQKBNR w KQkq - 0 4",
+          "move": "bxc3",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2PP4/PP3PPP/RNBQKBNR w KQkq - 1 4",
+          "move": "f3",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "d4",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.98,
+        "std": 1.06,
+        "skew": 1.17
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.24,
+        "std": 1.29,
+        "skew": 1.12
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.64,
+        "std": 0.91,
+        "skew": 1.96
+      }
+    },
+    "Bishop's Opening": {
+      "eco": "C23",
+      "sample_size": 1000,
+      "number_of_times_played": 1202,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 15
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/8/4p3/2B1P2q/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "g3",
+          "count": 12
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Nh3",
+          "count": 10
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "f6",
+          "count": 22
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+          "move": "Bb4",
+          "count": 20
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/5q2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3",
+          "move": "Qf3",
+          "count": 7
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.73,
+        "std": 0.88,
+        "skew": 1.31
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.44,
+        "std": 1.36,
+        "skew": 0.96
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.92,
+        "std": 1.01,
+        "skew": 1.07
+      }
+    },
+    "Three Knights Opening": {
+      "eco": "C46",
+      "sample_size": 1000,
+      "number_of_times_played": 1071,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqk1nr/ppp2ppp/2np4/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+          "move": "Ng5",
+          "count": 5
+        },
+        {
+          "fen": "r1bqk1nr/ppp2ppp/2np4/2b1p1N1/2B1P3/2N5/PPPP1PPP/R1BQK2R b KQkq - 1 5",
+          "move": "Nh6",
+          "count": 2
+        },
+        {
+          "fen": "r1b1kbnr/pppp1ppp/2n2q2/3Np3/4P3/5N2/PPPP1PPP/R1BQKB1R b KQkq - 5 4",
+          "move": "Qf4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Nd4",
+          "count": 16
+        },
+        {
+          "fen": "r1bqk1nr/pppp1ppp/2n5/2b5/3pP3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Nxd4",
+          "count": 10
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/8/4p3/3nP3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "Nxd4",
+          "count": 6
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.75,
+        "std": 0.89,
+        "skew": 1.24
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.06,
+        "std": 1.15,
+        "skew": 1.08
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.45,
+        "std": 0.71,
+        "skew": 1.85
+      }
+    },
+    "Caro-Kann Defense": {
+      "eco": "B10",
+      "sample_size": 1000,
+      "number_of_times_played": 1271,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/8/3p4/8/2N5/PPPP1PPP/R1BQKBNR w KQkq - 0 4",
+          "move": "Nxd5",
+          "count": 6
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq - 0 3",
+          "move": "Bc4",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pp2p1pp/2p2p2/4N3/3Pp3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
+          "move": "Ng4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "d4",
+          "count": 12
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Nf3",
+          "count": 11
+        },
+        {
+          "fen": "rnbqkbnr/pp2pppp/2p5/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "c3",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.01,
+        "std": 1.06,
+        "skew": 0.96
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.34,
+        "skew": 1.39
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.5,
+        "std": 0.83,
+        "skew": 2.23
+      }
+    },
+    "Scandinavian Defense: Mieses-Kotroc Variation": {
+      "eco": "B01",
+      "sample_size": 1000,
+      "number_of_times_played": 1005,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "b3",
+          "count": 17
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
+          "move": "Qc6",
+          "count": 10
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/4q3/8/8/2N5/PPPPBPPP/R1BQK1NR b KQkq - 3 4",
+          "move": "Qc6",
+          "count": 8
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/4q3/8/2N5/PPPPQPPP/R1B1KBNR b KQkq - 3 4",
+          "move": "f6",
+          "count": 9
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Bd3",
+          "count": 7
+        },
+        {
+          "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "Be2",
+          "count": 7
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.84,
+        "std": 0.9,
+        "skew": 1.09
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.37,
+        "std": 1.38,
+        "skew": 1.08
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.77,
+        "std": 0.97,
+        "skew": 1.59
+      }
+    },
+    "Horwitz Defense": {
+      "eco": "A40",
+      "sample_size": 1000,
+      "number_of_times_played": 914,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bg5",
+          "count": 5
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/4p3/8/3P1B1q/8/PPP1PPPP/RN1QKBNR w KQkq - 2 3",
+          "move": "Nf3",
+          "count": 3
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/4p3/2b5/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq - 2 3",
+          "move": "e3",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 13
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 10
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/3pp3/8/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
+          "move": "e5",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.03,
+        "skew": 0.94
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.3,
+        "std": 1.34,
+        "skew": 1.2
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.63,
+        "std": 0.93,
+        "skew": 1.91
+      }
+    },
+    "Four Knights Game: Italian Variation": {
+      "eco": "C50",
+      "sample_size": 1000,
+      "number_of_times_played": 1609,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2n2n2/3Pp3/2B5/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 0 5",
+          "move": "Nxd5",
+          "count": 11
+        },
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b5/2BpP3/2N2N2/PPP2PPP/R1BQK2R w KQkq - 0 6",
+          "move": "Nxd4",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2n2n2/3pp3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+          "move": "O-O",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5",
+          "move": "Nxe5",
+          "count": 11
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4",
+          "move": "Nd4",
+          "count": 9
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/5n2/4p3/2BnP3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5",
+          "move": "d3",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.71,
+        "std": 0.81,
+        "skew": 1.08
+      },
+      "opening_mistakes_per_game": {
+        "mean": 0.99,
+        "std": 1.09,
+        "skew": 1.35
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.53,
+        "std": 0.8,
+        "skew": 1.89
+      }
+    },
+    "Scotch Game": {
+      "eco": "C44",
+      "sample_size": 1000,
+      "number_of_times_played": 920,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp2ppp/2np4/4p3/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq - 1 4",
+          "move": "Be6",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n5/4P3/2B1n3/5N2/PPP2PPP/RNBQK2R b KQkq - 1 5",
+          "move": "Bc5",
+          "count": 4
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4P3/4P3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+          "move": "Nxe5",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "f6",
+          "count": 57
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bb4",
+          "count": 38
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 25
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.03,
+        "std": 0.92,
+        "skew": 0.68
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.5,
+        "std": 1.27,
+        "skew": 0.83
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.61,
+        "std": 0.93,
+        "skew": 2.01
+      }
+    },
+    "Queen's Pawn Game: Chigorin Variation": {
+      "eco": "D00",
+      "sample_size": 1000,
+      "number_of_times_played": 1878,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P4/2N5/PPP1PPPP/R1BQKBNR w KQkq - 2 3",
+          "move": "Nxd5",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3N4/3P4/8/PPP1PPPP/R1BQKBNR b KQkq - 0 3",
+          "move": "Nxd4",
+          "count": 3
+        },
+        {
+          "fen": "r1bq3r/ppp2kpp/2nb4/1N1p4/4nB2/8/PPP1PPPP/R2QKBNR w KQ - 0 8",
+          "move": "Be3",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/3p4/3P4/2N2N2/PPP1PPPP/R1BQKB1R w KQkq - 4 4",
+          "move": "e4",
+          "count": 9
+        },
+        {
+          "fen": "r1bqkbnr/ppp1pppp/2n5/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+          "move": "e4",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkb1r/ppp1pppp/2n2n2/8/3Pp3/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Nxe4",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.73,
+        "std": 0.88,
+        "skew": 1.32
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.14,
+        "std": 1.23,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.57,
+        "std": 0.83,
+        "skew": 1.63
+      }
+    },
+    "King's Pawn Game: Busch-Gass Gambit": {
+      "eco": "C40",
+      "sample_size": 978,
+      "number_of_times_played": 837,
+      "top_3_blunders": [
+        {
+          "fen": "rnb1k1nr/pppp1ppp/8/2b1N3/4P2q/8/PPPP1PPP/RNBQKB1R w KQkq - 1 4",
+          "move": "g3",
+          "count": 9
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "Bxf2",
+          "count": 9
+        },
+        {
+          "fen": "rnb1k1nr/pppp1ppp/8/2b1N3/4P2q/8/PPPP1PPP/RNBQKB1R w KQkq - 1 4",
+          "move": "Nd3",
+          "count": 5
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bc5",
+          "count": 498
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 115
+        },
+        {
+          "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Nc3",
+          "count": 104
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.62,
+        "std": 0.82,
+        "skew": 1.33
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.58,
+        "std": 1.49,
+        "skew": 0.82
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.8,
+        "std": 0.96,
+        "skew": 1.52
+      }
+    },
+    "French Defense: Knight Variation": {
+      "eco": "C00",
+      "sample_size": 998,
+      "number_of_times_played": 828,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Ng5",
+          "count": 4
+        },
+        {
+          "fen": "rn1qkbnr/pppb1ppp/4p3/1B1p4/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4",
+          "move": "c4",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/4p3/4P3/4p3/5N2/PPPP1PPP/R1BQKB1R w KQkq - 0 6",
+          "move": "Nd4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 26
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/4pn2/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bb4",
+          "count": 11
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.08,
+        "std": 1.07,
+        "skew": 1.03
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.41,
+        "std": 1.37,
+        "skew": 1.05
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.62,
+        "std": 0.89,
+        "skew": 1.96
+      }
+    },
+    "Petrov's Defense: Three Knights Game": {
+      "eco": "C42",
+      "sample_size": 953,
+      "number_of_times_played": 774,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1p3/3PP3/2N2N2/PPP2PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "Bb6",
+          "count": 4
+        },
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1N3/4P3/2N5/PPPP1PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "Ng4",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/5n2/4N3/4p3/2N5/PPPP1PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Nxe4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "Nxe4",
+          "count": 20
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+          "move": "c6",
+          "count": 20
+        },
+        {
+          "fen": "rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "d4",
+          "count": 19
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.97,
+        "std": 0.9,
+        "skew": 0.88
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.41,
+        "std": 1.31,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.65,
+        "std": 0.86,
+        "skew": 1.39
+      }
+    },
+    "Modern Defense": {
+      "eco": "B06",
+      "sample_size": 919,
+      "number_of_times_played": 746,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqk2r/ppppnpbp/4p1p1/8/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq - 2 5",
+          "move": "Ne5",
+          "count": 2
+        },
+        {
+          "fen": "r1bq1rk1/ppppppb1/2n3pp/3N2B1/2BPP1n1/5N2/PPP2PPP/R2QK2R w KQ - 0 8",
+          "move": "Bxe7",
+          "count": 1
+        },
+        {
+          "fen": "rnbqk2r/ppppppbp/5np1/8/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Qd3",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Qg4",
+          "count": 9
+        },
+        {
+          "fen": "rnbqk1nr/ppppppbp/6p1/8/2B1P3/5Q2/PPPP1PPP/RNB1K1NR b KQkq - 3 3",
+          "move": "Nf6",
+          "count": 9
+        },
+        {
+          "fen": "rnbqk2r/ppppppbp/5np1/8/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "Bc4",
+          "count": 6
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.2,
+        "std": 1.1,
+        "skew": 0.95
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.59,
+        "std": 1.46,
+        "skew": 1.06
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.86,
+        "skew": 1.84
+      }
+    },
+    "King's Pawn Game: Napoleon Attack": {
+      "eco": "C20",
+      "sample_size": 855,
+      "number_of_times_played": 688,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "g4",
+          "count": 17
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Nh3",
+          "count": 13
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "Qb3",
+          "count": 8
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+          "move": "f6",
+          "count": 31
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5Q2/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Nh3",
+          "count": 13
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+          "move": "d4",
+          "count": 6
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.72,
+        "std": 0.9,
+        "skew": 1.33
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.6,
+        "std": 1.36,
+        "skew": 0.72
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.81,
+        "std": 0.95,
+        "skew": 1.34
+      }
+    },
+    "King's Pawn Game: Damiano Defense": {
+      "eco": "C40",
+      "sample_size": 865,
+      "number_of_times_played": 685,
+      "top_3_blunders": [
+        {
+          "fen": "rnbq1bnr/pppp1kpp/8/4Q3/2B1P3/8/PPPP1PPP/RNB1K2R b KQ - 2 6",
+          "move": "Kg6",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 1 3",
+          "move": "g5",
+          "count": 4
+        },
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4p3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "g5",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "f6",
+          "count": 432
+        },
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "fxe5",
+          "count": 32
+        },
+        {
+          "fen": "rnbqkbnr/pppp2pp/5p2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+          "move": "d3",
+          "count": 11
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.09,
+        "std": 1.06,
+        "skew": 0.93
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.28,
+        "std": 1.51,
+        "skew": 0.58
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.87,
+        "skew": 2.96
+      }
+    },
+    "King's Pawn Game: Wayward Queen Attack, Kiddie Countergambit": {
+      "eco": "C20",
+      "sample_size": 827,
+      "number_of_times_played": 681,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Bc4",
+          "count": 6
+        },
+        {
+          "fen": "rnbqk2r/ppppbppp/5n2/8/4P3/6Q1/PPPP1PPP/RNB1KBNR b KQkq - 2 4",
+          "move": "Bd6",
+          "count": 4
+        },
+        {
+          "fen": "rnbqk2r/ppp1bppp/3p1n2/8/4P3/5NQ1/PPPP1PPP/RNB1KB1R b KQkq - 1 5",
+          "move": "Nxe4",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4Q3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3",
+          "move": "Qe7",
+          "count": 85
+        },
+        {
+          "fen": "rnbqk2r/ppppbppp/5n2/6Q1/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2 4",
+          "move": "Nxe4",
+          "count": 22
+        },
+        {
+          "fen": "rnbqk2r/ppppbppp/5n2/4Q3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 2 4",
+          "move": "d6",
+          "count": 20
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.79,
+        "std": 0.89,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.95,
+        "std": 1.55,
+        "skew": 1.0
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.89,
+        "std": 1.0,
+        "skew": 1.42
+      }
+    },
+    "Englund Gambit": {
+      "eco": "A40",
+      "sample_size": 811,
+      "number_of_times_played": 672,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Qg5",
+          "count": 8
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bf4",
+          "count": 7
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Bg5",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "c3",
+          "count": 44
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "c4",
+          "count": 21
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Nc3",
+          "count": 18
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.56,
+        "std": 1.2,
+        "skew": 0.7
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.71,
+        "std": 1.46,
+        "skew": 0.9
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.78,
+        "std": 1.01,
+        "skew": 1.65
+      }
+    },
+    "Hungarian Opening": {
+      "eco": "A00",
+      "sample_size": 796,
+      "number_of_times_played": 650,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/8/5p2/6P1/PPPPP2P/RNBQKBNR w KQkq - 0 3",
+          "move": "gxf4",
+          "count": 3
+        },
+        {
+          "fen": "r1b1kb1r/ppp1qppp/8/3pn3/4n3/2N2NP1/PPP1PPBP/R1BQ1RK1 w kq - 0 8",
+          "move": "Nxe5",
+          "count": 1
+        },
+        {
+          "fen": "r1b1kb1r/ppp2ppp/8/3pq3/4n3/2N3P1/PPP1PPBP/R1BQ1RK1 w kq - 0 9",
+          "move": "Nxe4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/8/6P1/PPPPPP1P/RNBQKBNR w KQkq - 0 2",
+          "move": "Bh3",
+          "count": 7
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/8/6P1/PPPPPP1P/RNBQKBNR w KQkq - 0 2",
+          "move": "f4",
+          "count": 7
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3p4/4p3/5NP1/PPPPPPBP/RNBQK2R w KQkq - 0 4",
+          "move": "Ne5",
+          "count": 3
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.24,
+        "std": 1.13,
+        "skew": 0.99
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.5,
+        "std": 1.41,
+        "skew": 1.13
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.66,
+        "std": 0.94,
+        "skew": 1.98
+      }
+    },
+    "French Defense": {
+      "eco": "C00",
+      "sample_size": 786,
+      "number_of_times_played": 642,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4",
+          "move": "Bxd5",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 3",
+          "move": "Qf3",
+          "count": 2
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          "move": "Ba6",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+          "move": "f3",
+          "count": 19
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/4pn2/7Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qe5",
+          "count": 11
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/4pn2/7Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3",
+          "move": "Qg5",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.24,
+        "std": 1.09,
+        "skew": 0.78
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.72,
+        "std": 1.52,
+        "skew": 0.87
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.78,
+        "std": 0.97,
+        "skew": 1.51
+      }
+    },
+    "King's Knight Opening": {
+      "eco": "C40",
+      "sample_size": 783,
+      "number_of_times_played": 642,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 15
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Qg5",
+          "count": 6
+        },
+        {
+          "fen": "rnb1kbnr/pppp1ppp/8/4p3/4P2q/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+          "move": "Nc3",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "Bb4",
+          "count": 120
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "g6",
+          "count": 35
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+          "move": "g5",
+          "count": 29
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 1.02,
+        "skew": 1.1
+      },
+      "opening_mistakes_per_game": {
+        "mean": 2.06,
+        "std": 1.61,
+        "skew": 0.74
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.08,
+        "skew": 1.61
+      }
+    },
+    "Vienna Game": {
+      "eco": "C25",
+      "sample_size": 770,
+      "number_of_times_played": 618,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkbnr/pp3ppp/2p5/3pN3/4P3/2N5/PPPP1PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "f6",
+          "count": 2
+        },
+        {
+          "fen": "rn1qkbnr/pp3ppp/2pp4/4p1B1/3PP1b1/2N2N2/PPP2PPP/R2QKB1R b KQkq - 2 5",
+          "move": "f6",
+          "count": 2
+        },
+        {
+          "fen": "rnb1k1nr/ppqp1p1p/2p5/4N3/3QPP2/8/PPP4P/R1B1KB1R w KQkq - 0 12",
+          "move": "Qc4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+          "move": "Qf6",
+          "count": 36
+        },
+        {
+          "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+          "move": "Qh4",
+          "count": 28
+        },
+        {
+          "fen": "rnbqkbnr/pp1p1ppp/2p5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 1 3",
+          "move": "f6",
+          "count": 12
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.94,
+        "std": 1.0,
+        "skew": 1.08
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.71,
+        "std": 1.56,
+        "skew": 1.16
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.6,
+        "std": 0.89,
+        "skew": 2.46
+      }
+    },
+    "Petrov's Defense": {
+      "eco": "C42",
+      "sample_size": 732,
+      "number_of_times_played": 588,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/3P1N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Nxe4",
+          "count": 4
+        },
+        {
+          "fen": "rnb1kb1r/ppppqppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 1 4",
+          "move": "Qe2",
+          "count": 3
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/3p1n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
+          "move": "Ng4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bc5",
+          "count": 30
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/3p1n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 4",
+          "move": "d5",
+          "count": 9
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+          "move": "Bb4",
+          "count": 6
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.89,
+        "std": 0.98,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.52,
+        "std": 1.38,
+        "skew": 0.93
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.86,
+        "std": 1.09,
+        "skew": 1.8
+      }
+    },
+    "Petrov's Defense: Italian Variation": {
+      "eco": "C42",
+      "sample_size": 691,
+      "number_of_times_played": 572,
+      "top_3_blunders": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4N3/2B1n3/8/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+          "move": "d6",
+          "count": 10
+        },
+        {
+          "fen": "rnb1kb1r/ppppqppp/8/4N3/2B1n3/8/PPPP1PPP/RNBQK2R w KQkq - 1 5",
+          "move": "Nxf7",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/8/4p3/2B1n3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "move": "Ng5",
+          "count": 4
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "Bc5",
+          "count": 80
+        },
+        {
+          "fen": "rnbqkb1r/ppp2ppp/5n2/3Pp3/2B5/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+          "move": "Nxd5",
+          "count": 28
+        },
+        {
+          "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+          "move": "c6",
+          "count": 19
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 1.09,
+        "std": 0.96,
+        "skew": 1.04
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.77,
+        "std": 1.32,
+        "skew": 0.8
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.98,
+        "std": 1.09,
+        "skew": 1.43
+      }
+    },
+    "Mikenas Defense": {
+      "eco": "A40",
+      "sample_size": 710,
+      "number_of_times_played": 570,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkbnr/pppppppp/8/8/3n1B2/8/PPP1PPPP/RN1QKBNR w KQkq - 0 3",
+          "move": "e3",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P4/2N5/PPP1PPPP/R1BQKBNR b KQkq - 2 2",
+          "move": "Nxd4",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/3P4/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 2",
+          "move": "Nd4",
+          "count": 3
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 2 2",
+          "move": "e5",
+          "count": 16
+        },
+        {
+          "fen": "r1bqkbnr/pppppppp/2n5/8/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 2 2",
+          "move": "Nxd4",
+          "count": 7
+        },
+        {
+          "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 3",
+          "move": "e3",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.88,
+        "std": 0.97,
+        "skew": 1.2
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.45,
+        "std": 1.36,
+        "skew": 1.04
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.76,
+        "std": 1.03,
+        "skew": 1.68
+      }
+    },
+    "Queen's Pawn Game: Zukertort Variation": {
+      "eco": "D02",
+      "sample_size": 666,
+      "number_of_times_played": 536,
+      "top_3_blunders": [
+        {
+          "fen": "rn1qkbnr/ppp1p3/5p2/3p1N2/3P2pp/6B1/PPP1PPPP/RN1QKB1R w KQkq - 0 8",
+          "move": "Ng7",
+          "count": 1
+        },
+        {
+          "fen": "rn1qkbnr/ppp3pp/4pp2/3pNb2/3P1B2/8/PPP1PPPP/RN1QKB1R w KQkq - 0 5",
+          "move": "g3",
+          "count": 1
+        },
+        {
+          "fen": "rn2kb1r/pp2pppp/3q1n2/6N1/2Bp4/4P2P/PP3PP1/R1BQK2R w KQkq - 0 11",
+          "move": "exd4",
+          "count": 1
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 1 2",
+          "move": "e5",
+          "count": 28
+        },
+        {
+          "fen": "rn1qkbnr/ppp1pppp/8/3p1b2/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+          "move": "e4",
+          "count": 5
+        },
+        {
+          "fen": "rnbqkbnr/ppp2ppp/8/3pp3/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 3",
+          "move": "Nc3",
+          "count": 5
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.91,
+        "std": 1.0,
+        "skew": 1.16
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.2,
+        "std": 1.3,
+        "skew": 1.17
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.45,
+        "std": 0.73,
+        "skew": 2.0
+      }
+    },
+    "Four Knights Game": {
+      "eco": "C47",
+      "sample_size": 616,
+      "number_of_times_played": 530,
+      "top_3_blunders": [
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2n2n2/3pp3/4P3/2NP1N2/PPP2PPP/R1BQKB1R w KQkq - 0 5",
+          "move": "Be3",
+          "count": 3
+        },
+        {
+          "fen": "r1bqkb1r/ppp2ppp/8/3nn3/8/2NP4/PPP2PPP/R1BQKB1R w KQkq - 0 7",
+          "move": "d4",
+          "count": 2
+        },
+        {
+          "fen": "r1bqkb1r/ppp2ppp/2n2n2/3pp3/4P3/2NPBN2/PPP2PPP/R2QKB1R b KQkq - 1 5",
+          "move": "dxe4",
+          "count": 2
+        }
+      ],
+      "top_3_mistakes": [
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+          "move": "Nb5",
+          "count": 9
+        },
+        {
+          "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2NP1N2/PPP2PPP/R1BQKB1R b KQkq - 0 4",
+          "move": "Nd4",
+          "count": 7
+        },
+        {
+          "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/4P3/2NP1N2/PPP2PPP/R1BQKB1R w KQkq - 1 5",
+          "move": "d4",
+          "count": 4
+        }
+      ],
+      "opening_inaccuracies_per_game": {
+        "mean": 0.64,
+        "std": 0.79,
+        "skew": 1.11
+      },
+      "opening_mistakes_per_game": {
+        "mean": 1.07,
+        "std": 1.16,
+        "skew": 1.21
+      },
+      "opening_blunders_per_game": {
+        "mean": 0.55,
+        "std": 0.85,
+        "skew": 1.82
+      }
+    }
+  }
+}

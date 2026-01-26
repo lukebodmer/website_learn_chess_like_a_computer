@@ -599,7 +599,7 @@ def load_opening_stats_for_elo(elo_by_time_control):
 
         # Load the opening stats JSON file for this bracket
         try:
-            json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'opening_stats', f'{bracket}.json')
+            json_path = os.path.join(settings.BASE_DIR, 'static', 'data', 'top_100_opening_stats', f'{bracket}.json')
 
             if os.path.exists(json_path):
                 with open(json_path, 'r') as f:

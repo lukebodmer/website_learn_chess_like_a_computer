@@ -176,12 +176,25 @@ interface EloAveragesData {
   };
 }
 
+interface CommonError {
+  fen: string;
+  move: string;
+  count: number;
+  best_move?: string;
+  variation?: string;
+  evaluation?: number;
+  mate?: number;
+}
+
 interface OpeningStatsData {
   [timeControl: string]: {
     [openingName: string]: {
       eco: string;
       sample_size: number;
       number_of_times_played: number;
+      top_3_blunders?: CommonError[];
+      top_3_mistakes?: CommonError[];
+      top_3_inaccuracies?: CommonError[];
       opening_inaccuracies_per_game: {
         mean: number;
         std: number;
@@ -199,6 +212,8 @@ interface OpeningStatsData {
       };
     };
   };
+  _enriched?: boolean;
+  _enrichment_timestamp?: string;
 }
 
 interface OpeningAnalysisProps {
@@ -552,10 +567,12 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
 
       if (timeControl && openingStatsData[timeControl]) {
         openingsData.forEach(opening => {
-          // Try to find the opening stats using the base name
-          // The data uses title case, so we need to match exactly
-          const openingStats = openingStatsData[timeControl!][opening.baseName];
+          // Try to find the opening stats using the base name first
+          let openingStats = openingStatsData[timeControl!][opening.baseName];
 
+          // If not found, the base name might not be in the data file
+          // (since the new format only includes the top 100 openings with full names)
+          // In this case, we won't have population data for comparison
           if (openingStats) {
             // Calculate user's error score
             const userErrorScore = opening.avgInaccuracies + 2 * opening.avgMistakes + 3 * opening.avgBlunders;
@@ -1020,8 +1037,18 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 if (openingStatsData && timeControl && selectedOpening) {
                   // openingStatsData is organized by time control
                   if (openingStatsData[timeControl]) {
-                    // Use base opening name to look up population stats (exact case match)
-                    const openingStats = openingStatsData[timeControl][selectedOpening.baseName];
+                    // Determine which opening to look up based on selected variation
+                    let lookupKey = selectedOpening.baseName;
+
+                    // If a specific variation is selected (not base), try to find it in the data
+                    if (selectedVariationName && selectedVariationName !== '__base__') {
+                      // First try exact match with the variation name
+                      if (openingStatsData[timeControl][selectedVariationName]) {
+                        lookupKey = selectedVariationName;
+                      }
+                    }
+
+                    const openingStats = openingStatsData[timeControl][lookupKey];
 
                     if (openingStats) {
                       popAvgInaccuracies = openingStats.opening_inaccuracies_per_game?.mean || 0;

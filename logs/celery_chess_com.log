@@ -35642,3 +35642,46 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-23 21:19:48,987: INFO/MainProcess] mingle: all alone
 [2026-01-23 21:19:48,992: INFO/MainProcess] chess_com_worker@nemo ready.
 [2026-01-24 17:54:53,729: INFO/MainProcess] missed heartbeat from lichess_worker@nemo
+[2026-01-24 19:59:33,273: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[e1aa2257-00ca-4725-ac68-bc71d8a2c2e9] received
+[2026-01-24 19:59:33,282: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-24 19:59:33,282: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-24 19:59:33,553: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-24 19:59:33,553: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[e1aa2257-00ca-4725-ac68-bc71d8a2c2e9] succeeded in 0.27975379599956796s: {'title': 'Did I Do That? 😉', 'fen': '1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K w - - 0 26', 'pgn': '[Result "1-0"]
+[FEN "1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K w - - 0 26"]
+
+26. Qe6 fxe6 27. Rg3+ Qg5 28. Rxg5# 1-0', 'url': 'https://www.chess.com/daily/2026-01-24', 'image': 'https://www.chess.com/dynboard?fen=1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K%20w%20-%20-%200%2026&size=2', 'solution': ['Qe6', 'fxe6', 'Rg3+', 'Qg5', 'Rxg5#'], 'publish_time': 1769241600, 'publish_datetime': datetime.datetime(2026, 1, 24, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-24 22:11:56,957: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-24 22:11:56,958: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-24 22:11:57,963: INFO/MainProcess] mingle: all alone
+[2026-01-24 22:11:57,969: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-24 22:45:41,616: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[26154645-5fd4-4cef-af1b-b57264a21cc4] received
+[2026-01-24 22:45:41,624: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-24 22:45:41,624: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-24 22:45:41,832: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-24 22:45:41,833: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[26154645-5fd4-4cef-af1b-b57264a21cc4] succeeded in 0.21605365601135418s: {'title': 'Did I Do That? 😉', 'fen': '1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K w - - 0 26', 'pgn': '[Result "1-0"]
+[FEN "1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K w - - 0 26"]
+
+26. Qe6 fxe6 27. Rg3+ Qg5 28. Rxg5# 1-0', 'url': 'https://www.chess.com/daily/2026-01-24', 'image': 'https://www.chess.com/dynboard?fen=1r4kr/5p1p/n7/p1q5/8/2p2R2/Pp2Q1PP/5R1K%20w%20-%20-%200%2026&size=2', 'solution': ['Qe6', 'fxe6', 'Rg3+', 'Qg5', 'Rxg5#'], 'publish_time': 1769241600, 'publish_datetime': datetime.datetime(2026, 1, 24, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-24 23:17:43,076: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-24 23:17:43,078: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-24 23:17:44,082: INFO/MainProcess] mingle: all alone
+[2026-01-24 23:17:44,088: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-25 17:30:39,538: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[f5c14549-baa0-41d9-b010-bf07ad51ecb6] received
+[2026-01-25 17:30:39,547: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-25 17:30:39,547: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-25 17:30:39,968: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-25 17:30:39,969: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[f5c14549-baa0-41d9-b010-bf07ad51ecb6] succeeded in 0.4304942800081335s: {'title': 'Fog Machine', 'fen': '8/p7/5p2/1PP2pk1/8/8/5P2/3K2b1 w - - 0 1', 'pgn': '[White "Bernhardt"]
+[Black "1962"]
+[Result "*"]
+[FEN "8/p7/5p2/1PP2pk1/8/8/5P2/3K2b1 w - - 0 1"]
+
+1. b6 axb6 2. f4+ Kxf4 3. c6 Bh2 4. c7 Ke3 5. c8=Q *', 'url': 'https://www.chess.com/daily/2026-01-25', 'image': 'https://www.chess.com/dynboard?fen=8/p7/5p2/1PP2pk1/8/8/5P2/3K2b1%20w%20-%20-%200%201&size=2', 'solution': ['b6', 'axb6', 'f4+', 'Kxf4', 'c6', 'Bh2', 'c7', 'Ke3', 'c8=Q'], 'publish_time': 1769328000, 'publish_datetime': datetime.datetime(2026, 1, 25, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-26 14:27:33,733: INFO/MainProcess] missed heartbeat from lichess_worker@nemo
+[2026-01-26 19:55:05,589: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[b6d7fb0f-2920-4283-a508-db47053046e1] received
+[2026-01-26 19:55:05,590: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-26 19:55:05,590: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-26 19:55:05,974: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-26 19:55:05,974: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[b6d7fb0f-2920-4283-a508-db47053046e1] succeeded in 0.3850470639881678s: {'title': 'Corner of Your Eye', 'fen': '6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q w - - 0 1', 'pgn': '[Result "*"]
+[FEN "6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q w - - 0 1"]
+
+1. Qa8+ Kh7 2. Qh8# *', 'url': 'https://www.chess.com/daily/2026-01-26', 'image': 'https://www.chess.com/dynboard?fen=6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q%20w%20-%20-%200%201&size=2', 'solution': ['Qa8+', 'Kh7', 'Qh8#'], 'publish_time': 1769414400, 'publish_datetime': datetime.datetime(2026, 1, 26, 8, 0), 'source': 'chess.com', 'lastMove': None}

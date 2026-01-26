@@ -1,0 +1,66 @@
+#+TITLE: Openings Deep Dive
+When I first started learning chess, opening theory came up a lot. The impression I got is that there is some specific, universal, almost mathematical classification to the beginning moves of chess games.
+(show video of Ana cramlin against magnus? casually commenting on how one opening has transitioned to the next)
+(cut to some other video)
+
+It turns out, its not so simple. Classifying chess openings is a bit of a math problem, a bit of an art, and a bit of a social and historic relic. Generally, grand masters consider the game to be in the opening phase if they are making moves that are documented "book moves".
+(insert a clip here)
+
+What "book" are they talking about? The Encyclopaedia of Chess Openings, (ECO)? Or maybe the NIC-Key (New in Chess Key classification system)? Basically it just means any respectable opening theory either played or written, usually written by a grandmaster. The earliest of these books are over 500 years old, including the "Luis Ramírez de Lucena", written around 1497, and the "Göttingen manuscript" written around 1490 which established what we now call the Ruy Lopez, Queen's Gambit Accepted, and more. More recent developments include the Magnus Carlsen variation of the scilian that he first used in 2018 (INSERT CLIP). Or the Jobava London, first played in 1882, but only made it into the opening theory around 2019.
+
+Ok, so opening theory is the sum total of all the developed knowledge, for the modern version of chess. It's all the things that you might be expected to know if you are a grand master. Then, how do we classify openings of games if there is no Grandmaster around to help us? The defacto way currently is the Encyclopedia of Chess Openings (ECO).
+
+* Classifying Chess Openings (ECO codes)
+The Encyclopedia of Chess Openings (ECO) is a five volume reference texts for classifying chess openings. Created by the Serbian based company, Chess Informant (Šahovski Informator), started by the late Serbian Chess Grandmaster Aleksandar Matanović in 1966.
+
+INTERESTING: The Chess Informant created the system of symbols for evaluating the merits of a move like ??(Blunder), ?(Mistake), ?!(Inaccuracy) that are used on this site and many others.
+
+While the ECO codes are the de facto way to classify a chess opening, that doesn't mean they are the only way to do it. /New In Chess/, a Netherlands based company developed the NIC-Key classification system that is used internationally (TODO: By who??) to classify openings. There have even been attempts by research scientists to use network theory to group openings based on online chess game data.
+
+However, ECO remains the most authoritative resource on chess openings, and it is used extensively in this site, so it's good to understand how it works, and what its short comings might be.
+
+First, it's important to understand that ECO groups are compiled by experts and Grandmasters who group them subjectively based on their understanding of the game. It's not a standardized classification system like we have for chemical elements, or biological taxonomy. Instead ECO classifications are the art of the Grandmasters.
+
+Secondly, an ECO code alone is not enough to fully classify a game. Consider the following two ECO classifications:
+
+B01	Scandinavian Defense: Modern Variation	1. e4 d5 2. exd5 Nf6
+B01	Scandinavian Defense: Modern Variation	1. e4 d5 2. exd5 Nf6 3. d4
+
+both have the exact same ECO code (B01), the same opening name (Scandinavian Defense: Modern Variation), but they have different moves with the second opening including 3. d4.
+
+This means that  1. e4 d5 2. exd5 Nf6 and 1. e4 d5 2. exd5 Nf6 3. d4 are both considered to be in the Scandinavian Defense: Modern Variation. Grandmasters and experts decided that those two openings are theoretically similar enough that they should be classified together. (INSERT BOARD IMAGES HERE)
+
+So how do you actually classify a games opening?
+
+There are a number of ways you can think about doing this. In this website, our goal is to group games together based on openings so we can extract useful data about how those games are played at each eco level. To do this we compile a database of all the common openings with data as follows:
+
+B01	Scandinavian Defense	1. e4 d5	e2e4 d7d5	rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -
+B01	Scandinavian Defense	1. e4 d5 2. b3	e2e4 d7d5 b2b3	rnbqkbnr/ppp1pppp/8/3p4/4P3/1P6/P1PP1PPP/RNBQKBNR b KQkq -
+
+Where the last column includes a FEN (Forsyth–Edwards Notation) which is standard notation for explaining a particular board position in a chess game. Then, when we want to classify a particular game's opening, we do the following:
+
+1. Start at the end of the game.
+2. Check the database for that particular position.
+3. If the position is in the database, we've found our opening classification of the game.
+4. If the position is not in the database, go back one ply (one half-move).
+5. Repeat
+
+This algorithm allows us to find the longest established opening that was played in that game.  Now we have a human-readable opening name that we can use to group users games and study their statistical properties to improve our game.
+
+This also explains how one opening can morph into another opening. Two opening can share the same first few moves, but diverge into separate openings. For example the 
+
+A09	Réti Opening	1. Nf3 d5 2. c4
+
+Can be followed by 2. ... Nc6, 3. d4 Bg4 to transpose into the 
+
+D07	Queen's Gambit Declined: Chigorin Defense, Main Line  	1. d4 d5 2. c4 Nc6 3. Nf3 Bg4
+
+REMEMBER: It's the board position that classifies the opening, not the sequence of moves that created it.
+
+Conclusion:
+
+ECO codes aren't perfect, and they aren't as mathematically precise as they might look at first glance. Nevertheless, they serve as a powerful way of classifying openings, allowing us to use our database of millions of games to understand user patterns, find common traps, and improve our game.
+
+* References
+1. https://www.newinchess.com/media/wysiwyg/product_pdf/8831.pdf
+2. https://www.nature.com/articles/s41598-023-31658-w

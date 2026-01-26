@@ -6,12 +6,14 @@ interface OpeningBoardProps {
   size?: number;
   position?: string; // FEN string
   orientation?: 'white' | 'black';
+  highlightedSquares?: { square: string, color: string }[];
 }
 
 const OpeningBoard: React.FC<OpeningBoardProps> = ({
   size = 300,
   position = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // Starting position by default
-  orientation = 'white'
+  orientation = 'white',
+  highlightedSquares = []
 }) => {
   const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme());
 
@@ -61,6 +63,7 @@ const OpeningBoard: React.FC<OpeningBoardProps> = ({
         showGameEndSymbols={false}
         showCheckHighlight={true}
         boardTheme={boardTheme}
+        highlightedSquares={highlightedSquares}
       />
     </div>
   );
