@@ -388,6 +388,8 @@ export const OpeningStatsByElo: React.FC = () => {
 
   const handleGroupClick = (group: GroupedOpening) => {
     setSelectedGroup(group);
+    setSelectedError(null); // Clear any selected error
+
     // Auto-select the first variation in the group
     if (group.variations.length > 0) {
       const firstVariation = group.variations[0];
@@ -1094,17 +1096,18 @@ export const OpeningStatsByElo: React.FC = () => {
 
         {/* Opening Board with Navigation */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-          {selectedError ? (
-            // Show interactive board for error puzzles
-            <div style={{
-              backgroundColor: 'var(--background-primary)',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              padding: '16px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+            backgroundColor: 'var(--background-primary)',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            marginBottom: '1px'
+          }}>
+            {selectedError ? (
+              // Show interactive board for error puzzles
               <div style={{
                 width: `${boardSize}px`,
                 height: `${boardSize}px`,
@@ -1129,15 +1132,22 @@ export const OpeningStatsByElo: React.FC = () => {
                   boardTheme={boardTheme}
                 />
               </div>
-            </div>
-          ) : (
-            // Show regular opening board
-            <OpeningBoard
-              size={boardSize}
-              position={selectedOpeningFen}
-              highlightedSquares={[]}
-            />
-          )}
+            ) : (
+              // Show regular opening board
+              <BaseChessBoard
+                size={boardSize}
+                position={selectedOpeningFen}
+                orientation="white"
+                coordinates={true}
+                interactive={false}
+                allowPieceDragging={false}
+                showGameEndSymbols={false}
+                showCheckHighlight={true}
+                boardTheme={boardTheme}
+                highlightedSquares={[]}
+              />
+            )}
+          </div>
 
           {/* Status Message and Puzzle Controls for Error Puzzles - Combined to match navigation height */}
           {selectedError && (
@@ -1561,8 +1571,8 @@ export const OpeningStatsByElo: React.FC = () => {
                       </div>
                       {isErrorSolved(error) && (
                         <div style={{
-                          width: '20px',
-                          height: '20px',
+                          width: '14px',
+                          height: '14px',
                           borderRadius: '50%',
                           backgroundColor: '#00aa00',
                           display: 'flex',
@@ -1572,8 +1582,9 @@ export const OpeningStatsByElo: React.FC = () => {
                         }}>
                           <span style={{
                             color: 'white',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '1'
                           }}>✓</span>
                         </div>
                       )}
@@ -1644,8 +1655,8 @@ export const OpeningStatsByElo: React.FC = () => {
                       </div>
                       {isErrorSolved(error) && (
                         <div style={{
-                          width: '20px',
-                          height: '20px',
+                          width: '14px',
+                          height: '14px',
                           borderRadius: '50%',
                           backgroundColor: '#00aa00',
                           display: 'flex',
@@ -1655,8 +1666,9 @@ export const OpeningStatsByElo: React.FC = () => {
                         }}>
                           <span style={{
                             color: 'white',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '1'
                           }}>✓</span>
                         </div>
                       )}
@@ -1727,8 +1739,8 @@ export const OpeningStatsByElo: React.FC = () => {
                       </div>
                       {isErrorSolved(error) && (
                         <div style={{
-                          width: '20px',
-                          height: '20px',
+                          width: '14px',
+                          height: '14px',
                           borderRadius: '50%',
                           backgroundColor: '#00aa00',
                           display: 'flex',
@@ -1738,8 +1750,9 @@ export const OpeningStatsByElo: React.FC = () => {
                         }}>
                           <span style={{
                             color: 'white',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                            lineHeight: '1'
                           }}>✓</span>
                         </div>
                       )}
