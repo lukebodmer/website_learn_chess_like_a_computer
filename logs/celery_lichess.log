@@ -82042,3 +82042,114 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-24 23:33:21,482: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[382d96d4-b704-4ae2-83c0-019b462a748d] received
 [2026-01-24 23:33:23,032: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[382d96d4-b704-4ae2-83c0-019b462a748d] succeeded in 1.5487811409984715s: {'success': True, 'games_count': 20, 'game_dataset_id': 235, 'created_at': 'January 24, 2026 11:33 PM', 'data_size': 61997, 'date_range': 'September 28, 2025 - January 20, 2026', 'oldest_game_date': 'September 28, 2025', 'newest_game_date': 'January 20, 2026', 'elo_ratings': {'blitz': 1248, 'bullet': 1377}, 'ndjson_data': '{"id":"6aJyM7m8","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1768884292307,"lastMoveAt":1768885022572,"status":"mate","source":"pool","players":{"white":{"user":{"name":"OEParker","id":"oeparker"},"rating":1305,"ratingDiff":4,"analysis":{"inaccuracy":4,"mistake":1,"blunder":3,"acpl":62,"accuracy":86}},"black":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1248,"ratingDiff":-13,"analysis":{"inaccuracy":6,"mistake":3,"blunder":3,"acpl":87,"accuracy":78}}},"fullId":"6aJyM7m8WkFl","winner":"white","opening":{"eco":"D00","name":"Queen\'s Pawn Game: Accelerated London System","ply":3},"moves":"d4 d5 Bf4 Nc6 Nc3 Nf6 Nb5 e5 dxe5 a6 exf6 axb5 fxg7 Bxg7...', ...
 [2026-01-26 14:27:33,733: INFO/MainProcess] missed heartbeat from chess_com_worker@nemo
+[2026-01-27 00:38:28,112: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 00:38:28,113: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 00:38:29,118: INFO/MainProcess] mingle: all alone
+[2026-01-27 00:38:29,124: INFO/MainProcess] lichess_worker@nemo ready.
+[2026-01-27 00:39:35,845: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 00:39:35,847: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 00:39:35,861: INFO/MainProcess] sync with chess_com_worker@nemo
+[2026-01-27 00:39:36,852: INFO/MainProcess] mingle: sync with 1 nodes
+[2026-01-27 00:39:36,852: INFO/MainProcess] mingle: sync complete
+[2026-01-27 00:39:36,859: INFO/MainProcess] lichess_worker@nemo ready.
+[2026-01-27 23:51:24,285: WARNING/MainProcess] consumer: Connection to broker lost. Trying to re-establish the connection...
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 919, in <lambda>
+    lambda: command(*args, **kwargs),
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 940, in try_read
+    return conn.read_response(disconnect_on_error=False, push_request=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 644, in read_response
+    response = self._parser.read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 15, in read_response
+    result = self._read_response(disable_decoding=disable_decoding)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 25, in _read_response
+    raw = self._buffer.readline()
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/socket.py", line 115, in readline
+    self._read_from_socket()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/socket.py", line 68, in _read_from_socket
+    raise ConnectionError(SERVER_CLOSED_CONNECTION_ERROR)
+redis.exceptions.ConnectionError: Connection closed by server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 346, in start
+    blueprint.start(self)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 790, in start
+    c.loop(*c.loop_args())
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/loops.py", line 97, in asynloop
+    next(loop)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/asynchronous/hub.py", line 377, in create_loop
+    cb(*cbargs)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 1395, in on_readable
+    self.cycle.on_readable(fileno)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 579, in on_readable
+    chan.handlers[type]()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 931, in _receive
+    ret.append(self._receive_one(c))
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 941, in _receive_one
+    response = c.parse_response()
+               ^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 942, in parse_response
+    response = self._execute(conn, try_read)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 918, in _execute
+    return conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 90, in call_with_retry
+    fail(error)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 920, in <lambda>
+    lambda _: self._reconnect(conn),
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 908, in _reconnect
+    conn.connect()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+[2026-01-27 23:51:24,288: WARNING/MainProcess] /nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:397: CPendingDeprecationWarning: 
+In Celery 5.1 we introduced an optional breaking change which
+on connection loss cancels all currently executed tasks with late acknowledgement enabled.
+These tasks cannot be acknowledged as the connection is gone, and the tasks are automatically redelivered
+back to the queue. You can enable this behavior using the worker_cancel_long_running_tasks_on_connection_loss
+setting. In Celery 5.1 it is set to False by default. The setting will be set to True by default in Celery 6.0.
+
+  warnings.warn(CANCEL_TASKS_BY_DEFAULT, CPendingDeprecationWarning)
+
+[2026-01-27 23:51:24,290: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:6379/0: Error 111 connecting to localhost:6379. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+
+[2026-01-27 23:51:33,079: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 23:51:33,080: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 23:51:34,085: INFO/MainProcess] mingle: all alone
+[2026-01-27 23:51:34,090: INFO/MainProcess] lichess_worker@nemo ready.

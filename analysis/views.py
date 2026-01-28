@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .forms import CustomPasswordChangeForm
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.urls import reverse
@@ -33,7 +34,7 @@ from .opening_classifier import classify_opening_by_moves, lookup_opening_in_dat
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 20
+ANALYSIS_GAME_COUNT = 100
 
 
 # Configure Chess.com client with rate limit handling
@@ -930,7 +931,24 @@ def get_report_data(request, report_id):
             game_id = first_game.get('id', 'unknown')
             print(f"DEBUG get_report_data: First enriched game - Source: {game_source}, ID: {game_id}")
 
+        # Determine platform and username
+        if report.game_dataset.lichess_username:
+            platform = 'Lichess'
+            username = report.game_dataset.lichess_username
+        elif report.game_dataset.chess_com_username:
+            platform = 'Chess.com'
+            username = report.game_dataset.chess_com_username
+        else:
+            platform = 'Unknown'
+            username = 'Unknown'
+
         return JsonResponse({
+            'report': {
+                'id': report.id,
+                'platform': platform,
+                'username': username,
+                'created_at': report.created_at.isoformat(),
+            },
             'report_id': report.id,
             'enriched_games': report.enriched_games,
             'games_count': len(report.enriched_games) if report.enriched_games else 0,
@@ -941,6 +959,57 @@ def get_report_data(request, report_id):
     except Exception as e:
         return JsonResponse({
             'error': f'Failed to fetch report data: {str(e)}'
+        }, status=500)
+
+
+@login_required
+def get_user_reports_api(request):
+    """API endpoint to fetch list of user reports"""
+    try:
+        reports = AnalysisReport.objects.filter(
+            user=request.user
+        ).select_related('game_dataset').order_by('-created_at')
+
+        reports_list = []
+        for report in reports:
+            # Determine platform and username
+            if report.game_dataset.lichess_username:
+                platform = 'Lichess'
+                username = report.game_dataset.lichess_username
+            elif report.game_dataset.chess_com_username:
+                platform = 'Chess.com'
+                username = report.game_dataset.chess_com_username
+            else:
+                platform = 'Unknown'
+                username = 'Unknown'
+
+            # Format date range for title
+            date_start = report.game_dataset.oldest_game_date
+            date_end = report.game_dataset.newest_game_date
+
+            if date_start and date_end:
+                date_range = f"{date_start.strftime('%b %d, %Y')} - {date_end.strftime('%b %d, %Y')}"
+            else:
+                date_range = "Unknown dates"
+
+            title = f"{username} ({platform}) - {date_range}"
+
+            reports_list.append({
+                'id': report.id,
+                'title': title,
+                'username': username,
+                'platform': platform,
+                'created_at': report.created_at.isoformat(),
+                'games_count': len(report.enriched_games) if report.enriched_games else 0
+            })
+
+        return JsonResponse({
+            'reports': reports_list
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Failed to fetch reports: {str(e)}'
         }, status=500)
 
 
@@ -1795,7 +1864,7 @@ def account_settings(request):
 
         elif action == 'change_password':
             # Handle password change
-            password_form = PasswordChangeForm(user, request.POST)
+            password_form = CustomPasswordChangeForm(user, request.POST)
             if password_form.is_valid():
                 password_form.save()
                 update_session_auth_hash(request, password_form.user)  # Keep user logged in
@@ -1837,7 +1906,7 @@ def account_settings(request):
         return redirect('analysis:settings')
 
     # GET request - show the settings page
-    password_form = PasswordChangeForm(user)
+    password_form = CustomPasswordChangeForm(user)
 
     context = {
         'user': user,

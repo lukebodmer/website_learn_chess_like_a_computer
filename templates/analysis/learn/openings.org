@@ -1,10 +1,10 @@
 #+TITLE: Openings Deep Dive
 When I first started learning chess, opening theory came up a lot. The impression I got is that there is some specific, universal, almost mathematical classification to the beginning moves of chess games.
-(show video of Ana cramlin against magnus? casually commenting on how one opening has transitioned to the next)
+(YOUTUBE: show video of Ana cramlin against magnus? casually commenting on how one opening has transitioned to the next)
 (cut to some other video)
 
 It turns out, its not so simple. Classifying chess openings is a bit of a math problem, a bit of an art, and a bit of a social and historic relic. Generally, grand masters consider the game to be in the opening phase if they are making moves that are documented "book moves".
-(insert a clip here)
+(YOUTUBE insert a clip here)
 
 What "book" are they talking about? The Encyclopaedia of Chess Openings, (ECO)? Or maybe the NIC-Key (New in Chess Key classification system)? Basically it just means any respectable opening theory either played or written, usually written by a grandmaster. The earliest of these books are over 500 years old, including the "Luis Ramírez de Lucena", written around 1497, and the "Göttingen manuscript" written around 1490 which established what we now call the Ruy Lopez, Queen's Gambit Accepted, and more. More recent developments include the Magnus Carlsen variation of the scilian that he first used in 2018 (INSERT CLIP). Or the Jobava London, first played in 1882, but only made it into the opening theory around 2019.
 
@@ -64,3 +64,6 @@ ECO codes aren't perfect, and they aren't as mathematically precise as they migh
 * References
 1. https://www.newinchess.com/media/wysiwyg/product_pdf/8831.pdf
 2. https://www.nature.com/articles/s41598-023-31658-w
+
+* Youtube clips
+- i played magnus carlsen -anna cramling (ooh catalan @0:57)

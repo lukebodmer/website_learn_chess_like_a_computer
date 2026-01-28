@@ -272,6 +272,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   const [boardSize, setBoardSize] = useState<number>(400);
   const [sortBy, setSortBy] = useState<'percentile' | 'name' | 'games'>('percentile');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [fetchedOpeningStatsData, setFetchedOpeningStatsData] = useState<OpeningStatsData | null>(openingStatsData);
 
   // Responsive board size based on window width
   useEffect(() => {
@@ -341,6 +342,40 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
 
     fetchCanonicalOpenings();
   }, []);
+
+  // Fetch opening stats data if not provided
+  useEffect(() => {
+    if (openingStatsData) {
+      setFetchedOpeningStatsData(openingStatsData);
+      return;
+    }
+
+    const fetchOpeningStatsData = async () => {
+      try {
+        // Calculate average ELO from filtered games to determine which file to fetch
+        const avgElo = calculateAverageElo(filteredGames, username);
+
+        // Determine ELO range file to fetch
+        let eloRange = '700-800'; // default
+        if (avgElo !== null) {
+          if (avgElo < 600) {
+            eloRange = '0-600';
+          } else if (avgElo >= 700 && avgElo < 800) {
+            eloRange = '700-800';
+          }
+          // Add more ranges as needed
+        }
+
+        const response = await fetch(`/static/data/top_100_opening_stats/${eloRange}.json`);
+        const data: OpeningStatsData = await response.json();
+        setFetchedOpeningStatsData(data);
+      } catch (error) {
+        console.error('Error fetching opening stats data:', error);
+      }
+    };
+
+    fetchOpeningStatsData();
+  }, [filteredGames, username, openingStatsData]);
 
   // Find base opening when selected opening changes
   useEffect(() => {
@@ -542,8 +577,8 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
     // Convert to array (will sort after calculating percentiles)
     const openingsData = Array.from(openingsMap.values());
 
-    // Calculate percentiles for each opening if openingStatsData is available
-    if (openingStatsData) {
+    // Calculate percentiles for each opening if fetchedOpeningStatsData is available
+    if (fetchedOpeningStatsData) {
       // Determine which time control to use based on current filter
       const speedFilter = gameFilterManager.getCurrentSpeedFilter();
       let timeControl: string | null = null;
@@ -565,10 +600,10 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         timeControl = speedFilter[0];
       }
 
-      if (timeControl && openingStatsData[timeControl]) {
+      if (timeControl && fetchedOpeningStatsData[timeControl]) {
         openingsData.forEach(opening => {
           // Try to find the opening stats using the base name first
-          let openingStats = openingStatsData[timeControl!][opening.baseName];
+          let openingStats = fetchedOpeningStatsData[timeControl!][opening.baseName];
 
           // If not found, the base name might not be in the data file
           // (since the new format only includes the top 100 openings with full names)
@@ -631,7 +666,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       openingsData,
       totalGames: validGameCount
     };
-  }, [filteredGames, username, currentFilter, openingStatsData]);
+  }, [filteredGames, username, currentFilter, fetchedOpeningStatsData]);
 
   // Sort openings based on the selected sort method and direction
   const sortedOpeningsData = useMemo(() => {
@@ -1034,21 +1069,21 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 let popAvgMistakes = 0;
                 let popAvgBlunders = 0;
 
-                if (openingStatsData && timeControl && selectedOpening) {
-                  // openingStatsData is organized by time control
-                  if (openingStatsData[timeControl]) {
+                if (fetchedOpeningStatsData && timeControl && selectedOpening) {
+                  // fetchedOpeningStatsData is organized by time control
+                  if (fetchedOpeningStatsData[timeControl]) {
                     // Determine which opening to look up based on selected variation
                     let lookupKey = selectedOpening.baseName;
 
                     // If a specific variation is selected (not base), try to find it in the data
                     if (selectedVariationName && selectedVariationName !== '__base__') {
                       // First try exact match with the variation name
-                      if (openingStatsData[timeControl][selectedVariationName]) {
+                      if (fetchedOpeningStatsData[timeControl][selectedVariationName]) {
                         lookupKey = selectedVariationName;
                       }
                     }
 
-                    const openingStats = openingStatsData[timeControl][lookupKey];
+                    const openingStats = fetchedOpeningStatsData[timeControl][lookupKey];
 
                     if (openingStats) {
                       popAvgInaccuracies = openingStats.opening_inaccuracies_per_game?.mean || 0;

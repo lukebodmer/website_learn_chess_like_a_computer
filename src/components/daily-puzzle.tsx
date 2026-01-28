@@ -51,6 +51,11 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
   const [orientation, setOrientation] = useState<'white' | 'black'>('white')
   const [lastMoveSquares, setLastMoveSquares] = useState<{ from: string, to: string } | null>(null)
   const [boardTheme, setBoardTheme] = useState<BoardTheme>(getCurrentBoardTheme())
+  const [promotionData, setPromotionData] = useState<{
+    from: string,
+    to: string,
+    color: 'w' | 'b'
+  } | null>(null)
 
   // Listen for board theme changes
   useEffect(() => {
@@ -183,6 +188,24 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
           const piece = chess.get(selectedSquare)
           if (!piece) return
 
+          // Check for pawn promotion
+          if (piece.type === 'p') {
+            const toRank = parseInt(square[1])
+            const isPromotion = (piece.color === 'w' && toRank === 8) || (piece.color === 'b' && toRank === 1)
+
+            if (isPromotion) {
+              // Test if move is legal
+              const testMove = chess.move({ from: selectedSquare, to: square, promotion: 'q' })
+              if (testMove) {
+                chess.undo() // Undo the test move
+                setPromotionData({ from: selectedSquare, to: square, color: piece.color })
+                setSelectedSquare(null)
+                setLegalMoves([])
+                return
+              }
+            }
+          }
+
           // Check if this move would be correct before making it
           const solutionMoves = getSolutionMoves()
 
@@ -278,6 +301,81 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         setLegalMoves(moves.map(move => move.to))
       }
     }
+  }
+
+  const handlePromotion = (promotionPiece: 'q' | 'r' | 'b' | 'n') => {
+    if (!promotionData || !puzzleData) return
+
+    const solutionMoves = getSolutionMoves()
+    const piece = chess.get(promotionData.from)
+    if (!piece) return
+
+    // Try the move with the selected promotion piece
+    const testMove = chess.move({
+      from: promotionData.from,
+      to: promotionData.to,
+      promotion: promotionPiece
+    })
+
+    if (testMove) {
+      const isCorrect = solutionMoves[puzzleState.currentMoveIndex] === testMove.san
+
+      if (isCorrect) {
+        // Correct move - clear hints and animate it
+        setHintLevel(0)
+        setHighlightedSquares([])
+        setArrows([])
+
+        setAnimationData({
+          piece: piece,
+          from: promotionData.from,
+          to: promotionData.to
+        })
+
+        // Prepare position update for after animation
+        const newPosition = chess.fen()
+        setPendingPositionUpdate(newPosition)
+
+        const newUserMoves = [...puzzleState.userMoves, testMove.san]
+        const newMoveIndex = puzzleState.currentMoveIndex + 1
+
+        // Prepare state update for after animation
+        setPendingStateUpdate({
+          type: 'userMove',
+          data: {
+            status: 'solving',
+            userMoves: newUserMoves,
+            currentMoveIndex: newMoveIndex,
+            isCorrect: true,
+            solutionMoves,
+            nextMoveIndex: newMoveIndex
+          }
+        })
+      } else {
+        // Incorrect move - undo and animate back
+        chess.undo()
+
+        setPuzzleState(prev => ({
+          ...prev,
+          status: 'failed'
+        }))
+
+        // Animate piece back
+        setAnimationData({
+          piece: piece,
+          from: promotionData.to,
+          to: promotionData.from
+        })
+
+        // Set ready state after animation
+        setPendingStateUpdate({
+          type: 'puzzleState',
+          data: { status: 'ready' }
+        })
+      }
+    }
+
+    setPromotionData(null)
   }
 
   const handleAnimationComplete = () => {
@@ -382,6 +480,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
       setHintLevel(0)
       setHighlightedSquares([])
       setArrows([])
+      setPromotionData(null)
     }
   }
 
@@ -514,7 +613,8 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      width: '100%'
+      width: '100%',
+      position: 'relative'
     }}>
       {/* Header */}
       <div style={{
@@ -530,24 +630,84 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
         </div>
       </div>
 
-      {/* Chess Board */}
-      <BaseChessBoard
-        size={size}
-        position={position}
-        pieceTheme={pieceTheme}
-        orientation={orientation}
-        coordinates={true}
-        interactive={puzzleState.status === 'ready' || puzzleState.status === 'solving'}
-        selectedSquare={selectedSquare}
-        legalMoves={legalMoves}
-        highlightedSquares={highlightedSquares}
-        arrows={arrows}
-        lastMove={lastMoveSquares}
-        animationData={animationData}
-        boardTheme={boardTheme}
-        onSquareClick={handleSquareClick}
-        onAnimationComplete={handleAnimationComplete}
-      />
+      {/* Chess Board Container */}
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <BaseChessBoard
+          size={size}
+          position={position}
+          pieceTheme={pieceTheme}
+          orientation={orientation}
+          coordinates={true}
+          interactive={!promotionData && (puzzleState.status === 'ready' || puzzleState.status === 'solving')}
+          selectedSquare={selectedSquare}
+          legalMoves={legalMoves}
+          highlightedSquares={highlightedSquares}
+          arrows={arrows}
+          lastMove={lastMoveSquares}
+          animationData={animationData}
+          boardTheme={boardTheme}
+          onSquareClick={handleSquareClick}
+          onAnimationComplete={handleAnimationComplete}
+        />
+
+        {/* Promotion Popup */}
+        {promotionData && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10
+            }}
+          >
+            <div style={{
+              color: 'white',
+              fontSize: `${size / 25}px`,
+              marginBottom: `${size / 40}px`,
+              textAlign: 'center'
+            }}>
+              Choose promotion piece:
+            </div>
+            <div style={{ display: 'flex', gap: `${size * 0.02}px` }}>
+              {['q', 'r', 'b', 'n'].map((piece) => (
+                <button
+                  key={piece}
+                  onClick={() => handlePromotion(piece as 'q' | 'r' | 'b' | 'n')}
+                  style={{
+                    width: `${size * 0.12}px`,
+                    height: `${size * 0.12}px`,
+                    border: 'none',
+                    borderRadius: '4px',
+                    backgroundColor: 'rgba(200, 200, 200, 0.5)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: `${size * 0.006}px`
+                  }}
+                >
+                  <img
+                    src={`${pieceTheme || '/static/images/chesspieces/default/'}${promotionData.color}${piece.toUpperCase()}.svg`}
+                    alt={piece}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      imageRendering: 'crisp-edges'
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Controls */}
       <div style={{

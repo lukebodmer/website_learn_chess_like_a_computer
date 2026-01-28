@@ -19,6 +19,7 @@ import CustomPuzzles from './components/custom-puzzles'
 import PrincipleSelector from './components/principle-selector'
 import OpeningStatsByElo from './components/opening-stats-by-elo'
 import LearnTopicBoard from './components/learn-topic-board'
+import LearnBuddyBoard from './components/learn-buddy-board'
 import GenerateReport from './components/generate-report'
 import { gameFilterManager } from './game-filter-manager'
 import { eloDataManager } from './elo-data-manager'
@@ -604,6 +605,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store the root reference globally
     ;(window as any).openingStatsByEloRoot = root
     ;(window as any).OpeningStatsByElo = OpeningStatsByElo
+  }
+
+  // Mount LearnBuddyBoard on learn pages (e.g., evaluations)
+  const learnBuddyBoardContainer = document.getElementById('learn-buddy-board-root')
+  if (learnBuddyBoardContainer) {
+    const root = ReactDOM.createRoot(learnBuddyBoardContainer)
+    root.render(<LearnBuddyBoard size={400} />)
+
+    // Store the root reference globally
+    ;(window as any).learnBuddyBoardRoot = root
   }
 
   // Mount LearnTopicBoard instances on learn page

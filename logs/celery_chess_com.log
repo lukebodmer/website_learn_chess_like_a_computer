@@ -35685,3 +35685,950 @@ Trying again in 2.00 seconds... (1/100)
 [FEN "6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q w - - 0 1"]
 
 1. Qa8+ Kh7 2. Qh8# *', 'url': 'https://www.chess.com/daily/2026-01-26', 'image': 'https://www.chess.com/dynboard?fen=6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q%20w%20-%20-%200%201&size=2', 'solution': ['Qa8+', 'Kh7', 'Qh8#'], 'publish_time': 1769414400, 'publish_datetime': datetime.datetime(2026, 1, 26, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-27 00:38:28,112: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 00:38:28,113: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 00:38:29,117: INFO/MainProcess] mingle: all alone
+[2026-01-27 00:38:29,123: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-27 00:39:35,850: INFO/MainProcess] sync with lichess_worker@nemo
+[2026-01-27 00:39:35,858: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 00:39:35,859: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 00:39:36,864: INFO/MainProcess] mingle: sync with 1 nodes
+[2026-01-27 00:39:36,864: INFO/MainProcess] mingle: sync complete
+[2026-01-27 00:39:36,869: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-27 00:56:38,112: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[3b331d08-5c83-4d47-818e-a1c4c8ca7ff2] received
+[2026-01-27 00:56:38,120: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 00:56:38,120: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 00:56:38,360: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-27 00:56:38,361: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[3b331d08-5c83-4d47-818e-a1c4c8ca7ff2] succeeded in 0.2485277850064449s: {'title': 'Corner of Your Eye', 'fen': '6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q w - - 0 1', 'pgn': '[Result "*"]
+[FEN "6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q w - - 0 1"]
+
+1. Qa8+ Kh7 2. Qh8# *', 'url': 'https://www.chess.com/daily/2026-01-26', 'image': 'https://www.chess.com/dynboard?fen=6k1/5p2/6b1/5q2/1p5b/pP6/P1P1nP2/BK5Q%20w%20-%20-%200%201&size=2', 'solution': ['Qa8+', 'Kh7', 'Qh8#'], 'publish_time': 1769414400, 'publish_datetime': datetime.datetime(2026, 1, 26, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-27 16:32:47,126: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[6f263d1d-4e82-4fe1-bbfa-14256ccc77de] received
+[2026-01-27 16:32:47,133: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 16:32:47,133: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 16:32:47,317: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-27 16:32:47,318: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[6f263d1d-4e82-4fe1-bbfa-14256ccc77de] succeeded in 0.19167611002922058s: {'title': 'All Together Now', 'fen': '1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49', 'pgn': '[White "geelse_zot"]
+[Black "Daily Puzzle Inspiration"]
+[Result "1-0"]
+[FEN "1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49"]
+
+49. Re8+ Kf7 50. e6# 1-0', 'url': 'https://www.chess.com/daily/2026-01-27', 'image': 'https://www.chess.com/dynboard?fen=1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5%20w%20-%20-%201%2049&size=2', 'solution': ['Re8+', 'Kf7', 'e6#'], 'publish_time': 1769500800, 'publish_datetime': datetime.datetime(2026, 1, 27, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-27 17:04:04,468: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[664d8af1-1a85-4d5d-84a7-cda584f95e85] received
+[2026-01-27 17:04:04,469: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:04:04,469: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:04:04,853: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-27 17:04:04,854: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[664d8af1-1a85-4d5d-84a7-cda584f95e85] succeeded in 0.38605404197005555s: {'title': 'All Together Now', 'fen': '1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49', 'pgn': '[White "geelse_zot"]
+[Black "Daily Puzzle Inspiration"]
+[Result "1-0"]
+[FEN "1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49"]
+
+49. Re8+ Kf7 50. e6# 1-0', 'url': 'https://www.chess.com/daily/2026-01-27', 'image': 'https://www.chess.com/dynboard?fen=1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5%20w%20-%20-%201%2049&size=2', 'solution': ['Re8+', 'Kf7', 'e6#'], 'publish_time': 1769500800, 'publish_datetime': datetime.datetime(2026, 1, 27, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-27 17:16:46,541: INFO/MainProcess] Task analysis.tasks.fetch_chess_com_games_task[7c7a0122-e1ac-48dc-a95b-071585374ddb] received
+[2026-01-27 17:16:46,542: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:46,542: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:46,751: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:46,751: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:47,099: WARNING/MainProcess] Added qualified game (1/100): blitz from 2026/01
+[2026-01-27 17:16:47,099: WARNING/MainProcess] Added qualified game (2/100): blitz from 2026/01
+[2026-01-27 17:16:47,100: WARNING/MainProcess] Checked 2026/01: 2 qualified games collected so far (API calls: 1)
+[2026-01-27 17:16:47,100: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:47,100: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:47,344: WARNING/MainProcess] Added qualified game (3/100): blitz from 2025/10
+[2026-01-27 17:16:47,345: WARNING/MainProcess] Checked 2025/10: 3 qualified games collected so far (API calls: 2)
+[2026-01-27 17:16:47,345: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:47,345: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:47,713: WARNING/MainProcess] Checked 2023/12: 3 qualified games collected so far (API calls: 3)
+[2026-01-27 17:16:47,714: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:47,714: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:48,430: WARNING/MainProcess] Added qualified game (4/100): blitz from 2023/07
+[2026-01-27 17:16:48,430: WARNING/MainProcess] Added qualified game (5/100): rapid from 2023/07
+[2026-01-27 17:16:48,430: WARNING/MainProcess] Added qualified game (6/100): rapid from 2023/07
+[2026-01-27 17:16:48,430: WARNING/MainProcess] Added qualified game (7/100): rapid from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (8/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (9/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (10/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (11/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (12/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (13/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (14/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (15/100): bullet from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (16/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (17/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (18/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (19/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (20/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (21/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (22/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (23/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (24/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (25/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (26/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (27/100): rapid from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (28/100): blitz from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (29/100): rapid from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (30/100): bullet from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Added qualified game (31/100): bullet from 2023/07
+[2026-01-27 17:16:48,431: WARNING/MainProcess] Checked 2023/07: 31 qualified games collected so far (API calls: 4)
+[2026-01-27 17:16:48,432: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:16:48,432: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (32/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (33/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (34/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (35/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (36/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (37/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (38/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (39/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (40/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (41/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (42/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (43/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (44/100): bullet from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (45/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (46/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (47/100): bullet from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (48/100): bullet from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (49/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (50/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (51/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (52/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (53/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (54/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (55/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (56/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (57/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (58/100): blitz from 2023/06
+[2026-01-27 17:16:49,559: WARNING/MainProcess] Added qualified game (59/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (60/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (61/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (62/100): bullet from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (63/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (64/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (65/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (66/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (67/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (68/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (69/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (70/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (71/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (72/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (73/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (74/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (75/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (76/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (77/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (78/100): bullet from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (79/100): bullet from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (80/100): bullet from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (81/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (82/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (83/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (84/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (85/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (86/100): bullet from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (87/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (88/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (89/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (90/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (91/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (92/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (93/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (94/100): blitz from 2023/06
+[2026-01-27 17:16:49,560: WARNING/MainProcess] Added qualified game (95/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Added qualified game (96/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Added qualified game (97/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Added qualified game (98/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Added qualified game (99/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Added qualified game (100/100): blitz from 2023/06
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Checked 2023/06: 100 qualified games collected so far (API calls: 5)
+[2026-01-27 17:16:49,561: WARNING/MainProcess] Final result: 100 qualified games collected from 102 total games using 5 API calls
+[2026-01-27 17:16:49,575: INFO/MainProcess] Task analysis.tasks.fetch_chess_com_games_task[7c7a0122-e1ac-48dc-a95b-071585374ddb] succeeded in 3.0336082110297866s: {'success': True, 'games_count': 100, 'game_dataset_id': 236, 'date_range': 'June 01, 2023 - January 12, 2026', 'created_at': 'January 27, 2026 at 05:16 PM', 'data_size': 309903, 'elo_ratings': {'blitz': 783, 'rapid': 868, 'bullet': 702}, 'ndjson_data': '{"url": "https://www.chess.com/game/live/147769140458", "pgn": "[Event \"Live Chess\"]\n[Site \"Chess.com\"]\n[Date \"2026.01.09\"]\n[Round \"-\"]\n[White \"QuizzicalPuppet\"]\n[Black \"megaloblasto\"]\n[Result \"1-0\"]\n[CurrentPosition \"8/4P2r/5Q2/7k/8/3P1PPK/2q4P/8 b - - 0 64\"]\n[Timezone \"UTC\"]\n[ECO \"C28\"]\n[ECOUrl \"https://www.chess.com/openings/Bishops-Opening-Berlin-Vienna-Hybrid-Hromadka-Variation\"]\n[UTCDate \"2026.01.09\"]\n[UTCTime \"00:33:37\"]\n[WhiteElo \"918\"]\n[BlackElo \"783\"]\n[TimeControl \"180+2\"]\n[Termination \"QuizzicalPuppet won on time\"]\n[StartTime \"00:33:37\"]\n[EndDate \"2026.01.09\"]\n[EndTime \"00:44:04\"]\n[Link \"https://www.chess.com/game/live/147769140458\"]\n\n1. e4 {[%clk 0:03:01.8]} 1... e5 {[%clk 0:02:58.9]}...', ...
+[2026-01-27 17:16:53,668: WARNING/MainProcess] 📊 Processing task 157 for user lj
+[2026-01-27 17:16:53,691: WARNING/MainProcess] Loaded 3628 openings from database
+[2026-01-27 17:16:54,731: WARNING/MainProcess] 📊 Created new AnalysisReport 159 for task 157
+[2026-01-27 17:16:56,886: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:16:56,886: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:16:58,198: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:16:58,199: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:16:59,573: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:16:59,573: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:16:59,573: INFO/MainProcess] Smart batching: 5130 positions in 65 batches of ~80, 150 concurrent requests
+[2026-01-27 17:16:59,573: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,574: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,574: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,574: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,574: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,574: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,574: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,574: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,574: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,575: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,575: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,575: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,575: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,576: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,576: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,576: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,576: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,576: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,576: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,577: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,577: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,577: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,577: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,577: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,577: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,578: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,578: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,578: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,578: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,578: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,579: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,579: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,579: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,579: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,579: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,579: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,579: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,580: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,580: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,580: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,580: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,581: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,581: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,581: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,581: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,581: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,581: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,581: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,582: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,582: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,582: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,582: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,582: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,582: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,582: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,583: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,583: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,583: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,583: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,583: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,583: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,584: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,584: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,585: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,585: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,585: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,585: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,585: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,585: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,586: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,586: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,586: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,586: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,586: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,586: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,586: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,587: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,587: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,587: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,587: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,587: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,587: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,587: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,587: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,588: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,588: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,588: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,588: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,588: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,589: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,589: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,589: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,589: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,589: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,589: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,589: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,589: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,589: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,590: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,590: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,590: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,591: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,591: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,591: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,591: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,591: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,591: INFO/MainProcess] Sending 80 positions to GCP (depth=12)
+[2026-01-27 17:16:59,591: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,592: INFO/MainProcess] Sending 10 positions to GCP (depth=12)
+[2026-01-27 17:16:59,592: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,592: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,592: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,592: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,592: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,593: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,594: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,595: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,596: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,596: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,596: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,596: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,596: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,597: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,597: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,597: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,597: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,598: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 80 positions
+[2026-01-27 17:16:59,599: WARNING/MainProcess] 🔥 DEBUG: Making GCP API call with 10 positions
+[2026-01-27 17:16:59,599: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,599: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,599: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,600: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,600: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,600: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,601: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,601: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,601: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,601: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,602: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,602: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,602: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,603: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,603: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,604: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,604: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,604: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,604: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,605: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,605: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,605: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,606: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,606: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,606: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:16:59,607: WARNING/MainProcess] 🔥 DEBUG: API attempt 1/3
+[2026-01-27 17:17:01,756: INFO/MainProcess] GCP evaluation complete in 2.15s - Success: 10, Failed: 0
+[2026-01-27 17:17:01,756: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 2.15s - 10 evals
+[2026-01-27 17:17:01,758: INFO/MainProcess] GCP evaluation complete in 2.17s - Success: 80, Failed: 0
+[2026-01-27 17:17:01,758: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 2.17s - 80 evals
+[2026-01-27 17:17:01,802: INFO/MainProcess] Batch complete: 10 positions - Total: 10/5130
+[2026-01-27 17:17:02,122: INFO/MainProcess] Batch complete: 80 positions - Total: 90/5130
+[2026-01-27 17:17:02,578: INFO/MainProcess] GCP evaluation complete in 2.97s - Success: 80, Failed: 0
+[2026-01-27 17:17:02,578: INFO/MainProcess] GCP evaluation complete in 2.97s - Success: 80, Failed: 0
+[2026-01-27 17:17:02,578: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 2.97s - 80 evals
+[2026-01-27 17:17:02,578: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 2.97s - 80 evals
+[2026-01-27 17:17:02,580: INFO/MainProcess] GCP evaluation complete in 2.99s - Success: 80, Failed: 0
+[2026-01-27 17:17:02,580: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 2.99s - 80 evals
+[2026-01-27 17:17:02,903: INFO/MainProcess] Batch complete: 80 positions - Total: 170/5130
+[2026-01-27 17:17:03,210: INFO/MainProcess] GCP evaluation complete in 3.61s - Success: 80, Failed: 0
+[2026-01-27 17:17:03,210: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 3.61s - 80 evals
+[2026-01-27 17:17:03,221: INFO/MainProcess] Batch complete: 80 positions - Total: 250/5130
+[2026-01-27 17:17:03,226: INFO/MainProcess] GCP evaluation complete in 3.65s - Success: 80, Failed: 0
+[2026-01-27 17:17:03,226: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 3.65s - 80 evals
+[2026-01-27 17:17:03,546: INFO/MainProcess] Batch complete: 80 positions - Total: 330/5130
+[2026-01-27 17:17:03,640: INFO/MainProcess] GCP evaluation complete in 4.05s - Success: 80, Failed: 0
+[2026-01-27 17:17:03,640: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 4.05s - 80 evals
+[2026-01-27 17:17:03,843: INFO/MainProcess] GCP evaluation complete in 4.25s - Success: 80, Failed: 0
+[2026-01-27 17:17:03,843: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 4.25s - 80 evals
+[2026-01-27 17:17:03,891: INFO/MainProcess] Batch complete: 80 positions - Total: 410/5130
+[2026-01-27 17:17:04,221: INFO/MainProcess] Batch complete: 80 positions - Total: 490/5130
+[2026-01-27 17:17:04,442: INFO/MainProcess] GCP evaluation complete in 4.87s - Success: 80, Failed: 0
+[2026-01-27 17:17:04,443: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 4.87s - 80 evals
+[2026-01-27 17:17:04,550: INFO/MainProcess] Batch complete: 80 positions - Total: 570/5130
+[2026-01-27 17:17:04,643: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:04,643: INFO/MainProcess] GCP evaluation complete in 5.04s - Success: 80, Failed: 0
+[2026-01-27 17:17:04,643: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 5.04s - 80 evals
+[2026-01-27 17:17:05,202: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:05,203: INFO/MainProcess] GCP evaluation complete in 5.61s - Success: 80, Failed: 0
+[2026-01-27 17:17:05,203: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 5.61s - 80 evals
+[2026-01-27 17:17:05,460: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:05,460: INFO/MainProcess] GCP evaluation complete in 5.86s - Success: 80, Failed: 0
+[2026-01-27 17:17:05,460: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 5.86s - 80 evals
+[2026-01-27 17:17:05,766: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:05,766: INFO/MainProcess] GCP evaluation complete in 6.19s - Success: 80, Failed: 0
+[2026-01-27 17:17:05,766: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 6.19s - 80 evals
+[2026-01-27 17:17:06,097: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:06,097: INFO/MainProcess] GCP evaluation complete in 6.51s - Success: 80, Failed: 0
+[2026-01-27 17:17:06,098: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 6.51s - 80 evals
+[2026-01-27 17:17:06,264: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:06,264: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:06,299: INFO/MainProcess] Batch complete: 80 positions - Total: 650/5130
+[2026-01-27 17:17:06,590: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:06,590: INFO/MainProcess] GCP evaluation complete in 7.01s - Success: 80, Failed: 0
+[2026-01-27 17:17:06,590: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 7.01s - 80 evals
+[2026-01-27 17:17:06,627: INFO/MainProcess] Batch complete: 80 positions - Total: 730/5130
+[2026-01-27 17:17:06,956: INFO/MainProcess] Batch complete: 80 positions - Total: 810/5130
+[2026-01-27 17:17:07,099: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:07,100: INFO/MainProcess] GCP evaluation complete in 7.50s - Success: 80, Failed: 0
+[2026-01-27 17:17:07,100: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 7.50s - 80 evals
+[2026-01-27 17:17:07,304: INFO/MainProcess] Batch complete: 80 positions - Total: 890/5130
+[2026-01-27 17:17:07,477: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:07,478: INFO/MainProcess] GCP evaluation complete in 7.88s - Success: 80, Failed: 0
+[2026-01-27 17:17:07,478: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 7.88s - 80 evals
+[2026-01-27 17:17:07,505: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:07,506: INFO/MainProcess] GCP evaluation complete in 7.90s - Success: 80, Failed: 0
+[2026-01-27 17:17:07,506: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 7.90s - 80 evals
+[2026-01-27 17:17:07,629: INFO/MainProcess] Batch complete: 80 positions - Total: 970/5130
+[2026-01-27 17:17:07,814: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:07,814: INFO/MainProcess] GCP evaluation complete in 8.22s - Success: 80, Failed: 0
+[2026-01-27 17:17:07,814: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.22s - 80 evals
+[2026-01-27 17:17:07,964: INFO/MainProcess] Batch complete: 80 positions - Total: 1050/5130
+[2026-01-27 17:17:08,294: INFO/MainProcess] Batch complete: 80 positions - Total: 1130/5130
+[2026-01-27 17:17:08,389: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,390: INFO/MainProcess] GCP evaluation complete in 8.78s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,390: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.78s - 80 evals
+[2026-01-27 17:17:08,405: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,406: INFO/MainProcess] GCP evaluation complete in 8.82s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,406: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.82s - 80 evals
+[2026-01-27 17:17:08,550: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,550: INFO/MainProcess] GCP evaluation complete in 8.97s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,550: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.97s - 80 evals
+[2026-01-27 17:17:08,555: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,555: INFO/MainProcess] GCP evaluation complete in 8.96s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,555: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.96s - 80 evals
+[2026-01-27 17:17:08,559: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,560: INFO/MainProcess] GCP evaluation complete in 8.98s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,560: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.98s - 80 evals
+[2026-01-27 17:17:08,588: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,588: INFO/MainProcess] GCP evaluation complete in 8.99s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,588: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 8.99s - 80 evals
+[2026-01-27 17:17:08,601: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:08,602: INFO/MainProcess] GCP evaluation complete in 9.01s - Success: 80, Failed: 0
+[2026-01-27 17:17:08,602: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.01s - 80 evals
+[2026-01-27 17:17:08,631: INFO/MainProcess] Batch complete: 80 positions - Total: 1210/5130
+[2026-01-27 17:17:08,971: INFO/MainProcess] Batch complete: 80 positions - Total: 1290/5130
+[2026-01-27 17:17:09,014: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,015: INFO/MainProcess] GCP evaluation complete in 9.42s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,015: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.42s - 80 evals
+[2026-01-27 17:17:09,016: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,016: INFO/MainProcess] GCP evaluation complete in 9.42s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,016: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.42s - 80 evals
+[2026-01-27 17:17:09,052: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,053: INFO/MainProcess] GCP evaluation complete in 9.45s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,053: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.45s - 80 evals
+[2026-01-27 17:17:09,087: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,087: INFO/MainProcess] GCP evaluation complete in 9.49s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,087: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.49s - 80 evals
+[2026-01-27 17:17:09,307: INFO/MainProcess] Batch complete: 80 positions - Total: 1370/5130
+[2026-01-27 17:17:09,323: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,323: INFO/MainProcess] GCP evaluation complete in 9.74s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,323: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.74s - 80 evals
+[2026-01-27 17:17:09,372: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,372: INFO/MainProcess] GCP evaluation complete in 9.78s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,372: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.78s - 80 evals
+[2026-01-27 17:17:09,410: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,411: INFO/MainProcess] GCP evaluation complete in 9.83s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,411: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.83s - 80 evals
+[2026-01-27 17:17:09,421: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,422: INFO/MainProcess] GCP evaluation complete in 9.82s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,422: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.82s - 80 evals
+[2026-01-27 17:17:09,457: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,457: INFO/MainProcess] GCP evaluation complete in 9.85s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,457: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 9.85s - 80 evals
+[2026-01-27 17:17:09,634: INFO/MainProcess] Batch complete: 80 positions - Total: 1450/5130
+[2026-01-27 17:17:09,955: INFO/MainProcess] Batch complete: 80 positions - Total: 1530/5130
+[2026-01-27 17:17:09,966: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:09,966: INFO/MainProcess] GCP evaluation complete in 10.36s - Success: 80, Failed: 0
+[2026-01-27 17:17:09,966: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.36s - 80 evals
+[2026-01-27 17:17:10,239: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,240: INFO/MainProcess] GCP evaluation complete in 10.65s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,240: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.65s - 80 evals
+[2026-01-27 17:17:10,273: INFO/MainProcess] Batch complete: 80 positions - Total: 1610/5130
+[2026-01-27 17:17:10,322: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,323: INFO/MainProcess] GCP evaluation complete in 10.72s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,323: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,323: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.72s - 80 evals
+[2026-01-27 17:17:10,323: INFO/MainProcess] GCP evaluation complete in 10.73s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,324: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.73s - 80 evals
+[2026-01-27 17:17:10,408: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,408: INFO/MainProcess] GCP evaluation complete in 10.81s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,408: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.81s - 80 evals
+[2026-01-27 17:17:10,420: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,420: INFO/MainProcess] GCP evaluation complete in 10.82s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,420: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.82s - 80 evals
+[2026-01-27 17:17:10,450: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,451: INFO/MainProcess] GCP evaluation complete in 10.85s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,451: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.85s - 80 evals
+[2026-01-27 17:17:10,556: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,557: INFO/MainProcess] GCP evaluation complete in 10.95s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,557: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 10.95s - 80 evals
+[2026-01-27 17:17:10,596: INFO/MainProcess] Batch complete: 80 positions - Total: 1690/5130
+[2026-01-27 17:17:10,926: INFO/MainProcess] Batch complete: 80 positions - Total: 1770/5130
+[2026-01-27 17:17:10,942: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,943: INFO/MainProcess] GCP evaluation complete in 11.36s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,943: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.36s - 80 evals
+[2026-01-27 17:17:10,975: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:10,976: INFO/MainProcess] GCP evaluation complete in 11.37s - Success: 80, Failed: 0
+[2026-01-27 17:17:10,976: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.37s - 80 evals
+[2026-01-27 17:17:11,011: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,011: INFO/MainProcess] GCP evaluation complete in 11.41s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,011: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.41s - 80 evals
+[2026-01-27 17:17:11,026: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,027: INFO/MainProcess] GCP evaluation complete in 11.42s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,027: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.42s - 80 evals
+[2026-01-27 17:17:11,118: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,118: INFO/MainProcess] GCP evaluation complete in 11.52s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,118: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.52s - 80 evals
+[2026-01-27 17:17:11,153: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,153: INFO/MainProcess] GCP evaluation complete in 11.56s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,153: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.56s - 80 evals
+[2026-01-27 17:17:11,196: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,197: INFO/MainProcess] GCP evaluation complete in 11.61s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,197: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.61s - 80 evals
+[2026-01-27 17:17:11,232: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,233: INFO/MainProcess] GCP evaluation complete in 11.63s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,233: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 11.63s - 80 evals
+[2026-01-27 17:17:11,258: INFO/MainProcess] Batch complete: 80 positions - Total: 1850/5130
+[2026-01-27 17:17:11,579: INFO/MainProcess] Batch complete: 80 positions - Total: 1930/5130
+[2026-01-27 17:17:11,706: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,706: INFO/MainProcess] GCP evaluation complete in 12.11s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,706: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 12.11s - 80 evals
+[2026-01-27 17:17:11,716: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,717: INFO/MainProcess] GCP evaluation complete in 12.13s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,717: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 12.13s - 80 evals
+[2026-01-27 17:17:11,897: INFO/MainProcess] Batch complete: 80 positions - Total: 2010/5130
+[2026-01-27 17:17:11,983: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:11,983: INFO/MainProcess] GCP evaluation complete in 12.38s - Success: 80, Failed: 0
+[2026-01-27 17:17:11,984: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 12.38s - 80 evals
+[2026-01-27 17:17:12,017: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:12,017: INFO/MainProcess] GCP evaluation complete in 12.42s - Success: 80, Failed: 0
+[2026-01-27 17:17:12,017: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 12.42s - 80 evals
+[2026-01-27 17:17:12,219: INFO/MainProcess] Batch complete: 80 positions - Total: 2090/5130
+[2026-01-27 17:17:12,549: INFO/MainProcess] Batch complete: 80 positions - Total: 2170/5130
+[2026-01-27 17:17:12,564: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:12,564: INFO/MainProcess] GCP evaluation complete in 12.97s - Success: 80, Failed: 0
+[2026-01-27 17:17:12,564: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 12.97s - 80 evals
+[2026-01-27 17:17:12,716: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:12,716: INFO/MainProcess] GCP evaluation complete in 13.12s - Success: 80, Failed: 0
+[2026-01-27 17:17:12,716: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 13.12s - 80 evals
+[2026-01-27 17:17:12,909: INFO/MainProcess] Batch complete: 80 positions - Total: 2250/5130
+[2026-01-27 17:17:13,225: INFO/MainProcess] Batch complete: 80 positions - Total: 2330/5130
+[2026-01-27 17:17:13,540: INFO/MainProcess] Batch complete: 80 positions - Total: 2410/5130
+[2026-01-27 17:17:13,549: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:13,550: INFO/MainProcess] GCP evaluation complete in 13.95s - Success: 80, Failed: 0
+[2026-01-27 17:17:13,550: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 13.95s - 80 evals
+[2026-01-27 17:17:14,145: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,146: INFO/MainProcess] GCP evaluation complete in 14.56s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,146: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.56s - 80 evals
+[2026-01-27 17:17:14,176: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,177: INFO/MainProcess] GCP evaluation complete in 14.60s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,177: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.60s - 80 evals
+[2026-01-27 17:17:14,182: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,182: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,182: INFO/MainProcess] GCP evaluation complete in 14.58s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,182: INFO/MainProcess] GCP evaluation complete in 14.58s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,182: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.58s - 80 evals
+[2026-01-27 17:17:14,182: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.58s - 80 evals
+[2026-01-27 17:17:14,217: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,217: INFO/MainProcess] GCP evaluation complete in 14.62s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,217: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.62s - 80 evals
+[2026-01-27 17:17:14,252: WARNING/MainProcess] Connection pool is full, discarding connection: stockfish-api-552342702662.us-west1.run.app. Connection pool size: 10
+[2026-01-27 17:17:14,253: INFO/MainProcess] GCP evaluation complete in 14.65s - Success: 80, Failed: 0
+[2026-01-27 17:17:14,253: WARNING/MainProcess] ✅ DEBUG: API call SUCCESS in 14.65s - 80 evals
+[2026-01-27 17:17:14,924: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:14,924: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:15,364: INFO/MainProcess] Batch complete: 80 positions - Total: 2490/5130
+[2026-01-27 17:17:15,690: INFO/MainProcess] Batch complete: 80 positions - Total: 2570/5130
+[2026-01-27 17:17:16,014: INFO/MainProcess] Batch complete: 80 positions - Total: 2650/5130
+[2026-01-27 17:17:16,350: INFO/MainProcess] Batch complete: 80 positions - Total: 2730/5130
+[2026-01-27 17:17:16,682: INFO/MainProcess] Batch complete: 80 positions - Total: 2810/5130
+[2026-01-27 17:17:17,016: INFO/MainProcess] Batch complete: 80 positions - Total: 2890/5130
+[2026-01-27 17:17:17,332: INFO/MainProcess] Batch complete: 80 positions - Total: 2970/5130
+[2026-01-27 17:17:17,652: INFO/MainProcess] Batch complete: 80 positions - Total: 3050/5130
+[2026-01-27 17:17:17,977: INFO/MainProcess] Batch complete: 80 positions - Total: 3130/5130
+[2026-01-27 17:17:18,322: INFO/MainProcess] Batch complete: 80 positions - Total: 3210/5130
+[2026-01-27 17:17:18,647: INFO/MainProcess] Batch complete: 80 positions - Total: 3290/5130
+[2026-01-27 17:17:18,966: INFO/MainProcess] Batch complete: 80 positions - Total: 3370/5130
+[2026-01-27 17:17:19,286: INFO/MainProcess] Batch complete: 80 positions - Total: 3450/5130
+[2026-01-27 17:17:20,741: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:20,742: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:20,987: INFO/MainProcess] Batch complete: 80 positions - Total: 3530/5130
+[2026-01-27 17:17:21,311: INFO/MainProcess] Batch complete: 80 positions - Total: 3610/5130
+[2026-01-27 17:17:21,641: INFO/MainProcess] Batch complete: 80 positions - Total: 3690/5130
+[2026-01-27 17:17:21,964: INFO/MainProcess] Batch complete: 80 positions - Total: 3770/5130
+[2026-01-27 17:17:22,288: INFO/MainProcess] Batch complete: 80 positions - Total: 3850/5130
+[2026-01-27 17:17:23,618: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:23,618: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:23,962: INFO/MainProcess] Batch complete: 80 positions - Total: 3930/5130
+[2026-01-27 17:17:24,289: INFO/MainProcess] Batch complete: 80 positions - Total: 4010/5130
+[2026-01-27 17:17:25,819: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:25,819: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:25,972: INFO/MainProcess] Batch complete: 80 positions - Total: 4090/5130
+[2026-01-27 17:17:27,404: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:27,404: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:27,682: INFO/MainProcess] Batch complete: 80 positions - Total: 4170/5130
+[2026-01-27 17:17:28,048: INFO/MainProcess] Batch complete: 80 positions - Total: 4250/5130
+[2026-01-27 17:17:29,610: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:29,611: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:29,797: INFO/MainProcess] Batch complete: 80 positions - Total: 4330/5130
+[2026-01-27 17:17:30,121: INFO/MainProcess] Batch complete: 80 positions - Total: 4410/5130
+[2026-01-27 17:17:30,457: INFO/MainProcess] Batch complete: 80 positions - Total: 4490/5130
+[2026-01-27 17:17:31,986: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:31,987: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:33,384: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:33,384: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:33,497: INFO/MainProcess] Batch complete: 80 positions - Total: 4570/5130
+[2026-01-27 17:17:33,817: INFO/MainProcess] Batch complete: 80 positions - Total: 4650/5130
+[2026-01-27 17:17:35,285: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:35,286: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:35,500: INFO/MainProcess] Batch complete: 80 positions - Total: 4730/5130
+[2026-01-27 17:17:36,970: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:36,970: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:38,469: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:38,469: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:40,041: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:40,041: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:40,101: INFO/MainProcess] Batch complete: 80 positions - Total: 4810/5130
+[2026-01-27 17:17:41,597: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:41,597: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:42,988: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:42,989: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:43,109: INFO/MainProcess] Batch complete: 80 positions - Total: 4890/5130
+[2026-01-27 17:17:44,468: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:44,468: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:45,849: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:45,850: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:47,266: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:47,266: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:48,777: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:48,778: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:50,164: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:50,164: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:51,543: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:51,543: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:53,029: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:53,030: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:54,367: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:54,367: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:55,737: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:55,737: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:57,119: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:57,119: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:58,459: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:58,459: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:17:59,767: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:17:59,767: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:01,119: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:01,119: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:02,597: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:02,597: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:02,623: INFO/MainProcess] Batch complete: 80 positions - Total: 4970/5130
+[2026-01-27 17:18:03,914: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:03,914: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:05,230: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:05,230: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:06,517: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:06,517: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:07,943: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:07,944: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:09,360: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:09,361: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:10,733: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:10,733: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:12,081: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:12,081: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:13,456: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:13,456: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:14,801: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:14,801: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:16,122: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:16,122: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:17,450: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:17,450: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:18,851: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:18,851: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:20,171: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:20,172: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:21,580: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:21,580: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:23,106: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:23,106: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:24,520: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:24,520: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:25,950: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:25,950: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:27,346: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:27,346: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:28,149: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[4dc76ce0-bd7d-4b4f-8880-83c48602b248] received
+[2026-01-27 17:18:28,151: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-27 17:18:28,151: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-27 17:18:28,342: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-27 17:18:28,343: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[4dc76ce0-bd7d-4b4f-8880-83c48602b248] succeeded in 0.1928173850174062s: {'title': 'All Together Now', 'fen': '1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49', 'pgn': '[White "geelse_zot"]
+[Black "Daily Puzzle Inspiration"]
+[Result "1-0"]
+[FEN "1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49"]
+
+49. Re8+ Kf7 50. e6# 1-0', 'url': 'https://www.chess.com/daily/2026-01-27', 'image': 'https://www.chess.com/dynboard?fen=1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5%20w%20-%20-%201%2049&size=2', 'solution': ['Re8+', 'Kf7', 'e6#'], 'publish_time': 1769500800, 'publish_datetime': datetime.datetime(2026, 1, 27, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-27 17:18:28,705: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:28,705: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:28,743: INFO/MainProcess] Batch complete: 80 positions - Total: 5050/5130
+[2026-01-27 17:18:30,054: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:30,055: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:31,418: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:31,418: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:32,724: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:32,724: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:34,027: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:34,027: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:35,343: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:35,344: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:36,687: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:36,687: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:38,291: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:38,291: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:39,633: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:39,633: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:41,137: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:41,137: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:42,508: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:42,508: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:43,849: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:43,850: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:45,187: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:45,187: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:46,518: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:46,518: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:47,866: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:47,866: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:49,210: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:49,211: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:50,576: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:50,576: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:51,979: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:51,979: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:53,328: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:53,328: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:54,701: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:54,701: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:56,151: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:56,151: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:57,498: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:57,498: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:18:58,843: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:18:58,843: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:00,175: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:00,175: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:01,894: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:01,894: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:03,583: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:03,583: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:05,005: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:05,006: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:06,410: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:06,410: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:07,796: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:07,796: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:09,262: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:09,262: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:10,707: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:10,707: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:12,112: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:12,112: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:13,795: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:13,795: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:15,163: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:15,163: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:16,500: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:16,500: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:17,881: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:17,881: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:19,310: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:19,310: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:20,846: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:20,846: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:22,194: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:22,194: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:23,585: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:23,585: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:24,965: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:24,965: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:26,339: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:26,339: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:27,740: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:27,740: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:29,302: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:29,302: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:30,664: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:30,664: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:32,145: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:32,145: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:33,527: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:33,527: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:35,335: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:35,335: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:36,741: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:36,741: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:38,371: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:38,371: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:39,776: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-27 17:19:39,776: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-27 17:19:39,823: INFO/MainProcess] Batch complete: 80 positions - Total: 5130/5130
+[2026-01-27 17:19:39,828: INFO/MainProcess] Smart batching complete in 160.25s - 5130/5130 successful
+[2026-01-27 17:19:39,828: INFO/MainProcess] Performance: 65 HTTP requests (was 5130), 0.031s per position
+[2026-01-27 17:19:39,828: WARNING/MainProcess] 🚀 SMART BATCHING: 5130 positions in 160.25s using 65 batches (0.031s per position)
+[2026-01-27 17:19:39,829: WARNING/MainProcess] 📊 Running principles analysis on 100 enriched games
+[2026-01-27 17:19:39,856: WARNING/MainProcess] ✅ Principles analysis complete. ELO range: None, Games: 100
+[2026-01-27 17:19:39,858: WARNING/MainProcess] 📊 Generating puzzles for user rating: 878
+[2026-01-27 17:19:54,931: WARNING/MainProcess] ✅ Generated 1000 custom puzzles for training
+[2026-01-27 17:19:54,947: WARNING/MainProcess] 📊 Generating LLM insights for report 159
+[2026-01-27 17:19:54,948: INFO/MainProcess] Generating game results insights for megaloblasto
+[2026-01-27 17:20:04,835: WARNING/MainProcess] ✅ Game results insights generated successfully (769 tokens)
+[2026-01-27 17:20:04,836: INFO/MainProcess] Generating mistakes insights for megaloblasto
+[2026-01-27 17:20:13,161: WARNING/MainProcess] ✅ Mistakes insights generated successfully (899 tokens)
+[2026-01-27 17:20:13,162: INFO/MainProcess] Generating blunder insights for megaloblasto
+[2026-01-27 17:20:21,169: WARNING/MainProcess] ✅ Blunder insights generated successfully (663 tokens)
+[2026-01-27 17:20:21,169: INFO/MainProcess] Generating time management insights for megaloblasto
+[2026-01-27 17:20:29,923: WARNING/MainProcess] ✅ Time management insights generated successfully (746 tokens)
+[2026-01-27 17:20:29,985: WARNING/MainProcess] ✅ Task 157 completed successfully. Report 159 created with 100 enriched games
+[2026-01-27 23:51:24,285: WARNING/MainProcess] consumer: Connection to broker lost. Trying to re-establish the connection...
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 919, in <lambda>
+    lambda: command(*args, **kwargs),
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 940, in try_read
+    return conn.read_response(disconnect_on_error=False, push_request=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 644, in read_response
+    response = self._parser.read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 15, in read_response
+    result = self._read_response(disable_decoding=disable_decoding)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 25, in _read_response
+    raw = self._buffer.readline()
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/socket.py", line 115, in readline
+    self._read_from_socket()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/_parsers/socket.py", line 68, in _read_from_socket
+    raise ConnectionError(SERVER_CLOSED_CONNECTION_ERROR)
+redis.exceptions.ConnectionError: Connection closed by server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 385, in connect_check_health
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 87, in call_with_retry
+    return do()
+           ^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 386, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 797, in _connect
+    raise err
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 781, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 346, in start
+    blueprint.start(self)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 790, in start
+    c.loop(*c.loop_args())
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/loops.py", line 97, in asynloop
+    next(loop)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/asynchronous/hub.py", line 377, in create_loop
+    cb(*cbargs)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 1395, in on_readable
+    self.cycle.on_readable(fileno)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 579, in on_readable
+    chan.handlers[type]()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 931, in _receive
+    ret.append(self._receive_one(c))
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/kombu/transport/redis.py", line 941, in _receive_one
+    response = c.parse_response()
+               ^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 942, in parse_response
+    response = self._execute(conn, try_read)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 918, in _execute
+    return conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/retry.py", line 90, in call_with_retry
+    fail(error)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 920, in <lambda>
+    lambda _: self._reconnect(conn),
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/client.py", line 908, in _reconnect
+    conn.connect()
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 379, in connect
+    self.connect_check_health(check_health=True)
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/redis/connection.py", line 391, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+[2026-01-27 23:51:24,288: WARNING/MainProcess] /nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:397: CPendingDeprecationWarning: 
+In Celery 5.1 we introduced an optional breaking change which
+on connection loss cancels all currently executed tasks with late acknowledgement enabled.
+These tasks cannot be acknowledged as the connection is gone, and the tasks are automatically redelivered
+back to the queue. You can enable this behavior using the worker_cancel_long_running_tasks_on_connection_loss
+setting. In Celery 5.1 it is set to False by default. The setting will be set to True by default in Celery 6.0.
+
+  warnings.warn(CANCEL_TASKS_BY_DEFAULT, CPendingDeprecationWarning)
+
+[2026-01-27 23:51:24,290: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:6379/0: Error 111 connecting to localhost:6379. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+
+[2026-01-27 23:51:33,091: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-27 23:51:33,092: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-27 23:51:34,095: INFO/MainProcess] mingle: all alone
+[2026-01-27 23:51:34,100: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-28 00:45:50,945: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[78d4dad7-244e-4cdc-93c9-b6a4a8759a96] received
+[2026-01-28 00:45:50,953: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-28 00:45:50,953: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-28 00:45:51,147: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-28 00:45:51,147: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[78d4dad7-244e-4cdc-93c9-b6a4a8759a96] succeeded in 0.2018620420130901s: {'title': 'All Together Now', 'fen': '1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49', 'pgn': '[White "geelse_zot"]
+[Black "Daily Puzzle Inspiration"]
+[Result "1-0"]
+[FEN "1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5 w - - 1 49"]
+
+49. Re8+ Kf7 50. e6# 1-0', 'url': 'https://www.chess.com/daily/2026-01-27', 'image': 'https://www.chess.com/dynboard?fen=1R6/8/1p2kN1K/4PpP1/8/p7/6r1/2r5%20w%20-%20-%201%2049&size=2', 'solution': ['Re8+', 'Kf7', 'e6#'], 'publish_time': 1769500800, 'publish_datetime': datetime.datetime(2026, 1, 27, 8, 0), 'source': 'chess.com', 'lastMove': None}
