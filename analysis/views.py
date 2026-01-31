@@ -365,6 +365,53 @@ def generate_report_page(request, platform, username):
     })
 
 @login_required
+def get_last_dataset(request, platform, username):
+    """Get the most recent dataset for a given platform and username"""
+    try:
+        # Find the most recent dataset for this user and platform
+        if platform == 'lichess':
+            last_dataset = GameDataSet.objects.filter(
+                user=request.user,
+                lichess_username=username
+            ).order_by('-created_at').first()
+        elif platform == 'chess.com':
+            last_dataset = GameDataSet.objects.filter(
+                user=request.user,
+                chess_com_username=username
+            ).order_by('-created_at').first()
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid platform'
+            })
+
+        if not last_dataset:
+            return JsonResponse({
+                'success': True,
+                'has_previous_dataset': False,
+                'message': 'No previous datasets found'
+            })
+
+        # Return dataset information
+        return JsonResponse({
+            'success': True,
+            'has_previous_dataset': True,
+            'dataset_id': last_dataset.id,
+            'total_games': last_dataset.total_games,
+            'created_at': last_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
+            'oldest_game_date': last_dataset.oldest_game_date.isoformat() if last_dataset.oldest_game_date else None,
+            'newest_game_date': last_dataset.newest_game_date.isoformat() if last_dataset.newest_game_date else None,
+            'date_range': last_dataset.date_range_display
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
+@login_required
 def fetch_lichess_games(request, username):
     """AJAX endpoint to dispatch Celery task for fetching Lichess games"""
     # Get access token
@@ -385,12 +432,18 @@ def fetch_lichess_games(request, username):
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
 
+        # Get the 'since' parameter (timestamp of newest game in last dataset)
+        # Frontend sends milliseconds, which is what Lichess API expects
+        since_timestamp = request.GET.get('since', None)
+        if since_timestamp:
+            since_timestamp = int(since_timestamp)
+
         # Import the task
         from .tasks import fetch_lichess_games_task
 
         # Dispatch Celery task to fetch games in background
         task = fetch_lichess_games_task.apply_async(
-            args=[request.user.id, username, access_token, max_games],
+            args=[request.user.id, username, access_token, max_games, since_timestamp],
             queue='lichess_api'
         )
 
@@ -1747,12 +1800,18 @@ def fetch_chess_com_games(request, username):
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
 
+        # Get the 'since' parameter (timestamp of newest game in last dataset)
+        # Frontend sends milliseconds, but Chess.com uses seconds
+        since_timestamp = request.GET.get('since', None)
+        if since_timestamp:
+            since_timestamp = int(since_timestamp) // 1000  # Convert ms to seconds
+
         # Import the task
         from .tasks import fetch_chess_com_games_task
 
         # Dispatch Celery task to fetch games in background
         task = fetch_chess_com_games_task.apply_async(
-            args=[request.user.id, username, max_games],
+            args=[request.user.id, username, max_games, since_timestamp],
             queue='chess_com_api'
         )
 

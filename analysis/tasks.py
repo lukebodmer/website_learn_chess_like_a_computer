@@ -374,7 +374,7 @@ def wait_for_lichess_api_access():
 
 
 @shared_task(bind=True, max_retries=3)
-def fetch_lichess_games_task(self, user_id, username, access_token, max_games=ANALYSIS_GAME_COUNT):
+def fetch_lichess_games_task(self, user_id, username, access_token, max_games=ANALYSIS_GAME_COUNT, since_timestamp=None):
     """
     Background task to fetch Lichess games with serial access rate limiting
 
@@ -390,6 +390,7 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
         username: Lichess username
         access_token: Lichess OAuth access token
         max_games: Maximum number of games to fetch
+        since_timestamp: Optional timestamp (milliseconds) to fetch games since
 
     Returns:
         Dictionary with game data or error information
@@ -429,6 +430,10 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
                 "perfType": "bullet,blitz,rapid",  # Filter at API level instead of in Python
                 "sort": "dateDesc",
             }
+
+            # Add 'since' parameter if provided (fetch games newer than this timestamp)
+            if since_timestamp:
+                api_params["since"] = since_timestamp
 
             response = requests.get(
                 f"https://lichess.org/api/games/user/{username}",

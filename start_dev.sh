@@ -21,6 +21,16 @@ redis-server --daemonize yes --port 6379
 # Wait for Redis to be ready
 sleep 1
 
+# Start Database Celery worker (log to file)
+echo "Starting Database worker..."
+celery -A chess_analysis worker \
+    --loglevel=info \
+    --queues=celery \
+    --concurrency=2 \
+    --pool=threads \
+    -n database_worker@%h \
+    --logfile=logs/celery_database.log &
+
 # Start Chess.com Celery worker (log to file)
 echo "Starting Chess.com worker..."
 celery -A chess_analysis worker \
@@ -49,6 +59,7 @@ echo "Starting Django server..."
 echo ""
 echo "✓ All services running!"
 echo "  - Redis: localhost:6379"
+echo "  - Database worker: Active (concurrency=2)"
 echo "  - Chess.com worker: Active"
 echo "  - Lichess worker: Active"
 echo "  - Django: http://127.0.0.1:8000"

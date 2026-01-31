@@ -52,16 +52,48 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
   const [errorMessage, setErrorMessage] = useState('')
   const [gameData, setGameData] = useState<GamesFetchResponse | null>(null)
   const [ndjsonData, setNdjsonData] = useState<string>('')
+  const [lastDataset, setLastDataset] = useState<any>(null)
+  const [isNewGames, setIsNewGames] = useState(false)
 
   useEffect(() => {
-    // Set initial loading state based on platform
+    // First, check if there's a previous dataset
     const platformName = platform === 'lichess' ? 'Lichess' : 'Chess.com'
-    setStatusText(`Finding your most recent ${platformName} games...`)
+    setStatusText(`Checking for previous reports...`)
 
+    fetch(`/api/last-dataset/${platform}/${username}/`)
+      .then(response => response.json())
+      .then((data) => {
+        if (data.success && data.has_previous_dataset) {
+          setLastDataset(data)
+          setIsNewGames(true)
+          setStatusText(`Finding new ${platformName} games since your last report...`)
+        } else {
+          setStatusText(`Finding your most recent ${platformName} games...`)
+        }
+
+        // Now fetch games
+        startGameFetch(data.has_previous_dataset ? data.newest_game_date : null)
+      })
+      .catch(error => {
+        console.error('Error checking last dataset:', error)
+        // Continue with normal fetch even if we can't check last dataset
+        setStatusText(`Finding your most recent ${platformName} games...`)
+        startGameFetch(null)
+      })
+  }, [username, platform])
+
+  const startGameFetch = (newestGameDate: string | null) => {
     // Determine the fetch URL based on platform
-    const fetchUrl = platform === 'lichess'
+    let fetchUrl = platform === 'lichess'
       ? `/fetch-games/${username}/`
       : `/chess-com/fetch-games/${username}/`
+
+    // Add 'since' parameter if we have a previous dataset
+    // Add 1ms to ensure we only get games AFTER the last game (not including it)
+    if (newestGameDate) {
+      const sinceTimestamp = new Date(newestGameDate).getTime() + 1
+      fetchUrl += `?since=${sinceTimestamp}`
+    }
 
     // Both platforms now use Celery task polling
     fetch(fetchUrl)
@@ -86,7 +118,7 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
         setProgressText('Network error')
         setErrorMessage('Network error occurred. Please try again.')
       })
-  }, [username, platform])
+  }
 
   // Poll for task status (works for both Chess.com and Lichess)
   const pollTaskStatus = (taskId: string) => {
@@ -133,13 +165,23 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
             // Task completed successfully
             clearInterval(pollInterval)
             const result = data.result!
-            setStatus('success')
-            setStatusText('Games Retrieved Successfully')
-            setProgressText(`Found ${result.games_count} games`)
-            setProgressPercent(100)
-            setGameData(result)
-            if (result.ndjson_data) {
-              setNdjsonData(result.ndjson_data)
+
+            // Check if the result indicates an error (e.g., no games found)
+            if (result.success === false) {
+              setStatus('error')
+              setStatusText('No Games Found')
+              setProgressText(result.error || 'No games found')
+              setProgressPercent(0)
+              setErrorMessage(result.error || 'No games found')
+            } else {
+              setStatus('success')
+              setStatusText('Games Retrieved Successfully')
+              setProgressText(`Found ${result.games_count} games`)
+              setProgressPercent(100)
+              setGameData(result)
+              if (result.ndjson_data) {
+                setNdjsonData(result.ndjson_data)
+              }
             }
           } else if (data.state === 'FAILURE' || data.state === 'ERROR') {
             // Task failed
@@ -370,6 +412,73 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
 
         {status === 'success' && gameData && (
           <>
+            {/* Last Report Info */}
+            {lastDataset && isNewGames && (
+              <div style={{
+                marginBottom: '20px',
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                padding: '16px'
+              }}>
+                <h4 style={{
+                  color: 'var(--text-primary)',
+                  margin: '0 0 12px 0',
+                  fontSize: '16px',
+                  fontWeight: 700
+                }}>Last Report</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Created:</span>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '14px' }}>{lastDataset.created_at}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Games Analyzed:</span>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '14px' }}>{lastDataset.total_games}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Last Game:</span>
+                    <span style={{ color: 'var(--text-primary)', fontSize: '14px' }}>
+                      {new Date(lastDataset.newest_game_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* New Report Info */}
+            <div style={{
+              marginBottom: '20px',
+              background: 'var(--background-tertiary)',
+              border: '2px solid var(--success-color)',
+              borderRadius: '8px',
+              padding: '16px'
+            }}>
+              <h4 style={{
+                color: 'var(--success-color)',
+                margin: '0 0 12px 0',
+                fontSize: '18px',
+                fontWeight: 700,
+                textAlign: 'center'
+              }}>
+                {isNewGames
+                  ? `${gameData.games_count ?? 0} New Game${(gameData.games_count ?? 0) === 1 ? '' : 's'} Found!`
+                  : `Found ${gameData.games_count ?? 0} Most Recent Game${(gameData.games_count ?? 0) === 1 ? '' : 's'}`}
+              </h4>
+              {isNewGames && (
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  margin: '0 0 16px 0',
+                  fontSize: '14px',
+                  textAlign: 'center'
+                }}>
+                  {(gameData.games_count ?? 0) === 0
+                    ? 'No new games played since your last report'
+                    : 'Games played since your last report'}
+                </p>
+              )}
+            </div>
+
             <div style={{
               marginBottom: '20px',
               display: 'flex',
@@ -431,7 +540,7 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
                   fontWeight: 700,
                   fontSize: '15px',
                   letterSpacing: '0.3px'
-                }}>Total Games:</span>
+                }}>{isNewGames ? 'New Games:' : 'Total Games:'}</span>
                 <span style={{
                   color: 'var(--text-primary)',
                   fontSize: '16px',
@@ -614,6 +723,24 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
               )}
             </div>
 
+            {/* Membership Info */}
+            <div style={{
+              marginBottom: '16px',
+              padding: '12px',
+              background: 'var(--background-secondary)',
+              borderRadius: '6px',
+              border: '1px solid var(--border-color)',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                color: 'var(--text-secondary)',
+                margin: 0,
+                fontSize: '13px'
+              }}>
+                Generating this report will use <strong style={{ color: 'var(--text-primary)' }}>1 of your 3 monthly reports</strong>
+              </p>
+            </div>
+
             <div style={{
               display: 'flex',
               gap: '15px',
@@ -633,7 +760,9 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
                   cursor: 'pointer'
                 }}
               >
-                Generate Analysis Report
+                {isNewGames
+                  ? `Analyze ${gameData.games_count ?? 0} New Game${(gameData.games_count ?? 0) === 1 ? '' : 's'}`
+                  : 'Generate Analysis Report'}
               </button>
               <a
                 href="/"

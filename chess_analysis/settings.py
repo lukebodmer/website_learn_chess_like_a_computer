@@ -88,13 +88,13 @@ DATABASES = {
     },
     "evaluations": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "chess_evaluations",
-        "USER": "chess_user",
-        "PASSWORD": "chess_password",
-        "HOST": BASE_DIR / "postgres_data",  # Unix socket connection
-        "PORT": "",  # Empty for Unix socket
+        "NAME": os.environ.get('EVAL_DB_NAME', 'chess_evaluations'),
+        "USER": os.environ.get('EVAL_DB_USER', 'chess_user'),
+        "PASSWORD": os.environ.get('EVAL_DB_PASSWORD', 'chess_password'),
+        "HOST": os.environ.get('EVAL_DB_HOST', 'localhost'),
+        "PORT": os.environ.get('EVAL_DB_PORT', '5432'),
         "OPTIONS": {
-            "sslmode": "prefer",
+            "sslmode": os.environ.get('EVAL_DB_SSLMODE', 'prefer'),
         },
     }
 }

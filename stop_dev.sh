@@ -7,6 +7,7 @@ echo "🛑 Stopping all services..."
 redis-cli shutdown 2>/dev/null && echo "✓ Redis stopped" || echo "✗ Redis not running"
 
 # Stop Celery workers
+pkill -f "celery.*database_worker" && echo "✓ Database worker stopped" || echo "✗ Database worker not running"
 pkill -f "celery.*chess_com_worker" && echo "✓ Chess.com worker stopped" || echo "✗ Chess.com worker not running"
 pkill -f "celery.*lichess_worker" && echo "✓ Lichess worker stopped" || echo "✗ Lichess worker not running"
 

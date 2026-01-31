@@ -14,6 +14,7 @@ urlpatterns = [
     # Unified generate-report URLs
     path('generate-report/<str:platform>/<str:username>/', views.generate_report_page, name='generate_report_page'),
     # API endpoints for fetching games
+    path('api/last-dataset/<str:platform>/<str:username>/', views.get_last_dataset, name='get_last_dataset'),
     path('chess-com/fetch-games/<str:username>/', views.fetch_chess_com_games, name='fetch_chess_com_games'),
     path('fetch-games/<str:username>/', views.fetch_lichess_games, name='fetch_lichess_games'),
     # Unified task status endpoint (works for both Chess.com and Lichess)

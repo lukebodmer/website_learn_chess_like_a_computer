@@ -105,7 +105,10 @@ interface UserOpeningStats {
 
 const ELO_RANGES = [
   '0-600',
-  '700-800'
+  '700-800',
+  '1100-1200',
+  '1200-1300',
+  '1300-1400'
 ];
 
 const TIME_CONTROLS = ['bullet', 'blitz', 'rapid'];

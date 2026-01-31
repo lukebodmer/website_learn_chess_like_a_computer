@@ -5,14 +5,18 @@ This API server provides batch position evaluation using Stockfish.
 Designed to be deployed on Google Cloud Platform to handle evaluation
 requests from the main Digital Ocean application.
 
+STOCKFISH CONFIGURATION - Single Source of Truth:
+- All evaluation parameters are configured here
+- Clients simply send positions without specifying evaluation parameters
+- To adjust quality/speed, modify the constants below
+
 Usage:
     POST /evaluate
     {
         "positions": [
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3",
             "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6"
-        ],
-        "depth": 20
+        ]
     }
 
     Returns:
@@ -71,6 +75,36 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# ============================================================================
+# STOCKFISH EVALUATION CONFIGURATION - Single Source of Truth
+# ============================================================================
+# Change these values to adjust evaluation quality/speed across the entire system
+# All clients use these parameters by default
+#
+# IMPORTANT: Only ONE limit should be set. Set others to None.
+# - nodes: Most consistent quality (but can be slow in complex positions)
+# - time: Predictable speed, good balance (RECOMMENDED)
+# - depth: Slowest and most variable
+
+STOCKFISH_NODES = None         # Nodes limit (None = no limit)
+STOCKFISH_TIME = 0.2           # Max time: 200ms per position (FAST & RELIABLE)
+STOCKFISH_DEPTH = None         # Max depth (None = no limit)
+
+# Engine pool configuration
+THREADS_PER_ENGINE = 1         # Single-threaded for parallel processing (1 engine per vCPU)
+HASH_SIZE_MB = 128  # Hash table size per engine (128 MB × 8 engines = 1 GB, safe for 8 GB instance)
+
+# Log active configuration
+active_limits = []
+if STOCKFISH_NODES is not None:
+    active_limits.append(f"{STOCKFISH_NODES:,} nodes")
+if STOCKFISH_TIME is not None:
+    active_limits.append(f"{STOCKFISH_TIME}s time")
+if STOCKFISH_DEPTH is not None:
+    active_limits.append(f"depth {STOCKFISH_DEPTH}")
+logger.info(f"Stockfish Config: {', '.join(active_limits) if active_limits else 'no limits (unlimited)'}")
+# ============================================================================
+
 class StockfishEvaluator:
     def __init__(self, pool_size: int = None, stockfish_path: str = None):
         """
@@ -81,17 +115,16 @@ class StockfishEvaluator:
             stockfish_path: Path to Stockfish binary (auto-detected if None)
         """
         # Scale pool size based on CPU cores for optimal performance
-        # Each Stockfish engine is CPU-intensive, so we want total_engines ≈ total_cores
+        # Key principle: 1 Stockfish engine per vCPU (single-threaded engines)
         if pool_size is None:
             cpu_count = os.cpu_count() or 4
             # Get number of Gunicorn workers (default 2)
             workers = int(os.environ.get('WORKERS', '2'))
 
-            # Key insight: Stockfish engines are CPU-bound, not I/O-bound
-            # Optimal performance: total engines across all workers ≈ CPU cores
-            # This prevents context switching and resource contention
-            # Each worker gets an equal share of engines
-            engines_per_worker = max(cpu_count // workers, 1)
+            # Strategy: Total engines = vCPUs, divided equally among workers
+            # With 8 vCPUs and 2 workers: 4 engines per worker = 8 total
+            # This ensures 1 engine per vCPU (optimal for CPU-bound Stockfish)
+            engines_per_worker = cpu_count // workers
 
             self.pool_size = engines_per_worker
 
@@ -144,10 +177,8 @@ class StockfishEvaluator:
             try:
                 engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
                 # Configure engine for speed with memory efficiency
-                # 8GB / 2 workers = 4GB per worker
-                # 4GB / 8 engines = 500MB per engine, use 128MB for safety
-                engine.configure({"Threads": 1})  # Single thread per engine instance
-                engine.configure({"Hash": 128})   # 128MB hash table per instance
+                engine.configure({"Threads": THREADS_PER_ENGINE})
+                engine.configure({"Hash": HASH_SIZE_MB})
                 self.engine_pool.put(engine)
                 logger.debug(f"Initialized engine {i+1}/{self.pool_size}")
             except Exception as e:
@@ -203,8 +234,7 @@ class StockfishEvaluator:
         """Test that Stockfish is working"""
         try:
             result = self.evaluate_single_position(
-                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-                depth=1
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
             )
             if "error" in result:
                 raise RuntimeError(f"Stockfish test failed: {result['error']}")
@@ -212,13 +242,15 @@ class StockfishEvaluator:
         except Exception as e:
             raise RuntimeError(f"Stockfish test failed: {e}")
 
-    def evaluate_single_position(self, fen: str, depth: int = 20) -> Dict:
+    def evaluate_single_position(self, fen: str) -> Dict:
         """
         Evaluate a single chess position using pooled engines
 
+        Uses global STOCKFISH_NODES, STOCKFISH_TIME, and STOCKFISH_DEPTH
+        configuration defined at module level.
+
         Args:
             fen: FEN notation of the position
-            depth: Search depth for evaluation
 
         Returns:
             Dict with evaluation result or error
@@ -235,12 +267,24 @@ class StockfishEvaluator:
 
             board = chess.Board(fen)
 
-            # Use aggressive time limits for speed
-            # Target: ~0.15s per position at depth 12
-            time_limit = 0.2  # Max 200ms per position
+            # Use centralized evaluation limits
+            # Build limit kwargs dynamically, only including non-None values
+            limit_kwargs = {}
+            if STOCKFISH_DEPTH is not None:
+                limit_kwargs['depth'] = STOCKFISH_DEPTH
+            if STOCKFISH_NODES is not None:
+                limit_kwargs['nodes'] = STOCKFISH_NODES
+            if STOCKFISH_TIME is not None:
+                limit_kwargs['time'] = STOCKFISH_TIME
+
+            # Safety: If no limits specified, use a default time limit
+            if not limit_kwargs:
+                logger.warning("No Stockfish limits configured! Using default 1.0s time limit")
+                limit_kwargs['time'] = 1.0
+
             analysis = engine.analyse(
                 board,
-                chess.engine.Limit(depth=depth, time=time_limit)
+                chess.engine.Limit(**limit_kwargs)
             )
             eval_time = time.time() - start_time
 
@@ -260,7 +304,7 @@ class StockfishEvaluator:
             # Extract additional Stockfish data
             result = {
                 "evaluation": evaluation,
-                "depth": depth,
+                "depth": STOCKFISH_DEPTH,
                 "time_ms": round(eval_time * 1000, 2)
             }
 
@@ -319,8 +363,8 @@ class StockfishEvaluator:
                 # Create a new engine to replace the failed one
                 try:
                     new_engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_path)
-                    new_engine.configure({"Threads": 1})
-                    new_engine.configure({"Hash": 128})
+                    new_engine.configure({"Threads": THREADS_PER_ENGINE})
+                    new_engine.configure({"Hash": HASH_SIZE_MB})
                     self.engine_pool.put_nowait(new_engine)
                 except Exception as engine_err:
                     logger.error(f"Failed to replace corrupted engine: {engine_err}")
@@ -333,13 +377,15 @@ class StockfishEvaluator:
             if engine is not None:
                 self._return_engine(engine)
 
-    def evaluate_batch(self, positions: List[str], depth: int = 20) -> Dict:
+    def evaluate_batch(self, positions: List[str]) -> Dict:
         """
         Evaluate multiple positions in parallel
 
+        Uses global STOCKFISH_NODES, STOCKFISH_TIME, and STOCKFISH_DEPTH
+        configuration defined at module level.
+
         Args:
             positions: List of FEN strings to evaluate
-            depth: Search depth for all evaluations
 
         Returns:
             Dict mapping FEN to evaluation result
@@ -347,12 +393,12 @@ class StockfishEvaluator:
         if not positions:
             return {}
 
-        logger.info(f"Starting batch evaluation of {len(positions)} positions at depth {depth}")
+        logger.info(f"Starting batch evaluation of {len(positions)} positions")
         start_time = time.time()
 
         # Submit all evaluation tasks
         future_to_fen = {
-            self.executor.submit(self.evaluate_single_position, fen, depth): fen
+            self.executor.submit(self.evaluate_single_position, fen): fen
             for fen in positions
         }
 
@@ -439,9 +485,11 @@ def evaluate_positions():
 
     Request body:
     {
-        "positions": ["fen1", "fen2", ...],
-        "depth": 20  // optional, default 20
+        "positions": ["fen1", "fen2", ...]
     }
+
+    All evaluation parameters (nodes, time, depth) are configured
+    in the STOCKFISH_* constants at the top of this file.
     """
     try:
         # Validate request
@@ -453,9 +501,6 @@ def evaluate_positions():
             return jsonify({"error": "Empty request body"}), 400
 
         positions = data.get('positions', [])
-        # Allow environment variable to override default depth for performance tuning
-        default_depth = int(os.environ.get('DEFAULT_STOCKFISH_DEPTH', '12'))
-        depth = data.get('depth', default_depth)
 
         # Validate inputs
         if not isinstance(positions, list):
@@ -466,9 +511,6 @@ def evaluate_positions():
 
         if len(positions) > 80:
             return jsonify({"error": "Too many positions (max 80 per request)"}), 400
-
-        if not isinstance(depth, int) or depth < 1 or depth > 50:
-            return jsonify({"error": "depth must be an integer between 1 and 50"}), 400
 
         # Validate FEN strings
         invalid_fens = []
@@ -490,23 +532,33 @@ def evaluate_positions():
         # Perform evaluation
         start_time = time.time()
         eval_instance = get_evaluator()
-        results = eval_instance.evaluate_batch(positions, depth)
+        results = eval_instance.evaluate_batch(positions)
         total_time = time.time() - start_time
 
         # Compile metadata
         successful_evaluations = len([r for r in results.values() if "error" not in r])
         failed_evaluations = len([r for r in results.values() if "error" in r])
 
+        # Build metadata with active limits
+        metadata = {
+            "total_positions": len(positions),
+            "successful_evaluations": successful_evaluations,
+            "failed_evaluations": failed_evaluations,
+            "total_time_seconds": round(total_time, 2),
+            "average_time_per_position_ms": round((total_time / len(positions)) * 1000, 2) if positions else 0
+        }
+
+        # Only include active limits in metadata
+        if STOCKFISH_NODES is not None:
+            metadata["nodes_limit"] = STOCKFISH_NODES
+        if STOCKFISH_TIME is not None:
+            metadata["time_limit_seconds"] = STOCKFISH_TIME
+        if STOCKFISH_DEPTH is not None:
+            metadata["depth_limit"] = STOCKFISH_DEPTH
+
         response_data = {
             "results": results,
-            "metadata": {
-                "total_positions": len(positions),
-                "successful_evaluations": successful_evaluations,
-                "failed_evaluations": failed_evaluations,
-                "total_time_seconds": round(total_time, 2),
-                "average_time_per_position_ms": round((total_time / len(positions)) * 1000, 2) if positions else 0,
-                "depth_used": depth
-            }
+            "metadata": metadata
         }
 
         return jsonify(response_data)
@@ -522,12 +574,17 @@ def test_endpoint():
 
     try:
         eval_instance = get_evaluator()
-        result = eval_instance.evaluate_single_position(test_fen, depth=10)
+        result = eval_instance.evaluate_single_position(test_fen)
 
         return jsonify({
             "test": "success",
             "test_position": test_fen,
-            "result": result
+            "result": result,
+            "config": {
+                "nodes": STOCKFISH_NODES,
+                "time_seconds": STOCKFISH_TIME,
+                "depth": STOCKFISH_DEPTH
+            }
         })
 
     except Exception as e:

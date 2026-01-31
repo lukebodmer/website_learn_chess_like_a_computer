@@ -115,15 +115,15 @@ This filtering system provides users with instant, responsive game analysis that
 
 ## Database Architecture
 
-### PostgreSQL Chess Evaluations Database
+### Digital Ocean PostgreSQL Chess Evaluations Database
 
-This project integrates with a PostgreSQL database containing approximately **300 million evaluated chess positions** (300GB+ of data). The database provides precomputed Stockfish evaluations to dramatically speed up chess game analysis.
+This project integrates with a cloud-hosted PostgreSQL database on **Digital Ocean** that dynamically builds up chess position evaluations. The database starts empty and automatically populates with Stockfish evaluations as games are analyzed, providing a growing cache of precomputed positions.
 
 #### Database Configuration
 
 The Django project uses a multi-database setup:
 - `default`: SQLite3 database for Django's standard tables (users, sessions, etc.)
-- `evaluations`: PostgreSQL database containing the chess position evaluations
+- `evaluations`: **Digital Ocean PostgreSQL** database containing chess position evaluations
 
 **Settings Configuration** (`chess_analysis/settings.py`):
 ```python
@@ -134,17 +134,25 @@ DATABASES = {
     },
     "evaluations": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "chess_evaluations",
-        "USER": "chess_user",
-        "PASSWORD": "chess_password",
-        "HOST": BASE_DIR / "postgres_data",  # Unix socket connection
-        "PORT": "",  # Empty for Unix socket
+        "NAME": os.environ.get("EVAL_DB_NAME", "chess_evaluations"),
+        "USER": os.environ.get("EVAL_DB_USER", ""),
+        "PASSWORD": os.environ.get("EVAL_DB_PASSWORD", ""),
+        "HOST": os.environ.get("EVAL_DB_HOST", ""),
+        "PORT": os.environ.get("EVAL_DB_PORT", "25060"),
         "OPTIONS": {
-            "sslmode": "prefer",
+            "sslmode": os.environ.get("EVAL_DB_SSLMODE", "require"),
         },
     }
 }
 ```
+
+**Environment Variables** (`.env` file):
+- `EVAL_DB_NAME`: Database name from Digital Ocean
+- `EVAL_DB_USER`: Database user
+- `EVAL_DB_PASSWORD`: Database password
+- `EVAL_DB_HOST`: Database hostname
+- `EVAL_DB_PORT`: Database port (usually 25060)
+- `EVAL_DB_SSLMODE`: SSL mode (usually `require`)
 
 #### Database Schema
 
@@ -171,19 +179,23 @@ The PostgreSQL evaluations database contains three main tables:
 #### Database Integration Classes
 
 **`DatabaseEvaluator`** (`analysis/chess_analysis/database_evaluator.py`)
-- Handles efficient queries against the 300M position database
+- Handles queries against the Digital Ocean PostgreSQL database
 - Uses indexed FEN lookups with batch processing (max 100 positions per query)
-- Provides methods for single position lookups and bulk position checking
+- Provides methods for reading AND writing evaluations
+- **Optimized bulk write operations** using Django's `bulk_create()` for ~1000+ evals/sec
 - **Key Features:**
   - `get_position_evaluation(fen)`: Single position lookup
-  - `get_multiple_position_evaluations(fens)`: Batch position lookup
+  - `get_multiple_position_evaluations(fens)`: Batch position lookup (with detailed logging)
   - `check_positions_exist(fens)`: Efficient existence checking
   - `get_game_positions_with_evaluations(moves)`: Full game analysis
+  - `write_evaluation(fen, data)`: Write single evaluation to database
+  - `write_evaluations_batch(evaluations)`: **Bulk write in single transaction (4 queries total)**
 
 **`HybridStockfishAnalyzer`** (`analysis/chess_analysis/hybrid_analyzer.py`)
 - Combines database lookups with GCP Stockfish API for optimal performance
-- First checks database for existing evaluations (fast)
+- First checks Digital Ocean database for existing evaluations (fast)
 - Sends remaining positions to GCP API for evaluation (scalable)
+- **Queues new evaluations for async Celery task (non-blocking database writes)**
 - Tracks statistics on database vs GCP API analysis usage
 
 **`GameEnricher`** (`analysis/chess_analysis/game_enricher.py`)
@@ -197,9 +209,10 @@ The PostgreSQL evaluations database contains three main tables:
 1. **Game Detection**: Identify games without existing accuracy data in `raw_json.players.{color}.analysis.accuracy`
 
 2. **Streaming Analysis Pipeline**:
-   - **Database-First Lookup**: Query 300M position database for instant results
-   - **Parallel API Processing**: Send remaining positions to GCP Stockfish API
-   - **Incremental Completion**: Games complete as soon as all their positions are evaluated
+   - **Database-First Lookup**: Query Digital Ocean PostgreSQL database for cached positions
+   - **Parallel API Processing**: Send uncached positions to GCP Stockfish API
+   - **Async Write-Back Cache**: Queue new evaluations for Celery background tasks (users don't wait)
+   - **Incremental Completion**: Games complete as soon as all their positions are evaluated (no waiting for DB writes)
    - **Real-Time Updates**: Stream individual game completions to frontend
 
 3. **Data Enrichment**:
@@ -212,12 +225,18 @@ The PostgreSQL evaluations database contains three main tables:
 
 - **Streaming Architecture**: Real-time updates eliminate user waiting time
 - **Smart Completion Detection**: Games complete as soon as all required positions are evaluated (no batch waiting)
-- **Database-First Strategy**: 300M position database provides instant results for common positions
-- **Parallel Processing**: Multiple API calls run concurrently with configurable limits (default: 40)
+- **Database-First Strategy**: Digital Ocean PostgreSQL database provides instant results for cached positions
+- **Async Database Writes**: New evaluations queued as Celery background tasks (non-blocking)
+- **Celery Task Queue**: Dedicated worker processes database writes independently from web requests
+- **Automatic Retry Logic**: Failed database writes retry with exponential backoff (3 max retries)
+- **Bulk Insert Optimization**: 1000+ evaluations written per second using single-transaction bulk operations
+- **Growing Hit Rate**: Database hit rate improves over time as more positions are cached
+- **Parallel Processing**: Multiple API calls run concurrently with configurable limits (default: 10)
 - **Indexed Queries**: All database lookups use indexed FEN columns for O(log n) performance
 - **Batch Processing**: Multiple positions processed in batches of 100 to avoid memory issues
 - **Connection Management**: Uses Django's multi-database routing for efficient connection handling
 - **Query Optimization**: DISTINCT ON and LIMIT clauses prevent excessive result sets
+- **Detailed Logging**: Progress tracking for database reads and async writes with timing information
 
 ## Usage Statistics Tracked
 
@@ -236,7 +255,8 @@ The system tracks detailed statistics during analysis:
 3. Database lookup (instant) → Games with DB hits complete immediately
 4. API calls start (parallel) → Position evaluations stream back
 5. Games complete incrementally → Frontend updates in real-time
-6. Final completion → All data available, streaming ends
+6. Celery task queued → Database writes happen in background (async)
+7. Final completion → All data available, streaming ends
 ```
 
 ## Example Database Query
@@ -274,11 +294,11 @@ LIMIT 1;
 ## Development Setup
 
 ### Main Application
-1. Ensure PostgreSQL database is running with the chess evaluations data
-2. Update database credentials in `chess_analysis/settings.py`
-3. Run Django migrations: `python manage.py migrate`
+1. Create Digital Ocean PostgreSQL database (see `MIGRATION_GUIDE.md`)
+2. Update `.env` file with Digital Ocean database credentials
+3. Run Django migrations: `python manage.py migrate` and `python manage.py migrate analysis --database=evaluations`
 4. Configure GCP Stockfish API credentials (see `gcp-stockfish-api/` directory)
-5. Test database connectivity: `python manage.py shell -c "from analysis.chess_analysis.database_evaluator import DatabaseEvaluator; print(DatabaseEvaluator().get_database_connection_info())"`
+5. Test database connectivity: `python test_digital_ocean_db.py`
 
 ### GCP Stockfish API
 See `gcp-stockfish-api/README.md` for deployment instructions.

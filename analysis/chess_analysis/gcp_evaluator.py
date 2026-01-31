@@ -40,8 +40,8 @@ class GCPStockfishClient:
         # Get authentication token
         self.auth_token = self._get_auth_token()
 
-        # Timeouts and retries (optimized for fast responses)
-        self.timeout = 60  # 1 minute for smaller batches
+        # Timeouts and retries - allow time for GCP to scale
+        self.timeout = 180  # 3 minutes to allow for cold start + scaling + processing
         self.max_retries = 3
 
         logger.info(f"Initialized GCP Stockfish client for {self.base_url}")
@@ -111,32 +111,31 @@ class GCPStockfishClient:
 
     def evaluate_single_position_async(
         self,
-        position: str,
-        depth: int = 20
+        position: str
     ) -> Dict[str, Dict]:
         """
         Send a single position to GCP for evaluation
 
         Args:
             position: FEN string to evaluate
-            depth: Stockfish search depth
 
         Returns:
             Dict with single position result
         """
-        return self.evaluate_positions_batch([position], depth)
+        return self.evaluate_positions_batch([position])
 
     def evaluate_positions_batch(
         self,
-        positions: List[str],
-        depth: int = 20
+        positions: List[str]
     ) -> Dict[str, Dict]:
         """
         Send positions to GCP for batch evaluation
 
+        All evaluation parameters (nodes, time, depth) are configured
+        in the GCP Stockfish API itself.
+
         Args:
             positions: List of FEN strings to evaluate
-            depth: Stockfish search depth (default: 20)
 
         Returns:
             Dict mapping FEN to evaluation result
@@ -152,11 +151,10 @@ class GCPStockfishClient:
             raise ValueError(f"Too many positions: {len(positions)} (max 80)")
 
         payload = {
-            "positions": positions,
-            "depth": depth
+            "positions": positions
         }
 
-        logger.info(f"Sending {len(positions)} positions to GCP (depth={depth})")
+        logger.info(f"Sending {len(positions)} positions to GCP")
         print(f"🔥 DEBUG: Making GCP API call with {len(positions)} positions")
         start_time = time.time()
 
@@ -200,16 +198,21 @@ class GCPStockfishClient:
                 last_exception = e
                 status_code = e.response.status_code if e.response else None
 
-                if status_code == 503:
+                if status_code == 429:
+                    # Rate limit - GCP is scaling up instances, need longer wait
+                    wait_time = (2 ** attempt) * 2 + 5  # 7s, 13s, 21s
+                    logger.warning(f"GCP rate limit (429), waiting {wait_time}s for instances to scale...")
+                    print(f"⏳ DEBUG: API call RATE LIMITED (429) - waiting {wait_time}s for GCP to scale instances")
+                elif status_code == 503:
                     # Service temporarily unavailable - longer wait for cold start
                     wait_time = (2 ** attempt) + 10  # Extra time for GCP to spin up
                     logger.warning(f"GCP service unavailable (503), waiting {wait_time}s for cold start...")
                     print(f"❌ DEBUG: API call FAILED with 503 - waiting {wait_time}s for cold start")
                 elif status_code == 500:
-                    # Internal server error - medium wait
-                    wait_time = (2 ** attempt) + 5
-                    logger.warning(f"GCP internal error (500), retrying in {wait_time}s...")
-                    print(f"❌ DEBUG: API call FAILED with 500 - retrying in {wait_time}s")
+                    # Internal server error - instances overloaded, wait for scaling
+                    wait_time = (2 ** attempt) * 2 + 3  # 5s, 11s, 19s
+                    logger.warning(f"GCP internal error (500), waiting {wait_time}s for scaling...")
+                    print(f"❌ DEBUG: API call FAILED with 500 - waiting {wait_time}s for instances to scale")
                 elif status_code == 403:
                     # Auth error - refresh token immediately
                     logger.warning("Auth error (403), refreshing token...")
@@ -251,15 +254,16 @@ class GCPStockfishClient:
     def evaluate_positions_chunked(
         self,
         positions: List[str],
-        depth: int = 12,
         chunk_size: int = 80
     ) -> Dict[str, Dict]:
         """
         Evaluate positions in chunks for very large batches
 
+        All evaluation parameters (nodes, time, depth) are configured
+        in the GCP Stockfish API itself.
+
         Args:
             positions: List of FEN strings to evaluate
-            depth: Stockfish search depth
             chunk_size: Number of positions per API call
 
         Returns:
@@ -269,7 +273,7 @@ class GCPStockfishClient:
             return {}
 
         if len(positions) <= chunk_size:
-            return self.evaluate_positions_batch(positions, depth)
+            return self.evaluate_positions_batch(positions)
 
         logger.info(f"Chunking {len(positions)} positions into groups of {chunk_size}")
 
@@ -283,7 +287,7 @@ class GCPStockfishClient:
             logger.info(f"Processing chunk {chunk_num}/{total_chunks} ({len(chunk)} positions)")
 
             try:
-                chunk_results = self.evaluate_positions_batch(chunk, depth)
+                chunk_results = self.evaluate_positions_batch(chunk)
                 all_results.update(chunk_results)
 
             except Exception as e:
@@ -300,19 +304,22 @@ class GCPStockfishClient:
     def evaluate_positions_parallel_streaming(
         self,
         positions: List[str],
-        depth: int = 12,
-        max_concurrent: int = 150
+        max_concurrent: int = 10
     ):
         """
         Generator that evaluates positions using optimal batching for maximum speed
 
         Strategy: Send concurrent batch requests to maximize throughput while respecting
-        GCP resource limits. Each batch is 400 positions (optimal for 8-16 CPU instance).
+        GCP resource limits. Each batch is 80 positions (optimal for API performance).
+
+        All evaluation parameters (nodes, time, depth) are configured
+        in the GCP Stockfish API itself.
 
         Args:
             positions: List of FEN strings to evaluate
-            depth: Stockfish search depth
-            max_concurrent: Maximum number of concurrent batch requests (default 20)
+            max_concurrent: Maximum number of concurrent batch requests to GCP API
+                          Default 10 = conservative limit to prevent 429 errors
+                          With 12 instances × 8 concurrency (96 total), this ensures stable operation
 
         Yields:
             Individual position completions and progress updates
@@ -322,7 +329,7 @@ class GCPStockfishClient:
             return
 
         if len(positions) == 1:
-            result = self.evaluate_positions_batch(positions, depth)
+            result = self.evaluate_positions_batch(positions)
             position = positions[0]
             if position in result:
                 yield {
@@ -336,9 +343,9 @@ class GCPStockfishClient:
             return
 
         # Optimal batch size: 80 positions
-        # - Small enough to complete quickly (avoid timeouts, ~12s per batch)
+        # - Small enough to complete quickly (avoid timeouts)
         # - Large enough to minimize HTTP overhead
-        # - Matches concurrency limit per instance (8 CPUs × 10 instances = 80 total)
+        # - Matches concurrency limit per instance
         OPTIMAL_BATCH_SIZE = 80
 
         # Calculate number of batches
@@ -358,12 +365,13 @@ class GCPStockfishClient:
             batch = positions[i:i + OPTIMAL_BATCH_SIZE]
             position_batches.append(batch)
 
-        # Submit all batches concurrently (each batch = 1 HTTP request)
-        # max_concurrent limits how many batches are in-flight at once
-        # Use larger pool to maximize parallelism with 32 CPU backend
-        with concurrent.futures.ThreadPoolExecutor(max_workers=min(max_concurrent, num_batches)) as executor:
+        # Use max_concurrent to control the number of simultaneous requests to GCP
+        # This prevents overwhelming the Cloud Run instances (12 instances × 8 concurrency = 96 max)
+        worker_count = min(max_concurrent, num_batches)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=worker_count) as executor:
+            # Submit all batches at once - GCP handles queueing
             future_to_batch = {
-                executor.submit(self.evaluate_positions_batch, batch, depth): batch
+                executor.submit(self.evaluate_positions_batch, batch): batch
                 for batch in position_batches
             }
 
@@ -439,16 +447,18 @@ def get_gcp_client() -> GCPStockfishClient:
         _gcp_client = GCPStockfishClient()
     return _gcp_client
 
-def evaluate_positions(positions: List[str], depth: int = 12) -> Dict[str, Dict]:
+def evaluate_positions(positions: List[str]) -> Dict[str, Dict]:
     """
     Convenience function for position evaluation
 
+    All evaluation parameters (nodes, time, depth) are configured
+    in the GCP Stockfish API itself.
+
     Args:
         positions: List of FEN strings
-        depth: Search depth
 
     Returns:
         Dict mapping FEN to evaluation result
     """
     client = get_gcp_client()
-    return client.evaluate_positions_chunked(positions, depth)
+    return client.evaluate_positions_chunked(positions)

@@ -12,7 +12,7 @@ import time
 class GameEnricher:
     """Enriches game data with Stockfish analysis for games lacking evaluation data"""
 
-    def __init__(self, games: List[Dict[str, Any]], max_concurrent: int = 150, stockfish_depth: int = 12):
+    def __init__(self, games: List[Dict[str, Any]], max_concurrent: int = 10, stockfish_depth: int = 12):
         self.games = games
         self.max_concurrent = max_concurrent
         self.stockfish_depth = stockfish_depth
@@ -692,7 +692,6 @@ class GameEnricher:
             # Stream individual position completions
             for update in gcp_client.evaluate_positions_parallel_streaming(
                 positions_for_gcp,
-                depth=self.stockfish_depth,
                 max_concurrent=self.max_concurrent
             ):
                 if update["type"] == "position_complete":

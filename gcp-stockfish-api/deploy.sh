@@ -18,6 +18,13 @@ gcloud builds submit --project=$PROJECT_ID --region=$REPOSITORY_REGION --config 
 
 # Deploy to Cloud Run
 echo "🌊 Deploying to Cloud Run..."
+echo "⚡ OPTIMIZED CONFIGURATION:"
+echo "   - 8 vCPUs per instance (gen2 with CPU boost)"
+echo "   - 8 Stockfish engines per instance (1 engine per vCPU)"
+echo "   - Concurrency: 8 (matched to engine count)"
+echo "   - 75 requests ÷ 8 concurrency = 10 instances needed"
+echo "   - Max instances: 12 (within quota: 96 vCPU limit)"
+echo "   - Min instances: 0 (scale to zero when idle)"
 gcloud run deploy $SERVICE_NAME \
   --image $REPOSITORY_REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY_NAME/$SERVICE_NAME:latest \
   --platform managed \
@@ -25,10 +32,12 @@ gcloud run deploy $SERVICE_NAME \
   --project=$PROJECT_ID \
   --memory 8Gi \
   --cpu 8 \
-  --min-instances 1 \
+  --cpu-throttling \
+  --execution-environment gen2 \
+  --min-instances 0 \
   --max-instances 12 \
-  --concurrency 80 \
-  --timeout 60s \
+  --concurrency 8 \
+  --timeout 300s \
   --set-env-vars DEFAULT_STOCKFISH_DEPTH=12,WORKERS=2 \
   --no-allow-unauthenticated
 

@@ -87,6 +87,23 @@ class HybridStockfishAnalyzer:
                 logger.info(f"Sending {len(positions_for_gcp)} positions to GCP")
                 gcp_results = self.gcp_client.evaluate_positions_batch(positions_for_gcp)
 
+                # Step 3.5: Queue GCP results for async database write
+                if gcp_results:
+                    logger.info(f"Queueing {len(gcp_results)} new evaluations for async database write")
+                    try:
+                        from analysis.tasks import write_evaluations_to_database_task
+                        import json
+
+                        # Filter out errors before serialization
+                        valid_results = {fen: data for fen, data in gcp_results.items() if 'error' not in data}
+
+                        if valid_results:
+                            evaluations_json = json.dumps(valid_results)
+                            task = write_evaluations_to_database_task.delay(evaluations_json)
+                            logger.info(f"Database write task queued (task_id: {task.id})")
+                    except Exception as e:
+                        logger.warning(f"Failed to queue database write task: {e}")
+
             # Step 4: Build final evaluations list
             evaluations = []
             database_count = 0
