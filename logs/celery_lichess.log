@@ -2295,3 +2295,90 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-31 00:41:44,899: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[ae75063a-a08f-4d88-ad4d-247f90222d9c] succeeded in 0.7153442849994462s: {'success': True, 'games_count': 1, 'game_dataset_id': 301, 'created_at': 'January 31, 2026 12:41 AM', 'data_size': 1047, 'date_range': 'January 30, 2026', 'oldest_game_date': 'January 30, 2026', 'newest_game_date': 'January 30, 2026', 'elo_ratings': {'blitz': 1253}, 'ndjson_data': '{"id":"A4IfFhH2","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769743736136,"lastMoveAt":1769744304843,"status":"resign","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1253,"ratingDiff":-15},"black":{"user":{"name":"Rollingsmooth","id":"rollingsmooth"},"rating":1260,"ratingDiff":6}},"fullId":"A4IfFhH2FkfJ","winner":"black","opening":{"eco":"B32","name":"Sicilian Defense: Franco-Sicilian Variation","ply":6},"moves":"d4 e6 e4 c5 Nf3 Nc6 Be3 cxd4 Nxd4 Nxd4 Bxd4 Nf6 Nc3 Qc7 Bd3 a6 O-O Be7 Qf3 O-O e5 Nd5 Nxd5 exd5 Qxd5 b5 c4 Bb7 Bxh7+ Kxh7 Qxb7 Qxb7 Rfe1 bxc4 Re3 Rac8 Rh3+ Kg8 Re1 Bc5 Bc3 Rc6 Re4 Rg6...'}
 [2026-01-31 00:41:55,034: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[5f8ee29a-790c-4431-94b3-85db9365ba38] received
 [2026-01-31 00:41:57,724: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[5f8ee29a-790c-4431-94b3-85db9365ba38] succeeded in 2.68978349399913s: {'success': True, 'games_count': 100, 'game_dataset_id': 302, 'created_at': 'January 31, 2026 12:41 AM', 'data_size': 210766, 'date_range': 'April 07, 2025 - January 30, 2026', 'oldest_game_date': 'April 07, 2025', 'newest_game_date': 'January 30, 2026', 'elo_ratings': {'blitz': 1253, 'bullet': 1377, 'rapid': 1201}, 'ndjson_data': '{"id":"A4IfFhH2","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769743736136,"lastMoveAt":1769744304843,"status":"resign","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1253,"ratingDiff":-15},"black":{"user":{"name":"Rollingsmooth","id":"rollingsmooth"},"rating":1260,"ratingDiff":6}},"fullId":"A4IfFhH2FkfJ","winner":"black","opening":{"eco":"B32","name":"Sicilian Defense: Franco-Sicilian Variation","ply":6},"moves":"d4 e6 e4 c5 Nf3 Nc6 Be3 cxd4 Nxd4 Nxd4 Bxd4 Nf6 Nc3 Qc7 Bd3 a6 O-O Be7 Qf3 O-O e5 Nd5 Nxd5 exd5 Qxd5 b5 c4 Bb7 Bxh7+ Kxh7 Qxb7 Qxb7 Rfe1 bxc4 Re3 Rac8 Rh3+ Kg8 Re1 Bc5 Bc3 Rc6 Re4 Rg6...'}
+[2026-01-31 16:38:30,159: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 16:38:30,161: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 16:38:31,166: INFO/MainProcess] mingle: all alone
+[2026-01-31 16:38:31,173: INFO/MainProcess] lichess_worker@nemo ready.
+[2026-01-31 17:07:46,774: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[c3110592-ebe3-43f2-9ce0-932e71122966] received
+[2026-01-31 17:07:49,856: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[c3110592-ebe3-43f2-9ce0-932e71122966] succeeded in 3.080738297001517s: {'success': True, 'games_count': 100, 'game_dataset_id': 303, 'created_at': 'January 31, 2026 05:07 PM', 'data_size': 212085, 'date_range': 'April 07, 2025 - January 31, 2026', 'oldest_game_date': 'April 07, 2025', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238, 'bullet': 1377, 'rapid': 1201}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4...', ...
+[2026-01-31 17:29:43,634: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 17:29:43,635: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 17:29:44,640: INFO/MainProcess] mingle: all alone
+[2026-01-31 17:29:44,647: INFO/MainProcess] lichess_worker@nemo ready.
+[2026-01-31 17:30:07,229: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[ebc4a561-2588-4f14-abf3-d9cc79df109f] received
+[2026-01-31 17:30:09,818: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[ebc4a561-2588-4f14-abf3-d9cc79df109f] succeeded in 2.588771362999978s: {'success': True, 'games_count': 100, 'game_dataset_id': 304, 'created_at': 'January 31, 2026 05:30 PM', 'data_size': 212085, 'date_range': 'April 07, 2025 - January 31, 2026', 'oldest_game_date': 'April 07, 2025', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238, 'bullet': 1377, 'rapid': 1201}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4...', ...
+[2026-01-31 17:49:04,241: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[f38d12d7-f806-4195-afd4-f312eac87e90] received
+[2026-01-31 17:49:06,860: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[f38d12d7-f806-4195-afd4-f312eac87e90] succeeded in 2.618665152003814s: {'success': True, 'games_count': 100, 'game_dataset_id': 305, 'created_at': 'January 31, 2026 05:49 PM', 'data_size': 212085, 'date_range': 'April 07, 2025 - January 31, 2026', 'oldest_game_date': 'April 07, 2025', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238, 'bullet': 1377, 'rapid': 1201}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4...', ...
+[2026-01-31 17:55:31,286: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[33e405c4-1ae1-4c60-8caa-d1a744e1102f] received
+[2026-01-31 17:55:34,198: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[33e405c4-1ae1-4c60-8caa-d1a744e1102f] succeeded in 2.911910374001309s: {'success': True, 'games_count': 100, 'game_dataset_id': 306, 'created_at': 'January 31, 2026 05:55 PM', 'data_size': 212085, 'date_range': 'April 07, 2025 - January 31, 2026', 'oldest_game_date': 'April 07, 2025', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238, 'bullet': 1377, 'rapid': 1201}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4...', ...
+[2026-01-31 17:59:31,153: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[633b4a73-215a-4fc4-b907-5c963a0438e8] received
+[2026-01-31 17:59:31,790: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[633b4a73-215a-4fc4-b907-5c963a0438e8] succeeded in 0.635776878996694s: {'success': True, 'games_count': 1, 'game_dataset_id': 307, 'created_at': 'January 31, 2026 05:59 PM', 'data_size': 2588, 'date_range': 'January 31, 2026', 'oldest_game_date': 'January 31, 2026', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4 Qf6 Nb3 Nge7 c4 bxc4 Bxc4 Ne5 Nc5 Bxf3 gxf3 Nxf3+...', ...
+[2026-01-31 18:25:38,741: ERROR/MainProcess] Received unregistered task of type 'analysis.tasks.fetch_lichess_daily_puzzle_task'.
+The message has been ignored and discarded.
+
+Did you remember to import the module containing this task?
+Or maybe you're using relative imports?
+
+Please see
+https://docs.celeryq.dev/en/latest/internals/protocol.html
+for more information.
+
+The full contents of the message body was:
+b'[[], {}, {"callbacks": null, "errbacks": null, "chain": null, "chord": null}]' (77b)
+
+The full contents of the message headers:
+{'lang': 'py', 'task': 'analysis.tasks.fetch_lichess_daily_puzzle_task', 'id': '9858b9b9-3158-4f14-a288-fa1e125514bf', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '9858b9b9-3158-4f14-a288-fa1e125514bf', 'parent_id': None, 'argsrepr': '()', 'kwargsrepr': '{}', 'origin': 'gen190128@nemo', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}
+
+The delivery info for this task is:
+{'exchange': '', 'routing_key': 'lichess_api'}
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 670, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: 'analysis.tasks.fetch_lichess_daily_puzzle_task'
+[2026-01-31 18:26:33,645: ERROR/MainProcess] Received unregistered task of type 'analysis.tasks.fetch_lichess_daily_puzzle_task'.
+The message has been ignored and discarded.
+
+Did you remember to import the module containing this task?
+Or maybe you're using relative imports?
+
+Please see
+https://docs.celeryq.dev/en/latest/internals/protocol.html
+for more information.
+
+The full contents of the message body was:
+b'[[], {}, {"callbacks": null, "errbacks": null, "chain": null, "chord": null}]' (77b)
+
+The full contents of the message headers:
+{'lang': 'py', 'task': 'analysis.tasks.fetch_lichess_daily_puzzle_task', 'id': '3bca76fa-f092-4711-b954-9e54be282182', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '3bca76fa-f092-4711-b954-9e54be282182', 'parent_id': None, 'argsrepr': '()', 'kwargsrepr': '{}', 'origin': 'gen190128@nemo', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}
+
+The delivery info for this task is:
+{'exchange': '', 'routing_key': 'lichess_api'}
+Traceback (most recent call last):
+  File "/nix/store/xz78mmj051mam7iadcm4irh7qv003zcz-python3-3.12.12-env/lib/python3.12/site-packages/celery/worker/consumer/consumer.py", line 670, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: 'analysis.tasks.fetch_lichess_daily_puzzle_task'
+[2026-01-31 19:07:53,788: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[e9fd58a9-0429-47bd-b222-65914e087216] received
+[2026-01-31 19:07:54,482: INFO/MainProcess] Task analysis.tasks.fetch_lichess_games_task[e9fd58a9-0429-47bd-b222-65914e087216] succeeded in 0.6933416280007805s: {'success': True, 'games_count': 1, 'game_dataset_id': 308, 'created_at': 'January 31, 2026 07:07 PM', 'data_size': 2588, 'date_range': 'January 31, 2026', 'oldest_game_date': 'January 31, 2026', 'newest_game_date': 'January 31, 2026', 'elo_ratings': {'blitz': 1238}, 'ndjson_data': '{"id":"DinlbkRA","rated":true,"variant":"standard","speed":"blitz","perf":"blitz","createdAt":1769835364483,"lastMoveAt":1769835675303,"status":"mate","source":"pool","players":{"white":{"user":{"name":"megaloblasto","id":"megaloblasto"},"rating":1238,"ratingDiff":14,"analysis":{"inaccuracy":1,"mistake":1,"blunder":2,"acpl":95,"accuracy":62}},"black":{"user":{"name":"Behzadtam","id":"behzadtam"},"rating":1232,"ratingDiff":-8,"analysis":{"inaccuracy":2,"mistake":0,"blunder":3,"acpl":152,"accuracy":49}}},"fullId":"DinlbkRAZsu3","winner":"white","opening":{"eco":"A43","name":"Benoni Defense: Old Benoni","ply":2},"moves":"d4 c5 e3 cxd4 Qxd4 e6 Nf3 Nc6 Qd1 a6 Nbd2 h6 Bd3 b5 a3 Bb7 b4 Qf6 Nb3 Nge7 c4 bxc4 Bxc4 Ne5 Nc5 Bxf3 gxf3 Nxf3+...', ...
+[2026-01-31 19:08:04,299: WARNING/MainProcess] 📊 Processing task 218 for user lj
+[2026-01-31 19:08:04,326: WARNING/MainProcess] Loaded 3628 openings from database
+[2026-01-31 19:08:04,333: WARNING/MainProcess] 📊 Created new AnalysisReport 221 for task 218
+[2026-01-31 19:08:04,337: WARNING/MainProcess] 🔍 DATABASE LOOKUP: Checking database for 36 positions...
+[2026-01-31 19:08:05,876: WARNING/MainProcess] ✅ DATABASE RETURNED: 36 already evaluated positions, 0 need evaluation
+[2026-01-31 19:08:07,498: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 19:08:07,498: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 19:08:07,511: WARNING/MainProcess] 📊 Running principles analysis on 1 enriched games
+[2026-01-31 19:08:07,516: WARNING/MainProcess] ✅ Principles analysis complete. ELO range: None, Games: 1
+[2026-01-31 19:08:07,518: WARNING/MainProcess] 📊 Generating puzzles for user rating: 1238
+[2026-01-31 19:08:11,350: WARNING/MainProcess] ✅ Generated 0 custom puzzles for training
+[2026-01-31 19:08:11,365: WARNING/MainProcess] 📊 Generating LLM insights for report 221
+[2026-01-31 19:08:11,365: INFO/MainProcess] Generating game results insights for megaloblasto
+[2026-01-31 19:08:22,120: WARNING/MainProcess] ✅ Game results insights generated successfully (759 tokens)
+[2026-01-31 19:08:22,121: INFO/MainProcess] Generating mistakes insights for megaloblasto
+[2026-01-31 19:08:30,825: WARNING/MainProcess] ✅ Mistakes insights generated successfully (910 tokens)
+[2026-01-31 19:08:30,825: INFO/MainProcess] Generating blunder insights for megaloblasto
+[2026-01-31 19:08:39,119: WARNING/MainProcess] ✅ Blunder insights generated successfully (719 tokens)
+[2026-01-31 19:08:39,119: INFO/MainProcess] Generating time management insights for megaloblasto
+[2026-01-31 19:08:47,384: WARNING/MainProcess] ✅ Time management insights generated successfully (579 tokens)
+[2026-01-31 19:08:47,395: WARNING/MainProcess] ✅ Task 218 completed successfully. Report 221 created with 1 enriched games

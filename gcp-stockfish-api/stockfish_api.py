@@ -304,7 +304,7 @@ class StockfishEvaluator:
             # Extract additional Stockfish data
             result = {
                 "evaluation": evaluation,
-                "depth": STOCKFISH_DEPTH,
+                "depth": analysis.get('depth'),  # Actual search depth from Stockfish
                 "time_ms": round(eval_time * 1000, 2)
             }
 
@@ -344,10 +344,6 @@ class StockfishEvaluator:
             # Extract time information if available
             if 'time' in analysis:
                 result["search_time_ms"] = round(analysis['time'] * 1000, 2)
-
-            # Extract depth information if available
-            if 'depth' in analysis:
-                result["search_depth"] = analysis['depth']
 
             return result
 

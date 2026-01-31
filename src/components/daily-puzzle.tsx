@@ -81,6 +81,13 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
     }
   }, [])
 
+  // Helper function to get unique legal move destinations (deduplicates promotion moves)
+  const getUniqueLegalMoves = (square: string): string[] => {
+    const moves = chess.moves({ square, verbose: true })
+    const uniqueSquares = Array.from(new Set(moves.map(move => move.to)))
+    return uniqueSquares
+  }
+
   // Fetch daily puzzle data
   useEffect(() => {
     const fetchPuzzle = async () => {
@@ -274,8 +281,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
             // Invalid move, try to select new piece
             if (piece && piece.color === playerColor) {
               setSelectedSquare(square)
-              const moves = chess.moves({ square, verbose: true })
-              setLegalMoves(moves.map(move => move.to))
+              setLegalMoves(getUniqueLegalMoves(square))
             } else {
               setSelectedSquare(null)
               setLegalMoves([])
@@ -285,8 +291,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
           // Move failed, try to select new piece
           if (piece && piece.color === playerColor) {
             setSelectedSquare(square)
-            const moves = chess.moves({ square, verbose: true })
-            setLegalMoves(moves.map(move => move.to))
+            setLegalMoves(getUniqueLegalMoves(square))
           } else {
             setSelectedSquare(null)
             setLegalMoves([])
@@ -297,8 +302,7 @@ const DailyPuzzle: React.FC<DailyPuzzleProps> = ({
       // Select piece if valid
       if (piece && piece.color === playerColor) {
         setSelectedSquare(square)
-        const moves = chess.moves({ square, verbose: true })
-        setLegalMoves(moves.map(move => move.to))
+        setLegalMoves(getUniqueLegalMoves(square))
       }
     }
   }

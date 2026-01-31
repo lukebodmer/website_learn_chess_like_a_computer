@@ -3424,3 +3424,91 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-31 00:41:20,654: INFO/MainProcess] mingle: searching for neighbors
 [2026-01-31 00:41:21,660: INFO/MainProcess] mingle: all alone
 [2026-01-31 00:41:21,667: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 16:38:30,160: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 16:38:30,162: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 16:38:31,166: INFO/MainProcess] mingle: all alone
+[2026-01-31 16:38:31,173: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 17:29:43,631: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 17:29:43,633: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 17:29:44,637: INFO/MainProcess] mingle: all alone
+[2026-01-31 17:29:44,646: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 17:34:02,539: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[f8681185-44b7-4c3a-bbac-23355c842104] received
+[2026-01-31 17:34:02,564: INFO/MainProcess] Starting async write of 6251 evaluations to database
+[2026-01-31 17:34:02,564: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 6251 position evaluations to database...
+[2026-01-31 17:34:03,571: WARNING/MainProcess]   [1/4] Preparing 6251 position records...
+[2026-01-31 17:34:03,632: WARNING/MainProcess]   [1/4] Bulk inserting 6251 positions to database...
+[2026-01-31 17:34:05,081: WARNING/MainProcess]   ✓ Step 1 complete in 1.51s
+[2026-01-31 17:34:05,081: WARNING/MainProcess]   [2/4] Fetching 6251 positions from database...
+[2026-01-31 17:34:06,117: WARNING/MainProcess]   ✓ Step 2 complete in 1.04s - fetched 6190 positions
+[2026-01-31 17:34:06,117: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 17:34:06,164: WARNING/MainProcess]   [3/4] Bulk inserting 6251 evaluation data records...
+[2026-01-31 17:34:06,781: ERROR/MainProcess] Bulk write failed: null value in column "depth" of relation "evaluations_data" violates not-null constraint
+DETAIL:  Failing row contains (23098, 89600, null, 1, 79248).
+
+[2026-01-31 17:34:06,781: WARNING/MainProcess] ❌ DATABASE WRITE FAILED: null value in column "depth" of relation "evaluations_data" violates not-null constraint
+DETAIL:  Failing row contains (23098, 89600, null, 1, 79248).
+[2026-01-31 17:34:06,781: WARNING/MainProcess] Database write completed but no evaluations were written
+[2026-01-31 17:34:06,782: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[f8681185-44b7-4c3a-bbac-23355c842104] succeeded in 4.238070270999742s: {'success': True, 'count': 0, 'total_requested': 6251}
+[2026-01-31 17:52:47,005: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[956fb23a-2b29-4d0c-b5f3-3b0d47d68128] received
+[2026-01-31 17:52:47,020: INFO/MainProcess] Starting async write of 6251 evaluations to database
+[2026-01-31 17:52:47,020: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 6251 position evaluations to database...
+[2026-01-31 17:52:47,854: WARNING/MainProcess]   [1/4] Preparing 6251 position records...
+[2026-01-31 17:52:47,872: WARNING/MainProcess]   [1/4] Bulk inserting 6251 positions to database...
+[2026-01-31 17:52:49,333: WARNING/MainProcess]   ✓ Step 1 complete in 1.48s
+[2026-01-31 17:52:49,333: WARNING/MainProcess]   [2/4] Fetching 6251 positions from database...
+[2026-01-31 17:52:50,204: WARNING/MainProcess]   ✓ Step 2 complete in 0.87s - fetched 6190 positions
+[2026-01-31 17:52:50,204: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 17:52:50,296: WARNING/MainProcess]   [3/4] Bulk inserting 6251 evaluation data records...
+[2026-01-31 17:52:50,793: WARNING/MainProcess]   ✓ Step 3 complete in 0.59s
+[2026-01-31 17:52:50,793: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 17:52:50,839: WARNING/MainProcess]   [4/4] Bulk inserting 6251 principal variations...
+[2026-01-31 17:52:51,679: WARNING/MainProcess]   ✓ Step 4 complete in 0.89s
+[2026-01-31 17:52:51,679: INFO/MainProcess] Bulk write complete: 6251 evaluations written in single transaction (4.66s)
+[2026-01-31 17:52:51,679: WARNING/MainProcess] 
+  ⚡ Total database write time: 4.66s (1342 evals/sec)
+[2026-01-31 17:52:51,954: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 6251 position evaluations written in single transaction
+[2026-01-31 17:52:51,966: INFO/MainProcess] Successfully wrote 6251 evaluations to database
+[2026-01-31 17:52:51,966: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 6251 evaluations written
+[2026-01-31 17:52:51,968: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[956fb23a-2b29-4d0c-b5f3-3b0d47d68128] succeeded in 4.959443032996205s: {'success': True, 'count': 6251, 'total_requested': 6251}
+[2026-01-31 17:58:06,382: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[2a401047-26f9-4f0a-a7ed-42c57b190575] received
+[2026-01-31 17:58:06,383: INFO/MainProcess] Starting async write of 2 evaluations to database
+[2026-01-31 17:58:06,383: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 2 position evaluations to database...
+[2026-01-31 17:58:07,077: WARNING/MainProcess]   [1/4] Preparing 2 position records...
+[2026-01-31 17:58:07,077: WARNING/MainProcess]   [1/4] Bulk inserting 2 positions to database...
+[2026-01-31 17:58:07,186: WARNING/MainProcess]   ✓ Step 1 complete in 0.11s
+[2026-01-31 17:58:07,186: WARNING/MainProcess]   [2/4] Fetching 2 positions from database...
+[2026-01-31 17:58:07,244: WARNING/MainProcess]   ✓ Step 2 complete in 0.06s - fetched 2 positions
+[2026-01-31 17:58:07,244: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 17:58:07,244: WARNING/MainProcess]   [3/4] Bulk inserting 2 evaluation data records...
+[2026-01-31 17:58:07,298: WARNING/MainProcess]   ✓ Step 3 complete in 0.05s
+[2026-01-31 17:58:07,298: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 17:58:07,298: WARNING/MainProcess]   [4/4] Bulk inserting 2 principal variations...
+[2026-01-31 17:58:07,352: WARNING/MainProcess]   ✓ Step 4 complete in 0.05s
+[2026-01-31 17:58:07,352: INFO/MainProcess] Bulk write complete: 2 evaluations written in single transaction (0.97s)
+[2026-01-31 17:58:07,352: WARNING/MainProcess] 
+  ⚡ Total database write time: 0.97s (2 evals/sec)
+[2026-01-31 17:58:07,412: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 2 position evaluations written in single transaction
+[2026-01-31 17:58:07,412: INFO/MainProcess] Successfully wrote 2 evaluations to database
+[2026-01-31 17:58:07,412: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 2 evaluations written
+[2026-01-31 17:58:07,413: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[2a401047-26f9-4f0a-a7ed-42c57b190575] succeeded in 1.0303409209955134s: {'success': True, 'count': 2, 'total_requested': 2}
+[2026-01-31 17:59:35,091: WARNING/MainProcess] 📊 Processing task 217 for user lj
+[2026-01-31 17:59:35,112: WARNING/MainProcess] Loaded 3628 openings from database
+[2026-01-31 17:59:35,122: WARNING/MainProcess] 📊 Created new AnalysisReport 220 for task 217
+[2026-01-31 17:59:35,126: WARNING/MainProcess] 🔍 DATABASE LOOKUP: Checking database for 36 positions...
+[2026-01-31 17:59:35,709: WARNING/MainProcess] ✅ DATABASE RETURNED: 36 already evaluated positions, 0 need evaluation
+[2026-01-31 17:59:37,329: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 17:59:37,329: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 17:59:37,343: WARNING/MainProcess] 📊 Running principles analysis on 1 enriched games
+[2026-01-31 17:59:37,348: WARNING/MainProcess] ✅ Principles analysis complete. ELO range: None, Games: 1
+[2026-01-31 17:59:37,350: WARNING/MainProcess] 📊 Generating puzzles for user rating: 1238
+[2026-01-31 17:59:40,128: WARNING/MainProcess] ✅ Generated 0 custom puzzles for training
+[2026-01-31 17:59:40,141: WARNING/MainProcess] 📊 Generating LLM insights for report 220
+[2026-01-31 17:59:40,142: INFO/MainProcess] Generating game results insights for megaloblasto
+[2026-01-31 17:59:47,655: WARNING/MainProcess] ✅ Game results insights generated successfully (710 tokens)
+[2026-01-31 17:59:47,655: INFO/MainProcess] Generating mistakes insights for megaloblasto
+[2026-01-31 17:59:55,847: WARNING/MainProcess] ✅ Mistakes insights generated successfully (933 tokens)
+[2026-01-31 17:59:55,847: INFO/MainProcess] Generating blunder insights for megaloblasto
+[2026-01-31 18:00:02,606: WARNING/MainProcess] ✅ Blunder insights generated successfully (710 tokens)
+[2026-01-31 18:00:02,606: INFO/MainProcess] Generating time management insights for megaloblasto
+[2026-01-31 18:00:08,856: WARNING/MainProcess] ✅ Time management insights generated successfully (569 tokens)
+[2026-01-31 18:00:08,867: WARNING/MainProcess] ✅ Task 217 completed successfully. Report 220 created with 1 enriched games

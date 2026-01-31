@@ -38,80 +38,76 @@ This document explains how to run the Celery-based background task system for:
 - `src/components/generate-report.tsx` - Frontend polling implementation
 
 #### Async Database Write Tasks
-- `analysis/tasks.py:write_evaluations_to_database_task()` - Async database write task
-- `analysis/chess_analysis/hybrid_analyzer.py` - Queues database writes after GCP analysis
-- `analysis/chess_analysis/game_enricher.py` - Queues database writes during streaming
+- `analysis/tasks.py:write_evaluations_to_database_task()` - Async database write task (lines 632-680)
+- `analysis/chess_analysis/hybrid_analyzer.py` - Queues database writes after GCP analysis (lines 90-106)
+- `analysis/chess_analysis/game_enricher.py` - Queues database writes during streaming (lines 754-772)
 
 ## Setup Instructions
 
-### 1. Update Nix Environment
+### Quick Start (Recommended)
 
-Exit and re-enter your Nix shell to install new packages:
+Use the provided scripts to start/stop all services automatically:
 
 ```bash
-# Exit current shell
-exit
+# Start all services (Redis, Celery workers, Django)
+./start_dev.sh
 
-# Re-enter to rebuild with new packages
-# This will install: celery, redis, django-celery-results, and redis-server
+# Stop all services
+./stop_dev.sh
 ```
 
-### 2. Run Database Migrations
+This starts:
+- **Redis**: Message broker (port 6379)
+- **Database Worker**: Handles evaluation writes (concurrency=2, queue=celery)
+- **Chess.com Worker**: Handles Chess.com API (concurrency=1, queue=chess_com_api)
+- **Lichess Worker**: Handles Lichess API (concurrency=1, queue=lichess_api)
+- **Django Server**: Web app (http://127.0.0.1:8000)
 
-Create tables for Celery result backend:
+Worker logs are written to:
+- `logs/celery_database.log`
+- `logs/celery_chess_com.log`
+- `logs/celery_lichess.log`
 
+### Manual Setup (Advanced)
+
+If you need to run services manually:
+
+**1. Update Nix Environment** (if not already done):
+```bash
+# Exit and re-enter Nix shell to install: celery, redis, django-celery-results
+```
+
+**2. Run Database Migrations** (one-time setup):
 ```bash
 python manage.py migrate django_celery_results
 ```
 
-### 3. Start Redis Server
-
-In a **new terminal**, start Redis:
-
+**3. Start Redis**:
 ```bash
-redis-server
+redis-server --daemonize yes --port 6379
 ```
 
-Keep this running. Redis is the message broker and result backend for Celery.
+**4. Start Celery Workers** (in separate terminals or as daemons):
 
-### 4. Start Celery Workers
-
-You need to start **THREE** Celery workers (one for each platform + one for database/general tasks):
-
-**Terminal 2 - Chess.com worker**:
+Database worker (concurrency=2):
 ```bash
-celery -A chess_analysis worker --loglevel=info --queues=chess_com_api --concurrency=1 -n chess_com_worker@%h
+celery -A chess_analysis worker --loglevel=info --queues=celery --concurrency=2 --pool=threads -n database_worker@%h
 ```
 
-**Terminal 3 - Lichess worker**:
+Chess.com worker (concurrency=1):
 ```bash
-celery -A chess_analysis worker --loglevel=info --queues=lichess_api --concurrency=1 -n lichess_worker@%h
+celery -A chess_analysis worker --loglevel=info --queues=chess_com_api --concurrency=1 --pool=threads -n chess_com_worker@%h
 ```
 
-**Terminal 4 - Database/General worker**:
+Lichess worker (concurrency=1):
 ```bash
-celery -A chess_analysis worker --loglevel=info --queues=celery --concurrency=4 -n database_worker@%h
+celery -A chess_analysis worker --loglevel=info --queues=lichess_api --concurrency=1 --pool=threads -n lichess_worker@%h
 ```
 
-Keep all three running:
-- Chess.com worker: Handles Chess.com API requests (serial access)
-- Lichess worker: Handles Lichess API requests (serial access)
-- Database worker: Handles async database writes and other background tasks (parallel processing)
-
-### 5. Start Django Development Server
-
-In your **original terminal** (Terminal 1), start Django as usual:
-
+**5. Start Django**:
 ```bash
 python manage.py runserver
 ```
-
-**Summary of Terminals:**
-- Terminal 1: Django development server
-- Terminal 2: Redis server
-- Terminal 3: Chess.com Celery worker
-- Terminal 4: Lichess Celery worker
-- Terminal 5: Database/General Celery worker
 
 ## How It Works
 
@@ -206,8 +202,8 @@ The Redis lock ensures we never trigger parallel request limits while maximizing
 # View all active tasks across all workers
 celery -A chess_analysis inspect active
 
-# View active tasks for specific worker
-celery -A chess_analysis inspect active --destination=database_worker@localhost
+# View active tasks for specific worker (use hostname, not localhost)
+celery -A chess_analysis inspect active --destination=database_worker@$(hostname)
 ```
 
 ### Check Redis Connection
@@ -295,15 +291,19 @@ tail -f logs/celery_database.log
 For production, consider:
 
 1. **Use Supervisor or systemd** to keep Redis and all Celery workers running
+   - See `start_dev.sh` for reference worker configurations
 2. **Monitor with Flower**: `celery -A chess_analysis flower`
 3. **Use RabbitMQ** instead of Redis for better message guarantees
-4. **Add task time limits** (already configured: 30 minutes for API tasks)
+4. **Add task time limits** (already configured: 30 minutes max per task)
 5. **Set up logging** to track rate limit hits and database write failures
+   - Logs already configured in `start_dev.sh` → `logs/celery_*.log`
 6. **Scale workers** based on traffic:
-   - Keep concurrency=1 for Chess.com/Lichess workers (serial access)
-   - Increase concurrency for database worker (parallel writes: 4-8 recommended)
+   - Keep concurrency=1 for Chess.com/Lichess workers (serial access required)
+   - Database worker: Currently concurrency=2, can increase to 4-8 for high traffic
+   - Use `--pool=threads` for I/O-bound tasks (already configured)
 7. **Database connection pooling** - Ensure Django's `CONN_MAX_AGE` is set for reusing connections
-8. **Monitor database write success rate** - Track failed vs successful writes
+8. **Monitor database write success rate** - Track failed vs successful writes via logs
+9. **Redis persistence** - Enable AOF or RDB for task recovery after crashes
 
 ## Testing
 
@@ -324,19 +324,26 @@ For production, consider:
 
 ### Test Async Database Writes
 ```bash
-# 1. Ensure database worker is running
-celery -A chess_analysis worker --loglevel=info --queues=celery --concurrency=4 -n database_worker@%h
+# 1. Ensure all services are running
+./start_dev.sh
 
-# 2. Run the test script
-python test_async_database_writethrough.py
+# 2. Generate a report with new positions:
+#    - Go to http://127.0.0.1:8000
+#    - Connect Chess.com or Lichess account
+#    - Generate a report
+#    - Wait for completion
 
-# Expected output:
-# - First analysis: Positions sent to GCP
-# - Database write task queued
-# - Second analysis: All positions from database (0 GCP calls)
-# - "✅ ALL TESTS PASSED!"
-
-# 3. Check Celery logs for confirmation
+# 3. Check logs for database write task:
 tail -f logs/celery_database.log
-# Should show: "✅ Celery task complete: Wrote X/X evaluations"
+
+# Expected log messages:
+# "📝 Queueing X GCP evaluations for async database write..."
+# "✅ Database write task queued: <task_id>"
+# "💾 DATABASE WRITE: Writing X position evaluations to database..."
+# "✅ ASYNC DATABASE WRITE: X evaluations written"
+
+# 4. Verify cache is working:
+#    - Generate another report for the same user
+#    - Should see more database hits, fewer GCP calls
+#    - Check logs: "✅ DATABASE RETURNED: X already evaluated positions..."
 ```

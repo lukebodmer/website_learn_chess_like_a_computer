@@ -201,4 +201,8 @@ CELERY_TASK_ROUTES = {
         'queue': 'lichess_api',
         # No rate limit needed - Redis locks ensure serial access
     },
+    'analysis.tasks.fetch_lichess_daily_puzzle_task': {
+        'queue': 'lichess_api',
+        # Uses same queue as other Lichess tasks for coordinated rate limiting
+    },
 }

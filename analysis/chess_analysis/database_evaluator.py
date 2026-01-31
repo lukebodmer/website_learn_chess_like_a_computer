@@ -316,7 +316,7 @@ class DatabaseEvaluator:
                 eval_data = EvaluationData.objects.using(self.db_name).create(
                     position=position,
                     knodes=knodes,
-                    depth=evaluation_data.get('depth', 20),
+                    depth=evaluation_data.get('depth'),  # NULL if not reported
                     pv_count=1  # Single PV from GCP API
                 )
 
@@ -442,7 +442,7 @@ class DatabaseEvaluator:
                     else:
                         knodes = int(knodes)
 
-                    depth = eval_data.get('depth', 20)
+                    depth = eval_data.get('depth')  # NULL if not reported
 
                     eval_data_obj = EvaluationData(
                         position=position,

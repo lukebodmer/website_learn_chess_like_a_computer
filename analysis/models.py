@@ -135,7 +135,7 @@ class EvaluationData(models.Model):
     """Individual evaluation for a position (multiple per position possible)"""
     position = models.ForeignKey(PositionEvaluation, on_delete=models.CASCADE, related_name='evals')
     knodes = models.BigIntegerField()  # Number of kilanodes searched
-    depth = models.IntegerField()      # Search depth
+    depth = models.IntegerField(null=True, blank=True)  # Search depth (NULL if not reported by engine)
     pv_count = models.IntegerField()   # Number of principal variations
 
     class Meta:

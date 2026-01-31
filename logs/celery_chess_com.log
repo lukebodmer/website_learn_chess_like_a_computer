@@ -457,3 +457,41 @@ Trying again in 2.00 seconds... (1/100)
 [2026-01-31 00:41:20,654: INFO/MainProcess] mingle: searching for neighbors
 [2026-01-31 00:41:21,660: INFO/MainProcess] mingle: all alone
 [2026-01-31 00:41:21,668: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-31 01:02:06,445: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[495906aa-5f2a-4567-b82a-88df223f4d0b] received
+[2026-01-31 01:02:06,454: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-31 01:02:06,454: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-31 01:02:06,703: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-31 01:02:06,704: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[495906aa-5f2a-4567-b82a-88df223f4d0b] succeeded in 0.25815206299739657s: {'title': 'Discovering Harmony', 'fen': 'Q2RNk2/2b2ppB/4q3/1r2n3/2pB4/2P4P/5PP1/6K1 b - - 0 23', 'pgn': '[White "Daily Puzzle Inspiration"]
+[Black "Adam M. + JohanVA"]
+[Result "0-1"]
+[FEN "Q2RNk2/2b2ppB/4q3/1r2n3/2pB4/2P4P/5PP1/6K1 b - - 0 23"]
+
+23... Nf3+ 24. gxf3 Qe1+ 25. Kg2 Rg5# 0-1', 'url': 'https://www.chess.com/daily/2026-01-30', 'image': 'https://www.chess.com/dynboard?fen=Q2RNk2/2b2ppB/4q3/1r2n3/2pB4/2P4P/5PP1/6K1%20b%20-%20-%200%2023&size=2', 'solution': ['Nf3+', 'gxf3', 'Qe1+', 'Kg2', 'Rg5#'], 'publish_time': 1769760000, 'publish_datetime': datetime.datetime(2026, 1, 30, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-31 16:38:30,166: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 16:38:30,168: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 16:38:31,172: INFO/MainProcess] mingle: all alone
+[2026-01-31 16:38:31,178: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-31 16:38:41,256: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[fe99762a-4718-4d26-8c58-341b7d33e4ac] received
+[2026-01-31 16:38:41,264: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-31 16:38:41,264: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-31 16:38:41,476: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-31 16:38:41,476: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[fe99762a-4718-4d26-8c58-341b7d33e4ac] succeeded in 0.21998762699513463s: {'title': 'Back to the Start', 'fen': '8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r b - - 3 40', 'pgn': '[White "Daily Puzzle Inspiration"]
+[Black "chesstiger787"]
+[Result "0-1"]
+[FEN "8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r b - - 3 40"]
+
+40... Rf1 41. a8=Q Nd1+ 42. Kg4 Ne3+ 43. Kh3 Rh1# 0-1', 'url': 'https://www.chess.com/daily/2026-01-31', 'image': 'https://www.chess.com/dynboard?fen=8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r%20b%20-%20-%203%2040&size=2', 'solution': ['Rf1', 'a8=Q', 'Nd1+', 'Kg4', 'Ne3+', 'Kh3', 'Rh1#'], 'publish_time': 1769846400, 'publish_datetime': datetime.datetime(2026, 1, 31, 8, 0), 'source': 'chess.com', 'lastMove': None}
+[2026-01-31 17:29:43,632: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 17:29:43,634: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 17:29:44,638: INFO/MainProcess] mingle: all alone
+[2026-01-31 17:29:44,644: INFO/MainProcess] chess_com_worker@nemo ready.
+[2026-01-31 18:25:38,742: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[a38cfb92-a9d8-4866-b4a6-e8a219830b26] received
+[2026-01-31 18:25:38,752: WARNING/MainProcess] ✓ Lock acquired: chess_com_api_lock
+[2026-01-31 18:25:38,752: WARNING/MainProcess] ✓ Chess.com API lock acquired
+[2026-01-31 18:25:39,271: WARNING/MainProcess] ✓ Successfully fetched daily puzzle from Chess.com
+[2026-01-31 18:25:39,272: INFO/MainProcess] Task analysis.tasks.fetch_daily_puzzle_task[a38cfb92-a9d8-4866-b4a6-e8a219830b26] succeeded in 0.5287530650020926s: {'title': 'Back to the Start', 'fen': '8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r b - - 3 40', 'pgn': '[White "Daily Puzzle Inspiration"]
+[Black "chesstiger787"]
+[Result "0-1"]
+[FEN "8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r b - - 3 40"]
+
+40... Rf1 41. a8=Q Nd1+ 42. Kg4 Ne3+ 43. Kh3 Rh1# 0-1', 'url': 'https://www.chess.com/daily/2026-01-31', 'image': 'https://www.chess.com/dynboard?fen=8/P2k1pp1/2p4p/3p1K1P/R2P4/2P3P1/1P3n2/7r%20b%20-%20-%203%2040&size=2', 'solution': ['Rf1', 'a8=Q', 'Nd1+', 'Kg4', 'Ne3+', 'Kh3', 'Rh1#'], 'publish_time': 1769846400, 'publish_datetime': datetime.datetime(2026, 1, 31, 8, 0), 'source': 'chess.com', 'lastMove': None}

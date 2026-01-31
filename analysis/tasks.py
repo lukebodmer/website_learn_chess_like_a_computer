@@ -627,3 +627,165 @@ def fetch_daily_puzzle_task(self):
         release_chess_com_api_lock()
         # Don't retry - return None to trigger fallback
         return None
+
+
+@shared_task(bind=True, max_retries=3)
+def fetch_lichess_daily_puzzle_task(self):
+    """
+    Background task to fetch Lichess daily puzzle with serial access rate limiting
+
+    This task ensures we don't hit Lichess's rate limits by using the same
+    Redis lock mechanism as other Lichess API calls.
+
+    Returns:
+        Dictionary with puzzle data or None if failed
+    """
+    import requests
+
+    try:
+        # Update task state
+        self.update_state(
+            state='PROGRESS',
+            meta={'status': 'Fetching daily puzzle from Lichess...'}
+        )
+
+        # Acquire lock for Lichess API (ensures serial access)
+        wait_for_lichess_api_access()
+
+        try:
+            # Fetch daily puzzle from Lichess
+            response = requests.get(
+                "https://lichess.org/api/puzzle/daily",
+                headers={
+                    "Accept": "application/json"
+                },
+                timeout=10
+            )
+
+            # Check for 429 rate limit
+            if response.status_code == 429:
+                mark_lichess_429_received()
+                release_lichess_api_lock()
+                raise self.retry(exc=Exception("429 rate limit"), countdown=LICHESS_RATE_LIMIT_WAIT)
+
+            if response.status_code != 200:
+                release_lichess_api_lock()
+                return {
+                    'success': False,
+                    'error': f'Lichess API returned status {response.status_code}'
+                }
+
+            puzzle_data = response.json()
+
+            if not puzzle_data:
+                release_lichess_api_lock()
+                return {
+                    'success': False,
+                    'error': 'No puzzle data in Lichess response'
+                }
+
+            # Import helper functions for processing Lichess puzzle data
+            from .views import convert_uci_to_algebraic, get_position_fen_from_pgn
+
+            # Extract puzzle data from Lichess response
+            lichess_puzzle = puzzle_data.get('puzzle', {})
+            lichess_game = puzzle_data.get('game', {})
+            pgn = lichess_game.get('pgn', '')
+            initial_ply = lichess_puzzle.get('initialPly', 0)
+            uci_solution = lichess_puzzle.get('solution', [])
+
+            # Convert UCI moves to algebraic notation
+            solution_moves = convert_uci_to_algebraic(uci_solution, pgn, initial_ply)
+
+            # Calculate FEN position at the puzzle start
+            puzzle_fen = get_position_fen_from_pgn(pgn, initial_ply)
+
+            # Extract puzzle information
+            puzzle = {
+                'id': lichess_puzzle.get('id'),
+                'title': f"Lichess Daily Puzzle - Rating {lichess_puzzle.get('rating', 'N/A')}",
+                'fen': puzzle_fen,
+                'solution': solution_moves,
+                'url': f"https://lichess.org/training/{lichess_puzzle.get('id')}",
+                'rating': lichess_puzzle.get('rating'),
+                'plays': lichess_puzzle.get('plays'),
+                'themes': lichess_puzzle.get('themes', []),
+                'source': 'lichess',
+                'lastMove': None  # Don't highlight last move for cleaner puzzle presentation
+            }
+
+            print(f"✓ Successfully fetched daily puzzle from Lichess (ID: {puzzle['id']})")
+
+            release_lichess_api_lock()
+
+            return {
+                'success': True,
+                'puzzle': puzzle
+            }
+
+        except Exception as e:
+            release_lichess_api_lock()
+            # Check if it's a 429 error
+            if '429' in str(e):
+                mark_lichess_429_received()
+                raise self.retry(exc=e, countdown=LICHESS_RATE_LIMIT_WAIT)
+            raise
+
+    except Exception as e:
+        print(f"❌ Error fetching Lichess daily puzzle: {e}")
+        # Release lock in case of error
+        release_lichess_api_lock()
+        # Retry the task
+        raise self.retry(exc=e, countdown=60)
+
+
+@shared_task(bind=True, max_retries=3, autoretry_for=(Exception,), retry_backoff=True)
+def write_evaluations_to_database_task(self, evaluations_json: str):
+    """
+    Background task to write position evaluations to Digital Ocean PostgreSQL database
+
+    This task runs asynchronously so users don't have to wait for database writes.
+    New evaluations from GCP Stockfish API are queued for write-back to the database
+    to build up the evaluation cache over time.
+
+    Args:
+        evaluations_json: JSON string of evaluations dict mapping FEN -> evaluation data
+
+    Returns:
+        Dictionary with write statistics
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        # Parse evaluations from JSON
+        evaluations = json.loads(evaluations_json)
+
+        if not evaluations:
+            logger.info("No evaluations to write (empty dict)")
+            return {'success': True, 'count': 0}
+
+        # Import database evaluator
+        from .chess_analysis.database_evaluator import DatabaseEvaluator
+        db_evaluator = DatabaseEvaluator()
+
+        # Write evaluations in batch (optimized for bulk operations)
+        logger.info(f"Starting async write of {len(evaluations)} evaluations to database")
+        success_count = db_evaluator.write_evaluations_batch(evaluations)
+
+        if success_count > 0:
+            logger.info(f"Successfully wrote {success_count} evaluations to database")
+            print(f"✅ ASYNC DATABASE WRITE: {success_count} evaluations written")
+        else:
+            logger.warning("Database write completed but no evaluations were written")
+
+        return {
+            'success': True,
+            'count': success_count,
+            'total_requested': len(evaluations)
+        }
+
+    except Exception as e:
+        logger.error(f"Error writing evaluations to database: {e}")
+        # Celery will automatically retry with exponential backoff
+        raise self.retry(exc=e, countdown=60)

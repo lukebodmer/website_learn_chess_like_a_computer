@@ -678,6 +678,9 @@ class GameEnricher:
         positions_for_gcp = [pos for pos in unique_positions if pos not in db_results]
         completed_api_calls = len(db_results)
 
+        # Track GCP results for async database write
+        gcp_results_for_db = {}
+
         yield {
             "type": "api_progress",
             "completed_calls": completed_api_calls,
@@ -700,6 +703,10 @@ class GameEnricher:
                         **update["result"],
                         "source": "gcp_stockfish"
                     }
+
+                    # Track GCP result for async database write (if no error)
+                    if "error" not in update["result"]:
+                        gcp_results_for_db[update["position"]] = update["result"]
 
                     # Add this position to the processor and check for newly completed games
                     newly_completed = processor.add_evaluation(update["position"], gcp_result_with_source)
@@ -743,6 +750,26 @@ class GameEnricher:
                 elif update["type"] == "complete":
                     # All API calls finished
                     pass
+
+        # Step 6: Queue GCP results for async database write
+        if gcp_results_for_db:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Queueing {len(gcp_results_for_db)} new evaluations for async database write")
+            print(f"📝 Queueing {len(gcp_results_for_db)} GCP evaluations for async database write...")
+
+            try:
+                from analysis.tasks import write_evaluations_to_database_task
+                import json
+
+                # Serialize evaluations for Celery task
+                evaluations_json = json.dumps(gcp_results_for_db)
+                task = write_evaluations_to_database_task.delay(evaluations_json)
+                logger.info(f"Database write task queued (task_id: {task.id})")
+                print(f"✅ Database write task queued: {task.id}")
+            except Exception as e:
+                logger.warning(f"Failed to queue database write task: {e}")
+                print(f"⚠️  Failed to queue database write: {e}")
 
         # Final completion
         stats = processor.get_completion_stats()

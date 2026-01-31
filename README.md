@@ -1,7 +1,7 @@
 Only use sub-agents if you are stuck
 # Learn Chess Like a Computer
 
-An interactive chess analysis web application that enriches Lichess and Chess.com game data with precomputed evaluations from a massive PostgreSQL database containing 300 million chess positions. Features real-time streaming analysis that updates the UI as games are completed.
+An interactive chess analysis web application that enriches Lichess and Chess.com game data with precomputed evaluations from a PostgreSQL database hosted on Digital Ocean containing chess positions. Features real-time streaming analysis that updates the UI as games are completed.
 
 ## Real-Time Streaming Analysis
 
@@ -195,13 +195,14 @@ The PostgreSQL evaluations database contains three main tables:
 - Combines database lookups with GCP Stockfish API for optimal performance
 - First checks Digital Ocean database for existing evaluations (fast)
 - Sends remaining positions to GCP API for evaluation (scalable)
-- **Queues new evaluations for async Celery task (non-blocking database writes)**
+- **Queues new evaluations for async Celery task `write_evaluations_to_database_task` (non-blocking database writes)**
 - Tracks statistics on database vs GCP API analysis usage
 
 **`GameEnricher`** (`analysis/chess_analysis/game_enricher.py`)
 - Identifies games lacking evaluation data
 - Coordinates database lookups and GCP Stockfish API analysis
 - Provides streaming analysis via generator functions
+- **Queues GCP results for async database write via `write_evaluations_to_database_task`**
 - Injects calculated accuracy percentages back into game JSON
 
 ## Analysis Workflow
@@ -227,7 +228,12 @@ The PostgreSQL evaluations database contains three main tables:
 - **Smart Completion Detection**: Games complete as soon as all required positions are evaluated (no batch waiting)
 - **Database-First Strategy**: Digital Ocean PostgreSQL database provides instant results for cached positions
 - **Async Database Writes**: New evaluations queued as Celery background tasks (non-blocking)
-- **Celery Task Queue**: Dedicated worker processes database writes independently from web requests
+  - Task: `analysis.tasks.write_evaluations_to_database_task`
+  - Queued automatically after GCP Stockfish API completes evaluations
+  - Users never wait for database writes - happens in background
+- **Celery Task Queue**: Dedicated "Database worker" processes writes independently from web requests
+  - Worker: `database_worker` (concurrency=2, pool=threads)
+  - Started via `start_dev.sh` on the default `celery` queue
 - **Automatic Retry Logic**: Failed database writes retry with exponential backoff (3 max retries)
 - **Bulk Insert Optimization**: 1000+ evaluations written per second using single-transaction bulk operations
 - **Growing Hit Rate**: Database hit rate improves over time as more positions are cached
@@ -258,6 +264,44 @@ The system tracks detailed statistics during analysis:
 6. Celery task queued → Database writes happen in background (async)
 7. Final completion → All data available, streaming ends
 ```
+
+## Database Write-Back Cache Flow
+
+The system uses an asynchronous write-back caching strategy to build the evaluation database over time:
+
+### How New Evaluations Get Stored
+
+1. **GCP API Returns Results** (`game_enricher.py:707-709`)
+   - Each position evaluation from GCP Stockfish is collected in `gcp_results_for_db` dict
+   - Errors are filtered out - only successful evaluations are tracked
+
+2. **Queue for Async Write** (`game_enricher.py:754-772`)
+   - After streaming completes, all GCP results are serialized to JSON
+   - Celery task `write_evaluations_to_database_task` is queued with the JSON payload
+   - Task ID is logged for monitoring: `✅ Database write task queued: <task_id>`
+
+3. **Background Processing** (`analysis/tasks.py:write_evaluations_to_database_task`)
+   - Dedicated Database worker picks up the task from the `celery` queue
+   - Deserializes the JSON payload back to evaluations dict
+   - Calls `DatabaseEvaluator.write_evaluations_batch()` for bulk insertion
+
+4. **Bulk Database Write** (`database_evaluator.py:341-511`)
+   - Single atomic transaction writes all evaluations
+   - Creates records in 3 tables: `evaluations_position`, `evaluations_data`, `evaluations_pv`
+   - Uses Django's `bulk_create()` for optimal performance (~1000+ evals/sec)
+   - Handles race conditions with `ignore_conflicts=True`
+
+5. **Automatic Retry on Failure**
+   - If database write fails, Celery automatically retries (max 3 attempts)
+   - Uses exponential backoff (60s, 120s, 240s delays)
+   - Ensures evaluations eventually get cached even with transient failures
+
+### Why This Matters
+
+- **No User Waiting**: Games appear in reports immediately, database writes happen later
+- **Growing Performance**: Each analysis builds the cache, making future analysis faster
+- **Resilient**: Network issues or database hiccups don't break user experience
+- **Efficient**: Bulk writes minimize database round-trips and transaction overhead
 
 ## Example Database Query
 
@@ -302,6 +346,37 @@ LIMIT 1;
 
 ### GCP Stockfish API
 See `gcp-stockfish-api/README.md` for deployment instructions.
+
+### Running the Application
+
+**Start all services** (Redis, Celery workers, Django):
+```bash
+./start_dev.sh
+```
+
+This starts:
+- **Redis**: Message broker for Celery (port 6379)
+- **Database Worker**: Handles evaluation writes to Digital Ocean DB (concurrency=2)
+- **Chess.com Worker**: Fetches Chess.com games with rate limiting (concurrency=1)
+- **Lichess Worker**: Fetches Lichess games with rate limiting (concurrency=1)
+- **Django Server**: Web application (http://127.0.0.1:8000)
+
+**Stop all services**:
+```bash
+./stop_dev.sh
+```
+
+**Monitor Celery workers**:
+```bash
+# Database worker logs (evaluation writes)
+tail -f logs/celery_database.log
+
+# Chess.com worker logs
+tail -f logs/celery_chess_com.log
+
+# Lichess worker logs
+tail -f logs/celery_lichess.log
+```
 
 The integration provides a powerful foundation for rapid chess analysis by leveraging precomputed evaluations while maintaining the flexibility to analyze new positions using the scalable GCP Stockfish API.
 

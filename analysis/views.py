@@ -2027,12 +2027,18 @@ def get_daily_puzzle_data():
 def get_lichess_puzzle_data():
     """
     Fetch daily puzzle from Lichess with caching
+    Cache expires at 12:05 AM EST to align with daily puzzle release
     Returns dict with puzzle data or None if failed
+
+    This function uses a Celery task to fetch the puzzle, which ensures
+    we don't hit Lichess's rate limits by coordinating with other API calls.
     """
     from django.utils import timezone
     import pytz
+    from datetime import datetime, timedelta
+    from .tasks import fetch_lichess_daily_puzzle_task
 
-    # Create cache key that includes the date
+    # Create cache key that includes the date to ensure daily refresh
     est = pytz.timezone('US/Eastern')
     now_est = timezone.now().astimezone(est)
     current_date = now_est.strftime('%Y-%m-%d')
@@ -2044,47 +2050,26 @@ def get_lichess_puzzle_data():
         return puzzle_data
 
     try:
-        # Fetch daily puzzle from Lichess API
-        response = requests.get('https://lichess.org/api/puzzle/daily', timeout=10)
-        response.raise_for_status()
+        # Use Celery task to fetch puzzle with proper rate limiting
+        # Use apply_async with queue specified for Lichess API coordination
+        result = fetch_lichess_daily_puzzle_task.apply_async(
+            queue='lichess_api'
+        )
 
-        lichess_data = response.json()
+        # Wait up to 30 seconds for the task to complete
+        task_result = result.get(timeout=30)
 
-        if lichess_data and 'puzzle' in lichess_data and 'game' in lichess_data:
-            puzzle = lichess_data['puzzle']
-            game = lichess_data['game']
+        # The task returns {'success': True, 'puzzle': {...}}
+        if task_result and task_result.get('success') and task_result.get('puzzle'):
+            puzzle_data = task_result['puzzle']
 
-            # Extract solution moves from UCI format to algebraic notation
-            solution_moves = convert_uci_to_algebraic(puzzle['solution'], game['pgn'], puzzle['initialPly'])
-
-            # Calculate FEN position at the puzzle start
-            puzzle_fen = get_position_fen_from_pgn(game['pgn'], puzzle['initialPly'])
-
-            # Get the last move that led to the puzzle position
-            # Disabled: Don't show last move highlighting for cleaner puzzle presentation
-            # last_move = get_last_move_from_pgn(game['pgn'], puzzle['initialPly'])
-
-            puzzle_data = {
-                'id': puzzle['id'],
-                'title': f"Lichess Daily Puzzle - Rating {puzzle['rating']}",
-                'fen': puzzle_fen,
-                'solution': solution_moves,
-                'url': f"https://lichess.org/training/{puzzle['id']}",
-                'rating': puzzle['rating'],
-                'plays': puzzle['plays'],
-                'themes': puzzle['themes'],
-                'source': 'lichess',
-                'lastMove': None  # Don't highlight last move
-            }
-
-            # Cache until next puzzle (same logic as Chess.com)
+            # Cache until next 12:05 AM EST (when new puzzle is released)
             cache_timeout = get_seconds_until_next_puzzle_release()
             cache.set(cache_key, puzzle_data, cache_timeout)
-
             return puzzle_data
 
     except Exception as e:
-        print(f"Error fetching Lichess puzzle: {e}")
+        print(f"Error fetching Lichess daily puzzle via Celery task: {e}")
 
     # Return fallback puzzle if API fails
     return get_lichess_fallback_puzzle()
