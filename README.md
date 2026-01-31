@@ -335,6 +335,109 @@ LIMIT 1;
 - **Deployment**: Google Cloud Run with authentication
 - **API**: REST endpoints for batch position evaluation
 
+## Incremental Game Fetching Logic
+
+The application implements intelligent game fetching to avoid unnecessary API calls and provide instant feedback when no new games are available.
+
+### Dataset Reuse Strategy
+
+When a user requests to fetch games, the system follows this logic:
+
+#### 1. Check for Unanalyzed Datasets (< 5 minutes old)
+If an unanalyzed dataset exists that was created **less than 5 minutes ago**:
+- ✅ **Action**: Return the existing dataset immediately (no API calls)
+- 🎯 **Use Case**: User accidentally clicks "fetch games" multiple times
+- 📊 **Result**: Instant response with cached data
+
+#### 2. Update Existing Datasets (5 min - 24 hours old, < 100 games)
+If an unanalyzed dataset exists that was created **5 minutes to 24 hours ago** with **fewer than 100 games**:
+- ✅ **Action**: Fetch only new games and append to existing dataset
+- 🎯 **Use Case**: User played a few more games and wants to add them to pending analysis
+- 📊 **Result**: Efficient incremental fetch (only new games)
+
+#### 3. Check for Recent Analysis (< 10 seconds after last game)
+If checking for new games **within 10 seconds** of the last analyzed game timestamp:
+- ✅ **Action**: Skip all API calls, return error immediately
+- 🎯 **Use Case**: User generates report then immediately clicks "fetch games" again
+- 📊 **Result**: Instant "No new games" message (0 API calls)
+- ⚡ **Optimization**: Prevents wasteful API scanning when no new games exist
+
+#### 4. Fetch New Games (all other cases)
+- ✅ **Action**: Make API calls to fetch most recent games
+- 🎯 **Use Case**: First fetch, or more than 24 hours since last fetch, or existing dataset has 100+ games
+- 📊 **Result**: New dataset with up to 100 most recent games
+
+### Platform-Specific Behavior
+
+**Lichess**:
+- Uses `since` API parameter with `lastMoveAt` timestamp for efficient filtering
+- Single API call returns only games newer than specified timestamp
+- Detects duplicates by comparing `lastMoveAt` (when game ended) not `createdAt` (when game started)
+
+**Chess.com**:
+- Fetches monthly archives in reverse chronological order
+- Filters games by `end_time` during processing
+- Stops fetching older months once no qualifying games are found
+- Uses timestamp comparison to detect duplicates before creating datasets
+
+### Example Scenarios
+
+#### Scenario A: Generate Report → Try Again Immediately (< 10 seconds)
+```
+1. User fetches 100 games → Creates Dataset #1 (analysis_generated=False)
+2. User clicks "Generate Analysis Report" → Dataset #1 marked as analysis_generated=True
+3. User clicks "Fetch Games" 5 seconds later
+
+   Result:
+   - ✅ Backend detects since_timestamp is within 10 seconds of Dataset #1's last game
+   - ✅ 0 API calls made
+   - ✅ Instant error: "No new games found since your last analyzed dataset"
+```
+
+#### Scenario B: Generate Report → Try Again After 15 Minutes
+```
+1. User generates report from Dataset #1 at 2:00 PM
+2. User plays 5 new games
+3. User clicks "Fetch Games" at 2:15 PM
+
+   Result:
+   - ✅ Lichess: Single API call with since=<last game timestamp + 5 seconds>
+   - ✅ Chess.com: Fetches recent months until finding no new games
+   - ✅ Returns 5 new games
+   - ✅ Creates Dataset #2 with only new games
+```
+
+#### Scenario C: Generate Report → Try Again Next Day (> 24 hours)
+```
+1. User generates report from Dataset #1 on Monday
+2. User plays 20 new games throughout the week
+3. User clicks "Fetch Games" on Friday
+
+   Result:
+   - ✅ API calls fetch most recent 100 games (including the 20 new ones)
+   - ✅ Creates Dataset #3 with latest 100 games
+   - ✅ User can analyze all recent games
+```
+
+#### Scenario D: Accidental Double-Click (< 5 minutes, no analysis)
+```
+1. User clicks "Fetch Games" → Creates Dataset #1 (in progress)
+2. User accidentally clicks "Fetch Games" again 30 seconds later
+
+   Result:
+   - ✅ Backend finds Dataset #1 (< 5 minutes old, unanalyzed)
+   - ✅ Returns Dataset #1 immediately
+   - ✅ 0 additional API calls made
+```
+
+### Benefits
+
+- **⚡ Zero Unnecessary API Calls**: Instant feedback when no new games exist
+- **🎯 Smart Duplicate Detection**: Compares actual game timestamps to avoid re-fetching
+- **♻️ Dataset Reuse**: Efficiently builds up datasets over time
+- **🚀 Optimized for Rate Limits**: Minimizes API usage for both Lichess and Chess.com
+- **👤 Better UX**: Users get instant "no new games" messages instead of waiting for API scans
+
 ## Development Setup
 
 ### Main Application

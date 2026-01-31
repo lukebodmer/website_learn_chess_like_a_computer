@@ -3512,3 +3512,205 @@ DETAIL:  Failing row contains (23098, 89600, null, 1, 79248).
 [2026-01-31 18:00:02,606: INFO/MainProcess] Generating time management insights for megaloblasto
 [2026-01-31 18:00:08,856: WARNING/MainProcess] ✅ Time management insights generated successfully (569 tokens)
 [2026-01-31 18:00:08,867: WARNING/MainProcess] ✅ Task 217 completed successfully. Report 220 created with 1 enriched games
+[2026-01-31 20:20:10,051: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 20:20:10,053: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 20:20:11,057: INFO/MainProcess] mingle: all alone
+[2026-01-31 20:20:11,063: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 20:30:15,991: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[87a60703-3685-4e1a-b9f5-ee61e7aff19a] received
+[2026-01-31 20:30:16,000: INFO/MainProcess] Starting async write of 1 evaluations to database
+[2026-01-31 20:30:16,000: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 1 position evaluations to database...
+[2026-01-31 20:30:17,123: WARNING/MainProcess]   [1/4] Preparing 1 position records...
+[2026-01-31 20:30:17,123: WARNING/MainProcess]   [1/4] Bulk inserting 1 positions to database...
+[2026-01-31 20:30:17,239: WARNING/MainProcess]   ✓ Step 1 complete in 0.12s
+[2026-01-31 20:30:17,239: WARNING/MainProcess]   [2/4] Fetching 1 positions from database...
+[2026-01-31 20:30:17,351: WARNING/MainProcess]   ✓ Step 2 complete in 0.11s - fetched 1 positions
+[2026-01-31 20:30:17,351: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 20:30:17,352: WARNING/MainProcess]   [3/4] Bulk inserting 1 evaluation data records...
+[2026-01-31 20:30:17,467: WARNING/MainProcess]   ✓ Step 3 complete in 0.12s
+[2026-01-31 20:30:17,467: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 20:30:17,467: WARNING/MainProcess]   [4/4] Bulk inserting 1 principal variations...
+[2026-01-31 20:30:17,517: WARNING/MainProcess]   ✓ Step 4 complete in 0.05s
+[2026-01-31 20:30:17,517: INFO/MainProcess] Bulk write complete: 1 evaluations written in single transaction (1.52s)
+[2026-01-31 20:30:17,517: WARNING/MainProcess] 
+  ⚡ Total database write time: 1.52s (1 evals/sec)
+[2026-01-31 20:30:17,574: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 1 position evaluations written in single transaction
+[2026-01-31 20:30:17,574: INFO/MainProcess] Successfully wrote 1 evaluations to database
+[2026-01-31 20:30:17,574: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 1 evaluations written
+[2026-01-31 20:30:17,575: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[87a60703-3685-4e1a-b9f5-ee61e7aff19a] succeeded in 1.583377044997178s: {'success': True, 'count': 1, 'total_requested': 1}
+[2026-01-31 20:37:27,730: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 20:37:27,731: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 20:37:28,736: INFO/MainProcess] mingle: all alone
+[2026-01-31 20:37:28,743: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:01:36,296: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:01:36,298: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:01:37,302: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:01:37,308: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:05:45,834: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:05:45,835: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:05:46,839: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:05:46,845: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:08:37,685: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[0e618efb-aead-455e-bccc-f3214dc7e53d] received
+[2026-01-31 21:08:37,693: INFO/MainProcess] Starting async write of 2 evaluations to database
+[2026-01-31 21:08:37,693: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 2 position evaluations to database...
+[2026-01-31 21:08:38,552: WARNING/MainProcess]   [1/4] Preparing 2 position records...
+[2026-01-31 21:08:38,552: WARNING/MainProcess]   [1/4] Bulk inserting 2 positions to database...
+[2026-01-31 21:08:38,660: WARNING/MainProcess]   ✓ Step 1 complete in 0.11s
+[2026-01-31 21:08:38,660: WARNING/MainProcess]   [2/4] Fetching 2 positions from database...
+[2026-01-31 21:08:38,719: WARNING/MainProcess]   ✓ Step 2 complete in 0.06s - fetched 2 positions
+[2026-01-31 21:08:38,719: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 21:08:38,719: WARNING/MainProcess]   [3/4] Bulk inserting 2 evaluation data records...
+[2026-01-31 21:08:38,778: WARNING/MainProcess]   ✓ Step 3 complete in 0.06s
+[2026-01-31 21:08:38,778: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 21:08:38,778: WARNING/MainProcess]   [4/4] Bulk inserting 2 principal variations...
+[2026-01-31 21:08:38,836: WARNING/MainProcess]   ✓ Step 4 complete in 0.06s
+[2026-01-31 21:08:38,836: INFO/MainProcess] Bulk write complete: 2 evaluations written in single transaction (1.14s)
+[2026-01-31 21:08:38,836: WARNING/MainProcess] 
+  ⚡ Total database write time: 1.14s (2 evals/sec)
+[2026-01-31 21:08:38,901: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 2 position evaluations written in single transaction
+[2026-01-31 21:08:38,901: INFO/MainProcess] Successfully wrote 2 evaluations to database
+[2026-01-31 21:08:38,902: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 2 evaluations written
+[2026-01-31 21:08:38,902: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[0e618efb-aead-455e-bccc-f3214dc7e53d] succeeded in 1.2167841760019655s: {'success': True, 'count': 2, 'total_requested': 2}
+[2026-01-31 21:26:05,014: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:26:05,016: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:26:06,020: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:26:06,027: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:44:54,373: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:44:54,375: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:44:55,379: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:44:55,386: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:46:40,879: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:46:40,882: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:46:41,886: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:46:41,894: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 21:51:54,247: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[fbfa947e-3e28-4f35-b28d-f920d300d726] received
+[2026-01-31 21:51:54,257: INFO/MainProcess] Starting async write of 1 evaluations to database
+[2026-01-31 21:51:54,257: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 1 position evaluations to database...
+[2026-01-31 21:51:54,898: WARNING/MainProcess]   [1/4] Preparing 1 position records...
+[2026-01-31 21:51:54,898: WARNING/MainProcess]   [1/4] Bulk inserting 1 positions to database...
+[2026-01-31 21:51:55,008: WARNING/MainProcess]   ✓ Step 1 complete in 0.11s
+[2026-01-31 21:51:55,008: WARNING/MainProcess]   [2/4] Fetching 1 positions from database...
+[2026-01-31 21:51:55,062: WARNING/MainProcess]   ✓ Step 2 complete in 0.05s - fetched 1 positions
+[2026-01-31 21:51:55,062: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 21:51:55,062: WARNING/MainProcess]   [3/4] Bulk inserting 1 evaluation data records...
+[2026-01-31 21:51:55,116: WARNING/MainProcess]   ✓ Step 3 complete in 0.05s
+[2026-01-31 21:51:55,116: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 21:51:55,116: WARNING/MainProcess]   [4/4] Bulk inserting 1 principal variations...
+[2026-01-31 21:51:55,167: WARNING/MainProcess]   ✓ Step 4 complete in 0.05s
+[2026-01-31 21:51:55,167: INFO/MainProcess] Bulk write complete: 1 evaluations written in single transaction (0.91s)
+[2026-01-31 21:51:55,167: WARNING/MainProcess] 
+  ⚡ Total database write time: 0.91s (1 evals/sec)
+[2026-01-31 21:51:55,230: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 1 position evaluations written in single transaction
+[2026-01-31 21:51:55,230: INFO/MainProcess] Successfully wrote 1 evaluations to database
+[2026-01-31 21:51:55,230: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 1 evaluations written
+[2026-01-31 21:51:55,231: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[fbfa947e-3e28-4f35-b28d-f920d300d726] succeeded in 0.983226429001661s: {'success': True, 'count': 1, 'total_requested': 1}
+[2026-01-31 21:58:47,338: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 21:58:47,340: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 21:58:48,345: INFO/MainProcess] mingle: all alone
+[2026-01-31 21:58:48,353: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:03:16,451: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:03:16,452: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:03:17,457: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:03:17,465: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:08:53,580: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:08:53,583: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:08:54,588: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:08:54,596: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:09:35,349: WARNING/MainProcess] 📊 Processing task 224 for user lj
+[2026-01-31 22:09:35,378: WARNING/MainProcess] Loaded 3628 openings from database
+[2026-01-31 22:09:35,450: WARNING/MainProcess] ❌ Task 224 failed: database is locked
+[2026-01-31 22:15:18,396: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:15:18,398: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:15:19,404: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:15:19,411: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:16:35,112: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[42d4fa40-a78a-43b4-858e-c48686df030f] received
+[2026-01-31 22:16:35,123: INFO/MainProcess] Starting async write of 1095 evaluations to database
+[2026-01-31 22:16:35,123: WARNING/MainProcess] 💾 DATABASE WRITE: Writing 1095 position evaluations to database...
+[2026-01-31 22:16:35,887: WARNING/MainProcess]   [1/4] Preparing 1095 position records...
+[2026-01-31 22:16:35,891: WARNING/MainProcess]   [1/4] Bulk inserting 1095 positions to database...
+[2026-01-31 22:16:36,276: WARNING/MainProcess]   ✓ Step 1 complete in 0.39s
+[2026-01-31 22:16:36,276: WARNING/MainProcess]   [2/4] Fetching 1095 positions from database...
+[2026-01-31 22:16:36,548: WARNING/MainProcess]   ✓ Step 2 complete in 0.27s - fetched 1095 positions
+[2026-01-31 22:16:36,548: WARNING/MainProcess]   [3/4] Preparing evaluation data records...
+[2026-01-31 22:16:36,557: WARNING/MainProcess]   [3/4] Bulk inserting 1095 evaluation data records...
+[2026-01-31 22:16:36,697: WARNING/MainProcess]   ✓ Step 3 complete in 0.15s
+[2026-01-31 22:16:36,697: WARNING/MainProcess]   [4/4] Preparing principal variation records...
+[2026-01-31 22:16:36,705: WARNING/MainProcess]   [4/4] Bulk inserting 1095 principal variations...
+[2026-01-31 22:16:36,830: WARNING/MainProcess]   ✓ Step 4 complete in 0.13s
+[2026-01-31 22:16:36,830: INFO/MainProcess] Bulk write complete: 1095 evaluations written in single transaction (1.71s)
+[2026-01-31 22:16:36,830: WARNING/MainProcess] 
+  ⚡ Total database write time: 1.71s (642 evals/sec)
+[2026-01-31 22:16:36,917: WARNING/MainProcess] ✅ DATABASE WRITE SUCCESS: 1095 position evaluations written in single transaction
+[2026-01-31 22:16:36,919: INFO/MainProcess] Successfully wrote 1095 evaluations to database
+[2026-01-31 22:16:36,920: WARNING/MainProcess] ✅ ASYNC DATABASE WRITE: 1095 evaluations written
+[2026-01-31 22:16:36,921: INFO/MainProcess] Task analysis.tasks.write_evaluations_to_database_task[42d4fa40-a78a-43b4-858e-c48686df030f] succeeded in 1.8075404749979498s: {'success': True, 'count': 1095, 'total_requested': 1095}
+[2026-01-31 22:26:40,107: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:26:40,108: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:26:41,112: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:26:41,118: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:35:14,289: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:35:14,290: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:35:15,294: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:35:15,301: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:43:11,245: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-01-31 22:43:11,248: INFO/MainProcess] mingle: searching for neighbors
+[2026-01-31 22:43:12,253: INFO/MainProcess] mingle: all alone
+[2026-01-31 22:43:12,259: INFO/MainProcess] database_worker@nemo ready.
+[2026-01-31 22:47:33,152: WARNING/MainProcess] 📊 Processing task 230 for user lj
+[2026-01-31 22:47:33,180: WARNING/MainProcess] Loaded 3628 openings from database
+[2026-01-31 22:47:33,393: WARNING/MainProcess] 📊 Task 230 already has AnalysisReport 233
+[2026-01-31 22:47:33,395: WARNING/MainProcess] 🔍 DATABASE LOOKUP: Checking database for 1150 positions...
+[2026-01-31 22:47:35,958: WARNING/MainProcess] ✅ DATABASE RETURNED: 1150 already evaluated positions, 0 need evaluation
+[2026-01-31 22:47:37,836: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:37,836: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:39,227: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:39,227: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:40,593: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:40,593: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:41,983: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:41,983: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:43,338: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:43,338: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:44,689: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:44,689: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:46,070: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:46,070: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:47,609: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:47,609: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:48,964: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:48,964: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:50,371: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:50,371: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:51,710: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:51,710: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:53,276: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:53,276: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:54,785: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:54,785: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:56,184: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:56,184: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:57,663: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:57,663: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:47:59,406: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:47:59,407: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:48:00,775: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:48:00,775: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:48:02,120: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:48:02,120: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:48:03,572: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:48:03,572: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:48:04,926: INFO/MainProcess] Successfully obtained GCP auth token
+[2026-01-31 22:48:04,926: INFO/MainProcess] Initialized GCP Stockfish client for https://stockfish-api-552342702662.us-west1.run.app
+[2026-01-31 22:48:04,944: WARNING/MainProcess] 📊 Running principles analysis on 20 enriched games
+[2026-01-31 22:48:04,955: WARNING/MainProcess] ✅ Principles analysis complete. ELO range: None, Games: 20
+[2026-01-31 22:48:04,958: WARNING/MainProcess] 📊 Generating puzzles for user rating: 846
+[2026-01-31 22:48:09,042: WARNING/MainProcess] ✅ Generated 0 custom puzzles for training
+[2026-01-31 22:48:09,059: WARNING/MainProcess] 📊 Generating LLM insights for report 233
+[2026-01-31 22:48:09,060: INFO/MainProcess] Generating game results insights for megaloblasto
+[2026-01-31 22:48:15,416: WARNING/MainProcess] ✅ Game results insights generated successfully (714 tokens)
+[2026-01-31 22:48:15,417: INFO/MainProcess] Generating mistakes insights for megaloblasto
+[2026-01-31 22:48:24,222: WARNING/MainProcess] ✅ Mistakes insights generated successfully (977 tokens)
+[2026-01-31 22:48:24,223: INFO/MainProcess] Generating blunder insights for megaloblasto
+[2026-01-31 22:48:30,842: WARNING/MainProcess] ✅ Blunder insights generated successfully (680 tokens)
+[2026-01-31 22:48:30,842: INFO/MainProcess] Generating time management insights for megaloblasto
+[2026-01-31 22:48:40,020: WARNING/MainProcess] ✅ Time management insights generated successfully (747 tokens)
+[2026-01-31 22:48:40,033: WARNING/MainProcess] ✅ Task 230 completed successfully. Report 233 created with 20 enriched games

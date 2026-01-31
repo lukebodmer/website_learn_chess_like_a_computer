@@ -193,7 +193,13 @@ class ReportTaskProcessor:
                             stockfish_games_analyzed=0
                         )
                         task.analysis_report = report
+
+                        # Mark the dataset as analyzed
+                        task.game_dataset.analysis_generated = True
+                        task.game_dataset.save()
+
                         print(f"📊 Created new AnalysisReport {report.id} for task {task.id}")
+                        print(f"✅ Marked GameDataSet {task.game_dataset.id} as analyzed")
                     else:
                         print(f"📊 Task {task.id} already has AnalysisReport {task.analysis_report.id}")
 

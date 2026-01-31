@@ -43,7 +43,12 @@ class GameDataSet(models.Model):
     oldest_game_date = models.DateTimeField(null=True, blank=True)
     newest_game_date = models.DateTimeField(null=True, blank=True)
 
+    # Track if this dataset has been used to generate an analysis report
+    # This field will be set when an AnalysisReport is created from this dataset
+    analysis_generated = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)  # Automatically updated on save
 
     class Meta:
         ordering = ['-created_at']

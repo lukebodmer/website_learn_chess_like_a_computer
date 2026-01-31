@@ -89,9 +89,11 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
       : `/chess-com/fetch-games/${username}/`
 
     // Add 'since' parameter if we have a previous dataset
-    // Add 1ms to ensure we only get games AFTER the last game (not including it)
+    // Add 5 seconds (5000ms) padding to ensure we only get games AFTER the last game
+    // This accounts for any timestamp precision issues and the fact that games can't
+    // finish within seconds of each other anyway
     if (newestGameDate) {
-      const sinceTimestamp = new Date(newestGameDate).getTime() + 1
+      const sinceTimestamp = new Date(newestGameDate).getTime() + 5000
       fetchUrl += `?since=${sinceTimestamp}`
     }
 

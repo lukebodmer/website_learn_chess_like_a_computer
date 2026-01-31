@@ -3,6 +3,8 @@ Celery tasks for async processing of Chess.com and Lichess API requests
 """
 from celery import shared_task
 from django.core.cache import cache
+from django.utils import timezone
+from datetime import datetime
 import json
 import time
 import requests
@@ -14,6 +16,8 @@ from .views import (
     get_latest_elo_by_time_control,
     format_date_range_for_display,
     track_game_dates,
+    find_unanalyzed_dataset,
+    update_game_dataset,
     ANALYSIS_GAME_COUNT
 )
 
@@ -97,7 +101,7 @@ def wait_for_api_access():
 
 
 @shared_task(bind=True, max_retries=3)
-def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_COUNT):
+def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_COUNT, since_timestamp=None):
     """
     Background task to fetch Chess.com games with serial access rate limiting
 
@@ -112,11 +116,16 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
         user_id: Django user ID
         username: Chess.com username
         max_games: Maximum number of games to fetch
+        since_timestamp: Optional timestamp (seconds) to fetch games since
 
     Returns:
         Dictionary with game data or error information
     """
     try:
+        # Get user object
+        from django.contrib.auth.models import User
+        user = User.objects.get(id=user_id)
+
         # Update task state to show progress
         self.update_state(
             state='PROGRESS',
@@ -126,6 +135,71 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
         # Validate max_games to prevent abuse
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
+
+        # Check for unanalyzed dataset that can be reused/updated
+        existing_dataset, should_update = find_unanalyzed_dataset(user, username, platform='chess.com')
+
+        # If since_timestamp is provided, check if we're looking for games after the last analyzed dataset
+        # If so, we can skip API calls entirely by comparing timestamps
+        if since_timestamp and not existing_dataset:
+            # Find the most recent analyzed dataset
+            last_analyzed = GameDataSet.objects.filter(
+                user=user,
+                chess_com_username=username,
+                analysis_generated=True
+            ).order_by('-created_at').first()
+
+            if last_analyzed and last_analyzed.newest_game_date:
+                # Convert newest_game_date to timestamp (seconds) for comparison
+                last_game_timestamp = int(last_analyzed.newest_game_date.timestamp())
+
+                # If the since_timestamp is very close to the last game (within 10 seconds),
+                # it means we're checking right after generating a report and likely have no new games
+                # Skip the API calls and return early
+                time_diff = abs(since_timestamp - last_game_timestamp)
+                if time_diff < 10:  # Within 10 seconds
+                    print(f"since_timestamp ({since_timestamp}) is very close to last analyzed game ({last_game_timestamp}). Skipping API calls.")
+                    return {
+                        'success': False,
+                        'error': 'No new games found since your last analyzed dataset. Play some more games and try again!'
+                    }
+
+        if existing_dataset and not should_update:
+            # Dataset is less than 5 minutes old - return it as-is without fetching
+            print(f"Reusing Chess.com dataset {existing_dataset.id} (created {existing_dataset.created_at}) with {existing_dataset.total_games} games")
+
+            # Get latest ELO ratings
+            elo_by_time_control = get_latest_elo_by_time_control(
+                existing_dataset.raw_data,
+                username,
+                'chess.com'
+            )
+
+            date_range_str = format_date_range_for_display(
+                existing_dataset.oldest_game_date,
+                existing_dataset.newest_game_date
+            )
+
+            return {
+                'success': True,
+                'games_count': existing_dataset.total_games,
+                'game_dataset_id': existing_dataset.id,
+                'date_range': date_range_str or "Date range unavailable",
+                'created_at': existing_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
+                'data_size': len(existing_dataset.raw_data),
+                'elo_ratings': elo_by_time_control,
+                'ndjson_data': existing_dataset.raw_data
+            }
+
+        if existing_dataset and should_update:
+            # Dataset is 5min-24hr old with < 100 games - fetch new games and update it
+            print(f"Found unanalyzed Chess.com dataset {existing_dataset.id} with {existing_dataset.total_games} games")
+            # Adjust max_games to only fetch what we need to reach 100
+            games_to_fetch = max_games - existing_dataset.total_games
+
+            # Update max_games for incremental fetch
+            max_games = games_to_fetch
+            print(f"Fetching {max_games} additional games for Chess.com dataset")
 
         # Acquire lock for Chess.com API (ensures serial access)
         wait_for_api_access()
@@ -224,6 +298,11 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
                             # Check if game meets our criteria
                             time_class = game_data.get('time_class', '').lower()
                             is_rated = game_data.get('rated', True)
+                            end_time = game_data.get('end_time', 0)
+
+                            # If since_timestamp is provided, filter out games that ended before it
+                            if since_timestamp and end_time <= since_timestamp:
+                                continue
 
                             if time_class in allowed_time_classes and is_rated:
                                 qualified_games.append(game_data)
@@ -248,16 +327,80 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
 
         # Check if we have any qualified games
         if not qualified_games:
-            return {
-                'success': False,
-                'error': f'No rated bullet, blitz, or rapid games found after checking {total_games_checked} games. Only these time controls are supported.'
-            }
+            # If since_timestamp was provided, this means user is checking for new games after generating a report
+            if since_timestamp:
+                # Check if we have an existing unanalyzed dataset to update
+                if existing_dataset:
+                    print(f"No new games found for Chess.com since {since_timestamp}, returning existing dataset")
+
+                    # Get latest ELO ratings from existing dataset
+                    elo_by_time_control = get_latest_elo_by_time_control(
+                        existing_dataset.raw_data,
+                        username,
+                        'chess.com'
+                    )
+
+                    date_range_str = format_date_range_for_display(
+                        existing_dataset.oldest_game_date,
+                        existing_dataset.newest_game_date
+                    )
+
+                    return {
+                        'success': True,
+                        'games_count': existing_dataset.total_games,
+                        'game_dataset_id': existing_dataset.id,
+                        'date_range': date_range_str or "Date range unavailable",
+                        'created_at': existing_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
+                        'data_size': len(existing_dataset.raw_data),
+                        'elo_ratings': elo_by_time_control,
+                        'ndjson_data': existing_dataset.raw_data
+                    }
+                else:
+                    # No existing unanalyzed dataset, but since_timestamp was provided
+                    # This means user is checking for new games after generating a report
+                    # Return success with 0 games found
+                    print(f"No new games found for Chess.com since {since_timestamp}, and all datasets are analyzed")
+                    return {
+                        'success': False,
+                        'error': 'No new games found since your last analyzed dataset. Play some more games and try again!'
+                    }
+            else:
+                # Initial fetch with no games - this is an error
+                return {
+                    'success': False,
+                    'error': f'No rated bullet, blitz, or rapid games found after checking {total_games_checked} games. Only these time controls are supported.'
+                }
 
         # Update progress
         self.update_state(
             state='PROGRESS',
             meta={'current': 90, 'total': 100, 'status': 'Saving game data...'}
         )
+
+        # Track newest game timestamp for duplicate detection
+        newest_game_timestamp = max(game.get('end_time', 0) for game in qualified_games) if qualified_games else 0
+
+        # If since_timestamp was provided but no existing_dataset exists,
+        # check if the fetched games are duplicates of already-analyzed games
+        if since_timestamp and not existing_dataset and newest_game_timestamp:
+            # Find the last analyzed dataset for this user
+            last_analyzed_dataset = GameDataSet.objects.filter(
+                user=user,
+                chess_com_username=username,
+                analysis_generated=True
+            ).order_by('-created_at').first()
+
+            if last_analyzed_dataset and last_analyzed_dataset.newest_game_date:
+                # Convert newest_game_date to timestamp (seconds)
+                last_analyzed_timestamp = int(last_analyzed_dataset.newest_game_date.timestamp())
+
+                # Check if the newest fetched game is older than or equal to the last analyzed game
+                if newest_game_timestamp <= last_analyzed_timestamp:
+                    print(f"Fetched Chess.com games are duplicates (newest: {newest_game_timestamp} <= last analyzed: {last_analyzed_timestamp})")
+                    return {
+                        'success': False,
+                        'error': 'No new games found since your last analyzed dataset. Play some more games and try again!'
+                    }
 
         # Convert qualified games to NDJSON format
         ndjson_lines = []
@@ -266,18 +409,24 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
 
         ndjson_data = '\n'.join(ndjson_lines)
 
-        # Get user object
-        from django.contrib.auth.models import User
-        user = User.objects.get(id=user_id)
-
-        # Create GameDataSet using shared utility
-        game_dataset = create_game_dataset(
-            user=user,
-            username=username,
-            games_data=qualified_games,
-            ndjson_data=ndjson_data,
-            platform='chess.com'
-        )
+        # Update existing dataset or create new one
+        if existing_dataset:
+            print(f"Updating existing Chess.com dataset {existing_dataset.id} with {len(qualified_games)} new games")
+            game_dataset = update_game_dataset(
+                existing_dataset,
+                qualified_games,
+                ndjson_data,
+                platform='chess.com'
+            )
+        else:
+            # Create new GameDataSet
+            game_dataset = create_game_dataset(
+                user=user,
+                username=username,
+                games_data=qualified_games,
+                ndjson_data=ndjson_data,
+                platform='chess.com'
+            )
 
         # Format date range using shared utility
         date_range_str = format_date_range_for_display(
@@ -285,9 +434,9 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
             game_dataset.newest_game_date
         )
 
-        # Get latest ELO ratings by time control
+        # Get latest ELO ratings by time control (use updated dataset's data)
         elo_by_time_control = get_latest_elo_by_time_control(
-            ndjson_data,
+            game_dataset.raw_data,
             username,
             'chess.com'
         )
@@ -300,13 +449,13 @@ def fetch_chess_com_games_task(self, user_id, username, max_games=ANALYSIS_GAME_
 
         return {
             'success': True,
-            'games_count': len(qualified_games),
+            'games_count': game_dataset.total_games,
             'game_dataset_id': game_dataset.id,
             'date_range': date_range_str or "Date range unavailable",
             'created_at': game_dataset.created_at.strftime("%B %d, %Y at %I:%M %p"),
-            'data_size': len(ndjson_data),
+            'data_size': len(game_dataset.raw_data),
             'elo_ratings': elo_by_time_control,
-            'ndjson_data': ndjson_data
+            'ndjson_data': game_dataset.raw_data
         }
 
     except Exception as e:
@@ -396,6 +545,10 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
         Dictionary with game data or error information
     """
     try:
+        # Get user object
+        from django.contrib.auth.models import User
+        user = User.objects.get(id=user_id)
+
         # Update task state to show progress
         self.update_state(
             state='PROGRESS',
@@ -405,6 +558,71 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
         # Validate max_games to prevent abuse
         if max_games < 1 or max_games > 1000:
             max_games = ANALYSIS_GAME_COUNT
+
+        # Check for unanalyzed dataset that can be reused/updated
+        existing_dataset, should_update = find_unanalyzed_dataset(user, username, platform='lichess')
+
+        # If since_timestamp is provided, check if we're looking for games after the last analyzed dataset
+        # If so, we can skip API calls entirely by comparing timestamps
+        if since_timestamp and not existing_dataset:
+            # Find the most recent analyzed dataset
+            last_analyzed = GameDataSet.objects.filter(
+                user=user,
+                lichess_username=username,
+                analysis_generated=True
+            ).order_by('-created_at').first()
+
+            if last_analyzed and last_analyzed.newest_game_date:
+                # Convert newest_game_date to timestamp (milliseconds) for comparison
+                last_game_timestamp = int(last_analyzed.newest_game_date.timestamp() * 1000)
+
+                # If the since_timestamp is very close to the last game (within 10 seconds),
+                # it means we're checking right after generating a report and likely have no new games
+                # Skip the API calls and return early
+                time_diff_ms = abs(since_timestamp - last_game_timestamp)
+                if time_diff_ms < 10000:  # Within 10 seconds (10000 ms)
+                    print(f"since_timestamp ({since_timestamp}) is very close to last analyzed game ({last_game_timestamp}). Skipping API calls.")
+                    return {
+                        'success': False,
+                        'error': 'No new games found since your last analyzed dataset. Play some more games and try again!'
+                    }
+
+        if existing_dataset and not should_update:
+            # Dataset is less than 5 minutes old - return it as-is without fetching
+            print(f"Reusing dataset {existing_dataset.id} (created {existing_dataset.created_at}) with {existing_dataset.total_games} games")
+
+            # Get latest ELO ratings
+            elo_by_time_control = get_latest_elo_by_time_control(
+                existing_dataset.raw_data,
+                username,
+                'lichess'
+            )
+
+            return {
+                'success': True,
+                'games_count': existing_dataset.total_games,
+                'game_dataset_id': existing_dataset.id,
+                'created_at': existing_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
+                'data_size': len(existing_dataset.raw_data),
+                'date_range': existing_dataset.date_range_display,
+                'oldest_game_date': existing_dataset.oldest_game_date.strftime("%B %d, %Y") if existing_dataset.oldest_game_date else None,
+                'newest_game_date': existing_dataset.newest_game_date.strftime("%B %d, %Y") if existing_dataset.newest_game_date else None,
+                'elo_ratings': elo_by_time_control,
+                'ndjson_data': existing_dataset.raw_data
+            }
+
+        if existing_dataset and should_update:
+            # Dataset is 5min-24hr old with < 100 games - fetch new games and update it
+            print(f"Found unanalyzed dataset {existing_dataset.id} with {existing_dataset.total_games} games")
+            # Adjust max_games to only fetch what we need to reach 100
+            games_to_fetch = max_games - existing_dataset.total_games
+
+            # Update max_games and since_timestamp for incremental fetch
+            max_games = games_to_fetch
+            if existing_dataset.newest_game_date:
+                # Fetch games newer than the newest game in the dataset
+                since_timestamp = int(existing_dataset.newest_game_date.timestamp() * 1000) + 1
+                print(f"Fetching {max_games} new games since {existing_dataset.newest_game_date}")
 
         # Acquire lock for Lichess API (ensures serial access)
         wait_for_lichess_api_access()
@@ -495,16 +713,60 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
         # Rebuild ndjson_data with only rated bullet/blitz/rapid games
         filtered_ndjson_data = '\n'.join(filtered_ndjson_lines)
 
+        # Handle case where no new games were found
         if len(games) == 0:
-            return {
-                'success': False,
-                'error': 'No rated bullet, blitz, or rapid games found for this account'
-            }
+            # If we're doing an incremental fetch (since_timestamp is set), this is SUCCESS
+            # It means no new games since last time
+            if since_timestamp:
+                # Check if we have an existing unanalyzed dataset to update
+                if existing_dataset:
+                    print(f"No new games found since {since_timestamp}, returning existing dataset")
+
+                    # Get latest ELO ratings from existing dataset
+                    elo_by_time_control = get_latest_elo_by_time_control(
+                        existing_dataset.raw_data,
+                        username,
+                        'lichess'
+                    )
+
+                    date_range_str = format_date_range_for_display(
+                        existing_dataset.oldest_game_date,
+                        existing_dataset.newest_game_date
+                    )
+
+                    return {
+                        'success': True,
+                        'games_count': existing_dataset.total_games,
+                        'game_dataset_id': existing_dataset.id,
+                        'created_at': existing_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
+                        'data_size': len(existing_dataset.raw_data),
+                        'date_range': date_range_str,
+                        'oldest_game_date': existing_dataset.oldest_game_date.strftime("%B %d, %Y") if existing_dataset.oldest_game_date else None,
+                        'newest_game_date': existing_dataset.newest_game_date.strftime("%B %d, %Y") if existing_dataset.newest_game_date else None,
+                        'elo_ratings': elo_by_time_control,
+                        'ndjson_data': existing_dataset.raw_data
+                    }
+                else:
+                    # No existing unanalyzed dataset, but since_timestamp was provided
+                    # This means user is checking for new games after generating a report
+                    # Return success with 0 games found
+                    print(f"No new games found since {since_timestamp}, and all datasets are analyzed")
+                    return {
+                        'success': False,
+                        'error': 'No new games found since your last analyzed dataset. Play some more games and try again!'
+                    }
+            else:
+                # Initial fetch with no games found - this is an error
+                return {
+                    'success': False,
+                    'error': 'No rated bullet, blitz, or rapid games found for this account'
+                }
 
         # Track dates
+        # IMPORTANT: Use lastMoveAt because Lichess API's 'since' parameter filters by lastMoveAt
         oldest_date, newest_date = track_game_dates(
             games,
-            lambda game: game.get('createdAt')
+            lambda game: game.get('lastMoveAt')
         )
 
         # Update progress
@@ -513,25 +775,34 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
             meta={'current': 80, 'total': 100, 'status': 'Saving game data...'}
         )
 
-        # Get user object
-        from django.contrib.auth.models import User
-        user = User.objects.get(id=user_id)
-
-        # Create GameDataSet
-        game_dataset = create_game_dataset(
-            user=user,
-            username=username,
-            games_data=games,
-            ndjson_data=filtered_ndjson_data,
-            platform='lichess'
-        )
+        # Update existing dataset or create new one
+        if existing_dataset:
+            print(f"Updating existing dataset {existing_dataset.id} with {len(games)} new games")
+            game_dataset = update_game_dataset(
+                existing_dataset,
+                games,
+                filtered_ndjson_data,
+                platform='lichess'
+            )
+        else:
+            # Create new GameDataSet
+            game_dataset = create_game_dataset(
+                user=user,
+                username=username,
+                games_data=games,
+                ndjson_data=filtered_ndjson_data,
+                platform='lichess'
+            )
 
         # Format date range
-        date_range_str = format_date_range_for_display(oldest_date, newest_date)
+        date_range_str = format_date_range_for_display(
+            game_dataset.oldest_game_date,
+            game_dataset.newest_game_date
+        )
 
-        # Get latest ELO ratings by time control
+        # Get latest ELO ratings by time control (use updated dataset's data)
         elo_by_time_control = get_latest_elo_by_time_control(
-            filtered_ndjson_data,
+            game_dataset.raw_data,
             username,
             'lichess'
         )
@@ -544,15 +815,15 @@ def fetch_lichess_games_task(self, user_id, username, access_token, max_games=AN
 
         return {
             'success': True,
-            'games_count': len(games),
+            'games_count': game_dataset.total_games,
             'game_dataset_id': game_dataset.id,
             'created_at': game_dataset.created_at.strftime("%B %d, %Y %I:%M %p"),
-            'data_size': len(filtered_ndjson_data),
+            'data_size': len(game_dataset.raw_data),
             'date_range': date_range_str,
-            'oldest_game_date': oldest_date.strftime("%B %d, %Y") if oldest_date else None,
-            'newest_game_date': newest_date.strftime("%B %d, %Y") if newest_date else None,
+            'oldest_game_date': game_dataset.oldest_game_date.strftime("%B %d, %Y") if game_dataset.oldest_game_date else None,
+            'newest_game_date': game_dataset.newest_game_date.strftime("%B %d, %Y") if game_dataset.newest_game_date else None,
             'elo_ratings': elo_by_time_control,
-            'ndjson_data': filtered_ndjson_data
+            'ndjson_data': game_dataset.raw_data
         }
 
     except Exception as e:
@@ -737,6 +1008,52 @@ def fetch_lichess_daily_puzzle_task(self):
         release_lichess_api_lock()
         # Retry the task
         raise self.retry(exc=e, countdown=60)
+
+
+@shared_task
+def cleanup_unanalyzed_datasets_task():
+    """
+    Periodic task to clean up unanalyzed game datasets older than 24 hours.
+
+    This prevents accumulation of unused datasets and ensures users can
+    always fetch fresh games without being blocked by old, unused datasets.
+
+    Should be run periodically (e.g., every hour) via Celery Beat.
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    from .models import GameDataSet
+
+    try:
+        # Find datasets that are:
+        # 1. Not analyzed (analysis_generated=False)
+        # 2. Created more than 24 hours ago
+        cutoff_time = timezone.now() - timedelta(hours=24)
+
+        old_unanalyzed = GameDataSet.objects.filter(
+            analysis_generated=False,
+            created_at__lt=cutoff_time
+        )
+
+        count = old_unanalyzed.count()
+        if count > 0:
+            print(f"Deleting {count} unanalyzed datasets older than 24 hours")
+            old_unanalyzed.delete()
+            print(f"✅ Successfully deleted {count} old unanalyzed datasets")
+        else:
+            print("No old unanalyzed datasets to delete")
+
+        return {
+            'success': True,
+            'deleted_count': count
+        }
+
+    except Exception as e:
+        print(f"❌ Error cleaning up unanalyzed datasets: {e}")
+        return {
+            'success': False,
+            'error': str(e)
+        }
 
 
 @shared_task(bind=True, max_retries=3, autoretry_for=(Exception,), retry_backoff=True)

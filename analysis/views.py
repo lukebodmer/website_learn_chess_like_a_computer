@@ -34,7 +34,7 @@ from .opening_classifier import classify_opening_by_moves, lookup_opening_in_dat
 
 
 # Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 100
+ANALYSIS_GAME_COUNT = 20
 
 
 # Configure Chess.com client with rate limit handling
@@ -100,9 +100,12 @@ def create_game_dataset(user, username, games_data, ndjson_data, platform='liche
     """Create a GameDataSet with proper date tracking"""
     # Extract dates based on platform
     if platform == 'lichess':
+        # IMPORTANT: Use lastMoveAt for Lichess because the API's 'since' parameter
+        # filters by lastMoveAt (when the game ended), not createdAt (when it started).
+        # This ensures consistency when fetching games incrementally.
         oldest_date, newest_date = track_game_dates(
             games_data,
-            lambda game: game.get('createdAt')
+            lambda game: game.get('lastMoveAt')
         )
     else:  # chess.com
         # Handle both dictionary format and object format
@@ -132,6 +135,125 @@ def create_game_dataset(user, username, games_data, ndjson_data, platform='liche
         })
 
     return GameDataSet.objects.create(**dataset_kwargs)
+
+
+def find_unanalyzed_dataset(user, username, platform='lichess'):
+    """
+    Find the most recent unanalyzed dataset for a user that can be reused/updated.
+
+    Logic:
+    1. If dataset was created < 5 minutes ago: Return it directly (prevents rapid re-fetching)
+    2. If dataset was created 5-24 hours ago AND has < 100 games: Return it for updating
+    3. Otherwise: Return None (create new dataset)
+
+    Returns tuple: (dataset, should_update)
+    - dataset: The GameDataSet object or None
+    - should_update: True if we should fetch new games and update, False if we should use as-is
+    """
+    try:
+        # Find most recent unanalyzed dataset
+        if platform == 'lichess':
+            dataset = GameDataSet.objects.filter(
+                user=user,
+                lichess_username=username,
+                analysis_generated=False
+            ).order_by('-created_at').first()
+        else:  # chess.com
+            dataset = GameDataSet.objects.filter(
+                user=user,
+                chess_com_username=username,
+                analysis_generated=False
+            ).order_by('-created_at').first()
+
+        if not dataset:
+            return None, False
+
+        # Calculate time since dataset creation
+        time_since_creation = timezone.now() - dataset.created_at
+
+        # Case 1: Dataset is less than 5 minutes old - use it as-is
+        if time_since_creation < timedelta(minutes=5):
+            print(f"Dataset {dataset.id} is less than 5 minutes old, reusing as-is")
+            return dataset, False
+
+        # Case 2: Dataset is 5 minutes to 24 hours old AND has < 100 games - update it
+        if time_since_creation < timedelta(hours=24) and dataset.total_games < 100:
+            print(f"Dataset {dataset.id} is {time_since_creation.total_seconds() / 60:.1f} minutes old with {dataset.total_games} games, will update")
+            return dataset, True
+
+        # Case 3: Dataset is too old or has 100+ games - don't reuse
+        print(f"Dataset {dataset.id} doesn't meet reuse criteria (age: {time_since_creation}, games: {dataset.total_games})")
+        return None, False
+
+    except Exception as e:
+        print(f"Error finding unanalyzed dataset: {e}")
+        return None, False
+
+
+def update_game_dataset(dataset, new_games_data, new_ndjson_data, platform='lichess'):
+    """
+    Update an existing GameDataSet with new games.
+    Appends new games to existing data and updates metadata.
+
+    Args:
+        dataset: Existing GameDataSet to update
+        new_games_data: List of new game dictionaries
+        new_ndjson_data: NDJSON string of new games
+        platform: 'lichess' or 'chess.com'
+
+    Returns:
+        Updated GameDataSet
+    """
+    # Combine old and new NDJSON data
+    combined_ndjson = dataset.raw_data
+    if combined_ndjson and not combined_ndjson.endswith('\n'):
+        combined_ndjson += '\n'
+    combined_ndjson += new_ndjson_data
+
+    # Parse all games to get updated date range
+    all_games = []
+    for line in combined_ndjson.strip().split('\n'):
+        if line.strip():
+            try:
+                all_games.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+
+    # Limit to 100 games (most recent)
+    # Sort games by date descending and take first 100
+    if platform == 'lichess':
+        # Sort by createdAt for consistency with API filtering
+        all_games.sort(key=lambda g: g.get('createdAt') or 0, reverse=True)
+    else:  # chess.com
+        all_games.sort(key=lambda g: g.get('end_time', 0), reverse=True)
+
+    all_games = all_games[:100]
+
+    # Rebuild NDJSON with limited games
+    ndjson_lines = [json.dumps(game) for game in all_games]
+    final_ndjson = '\n'.join(ndjson_lines)
+
+    # Extract updated date range
+    if platform == 'lichess':
+        # Use lastMoveAt for consistency with Lichess API's 'since' parameter
+        oldest_date, newest_date = track_game_dates(
+            all_games,
+            lambda game: game.get('lastMoveAt')
+        )
+    else:  # chess.com
+        oldest_date, newest_date = track_game_dates(
+            all_games,
+            lambda game: game.get('end_time', 0) if isinstance(game, dict) else getattr(game, 'end_time', 0)
+        )
+
+    # Update dataset
+    dataset.raw_data = final_ndjson
+    dataset.total_games = len(all_games)
+    dataset.oldest_game_date = oldest_date
+    dataset.newest_game_date = newest_date
+    dataset.save()
+
+    return dataset
 
 
 # OAuth helper functions (from Flask version)
@@ -366,18 +488,21 @@ def generate_report_page(request, platform, username):
 
 @login_required
 def get_last_dataset(request, platform, username):
-    """Get the most recent dataset for a given platform and username"""
+    """Get the most recent ANALYZED dataset for a given platform and username"""
     try:
-        # Find the most recent dataset for this user and platform
+        # Find the most recent ANALYZED dataset for this user and platform
+        # Only consider datasets that have been used to generate analysis reports
         if platform == 'lichess':
             last_dataset = GameDataSet.objects.filter(
                 user=request.user,
-                lichess_username=username
+                lichess_username=username,
+                analysis_generated=True
             ).order_by('-created_at').first()
         elif platform == 'chess.com':
             last_dataset = GameDataSet.objects.filter(
                 user=request.user,
-                chess_com_username=username
+                chess_com_username=username,
+                analysis_generated=True
             ).order_by('-created_at').first()
         else:
             return JsonResponse({
@@ -781,6 +906,13 @@ def _generate_unified_analysis_report(request, username, dataset_id):
                 status='pending'
             )
             print(f"📊 Created new report generation task {task.id} for {platform} user {username}")
+
+            # Mark the dataset as analyzed immediately to prevent it from being reused
+            # This ensures that if the user tries to fetch games again while analysis is running,
+            # they won't get the same dataset back
+            game_dataset.analysis_generated = True
+            game_dataset.save()
+            print(f"📊 Marked dataset {game_dataset.id} as analysis_generated=True")
 
             # Start the task processor if not running
             from .task_processor import start_task_processor

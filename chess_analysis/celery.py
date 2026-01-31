@@ -3,6 +3,7 @@ Celery configuration for chess_analysis project.
 """
 import os
 from celery import Celery
+from celery.schedules import crontab
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chess_analysis.settings')
@@ -21,6 +22,14 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
+
+# Configure periodic tasks
+app.conf.beat_schedule = {
+    'cleanup-unanalyzed-datasets': {
+        'task': 'analysis.tasks.cleanup_unanalyzed_datasets_task',
+        'schedule': crontab(minute=0),  # Run every hour at minute 0
+    },
+}
 
 
 @app.task(bind=True, ignore_result=True)
