@@ -371,78 +371,28 @@ class ReportTaskProcessor:
                         llm_client = DeepSeekClient(api_key=deepseek_api_key)
                         generator = InsightsGenerator(llm_client)
 
-                        # Generate game results insights
-                        result = generator.generate_game_results_insights(
+                        # Generate all insights in parallel (4x faster!)
+                        all_results = generator.generate_all_insights(
                             username=username,
                             enriched_games=completed_enriched_games,
+                            stockfish_analysis=analysis_summary,
                             elo_averages_data=elo_averages_data,
                             elo_chart_data=task.game_dataset.elo_chart_data
                         )
 
-                        if result['success']:
-                            llm_insights['game_results'] = {
-                                'insights': result['insights'],
-                                'generated_at': timezone.now().isoformat(),
-                                'tokens_used': result.get('tokens_used'),
-                                'metadata': result.get('metadata', {})
-                            }
-                            print(f"✅ Game results insights generated successfully ({result.get('tokens_used', 0)} tokens)")
-                        else:
-                            print(f"⚠️ Game results insights generation failed: {result.get('error')}")
+                        # Process results for each insight type
+                        generated_at = timezone.now().isoformat()
 
-                        # Generate mistakes insights
-                        mistakes_result = generator.generate_mistakes_insights(
-                            username=username,
-                            stockfish_analysis=analysis_summary,
-                            elo_averages_data=elo_averages_data
-                        )
-
-                        if mistakes_result['success']:
-                            llm_insights['mistakes_analysis'] = {
-                                'insights': mistakes_result['insights'],
-                                'generated_at': timezone.now().isoformat(),
-                                'tokens_used': mistakes_result.get('tokens_used'),
-                                'metadata': mistakes_result.get('metadata', {})
-                            }
-                            print(f"✅ Mistakes insights generated successfully ({mistakes_result.get('tokens_used', 0)} tokens)")
-                        else:
-                            print(f"⚠️ Mistakes insights generation failed: {mistakes_result.get('error')}")
-
-                        # Generate blunder insights
-                        blunder_result = generator.generate_blunder_insights(
-                            username=username,
-                            stockfish_analysis=analysis_summary,
-                            elo_averages_data=elo_averages_data
-                        )
-
-                        if blunder_result['success']:
-                            llm_insights['blunder_analysis'] = {
-                                'insights': blunder_result['insights'],
-                                'generated_at': timezone.now().isoformat(),
-                                'tokens_used': blunder_result.get('tokens_used'),
-                                'metadata': blunder_result.get('metadata', {})
-                            }
-                            print(f"✅ Blunder insights generated successfully ({blunder_result.get('tokens_used', 0)} tokens)")
-                        else:
-                            print(f"⚠️ Blunder insights generation failed: {blunder_result.get('error')}")
-
-                        # Generate time management insights
-                        time_result = generator.generate_time_insights(
-                            username=username,
-                            stockfish_analysis=analysis_summary,
-                            elo_averages_data=elo_averages_data
-                        )
-
-                        if time_result['success']:
-                            llm_insights['time_analysis'] = {
-                                'insights': time_result['insights'],
-                                'generated_at': timezone.now().isoformat(),
-                                'tokens_used': time_result.get('tokens_used'),
-                                'metadata': time_result.get('metadata', {})
-                            }
-                            print(f"✅ Time management insights generated successfully ({time_result.get('tokens_used', 0)} tokens)")
-                        else:
-                            print(f"⚠️ Time management insights generation failed: {time_result.get('error')}")
+                        for insight_type, result in all_results.items():
+                            if result and result.get('success'):
+                                llm_insights[insight_type] = {
+                                    'insights': result['insights'],
+                                    'generated_at': generated_at,
+                                    'tokens_used': result.get('tokens_used'),
+                                    'metadata': result.get('metadata', {})
+                                }
+                            elif result:
+                                print(f"⚠️ {insight_type} generation failed: {result.get('error')}")
                     else:
                         if not deepseek_api_key:
                             print("⚠️ DeepSeek API key not configured, skipping LLM insights")

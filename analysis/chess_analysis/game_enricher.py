@@ -246,7 +246,9 @@ class GameEnricher:
             "mistakes": mistakes,
             "total_moves_analyzed": len(evaluations),
             "database_evaluations": db_count,
-            "stockfish_evaluations": gcp_count
+            "stockfish_evaluations": gcp_count,
+            "positions": positions,  # Cache positions to avoid regenerating later
+            "moves": moves  # Cache moves to avoid reparsing later
         }
 
     def merge_evaluation_sources(
@@ -904,10 +906,16 @@ class GameEnricher:
         # should show what SHOULD have been played from the PREVIOUS position,
         # not what's best from the current position.
 
-        # Get moves to reconstruct positions
-        moves_string = raw_json.get("moves", "")
-        moves = self.parse_moves_string(moves_string)
-        positions = self.generate_positions_for_game(moves)
+        # Use cached positions and moves from analysis_result (already computed!)
+        # This avoids expensive regeneration of positions during streaming
+        positions = analysis_result.get("positions", [])
+        moves = analysis_result.get("moves", [])
+
+        # Fallback: only regenerate if somehow missing (shouldn't happen)
+        if not positions or not moves:
+            moves_string = raw_json.get("moves", "")
+            moves = self.parse_moves_string(moves_string)
+            positions = self.generate_positions_for_game(moves)
 
         for i, move_eval in enumerate(analysis_result["evaluations"]):
             eval_entry = {}
@@ -1005,17 +1013,19 @@ class GameEnricher:
         if "division" in raw_json:
             return
 
-        # Try to get moves from the raw_json
-        moves_string = raw_json.get("moves", "")
-        if not moves_string:
-            return
+        # Use cached moves from analysis_result if available
+        moves = analysis_result.get("moves", [])
 
-        try:
-            # Parse moves and calculate division
+        # Fallback: parse from raw_json if not cached
+        if not moves:
+            moves_string = raw_json.get("moves", "")
+            if not moves_string:
+                return
             moves = self.parse_moves_string(moves_string)
             if not moves:
                 return
 
+        try:
             # Generate board positions for division analysis
             boards = self.generate_board_positions_for_game(moves)
             if not boards:

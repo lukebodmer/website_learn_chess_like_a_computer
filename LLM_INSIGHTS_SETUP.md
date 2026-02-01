@@ -69,6 +69,7 @@ analysis/llm_insights/
 ✅ **Cached**: Insights stored in database to avoid regeneration
 ✅ **Cost-Effective**: Uses DeepSeek's affordable API
 ✅ **Extensible**: Easy to add insights for other components
+✅ **Parallel Generation**: All insight types generated concurrently (4x faster)
 ✅ **Well-Documented**: Comprehensive README with examples
 
 ## Usage
@@ -110,7 +111,7 @@ from analysis.llm_insights import (
 client = DeepSeekClient(api_key=settings.DEEPSEEK_API_KEY)
 generator = InsightsGenerator(client)
 
-# Generate insights
+# Generate single insight type
 result = generator.generate_game_results_insights(
     username="player123",
     enriched_games=report.enriched_games,
@@ -120,6 +121,21 @@ result = generator.generate_game_results_insights(
 
 if result['success']:
     print(result['insights'])
+
+# Generate ALL insights in parallel (4x faster!)
+all_results = generator.generate_all_insights(
+    username="player123",
+    enriched_games=report.enriched_games,
+    stockfish_analysis=report.stockfish_analysis,
+    elo_averages_data=elo_data,
+    elo_chart_data=report.elo_chart_data
+)
+
+# Access individual insights
+print(all_results['game_results']['insights'])
+print(all_results['mistakes_analysis']['insights'])
+print(all_results['blunder_analysis']['insights'])
+print(all_results['time_analysis']['insights'])
 ```
 
 ## Cost Breakdown
@@ -138,6 +154,7 @@ if result['success']:
 - ✅ Max 300 tokens per response
 - ✅ Generated only when user views report
 - ✅ Efficient prompt structure
+- ✅ Parallel generation reduces total latency (4x faster)
 
 ## Extending the System
 

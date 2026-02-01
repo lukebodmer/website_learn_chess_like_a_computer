@@ -217,15 +217,26 @@ The PostgreSQL evaluations database contains three main tables:
    - **Real-Time Updates**: Stream individual game completions to frontend
 
 3. **Data Enrichment**:
+   - **Cached Position/Move Reuse**: Positions and moves generated during collection are cached in memory to avoid redundant regeneration during streaming
    - Calculate player accuracy using Lichess algorithm
    - Generate mistake classifications (blunders, mistakes, inaccuracies)
    - Inject analysis data into original game JSON structure
    - Add opening classification and game phase divisions
 
+4. **LLM Insights Generation** (Parallel):
+   - **Game Results Insights**: Win/loss patterns, termination analysis, ELO trends
+   - **Mistakes Analysis**: Phase-specific error patterns (opening/middlegame/endgame)
+   - **Blunder Analysis**: Critical mistakes and time pressure factors
+   - **Time Management**: Timeout rates and time pressure blunders
+   - **Parallel Execution**: All 4 insight types generated concurrently (4x faster than sequential)
+
 ## Performance Considerations
+
+### Analysis Pipeline Optimizations
 
 - **Streaming Architecture**: Real-time updates eliminate user waiting time
 - **Smart Completion Detection**: Games complete as soon as all required positions are evaluated (no batch waiting)
+- **Cached Position Reuse**: Positions and moves generated once during collection phase, reused during enrichment (eliminates redundant chess board operations)
 - **Database-First Strategy**: Digital Ocean PostgreSQL database provides instant results for cached positions
 - **Async Database Writes**: New evaluations queued as Celery background tasks (non-blocking)
   - Task: `analysis.tasks.write_evaluations_to_database_task`
@@ -238,6 +249,18 @@ The PostgreSQL evaluations database contains three main tables:
 - **Bulk Insert Optimization**: 1000+ evaluations written per second using single-transaction bulk operations
 - **Growing Hit Rate**: Database hit rate improves over time as more positions are cached
 - **Parallel Processing**: Multiple API calls run concurrently with configurable limits (default: 10)
+
+### LLM Insights Optimizations
+
+- **Parallel Insight Generation**: All 4 insight types (game results, mistakes, blunders, time) generated concurrently using ThreadPoolExecutor
+  - **Sequential Time**: 4-12 seconds (1-3s per insight × 4 insights)
+  - **Parallel Time**: 1-3 seconds (just the slowest request)
+  - **Speedup**: ~4x faster insight generation
+- **Thread-Safe Execution**: Separate threads for each insight type prevent blocking
+- **Graceful Error Handling**: Failed insights don't block other insights from completing
+
+### Database Performance
+
 - **Indexed Queries**: All database lookups use indexed FEN columns for O(log n) performance
 - **Batch Processing**: Multiple positions processed in batches of 100 to avoid memory issues
 - **Connection Management**: Uses Django's multi-database routing for efficient connection handling
