@@ -106,8 +106,8 @@
     <div class="section">
         <h3>Get Started</h3>
         <p>Create an account or login to start analyzing your chess games!</p>
-        <a href="/auth/login/" class="btn">Login</a>
-        <a href="/auth/signup/" class="btn btn-secondary">Sign Up</a>
+        <a href="{% url 'login' %}" class="btn">Login</a>
+        <a href="{% url 'analysis:signup' %}" class="btn btn-secondary">Sign Up</a>
     </div>
 
     <div class="section">

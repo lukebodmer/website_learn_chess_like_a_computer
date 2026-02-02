@@ -170,6 +170,15 @@ GCP_STOCKFISH_URL = 'https://stockfish-api-552342702662.us-west1.run.app'
 # Get your API key from https://platform.deepseek.com/
 DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
 
+# Stripe settings
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
+# Stripe Price IDs (you'll need to create these in Stripe Dashboard)
+STRIPE_STANDARD_PRICE_ID = os.environ.get('STRIPE_STANDARD_PRICE_ID', '')  # $3/month - 300 games
+STRIPE_MAX_PRICE_ID = os.environ.get('STRIPE_MAX_PRICE_ID', '')  # $9/month - 1000 games
+
 # Login/logout URLs
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -204,5 +213,15 @@ CELERY_TASK_ROUTES = {
     'analysis.tasks.fetch_lichess_daily_puzzle_task': {
         'queue': 'lichess_api',
         # Uses same queue as other Lichess tasks for coordinated rate limiting
+    },
+}
+
+# Celery Beat Schedule for periodic tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'reset-monthly-usage-counters': {
+        'task': 'analysis.tasks.reset_monthly_usage_counters',
+        'schedule': crontab(hour=0, minute=0, day_of_month=1),  # Run at midnight on 1st of each month
     },
 }

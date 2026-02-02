@@ -1106,3 +1106,33 @@ def write_evaluations_to_database_task(self, evaluations_json: str):
         logger.error(f"Error writing evaluations to database: {e}")
         # Celery will automatically retry with exponential backoff
         raise self.retry(exc=e, countdown=60)
+
+
+@shared_task
+def reset_monthly_usage_counters():
+    """
+    Reset games_analyzed_this_month counter for all users.
+    This task should be scheduled to run on the 1st of each month.
+    """
+    from .models import UserProfile
+    from django.utils import timezone
+
+    today = timezone.now().date()
+
+    # Get all user profiles that have active subscriptions
+    profiles = UserProfile.objects.filter(subscription_status='active')
+
+    reset_count = 0
+    for profile in profiles:
+        # Reset the counter
+        profile.games_analyzed_this_month = 0
+        profile.usage_reset_date = today
+        profile.save()
+        reset_count += 1
+
+    print(f"✅ Reset usage counters for {reset_count} users on {today}")
+    return {
+        'success': True,
+        'reset_count': reset_count,
+        'date': str(today)
+    }

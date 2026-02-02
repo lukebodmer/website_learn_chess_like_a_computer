@@ -4,6 +4,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 interface GenerateReportProps {
   username: string
   platform: 'lichess' | 'chess.com'
+  monthlyLimit: number
+  gamesAnalyzed: number
+  remainingGames: number
+  resetDate: string | null
 }
 
 interface GamesFetchResponse {
@@ -44,7 +48,7 @@ const TIME_CONTROL_COLORS: Record<string, string> = {
   rapid: '#45B7D1'
 }
 
-export default function GenerateReport({ username, platform }: GenerateReportProps) {
+export default function GenerateReport({ username, platform, monthlyLimit, gamesAnalyzed, remainingGames, resetDate }: GenerateReportProps) {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [statusText, setStatusText] = useState('')
   const [progressText, setProgressText] = useState('Fetching games...')
@@ -726,22 +730,82 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
             </div>
 
             {/* Membership Info */}
-            <div style={{
-              marginBottom: '16px',
-              padding: '12px',
-              background: 'var(--background-secondary)',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                color: 'var(--text-secondary)',
-                margin: 0,
-                fontSize: '13px'
-              }}>
-                Generating this report will use <strong style={{ color: 'var(--text-primary)' }}>1 of your 3 monthly reports</strong>
-              </p>
-            </div>
+            {(() => {
+              const gamesInReport = gameData.games_count ?? 0
+              const canGenerate = gamesInReport <= remainingGames
+              const resetDateObj = resetDate ? new Date(resetDate) : null
+              const isValidDate = resetDateObj && !isNaN(resetDateObj.getTime())
+              const resetDateFormatted = isValidDate
+                ? resetDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                : null
+
+              return (
+                <div style={{
+                  marginBottom: '16px',
+                  padding: '16px',
+                  background: canGenerate ? 'var(--background-secondary)' : 'var(--background-tertiary)',
+                  borderRadius: '6px',
+                  border: `2px solid ${canGenerate ? 'var(--border-color)' : 'var(--danger-color)'}`,
+                  textAlign: 'center'
+                }}>
+                  {canGenerate ? (
+                    <>
+                      <p style={{
+                        color: 'var(--text-primary)',
+                        margin: '0 0 8px 0',
+                        fontSize: '15px',
+                        fontWeight: 600
+                      }}>
+                        This report will use <strong style={{ color: 'var(--primary-color)' }}>{gamesInReport} game{gamesInReport === 1 ? '' : 's'}</strong>
+                      </p>
+                      <p style={{
+                        color: 'var(--text-secondary)',
+                        margin: 0,
+                        fontSize: '13px'
+                      }}>
+                        {remainingGames} of {monthlyLimit} games remaining this month
+                      </p>
+                      {resetDateFormatted && (
+                        <p style={{
+                          color: 'var(--text-muted)',
+                          margin: '4px 0 0 0',
+                          fontSize: '12px'
+                        }}>
+                          Resets on {resetDateFormatted}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p style={{
+                        color: 'var(--danger-color)',
+                        margin: '0 0 8px 0',
+                        fontSize: '15px',
+                        fontWeight: 700
+                      }}>
+                        ⚠️ Insufficient Games Remaining
+                      </p>
+                      <p style={{
+                        color: 'var(--text-primary)',
+                        margin: '0 0 4px 0',
+                        fontSize: '14px'
+                      }}>
+                        This report requires <strong>{gamesInReport} games</strong>, but you only have <strong>{remainingGames} games</strong> remaining this month.
+                      </p>
+                      {resetDateFormatted && (
+                        <p style={{
+                          color: 'var(--text-secondary)',
+                          margin: 0,
+                          fontSize: '12px'
+                        }}>
+                          Your allotment resets on {resetDateFormatted}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )
+            })()}
 
             <div style={{
               display: 'flex',
@@ -753,13 +817,15 @@ export default function GenerateReport({ username, platform }: GenerateReportPro
               <button
                 onClick={handleGenerateReport}
                 className="btn btn-primary"
+                disabled={gameData.games_count ? gameData.games_count > remainingGames : false}
                 style={{
-                  background: 'var(--success-color)',
+                  background: (gameData.games_count ?? 0) > remainingGames ? 'var(--text-muted)' : 'var(--success-color)',
                   fontSize: '18px',
                   padding: '15px 30px',
                   textDecoration: 'none',
                   border: 'none',
-                  cursor: 'pointer'
+                  cursor: (gameData.games_count ?? 0) > remainingGames ? 'not-allowed' : 'pointer',
+                  opacity: (gameData.games_count ?? 0) > remainingGames ? 0.5 : 1
                 }}
               >
                 {isNewGames

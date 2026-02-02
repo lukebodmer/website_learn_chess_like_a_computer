@@ -1,0 +1,578 @@
+/* Signup Flow Styles - Matches main.css theme */
+
+/* Signup Container */
+.signup-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.signup-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.signup-header h1 {
+    color: var(--text-primary);
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.signup-header p {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.signup-content {
+    background: var(--background-secondary);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 20px var(--shadow-medium);
+}
+
+/* Step Indicator */
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--background-primary);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+
+.step.completed .step-number {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--text-on-primary);
+}
+
+.step-label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.step-divider {
+    flex: 1;
+    height: 2px;
+    background: var(--border-color);
+    margin: 0 10px;
+    margin-bottom: 25px;
+}
+
+/* Signup Steps */
+.signup-step {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.signup-step h2 {
+    color: var(--text-primary);
+    font-size: 1.8em;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.step-subtitle {
+    color: var(--text-secondary);
+    margin: 0 0 30px 0;
+    font-size: 1em;
+}
+
+/* Forms */
+.signup-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-color);
+}
+
+.field-help {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.field-error {
+    font-size: 0.85em;
+    color: var(--danger-color);
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+.error-banner {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: var(--danger-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Plans Grid */
+.plans-grid-signup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .plans-grid-signup {
+        grid-template-columns: 1fr;
+    }
+}
+
+.plan-card-signup {
+    background: var(--background-primary);
+    border: 3px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.plan-card-signup:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.plan-card-signup.selected {
+    border-color: var(--primary-color);
+    background: var(--background-secondary);
+    box-shadow: 0 4px 16px var(--shadow-medium);
+}
+
+.plan-card-signup.featured {
+    border-color: var(--primary-color);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--secondary-color);
+    color: var(--text-on-primary);
+    padding: 4px 16px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.plan-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+    color: var(--text-primary);
+}
+
+.plan-price {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.plan-price span {
+    font-size: 0.4em;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.plan-features li {
+    padding: 8px 0;
+    padding-left: 25px;
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.plan-features li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.plan-select-indicator {
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.plan-card-signup.selected .plan-select-indicator {
+    opacity: 1;
+}
+
+.checkmark {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    line-height: 30px;
+    font-weight: bold;
+}
+
+/* Buttons */
+.btn-large {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.signup-nav-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.signup-nav-buttons .btn {
+    flex: 1;
+}
+
+/* Footer */
+.signup-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.signup-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signup-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Stripe Embedded Checkout */
+.stripe-checkout-embedded {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.stripe-checkout-embedded iframe {
+    border: none;
+    width: 100%;
+    min-height: 600px;
+}
+
+/* Loading States */
+.checkout-loading {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.checkout-loading .spinner-large {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spinner 0.8s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spinner {
+    to { transform: rotate(360deg); }
+}
+
+.checkout-loading p {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+}
+
+/* Subscription Manager Styles */
+.subscription-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.subscription-container h2 {
+    color: var(--text-primary);
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.subscription-message {
+    background: var(--background-primary);
+    border-left: 4px solid var(--primary-color);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+.usage-stats {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.plan-card {
+    background: var(--background-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.plan-card.featured {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--secondary-color);
+    color: var(--text-on-primary);
+    padding: 0.25rem 1rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.plan-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.period {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.select-plan-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.stripe-checkout-container {
+    background: var(--background-secondary);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    box-shadow: 0 4px 20px var(--shadow-medium);
+}
+
+.checkout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.checkout-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.5em;
+}
+
+.btn-back {
+    margin-left: auto;
+}
+
+.checkout-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: var(--danger-color);
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.checkout-error h3 {
+    margin-top: 0;
+    color: var(--danger-color);
+}
+
+.back-link {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.back-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 10px;
+    }
+
+    .signup-content {
+        padding: 25px 20px;
+    }
+
+    .signup-header h1 {
+        font-size: 2em;
+    }
+
+    .step-indicator {
+        margin-bottom: 30px;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9em;
+    }
+
+    .step-label {
+        font-size: 0.8em;
+    }
+
+    .signup-nav-buttons {
+        flex-direction: column;
+    }
+
+    .plan-card-signup {
+        padding: 20px;
+    }
+
+    .plan-price {
+        font-size: 2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .signup-header h1 {
+        font-size: 1.75em;
+    }
+
+    .signup-header p {
+        font-size: 1em;
+    }
+
+    .signup-content {
+        padding: 20px 15px;
+    }
+
+    .step-indicator {
+        margin-bottom: 25px;
+    }
+}

@@ -21,6 +21,7 @@ import OpeningStatsByElo from './components/opening-stats-by-elo'
 import LearnTopicBoard from './components/learn-topic-board'
 import LearnBuddyBoard from './components/learn-buddy-board'
 import GenerateReport from './components/generate-report'
+import SignupFlow from './components/signup-flow'
 import { gameFilterManager } from './game-filter-manager'
 import { eloDataManager } from './elo-data-manager'
 
@@ -634,7 +635,27 @@ document.addEventListener('DOMContentLoaded', () => {
   if (generateReportContainer) {
     const username = generateReportContainer.dataset.username || ''
     const platform = (generateReportContainer.dataset.platform || 'lichess') as 'lichess' | 'chess.com'
+    const monthlyLimit = parseInt(generateReportContainer.dataset.monthlyLimit || '0')
+    const gamesAnalyzed = parseInt(generateReportContainer.dataset.gamesAnalyzed || '0')
+    const remainingGames = parseInt(generateReportContainer.dataset.remainingGames || '0')
+    const resetDate = generateReportContainer.dataset.resetDate || null
     const root = ReactDOM.createRoot(generateReportContainer)
-    root.render(<GenerateReport username={username} platform={platform} />)
+    root.render(
+      <GenerateReport
+        username={username}
+        platform={platform}
+        monthlyLimit={monthlyLimit}
+        gamesAnalyzed={gamesAnalyzed}
+        remainingGames={remainingGames}
+        resetDate={resetDate}
+      />
+    )
+  }
+
+  // Mount SignupFlow on signup page
+  const signupFlowContainer = document.getElementById('signup-flow-root')
+  if (signupFlowContainer) {
+    const root = ReactDOM.createRoot(signupFlowContainer)
+    root.render(<SignupFlow />)
   }
 })

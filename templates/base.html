@@ -26,6 +26,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/puzzles.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/reports.css' %}">
 
+    <!-- Extra CSS for specific pages -->
+    {% block extra_css %}{% endblock %}
+
     <!-- Modern bundled JavaScript (CSS removed since we removed chessboard.js) -->
     <script type="module" src="{% static 'js/dist/main.js' %}"></script>
 </head>

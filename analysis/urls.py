@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import stripe_views
 
 app_name = 'analysis'
 
@@ -42,4 +43,11 @@ urlpatterns = [
     path('api/mark-puzzle-solved/<int:report_id>/', views.mark_puzzle_solved, name='mark_puzzle_solved'),
     path('api/store-elo-data/<int:dataset_id>/', views.store_elo_chart_data, name='store_elo_chart_data'),
     path('api/generate-insights/<int:report_id>/', views.generate_llm_insights, name='generate_llm_insights'),
+    # Stripe subscription endpoints
+    path('api/stripe/config/', stripe_views.get_stripe_config, name='stripe_config'),
+    path('api/stripe/create-signup-checkout-session/', stripe_views.create_signup_checkout_session, name='create_signup_checkout_session'),
+    path('api/stripe/complete-signup/', stripe_views.complete_signup_checkout, name='complete_signup_checkout'),
+    path('api/stripe/webhook/', stripe_views.stripe_webhook, name='stripe_webhook'),
+    path('api/stripe/cancel-subscription/', stripe_views.cancel_subscription, name='cancel_subscription'),
+    path('api/stripe/subscription-status/', stripe_views.get_subscription_status, name='subscription_status'),
 ]

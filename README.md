@@ -3,6 +3,74 @@ Only use sub-agents if you are stuck
 
 An interactive chess analysis web application that enriches Lichess and Chess.com game data with precomputed evaluations from a PostgreSQL database hosted on Digital Ocean containing chess positions. Features real-time streaming analysis that updates the UI as games are completed.
 
+## Subscription & Payment System
+
+The application uses **Stripe Checkout Sessions** with an embedded UI for subscription management. All new users must subscribe during account creation.
+
+### Payment Flow
+
+**New User Signup** (`/signup/`):
+1. User enters account details (username, email, password) and selects a subscription tier
+2. Embedded Stripe Checkout Session handles payment processing
+3. After successful payment, account is created and user is logged in
+4. Subscription details are stored in user profile
+
+**Subscription Tiers**:
+- **Standard Plan**: $3/month - 300 game analyses per month
+- **Max Plan**: $9/month - 1000 game analyses per month
+
+### Monthly Game Quota System
+
+The subscription model is based on **games analyzed per month**, not number of reports:
+
+**How Game Usage Works**:
+- Each game analysis report consumes games from your monthly quota
+- If you analyze 100 games in one report, that uses 100 games from your quota
+- You can create multiple smaller reports (e.g., 3 reports of 30 games each = 90 games total)
+- The quota resets at the end of each billing cycle (tracked via `subscription_current_period_end`)
+
+**Usage Tracking** (`analysis/models.py:UserProfile`):
+- `games_analyzed_this_month`: Current month's usage counter
+- `monthly_game_limit`: Total games allowed per month (300 or 1000)
+- `remaining_analyses`: Calculated property showing games remaining
+- `subscription_current_period_end`: When quota resets (Stripe billing cycle end)
+
+**Usage Increment Logic** (`analysis/views.py:_generate_unified_analysis_report`):
+- When a new report is generated, `games_analyzed_this_month` increases by the number of games in that report
+- Existing reports can be viewed unlimited times without consuming additional quota
+- Usage counter only increments once per dataset when analysis is first generated
+
+**User Experience**:
+- Generate Report page shows: "This report will use X games out of Y remaining until [reset date]"
+- Users cannot generate reports if they don't have enough games remaining
+- Reset date is displayed so users know when their quota refreshes
+
+### Stripe Integration Details
+
+**Backend** (`analysis/stripe_views.py`):
+- `create_signup_checkout_session`: Creates embedded Stripe Checkout for new signups
+- `complete_signup_checkout`: Completes account creation after successful payment
+- `stripe_webhook`: Handles subscription lifecycle events (created, updated, canceled, payment succeeded/failed)
+
+**Important Implementation Notes**:
+- Stripe subscription `current_period_end` is accessed via `subscription['items']['data'][0]['current_period_end']` (not directly on subscription object)
+- Subscriptions are created with `ui_mode='embedded'` for seamless in-app checkout experience
+- All new evaluations from analysis are queued for async database write via Celery (non-blocking)
+
+**Frontend** (`src/components/signup-flow.tsx`, `src/components/stripe-checkout.tsx`):
+- React components handle the signup flow with embedded Stripe Elements
+- Real-time validation and error handling
+- Seamless transition from account creation to payment to login
+
+### No Old Subscription Routes
+
+The application has been cleaned of legacy subscription code. There is only one payment flow:
+- ✅ `/signup/` - New user signup with payment (the only way to create an account)
+- ❌ `/subscribe/` - Removed (old cruft)
+- ❌ Old logged-in user upgrade flows - Removed
+
+All subscription management (cancellation, viewing status) is handled through API endpoints, not dedicated pages.
+
 ## Real-Time Streaming Analysis
 
 The application provides a dynamic user experience through **Server-Sent Events (SSE)** that stream analysis progress in real-time:

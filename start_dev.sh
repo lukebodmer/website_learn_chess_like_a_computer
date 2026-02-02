@@ -51,6 +51,12 @@ celery -A chess_analysis worker \
     -n lichess_worker@%h \
     --logfile=logs/celery_lichess.log &
 
+# Start Celery Beat for scheduled tasks (monthly subscription resets)
+echo "Starting Celery Beat (scheduler)..."
+celery -A chess_analysis beat \
+    --loglevel=info \
+    --logfile=logs/celery_beat.log &
+
 # Wait for workers to start
 sleep 2
 
@@ -62,6 +68,7 @@ echo "  - Redis: localhost:6379"
 echo "  - Database worker: Active (concurrency=2)"
 echo "  - Chess.com worker: Active"
 echo "  - Lichess worker: Active"
+echo "  - Celery Beat: Active (scheduled tasks)"
 echo "  - Django: http://127.0.0.1:8000"
 echo ""
 echo "Press Ctrl+C to stop all services"

@@ -326,21 +326,11 @@ def home(request):
 
 
 def signup(request):
-    """User registration page"""
+    """Signup page with Stripe Checkout Sessions"""
     if request.user.is_authenticated:
         return redirect('analysis:home')
 
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f"Welcome {user.username}! Your account has been created.")
-            return redirect('analysis:home')
-    else:
-        form = UserCreationForm()
-
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'registration/signup.html')
 
 
 def games(request):
@@ -480,10 +470,26 @@ def generate_report_page(request, platform, username):
     else:
         return HttpResponse("Invalid platform", status=400)
 
+    # Get subscription info for display in React component
+    monthly_limit = profile.monthly_game_limit
+    games_analyzed = profile.games_analyzed_this_month
+    remaining_games = profile.remaining_analyses
+    # Use subscription_current_period_end for when the games allotment resets
+    reset_date = profile.subscription_current_period_end
+
+    # Format the reset date properly
+    reset_date_str = None
+    if reset_date:
+        reset_date_str = reset_date.isoformat()
+
     # Render unified page with React component
     return render(request, 'analysis/generate_report.html', {
         'username': username,
-        'platform': platform
+        'platform': platform,
+        'monthly_limit': monthly_limit,
+        'games_analyzed': games_analyzed,
+        'remaining_games': remaining_games,
+        'reset_date': reset_date_str,
     })
 
 @login_required
@@ -899,6 +905,16 @@ def _generate_unified_analysis_report(request, username, dataset_id):
         ).first()
 
         if not existing_report:
+            # Increment usage counter by the number of games in this dataset
+            try:
+                profile = UserProfile.objects.get(user=request.user)
+                games_count = game_dataset.total_games or 0
+                profile.games_analyzed_this_month += games_count
+                profile.save()
+                print(f"📊 Incremented games_analyzed_this_month by {games_count} to {profile.games_analyzed_this_month} for user {request.user.username}")
+            except UserProfile.DoesNotExist:
+                print(f"⚠️ UserProfile not found for user {request.user.username}")
+
             # Create a new background task
             task = ReportGenerationTask.objects.create(
                 user=request.user,
@@ -2801,3 +2817,5 @@ def generate_llm_insights(request, report_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+

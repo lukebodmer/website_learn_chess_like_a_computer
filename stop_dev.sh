@@ -11,6 +11,9 @@ pkill -f "celery.*database_worker" && echo "✓ Database worker stopped" || echo
 pkill -f "celery.*chess_com_worker" && echo "✓ Chess.com worker stopped" || echo "✗ Chess.com worker not running"
 pkill -f "celery.*lichess_worker" && echo "✓ Lichess worker stopped" || echo "✗ Lichess worker not running"
 
+# Stop Celery Beat
+pkill -f "celery.*beat" && echo "✓ Celery Beat stopped" || echo "✗ Celery Beat not running"
+
 # Stop Django (if running in background)
 pkill -f "manage.py runserver" && echo "✓ Django stopped" || echo "✗ Django not running"
 

@@ -28,6 +28,7 @@
 	      pkgs.typescript
 	      pkgs.nodejs_24
 	      pkgs.stockfish
+	      pkgs.stripe-cli
 	      pkgs.sqlite
 	      pkgs.postgresql
 	      pkgs.vscode-json-languageserver
@@ -53,6 +54,7 @@
 		requests
                 numpy
 		scipy
+		stripe
 		psycopg2
 		pycountry
 		python-dotenv

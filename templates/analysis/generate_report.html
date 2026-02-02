@@ -3,5 +3,13 @@
 {% block title %}Generate Report - {{ username }} - Chess Analysis{% endblock %}
 
 {% block content %}
-<div id="generate-report-root" data-username="{{ username }}" data-platform="{{ platform }}"></div>
+<div
+  id="generate-report-root"
+  data-username="{{ username }}"
+  data-platform="{{ platform }}"
+  data-monthly-limit="{{ monthly_limit }}"
+  data-games-analyzed="{{ games_analyzed }}"
+  data-remaining-games="{{ remaining_games }}"
+  {% if reset_date %}data-reset-date="{{ reset_date }}"{% endif %}
+></div>
 {% endblock %}

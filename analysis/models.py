@@ -13,6 +13,11 @@ class UserProfile(models.Model):
         ('brown', 'Brown Theme'),
     ]
 
+    SUBSCRIPTION_TIER_CHOICES = [
+        ('standard', 'Standard - $3/month'),
+        ('max', 'Max - $9/month'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     lichess_username = models.CharField(max_length=100, blank=True, null=True)
     lichess_access_token = models.TextField(blank=True, null=True)
@@ -23,11 +28,57 @@ class UserProfile(models.Model):
         default='blue',
         help_text="Choose your preferred chessboard theme"
     )
+
+    # Subscription fields
+    subscription_tier = models.CharField(
+        max_length=20,
+        choices=SUBSCRIPTION_TIER_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Current subscription tier"
+    )
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    subscription_status = models.CharField(max_length=50, blank=True, null=True)  # active, canceled, past_due, etc.
+    subscription_current_period_end = models.DateTimeField(null=True, blank=True)
+
+    # Usage tracking
+    games_analyzed_this_month = models.IntegerField(default=0)
+    usage_reset_date = models.DateField(null=True, blank=True)  # Track when we last reset the counter
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.lichess_username or 'No Lichess'}"
+
+    @property
+    def monthly_game_limit(self):
+        """Return the monthly game analysis limit based on subscription tier"""
+        limits = {
+            'standard': 300,
+            'max': 1000,
+        }
+        return limits.get(self.subscription_tier, 0)
+
+    @property
+    def has_active_subscription(self):
+        """Check if user has an active subscription"""
+        return self.subscription_status == 'active' and self.subscription_tier is not None
+
+    @property
+    def can_analyze_games(self):
+        """Check if user can analyze more games this month"""
+        if not self.has_active_subscription:
+            return False
+        return self.games_analyzed_this_month < self.monthly_game_limit
+
+    @property
+    def remaining_analyses(self):
+        """Return number of remaining game analyses for this month"""
+        if not self.has_active_subscription:
+            return 0
+        return max(0, self.monthly_game_limit - self.games_analyzed_this_month)
 
 
 class GameDataSet(models.Model):
