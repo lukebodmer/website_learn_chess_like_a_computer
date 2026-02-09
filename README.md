@@ -40,9 +40,39 @@ The subscription model is based on **games analyzed per month**, not number of r
 - Existing reports can be viewed unlimited times without consuming additional quota
 - Usage counter only increments once per dataset when analysis is first generated
 
+**Game Fetching & Report Limits**:
+- **Hard cap of 100 games per fetch**: API calls to Lichess/Chess.com are limited to 100 games maximum
+- This respects API rate limits and sets a consistent report size limit
+- Controlled via `ANALYSIS_GAME_COUNT = 100` constant
+
+**Minimum Games & Gift Reports**:
+- **Minimum 10 games required**: Reports need at least 10 games for meaningful analysis
+- **Gift Report Feature**: If user has < 10 games remaining but >= 10 games found, they receive a free 10-game "gift report"
+- Gift reports set the counter to exactly the monthly limit (300 or 1000), ensuring users never waste their paid quota
+- Example: User has used 295/300 games and finds 50 new games → Receives gift report analyzing 10 most recent games (counter → 300)
+
+**Report Generation Scenarios**:
+
+1. **Standard Report (Sufficient Quota)**:
+   - User with 95/300 games, finds 100 games → Analyzes all 100 games (195 total)
+   - User with 50/300 games, finds 100 games → Analyzes all 100 games (150 total)
+
+2. **Partial Report (Limited Quota)**:
+   - User with 250/300 games, finds 100 games → Truncates to 50 most recent, analyzes 50 (300 total)
+   - System automatically analyzes as many games as remaining quota allows
+
+3. **Gift Report (< 10 Remaining)**:
+   - User with 295/300 games, finds 100 games → Gift report: 10 most recent games (counter → 300)
+   - User with 292/300 games, finds 50 games → Gift report: 10 most recent games (counter → 300)
+
+4. **Blocked Reports**:
+   - User with 295/300 games, finds 5 games → Blocked: "Reports need a minimum of 10 games. We only found 5! Go play some more chess!"
+   - Ensures all reports have sufficient data for meaningful analysis
+
 **User Experience**:
 - Generate Report page shows: "This report will use X games out of Y remaining until [reset date]"
-- Users cannot generate reports if they don't have enough games remaining
+- Gift reports display: "🎁 Gift Report Available! We'll analyze your 10 most recent games as a gift"
+- Users see exactly how many games will be analyzed (respecting 100 game cap and quota limits)
 - Reset date is displayed so users know when their quota refreshes
 
 ### Stripe Integration Details

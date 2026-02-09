@@ -62,20 +62,20 @@ interface ChartData {
 const COLORS = {
   wins: {
     mate: 'var(--success-color)',      // Green - checkmate win
-    resign: 'var(--success-light)',    // Light green - resignation win
+    resign: 'var(--success-color)',    // Green - resignation win
     outoftime: 'var(--success-color)' // Green - timeout win
   },
   losses: {
     mate: 'var(--danger-color)',      // Red - checkmate loss
-    resign: 'var(--warning-color)',   // Orange - resignation loss
+    resign: 'var(--danger-color)',    // Red - resignation loss
     outoftime: 'var(--danger-color)' // Red - timeout loss
   },
   draws: {
-    stalemate: '#8B9DC3',             // Muted blue
-    agreement: '#95A99F',             // Muted green
+    stalemate: '#C9ADA7',             // Muted pink
+    agreement: '#C9ADA7',             // Muted pink
     repetition: '#C9ADA7',            // Muted pink
-    '50moveRule': '#B8B8A0',          // Muted yellow
-    insufficientMaterial: '#9B9B9B'   // Gray
+    '50moveRule': '#C9ADA7',          // Muted pink
+    insufficientMaterial: '#C9ADA7'   // Muted pink
   }
 };
 
@@ -983,6 +983,34 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
     );
   };
 
+  // Custom tick component for draws chart X-axis to handle multi-line labels
+  const renderDrawsXAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    if (!payload || !payload.value) return null;
+
+    const lines = String(payload.value).split('\n');
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={0}
+          textAnchor="end"
+          fill="var(--text-secondary)"
+          fontSize={12}
+          transform="rotate(-45)"
+        >
+          {lines.map((line: string, index: number) => (
+            <tspan x={0} dy={index === 0 ? 0 : 12} key={index}>
+              {line}
+            </tspan>
+          ))}
+        </text>
+      </g>
+    );
+  };
+
   const renderDrawsTooltip = (props: any) => {
     if (!props.active || !props.payload || !props.payload.length) return null;
 
@@ -1057,37 +1085,41 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
   };
 
   // Custom legend for wins/losses charts
-  const renderWinsLossesLegend = (props: any) => {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '16px',
-        fontSize: '11px',
-        paddingTop: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <div style={{
-            width: '12px',
-            height: '12px',
-            backgroundColor: 'var(--text-primary)',
-            opacity: 1
-          }} />
-          <span style={{ color: 'var(--text-secondary)' }}>You</span>
-        </div>
-        {eloBracket && (
+  const renderWinsLossesLegend = (chartData: any[]) => {
+    return (props: any) => {
+      // Get the color from the first item in the chart data
+      const color = chartData.length > 0 ? chartData[0].fill : 'var(--text-primary)';
+
+      return (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          fontSize: '11px'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{
               width: '12px',
               height: '12px',
-              backgroundColor: 'var(--text-primary)',
-              opacity: 0.5
+              backgroundColor: color,
+              opacity: 1
             }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Avg ({eloBracket})</span>
+            <span style={{ color: 'var(--text-secondary)' }}>You</span>
           </div>
-        )}
-      </div>
-    );
+          {eloBracket && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: color,
+                opacity: 0.5
+              }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Avg</span>
+            </div>
+          )}
+        </div>
+      );
+    };
   };
 
   const renderEloTooltip = (props: any) => {
@@ -1172,13 +1204,14 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
         padding: '16px',
-        marginBottom: '20px'
+        marginBottom: '8px'
       }}>
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: '12px'
+          marginBottom: '12px',
+          position: 'relative'
         }}>
           <h4 style={{
             margin: 0,
@@ -1192,6 +1225,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             <button
               onClick={handleEloZoomOut}
               style={{
+                position: 'absolute',
+                right: 0,
                 padding: '4px 12px',
                 backgroundColor: 'var(--primary-color)',
                 color: 'white',
@@ -1258,7 +1293,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                 <YAxis
                   fontSize={12}
                   tick={{ fill: 'var(--text-secondary)' }}
-                  label={{ value: 'Elo Rating', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }}
+                  label={{ value: 'Elo', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }}
                   domain={eloZoomDomain.y || ['auto', 'auto']}
                   allowDataOverflow={true}
                 />
@@ -1317,8 +1352,8 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '20px',
-        marginTop: '16px'
+        gap: '8px',
+        marginTop: '8px'
       }}>
         {/* Wins Chart - Always render */}
         <div style={{
@@ -1337,58 +1372,66 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             Wins ({userStats.wins})
           </h4>
           {(userStats.wins > 0 || (eloBracket && winsData.some(d => d.popAvg > 0))) ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart
-                data={winsData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                style={{ cursor: 'default' }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                <XAxis
-                  dataKey="name"
-                  fontSize={12}
-                  tick={{ fill: 'var(--text-secondary)' }}
-                />
-                <YAxis
-                  fontSize={12}
-                  tick={{ fill: 'var(--text-secondary)' }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                  label={{ value: 'Percentage', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', offset: 10 }}
-                />
-                <Tooltip
-                  content={renderCustomTooltip}
-                  cursor={false}
-                />
-                <Legend content={renderWinsLossesLegend} />
-                {/* User's actual wins */}
-                <Bar
-                  dataKey="value"
-                  name="You"
-                  radius={[4, 4, 0, 0]}
+            <div style={{ position: 'relative', width: '100%', height: '270px' }}>
+              <ResponsiveContainer width="100%" height={270}>
+                <BarChart
+                  data={winsData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 65 }}
+                  style={{ cursor: 'default' }}
                 >
-                  {winsData.map((entry, index) => (
-                    <Cell key={`wins-user-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-                {/* Population average wins */}
-                {eloBracket && (
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis
+                    dataKey="name"
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                  />
+                  <YAxis
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    content={renderCustomTooltip}
+                    cursor={false}
+                  />
+                  {/* User's actual wins */}
                   <Bar
-                    dataKey="popAvg"
-                    name={`Avg (${eloBracket})`}
+                    dataKey="value"
+                    name="You"
                     radius={[4, 4, 0, 0]}
-                    fillOpacity={0.5}
                   >
                     {winsData.map((entry, index) => (
-                      <Cell key={`wins-pop-${index}`} fill={entry.fill} />
+                      <Cell key={`wins-user-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
+                  {/* Population average wins */}
+                  {eloBracket && (
+                    <Bar
+                      dataKey="popAvg"
+                      name={`Avg (${eloBracket})`}
+                      radius={[4, 4, 0, 0]}
+                      fillOpacity={0.5}
+                    >
+                      {winsData.map((entry, index) => (
+                        <Cell key={`wins-pop-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '20px',
+                zIndex: 10
+              }}>
+                {renderWinsLossesLegend(winsData)({})}
+              </div>
+            </div>
           ) : (
             <div style={{
-              height: '180px',
+              height: '270px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1417,58 +1460,66 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             Losses ({userStats.losses})
           </h4>
           {(userStats.losses > 0 || (eloBracket && lossesData.some(d => d.popAvg > 0))) ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart
-                data={lossesData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-                style={{ cursor: 'default' }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                <XAxis
-                  dataKey="name"
-                  fontSize={12}
-                  tick={{ fill: 'var(--text-secondary)' }}
-                />
-                <YAxis
-                  fontSize={12}
-                  tick={{ fill: 'var(--text-secondary)' }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                  label={{ value: 'Percentage', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', offset: 10 }}
-                />
-                <Tooltip
-                  content={renderCustomTooltip}
-                  cursor={false}
-                />
-                <Legend content={renderWinsLossesLegend} />
-                {/* User's actual losses */}
-                <Bar
-                  dataKey="value"
-                  name="You"
-                  radius={[4, 4, 0, 0]}
+            <div style={{ position: 'relative', width: '100%', height: '270px' }}>
+              <ResponsiveContainer width="100%" height={270}>
+                <BarChart
+                  data={lossesData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 65 }}
+                  style={{ cursor: 'default' }}
                 >
-                  {lossesData.map((entry, index) => (
-                    <Cell key={`losses-user-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-                {/* Population average losses */}
-                {eloBracket && (
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis
+                    dataKey="name"
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                  />
+                  <YAxis
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    content={renderCustomTooltip}
+                    cursor={false}
+                  />
+                  {/* User's actual losses */}
                   <Bar
-                    dataKey="popAvg"
-                    name={`Avg (${eloBracket})`}
+                    dataKey="value"
+                    name="You"
                     radius={[4, 4, 0, 0]}
-                    fillOpacity={0.5}
                   >
                     {lossesData.map((entry, index) => (
-                      <Cell key={`losses-pop-${index}`} fill={entry.fill} />
+                      <Cell key={`losses-user-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
+                  {/* Population average losses */}
+                  {eloBracket && (
+                    <Bar
+                      dataKey="popAvg"
+                      name={`Avg (${eloBracket})`}
+                      radius={[4, 4, 0, 0]}
+                      fillOpacity={0.5}
+                    >
+                      {lossesData.map((entry, index) => (
+                        <Cell key={`losses-pop-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '20px',
+                zIndex: 10
+              }}>
+                {renderWinsLossesLegend(lossesData)({})}
+              </div>
+            </div>
           ) : (
             <div style={{
-              height: '180px',
+              height: '270px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1497,51 +1548,70 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
             Draws ({userStats.draws})
           </h4>
           {(userStats.draws > 0 || (eloBracket && drawsData.some(d => d.popAvg > 0))) ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart
-                data={drawsData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                style={{ cursor: 'default' }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis
-                  label={{
-                    value: 'Percentage of Draws',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { fill: 'var(--text-secondary)', fontSize: 12 }
-                  }}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                  domain={[0, maxYAxisValue]}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip content={renderDrawsTooltip} cursor={false} />
-                {/* User's actual draws - Solid bar */}
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {drawsData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-                {/* Population Average - Semi-transparent background bar */}
-                {eloBracket && (
-                  <Bar dataKey="popAvg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+            <div style={{ position: 'relative', width: '100%', height: '270px' }}>
+              <ResponsiveContainer width="100%" height={270}>
+                <BarChart
+                  data={drawsData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+                  style={{ cursor: 'default' }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis
+                    dataKey="name"
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={85}
+                    interval={0}
+                  />
+                  <YAxis
+                    fontSize={12}
+                    tick={{ fill: 'var(--text-secondary)' }}
+                    domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    content={renderDrawsTooltip}
+                    cursor={false}
+                  />
+                  {/* User's actual draws */}
+                  <Bar
+                    dataKey="value"
+                    name="You"
+                    radius={[4, 4, 0, 0]}
+                  >
                     {drawsData.map((entry, index) => (
-                      <Cell key={`cell-pop-${index}`} fill={entry.fill} />
+                      <Cell key={`draws-user-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
+                  {/* Population average draws */}
+                  {eloBracket && (
+                    <Bar
+                      dataKey="popAvg"
+                      name={`Avg (${eloBracket})`}
+                      radius={[4, 4, 0, 0]}
+                      fillOpacity={0.5}
+                    >
+                      {drawsData.map((entry, index) => (
+                        <Cell key={`draws-pop-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '20px',
+                zIndex: 10
+              }}>
+                {renderWinsLossesLegend(drawsData)({})}
+              </div>
+            </div>
           ) : (
             <div style={{
-              height: '300px',
+              height: '270px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1560,10 +1630,10 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
         padding: '16px',
-        marginTop: '20px'
+        marginTop: '8px'
       }}>
         {totalGames > 0 ? (
-          <ResponsiveContainer width="100%" height={50}>
+          <ResponsiveContainer width="100%" height={10}>
             <BarChart
               layout="vertical"
               data={[{
@@ -1572,21 +1642,18 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
                 Draws: userStats.draws,
                 Losses: userStats.losses
               }]}
-              margin={{ top: 5, right: 30, left: 60, bottom: 5 }}
-              barSize={30}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              barSize={10}
             >
               <XAxis
                 type="number"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
+                hide={true}
                 domain={[0, totalGames]}
               />
               <YAxis
                 type="category"
                 dataKey="name"
-                fontSize={12}
-                tick={{ fill: 'var(--text-secondary)' }}
-                width={50}
+                hide={true}
               />
               <Tooltip
                 content={(props: any) => {
@@ -1650,7 +1717,7 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
           border: '1px solid var(--border-color)',
           borderRadius: '8px',
           padding: '16px',
-          marginTop: '20px',
+          marginTop: '8px',
           minHeight: '100px',
           cursor: llmInsights ? 'pointer' : 'default'
         }}

@@ -80,6 +80,51 @@ class UserProfile(models.Model):
             return 0
         return max(0, self.monthly_game_limit - self.games_analyzed_this_month)
 
+    def can_analyze_report(self, games_found):
+        """
+        Check if user can analyze a report with the given number of games found.
+
+        Rules:
+        - Minimum 10 games required for any report
+        - Games are fetched with a hard cap of 100 (respects API rate limits)
+        - If user has < 10 games remaining and >= 10 games found: gift them a free 10-game report
+        - Gift report sets counter to exactly the monthly limit (ensures they use all paid games)
+
+        Returns: (can_analyze: bool, is_gift: bool, games_to_analyze: int, message: str)
+        """
+        if not self.has_active_subscription:
+            return False, False, 0, "No active subscription"
+
+        # Minimum 10 games required
+        if games_found < 10:
+            return False, False, 0, f"Reports need a minimum of 10 games. We only found {games_found}! Go play some more chess!"
+
+        remaining = self.remaining_analyses
+
+        # games_found should never exceed 100 due to API fetch limits, but cap it just in case
+        games_to_analyze = min(games_found, 100)
+
+        # Gift case: user has < 10 games remaining but >= 10 games found
+        # Give them a free 10-game report so they can use all their paid quota
+        if remaining < 10:
+            return True, True, 10, f"Gift report: Analyzing your 10 most recent games (you've used {self.games_analyzed_this_month}/{self.monthly_game_limit} games this month)"
+
+        # Standard case: analyze as many games as possible (up to games_found or remaining, whichever is smaller)
+        # This ensures users can always use their remaining quota
+        actual_games_to_analyze = min(games_to_analyze, remaining)
+        return True, False, actual_games_to_analyze, None
+
+    def increment_games_analyzed(self, games_count, is_gift=False):
+        """
+        Increment the games analyzed counter.
+        If it's a gift report, set counter to exactly the monthly limit.
+        """
+        if is_gift:
+            self.games_analyzed_this_month = self.monthly_game_limit
+        else:
+            self.games_analyzed_this_month += games_count
+        self.save()
+
 
 class GameDataSet(models.Model):
     """Stores raw game data from Lichess or Chess.com"""

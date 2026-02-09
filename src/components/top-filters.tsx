@@ -75,29 +75,35 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
       marginBottom: '20px'
     }}>
       {/* Color Filter */}
-      <div style={{ width: '100%', maxWidth: '600px' }}>
-        <div style={{
-          fontSize: '12px',
-          fontWeight: '600',
-          color: 'var(--text-secondary)',
-          marginBottom: '8px',
-          textAlign: 'center'
-        }}>
-          Player Color
-        </div>
+      <div style={{ maxWidth: '800px' }}>
         <div style={{
           display: 'flex',
-          gap: '8px',
-          justifyContent: 'center',
-          flexWrap: 'wrap'
+          alignItems: 'center',
+          gap: '16px'
         }}>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+            minWidth: '120px',
+            textAlign: 'right'
+          }}>
+            Player Color
+          </div>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
           {(['all', 'white', 'black'] as FilterType[]).map(filter => (
             <button
               key={filter}
               onClick={() => handleColorFilterChange(filter)}
               style={{
-                flex: '1',
-                padding: '10px 16px',
+                width: '100px',
+                height: '100px',
+                padding: '0',
                 fontSize: '14px',
                 fontWeight: '600',
                 border: currentFilter === filter ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
@@ -106,7 +112,10 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                 color: currentFilter === filter ? 'var(--text-on-primary)' : 'var(--text-primary)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                textTransform: 'capitalize'
+                textTransform: 'capitalize',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
               onMouseEnter={(e) => {
                 if (currentFilter !== filter) {
@@ -122,33 +131,40 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
               {filter}
             </button>
           ))}
+          </div>
         </div>
       </div>
 
       {/* Speed Filter */}
       {availableSpeeds.length > 0 && (
-        <div style={{ width: '100%', maxWidth: '600px' }}>
-          <div style={{
-            fontSize: '12px',
-            fontWeight: '600',
-            color: 'var(--text-secondary)',
-            marginBottom: '8px',
-            textAlign: 'center'
-          }}>
-            Time Control
-          </div>
+        <div style={{ maxWidth: '800px' }}>
           <div style={{
             display: 'flex',
-            gap: '8px',
-            justifyContent: 'center',
-            flexWrap: 'wrap'
+            alignItems: 'center',
+            gap: '16px'
           }}>
+            <div style={{
+              fontSize: '12px',
+              fontWeight: '600',
+              color: 'var(--text-secondary)',
+              minWidth: '120px',
+              textAlign: 'right'
+            }}>
+              Time Control
+            </div>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
             {/* All speeds option */}
             <button
               onClick={handleSpeedAllClick}
               style={{
-                flex: '1',
-                padding: '10px 16px',
+                width: '100px',
+                height: '100px',
+                padding: '0',
                 fontSize: '14px',
                 fontWeight: '600',
                 border: currentSpeedFilter === 'all' ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
@@ -156,7 +172,10 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                 backgroundColor: currentSpeedFilter === 'all' ? 'var(--primary-color)' : 'var(--background-primary)',
                 color: currentSpeedFilter === 'all' ? 'var(--text-on-primary)' : 'var(--text-primary)',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
               onMouseEnter={(e) => {
                 if (currentSpeedFilter !== 'all') {
@@ -179,8 +198,9 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                 onClick={() => handleSpeedToggle(speed)}
                 onDoubleClick={() => handleSpeedDoubleClick(speed)}
                 style={{
-                  flex: '1',
-                  padding: '10px 16px',
+                  width: '100px',
+                  height: '100px',
+                  padding: '0',
                   fontSize: '14px',
                   fontWeight: '600',
                   border: isSpeedSelected(speed) ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
@@ -189,7 +209,10 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                   color: isSpeedSelected(speed) ? 'var(--text-on-primary)' : 'var(--text-primary)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  textTransform: 'capitalize'
+                  textTransform: 'capitalize',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                 onMouseEnter={(e) => {
                   if (!isSpeedSelected(speed)) {
@@ -205,34 +228,41 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                 {speed}
               </button>
             ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* Game Result Filter */}
-      <div style={{ width: '100%', maxWidth: '600px' }}>
-        <div style={{
-          fontSize: '12px',
-          fontWeight: '600',
-          color: 'var(--text-secondary)',
-          marginBottom: '8px',
-          textAlign: 'center'
-        }}>
-          Game Result
-        </div>
+      <div style={{ maxWidth: '800px' }}>
         <div style={{
           display: 'flex',
-          gap: '8px',
-          justifyContent: 'center',
-          flexWrap: 'wrap'
+          alignItems: 'center',
+          gap: '16px'
         }}>
+          <div style={{
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+            minWidth: '120px',
+            textAlign: 'right'
+          }}>
+            Game Result
+          </div>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
           {(['all', 'win', 'loss', 'draw'] as ResultFilter[]).map(result => (
             <button
               key={result}
               onClick={() => handleResultFilterChange(result)}
               style={{
-                flex: '1',
-                padding: '10px 16px',
+                width: '100px',
+                height: '100px',
+                padding: '0',
                 fontSize: '14px',
                 fontWeight: '600',
                 border: currentResultFilter === result ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
@@ -241,7 +271,10 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
                 color: currentResultFilter === result ? 'var(--text-on-primary)' : 'var(--text-primary)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                textTransform: 'capitalize'
+                textTransform: 'capitalize',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
               onMouseEnter={(e) => {
                 if (currentResultFilter !== result) {
@@ -257,6 +290,7 @@ const TopFilters: React.FC<TopFiltersProps> = ({ username }) => {
               {result === 'all' ? 'All' : result === 'win' ? 'Win' : result === 'loss' ? 'Loss' : 'Draw'}
             </button>
           ))}
+          </div>
         </div>
       </div>
     </div>

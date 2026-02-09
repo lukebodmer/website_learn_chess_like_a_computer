@@ -33,8 +33,8 @@ from .report_generation import generate_html_report
 from .opening_classifier import classify_opening_by_moves, lookup_opening_in_database
 
 
-# Number of games to analyze (change this to analyze more/fewer games)
-ANALYSIS_GAME_COUNT = 20
+# Maximum number of games per report (hard limit to respect API rate limits)
+ANALYSIS_GAME_COUNT = 100
 
 
 # Configure Chess.com client with rate limit handling
@@ -905,15 +905,45 @@ def _generate_unified_analysis_report(request, username, dataset_id):
         ).first()
 
         if not existing_report:
-            # Increment usage counter by the number of games in this dataset
+            # Check if user can analyze this report (handles gift logic)
             try:
                 profile = UserProfile.objects.get(user=request.user)
-                games_count = game_dataset.total_games or 0
-                profile.games_analyzed_this_month += games_count
-                profile.save()
-                print(f"📊 Incremented games_analyzed_this_month by {games_count} to {profile.games_analyzed_this_month} for user {request.user.username}")
+                games_in_dataset = game_dataset.total_games or 0
+
+                can_analyze, is_gift, games_to_analyze, error_msg = profile.can_analyze_report(games_in_dataset)
+
+                if not can_analyze:
+                    return HttpResponse(
+                        f'<h2>Cannot Generate Report</h2><p>{error_msg}</p>'
+                        f'<p><a href="/">← Back to Home</a></p>',
+                        status=403
+                    )
+
+                # Truncate dataset if analyzing fewer games than found
+                if games_to_analyze < games_in_dataset:
+                    if is_gift:
+                        print(f"🎁 Gift report: Truncating {games_in_dataset} games to {games_to_analyze} most recent games")
+                    else:
+                        print(f"📊 Truncating {games_in_dataset} games to {games_to_analyze} most recent games (user's remaining quota)")
+
+                    # Parse the raw_data (NDJSON) and keep only the first N lines (most recent)
+                    lines = game_dataset.raw_data.strip().split('\n')
+                    game_dataset.raw_data = '\n'.join(lines[:games_to_analyze])
+                    game_dataset.total_games = games_to_analyze
+                    game_dataset.save()
+                    print(f"✅ Dataset truncated to {games_to_analyze} games")
+
+                # Increment usage counter
+                profile.increment_games_analyzed(games_to_analyze, is_gift=is_gift)
+
+                if is_gift:
+                    print(f"🎁 Gift report generated: {games_to_analyze} games (counter set to {profile.games_analyzed_this_month}/{profile.monthly_game_limit})")
+                else:
+                    print(f"📊 Incremented games_analyzed_this_month by {games_to_analyze} to {profile.games_analyzed_this_month} for user {request.user.username}")
+
             except UserProfile.DoesNotExist:
                 print(f"⚠️ UserProfile not found for user {request.user.username}")
+                return HttpResponse("User profile not found", status=404)
 
             # Create a new background task
             task = ReportGenerationTask.objects.create(

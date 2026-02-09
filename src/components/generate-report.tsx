@@ -732,12 +732,103 @@ export default function GenerateReport({ username, platform, monthlyLimit, games
             {/* Membership Info */}
             {(() => {
               const gamesInReport = gameData.games_count ?? 0
-              const canGenerate = gamesInReport <= remainingGames
               const resetDateObj = resetDate ? new Date(resetDate) : null
               const isValidDate = resetDateObj && !isNaN(resetDateObj.getTime())
               const resetDateFormatted = isValidDate
                 ? resetDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                 : null
+
+              // Check if minimum 10 games requirement is met
+              if (gamesInReport < 10) {
+                return (
+                  <div style={{
+                    marginBottom: '16px',
+                    padding: '16px',
+                    background: 'var(--background-tertiary)',
+                    borderRadius: '6px',
+                    border: '2px solid var(--danger-color)',
+                    textAlign: 'center'
+                  }}>
+                    <p style={{
+                      color: 'var(--danger-color)',
+                      margin: '0 0 8px 0',
+                      fontSize: '15px',
+                      fontWeight: 700
+                    }}>
+                      ⚠️ Not Enough Games
+                    </p>
+                    <p style={{
+                      color: 'var(--text-primary)',
+                      margin: 0,
+                      fontSize: '14px'
+                    }}>
+                      Reports need a minimum of 10 games. We only found {gamesInReport}! Go play some more chess!
+                    </p>
+                  </div>
+                )
+              }
+
+              // Limit to max 100 games per report
+              const gamesToAnalyze = Math.min(gamesInReport, 100)
+
+              // Check if this is a gift report scenario (< 10 games remaining but >= 10 found)
+              const isGiftReport = remainingGames < 10 && gamesInReport >= 10
+
+              if (isGiftReport) {
+                return (
+                  <div style={{
+                    marginBottom: '16px',
+                    padding: '16px',
+                    background: 'var(--background-secondary)',
+                    borderRadius: '6px',
+                    border: '2px solid var(--success-color)',
+                    textAlign: 'center'
+                  }}>
+                    <p style={{
+                      color: 'var(--success-color)',
+                      margin: '0 0 8px 0',
+                      fontSize: '16px',
+                      fontWeight: 700
+                    }}>
+                      🎁 Gift Report Available!
+                    </p>
+                    <p style={{
+                      color: 'var(--text-primary)',
+                      margin: '0 0 8px 0',
+                      fontSize: '14px'
+                    }}>
+                      You have fewer than 10 games remaining, but we found {gamesInReport} new game{gamesInReport === 1 ? '' : 's'}!
+                    </p>
+                    <p style={{
+                      color: 'var(--text-primary)',
+                      margin: '0 0 8px 0',
+                      fontSize: '15px',
+                      fontWeight: 600
+                    }}>
+                      We'll analyze your <strong style={{ color: 'var(--success-color)' }}>10 most recent games</strong> as a gift
+                    </p>
+                    <p style={{
+                      color: 'var(--text-secondary)',
+                      margin: 0,
+                      fontSize: '13px'
+                    }}>
+                      You've used {gamesAnalyzed} of {monthlyLimit} games this month
+                    </p>
+                    {resetDateFormatted && (
+                      <p style={{
+                        color: 'var(--text-muted)',
+                        margin: '4px 0 0 0',
+                        fontSize: '12px'
+                      }}>
+                        Your quota resets on {resetDateFormatted}
+                      </p>
+                    )}
+                  </div>
+                )
+              }
+
+              // Standard case
+              const canGenerate = gamesToAnalyze <= remainingGames
 
               return (
                 <div style={{
@@ -756,8 +847,18 @@ export default function GenerateReport({ username, platform, monthlyLimit, games
                         fontSize: '15px',
                         fontWeight: 600
                       }}>
-                        This report will use <strong style={{ color: 'var(--primary-color)' }}>{gamesInReport} game{gamesInReport === 1 ? '' : 's'}</strong>
+                        This report will use <strong style={{ color: 'var(--primary-color)' }}>{gamesToAnalyze} game{gamesToAnalyze === 1 ? '' : 's'}</strong>
                       </p>
+                      {gamesToAnalyze < gamesInReport && (
+                        <p style={{
+                          color: 'var(--text-secondary)',
+                          margin: '0 0 8px 0',
+                          fontSize: '13px',
+                          fontStyle: 'italic'
+                        }}>
+                          (Analyzing {gamesToAnalyze} of {gamesInReport} games found - max 100 per report)
+                        </p>
+                      )}
                       <p style={{
                         color: 'var(--text-secondary)',
                         margin: 0,
@@ -783,14 +884,14 @@ export default function GenerateReport({ username, platform, monthlyLimit, games
                         fontSize: '15px',
                         fontWeight: 700
                       }}>
-                        ⚠️ Insufficient Games Remaining
+                        ⚠️ Not Enough Games Remaining
                       </p>
                       <p style={{
                         color: 'var(--text-primary)',
                         margin: '0 0 4px 0',
                         fontSize: '14px'
                       }}>
-                        This report requires <strong>{gamesInReport} games</strong>, but you only have <strong>{remainingGames} games</strong> remaining this month.
+                        This report needs <strong>{gamesToAnalyze} games</strong>, but you only have <strong>{remainingGames} games</strong> remaining this month.
                       </p>
                       {resetDateFormatted && (
                         <p style={{
@@ -807,39 +908,50 @@ export default function GenerateReport({ username, platform, monthlyLimit, games
               )
             })()}
 
-            <div style={{
-              display: 'flex',
-              gap: '15px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <button
-                onClick={handleGenerateReport}
-                className="btn btn-primary"
-                disabled={gameData.games_count ? gameData.games_count > remainingGames : false}
-                style={{
-                  background: (gameData.games_count ?? 0) > remainingGames ? 'var(--text-muted)' : 'var(--success-color)',
-                  fontSize: '18px',
-                  padding: '15px 30px',
-                  textDecoration: 'none',
-                  border: 'none',
-                  cursor: (gameData.games_count ?? 0) > remainingGames ? 'not-allowed' : 'pointer',
-                  opacity: (gameData.games_count ?? 0) > remainingGames ? 0.5 : 1
-                }}
-              >
-                {isNewGames
-                  ? `Analyze ${gameData.games_count ?? 0} New Game${(gameData.games_count ?? 0) === 1 ? '' : 's'}`
-                  : 'Generate Analysis Report'}
-              </button>
-              <a
-                href="/"
-                className="btn btn-secondary"
-                style={{ textDecoration: 'none' }}
-              >
-                Back to Home
-              </a>
-            </div>
+            {(() => {
+              const gamesInReport = gameData.games_count ?? 0
+              const gamesToAnalyze = Math.min(gamesInReport, 100)
+              const isGiftReport = remainingGames < 10 && gamesInReport >= 10
+              const canGenerate = gamesInReport >= 10 && (gamesToAnalyze <= remainingGames || isGiftReport)
+
+              return (
+                <div style={{
+                  display: 'flex',
+                  gap: '15px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <button
+                    onClick={handleGenerateReport}
+                    className="btn btn-primary"
+                    disabled={!canGenerate}
+                    style={{
+                      background: canGenerate ? (isGiftReport ? 'var(--success-color)' : 'var(--success-color)') : 'var(--text-muted)',
+                      fontSize: '18px',
+                      padding: '15px 30px',
+                      textDecoration: 'none',
+                      border: 'none',
+                      cursor: canGenerate ? 'pointer' : 'not-allowed',
+                      opacity: canGenerate ? 1 : 0.5
+                    }}
+                  >
+                    {isGiftReport
+                      ? '🎁 Generate Gift Report (10 Games)'
+                      : isNewGames
+                      ? `Analyze ${gamesToAnalyze} New Game${gamesToAnalyze === 1 ? '' : 's'}`
+                      : 'Generate Analysis Report'}
+                  </button>
+                  <a
+                    href="/"
+                    className="btn btn-secondary"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Back to Home
+                  </a>
+                </div>
+              )
+            })()}
           </>
         )}
 
