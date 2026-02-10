@@ -9,15 +9,30 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
 {% endblock %}
 
 {% block content %}
-<div class="simple-report">
-    {% load static %}
-    <div class="report-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+{% load static %}
+
+<div id="report-grid-container" style="
+    display: grid;
+    grid-template-columns: 15% 1fr 10%;
+    gap: 20px;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+">
+    <!-- Left Column: Timeline Navigation -->
+    <div id="timeline-nav-column">
+        <div id="timeline-nav-container"></div>
+    </div>
+
+    <!-- Center Column: Main Content -->
+    <div class="simple-report" id="report-content" style="padding: 0 20px; width: 100%;">
+        <div class="report-header" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
         {% if platform == 'chess.com' %}
             <img src="{% static 'images/chess_com_logo.png' %}" alt="Chess.com" style="height: 40px; width: auto;">
-            <h1 style="margin: 0;">Chess.com Analysis Report for {{ username }}</h1>
+            <h1 style="margin: 0; font-weight: 500;">Chess.com Analysis Report for {{ username }}</h1>
         {% else %}
             <img src="{% static 'images/lichess_logo.svg' %}" alt="Lichess" style="height: 40px; width: auto;">
-            <h1 style="margin: 0;">Lichess Analysis Report for {{ username }}</h1>
+            <h1 style="margin: 0; font-weight: 500;">Lichess Analysis Report for {{ username }}</h1>
         {% endif %}
     </div>
 
@@ -32,41 +47,33 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
     {% endif %}
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Filters</h2>
-    <div id="top-filters-container" data-username="{{ username }}"></div>
+    <div id="top-filters-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;"></div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Game Results Chart:</h2>
-    <div id="game-results-chart-container" data-username="{{ username }}" >
+    <div id="game-results-chart-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React GameResultsChart will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Mistakes Analysis Chart:</h2>
-    <div id="mistakes-analysis-chart-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} >
+    <div id="mistakes-analysis-chart-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React MistakesAnalysisChart will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Opening Analysis:</h2>
-    <div id="opening-analysis-container" data-username="{{ username }}" >
+    <div id="opening-analysis-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React OpeningAnalysis will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Blunder Analysis:</h2>
-    <div id="blunder-analysis-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} >
+    <div id="blunder-analysis-container" data-username="{{ username }}" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React BlunderAnalysis will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Time Analysis:</h2>
-    <div id="time-analysis-container" data-username="{{ username }}" >
+    <div id="time-analysis-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React TimeAnalysis will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Principles Summary:</h2>
-    <div id="principles-summary-container">
+    <div id="principles-summary-container" style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React PrinciplesSummary will be mounted here -->
     </div>
 
-    <h2 style="margin-top: 40px; margin-bottom: 10px;">Custom Training Puzzles:</h2>
-    <div id="custom-puzzles-container" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} style="padding: 20px; background-color: var(--background-secondary); border-radius: 8px; border: 2px solid var(--primary-color); box-shadow: 0 2px 6px var(--shadow-light); min-height: 700px;">
+    <div id="custom-puzzles-container" {% if report_id %}data-report-id="{{ report_id }}"{% endif %} style="margin-top: 40px; margin-bottom: 40px; padding: 20px; background-color: var(--background-secondary); border-radius: 8px; border: 2px solid var(--primary-color); box-shadow: 0 2px 6px var(--shadow-light); min-height: 700px;">
         <!-- React CustomPuzzles with PrincipleSelector will be mounted here -->
     </div>
 
@@ -96,7 +103,15 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
 
     <!-- Hidden element to store LLM insights data for React components -->
     <div id="llm-insights-data" style="display: none;">{{ llm_insights|safe }}</div>
+    </div>
+    <!-- End Center Column -->
+
+    <!-- Right Column: Filters Button & Buddy Board (managed by React components) -->
+    <div id="right-column" style="position: relative;">
+        <!-- React components will mount filters-button-container and buddy-board-container here -->
+    </div>
 </div>
+<!-- End Grid Container -->
 
 <script>
 let eventSource;
@@ -178,6 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize top filters as a React component
     initializeTopFilters();
+
+    // Initialize timeline navigation
+    initializeTimelineNav();
 });
 
 function initializeTopFilters() {
@@ -203,6 +221,30 @@ function initializeTopFilters() {
 
     window.topFiltersRoot.render(
         window.React.createElement(window.TopFilters, { username: username })
+    );
+}
+
+function initializeTimelineNav() {
+    // Wait for React and TimelineNav component to be available
+    if (typeof window.React === 'undefined' || typeof window.TimelineNav === 'undefined' || typeof window.ReactDOM === 'undefined') {
+        console.log('Waiting for React and TimelineNav to load...');
+        setTimeout(initializeTimelineNav, 100);
+        return;
+    }
+
+    const container = document.getElementById('timeline-nav-container');
+    if (!container) {
+        console.error('Timeline nav container not found');
+        return;
+    }
+
+    // Create a React root and render the TimelineNav component
+    if (!window.timelineNavRoot) {
+        window.timelineNavRoot = window.ReactDOM.createRoot(container);
+    }
+
+    window.timelineNavRoot.render(
+        window.React.createElement(window.TimelineNav)
     );
 }
 

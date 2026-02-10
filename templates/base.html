@@ -9,7 +9,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Cutive+Mono&display=swap" rel="stylesheet">
 
     <!-- Phosphor Icons -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
@@ -34,10 +34,22 @@
 </head>
 <body>
     <div class="header">
-        <h1>Learn Chess Like a Computer</h1>
-        <div class="user-info">
+        <div class="header-left">
+            <h1><a href="{% url 'analysis:home' %}" class="logo-link">Learn Chess Like a Computer</a></h1>
+        </div>
+        <div class="header-center">
+            <nav class="header-nav">
+                <a href="{% url 'analysis:home' %}">Home</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'analysis:user_reports' %}">My Reports</a>
+                {% endif %}
+                <a href="{% url 'analysis:learn' %}">Learn</a>
+                <a href="{% url 'analysis:games' %}">Games</a>
+            </nav>
+        </div>
+        <div class="header-right">
             {% if user.is_authenticated %}
-                Welcome, {{ user.username }}!
+                <span class="username-text">{{ user.username }}</span>
                 <div class="settings-dropdown">
                     <button class="settings-icon" title="Settings">
                         <i class="ph ph-gear gear-icon"></i>
@@ -51,15 +63,6 @@
                 <a href="/auth/login/" style="color: white;">Login</a>
             {% endif %}
         </div>
-    </div>
-
-    <div class="nav">
-        <a href="{% url 'analysis:home' %}">Home</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'analysis:user_reports' %}">My Reports</a>
-        {% endif %}
-        <a href="{% url 'analysis:learn' %}">Learn</a>
-        <a href="{% url 'analysis:games' %}">Games</a>
     </div>
 
     {% if messages %}

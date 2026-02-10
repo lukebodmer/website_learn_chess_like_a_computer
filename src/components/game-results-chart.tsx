@@ -1180,23 +1180,6 @@ export const GameResultsChart: React.FC<GameResultsChartProps> = ({
       boxShadow: '0 2px 6px var(--shadow-light)',
       margin: '20px 0'
     }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          marginBottom: '8px',
-          color: 'var(--text-primary)'
-        }}>
-          Game Results ({gameFilterManager.getFilterDescription()})
-        </h3>
-        <div style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          marginBottom: '8px'
-        }}>
-          Total Games: {totalGames} | Wins: {userStats.wins} | Losses: {userStats.losses} | Draws: {userStats.draws}
-        </div>
-      </div>
 
       {/* ELO Over Time Chart - Always render */}
       <div style={{
