@@ -35,6 +35,8 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [selectedBlunder, setSelectedBlunder] = useState<BlunderData | null>(null);
   const [solvedBlunders, setSolvedBlunders] = useState<Set<string>>(new Set());
+  const [boardSize, setBoardSize] = useState(450);
+  const [isMobile, setIsMobile] = useState(false);
 
   // LLM insights state
   const [llmInsights, setLlmInsights] = useState<string | null>(null);
@@ -165,6 +167,29 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
     return () => {
       window.removeEventListener('llmInsightsReady', handleLlmInsightsReady);
     };
+  }, []);
+
+  // Handle responsive board size
+  React.useEffect(() => {
+    const updateBoardSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+
+      if (width < 768) {
+        // Mobile: full width minus padding
+        setBoardSize(Math.min(width - 40, 400));
+      } else if (width < 1024) {
+        // Tablet
+        setBoardSize(380);
+      } else {
+        // Desktop
+        setBoardSize(450);
+      }
+    };
+
+    updateBoardSize();
+    window.addEventListener('resize', updateBoardSize);
+    return () => window.removeEventListener('resize', updateBoardSize);
   }, []);
 
   // Set up filter manager when component mounts
@@ -395,9 +420,10 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
       {/* Main Layout: List on Left, Board on Right */}
       <div style={{
         display: 'flex',
-        gap: '20px',
+        gap: '8px',
         alignItems: 'flex-start',
         justifyContent: 'center',
+        flexDirection: isMobile ? 'column-reverse' : 'row',
         flexWrap: 'wrap',
         minHeight: '650px'
       }}>
@@ -406,11 +432,12 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          minWidth: '320px',
-          maxWidth: '400px',
+          minWidth: isMobile ? '100%' : '320px',
+          maxWidth: isMobile ? '100%' : '400px',
           flex: '1',
-          height: '700px',
-          minHeight: '700px',
+          height: isMobile ? 'auto' : '700px',
+          maxHeight: isMobile ? '300px' : '700px',
+          minHeight: isMobile ? '200px' : '700px',
           backgroundColor: 'var(--background-primary)',
           borderRadius: '8px',
           border: '1px solid var(--border-color)',
@@ -559,20 +586,21 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
           alignItems: 'center',
           gap: '4px',
           flex: '1',
-          minWidth: '320px',
-          maxWidth: '500px'
+          minWidth: isMobile ? '100%' : '320px',
+          maxWidth: isMobile ? '100%' : '500px',
+          width: '100%'
         }}>
           {selectedBlunder ? (
             <BlunderBoard
               blunder={selectedBlunder}
-              size={450}
+              size={boardSize}
               isSolved={solvedBlunders.has(getBlunderKey(selectedBlunder))}
               onSolved={() => handleBlunderSolved(selectedBlunder)}
               onSendToBuddyBoard={() => handleSendToBuddyBoard(selectedBlunder)}
               username={username}
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '450px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: `${boardSize}px` }}>
               {/* Empty state - show opening position */}
               <div style={{
                 padding: '12px',
@@ -644,10 +672,11 @@ export const BlunderAnalysis: React.FC<BlunderAnalysisProps> = ({
                 border: '1px solid var(--border-color)',
                 padding: '16px',
                 display: 'flex',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                width: '100%'
               }}>
                 <BaseChessBoard
-                  size={450}
+                  size={boardSize}
                   position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
                   orientation="white"
                   coordinates={true}

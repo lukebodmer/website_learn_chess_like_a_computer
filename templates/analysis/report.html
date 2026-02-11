@@ -47,8 +47,6 @@ Lichess Analysis Report for {{ username }} - Chess Analysis
     </div>
     {% endif %}
 
-    <div id="top-filters-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;"></div>
-
     <div id="game-results-chart-container" data-username="{{ username }}" style="margin-top: 40px; margin-bottom: 40px;">
         <!-- React GameResultsChart will be mounted here -->
     </div>
@@ -191,38 +189,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // The chart component will read pre-computed ELO data from the hidden div
     updateGameResultsChart();
 
-    // Initialize top filters as a React component
-    initializeTopFilters();
-
     // Initialize timeline navigation
     initializeTimelineNav();
 });
-
-function initializeTopFilters() {
-    // Wait for React and TopFilters component to be available
-    if (typeof window.React === 'undefined' || typeof window.TopFilters === 'undefined' || typeof window.ReactDOM === 'undefined') {
-        console.log('Waiting for React and TopFilters to load...');
-        setTimeout(initializeTopFilters, 100);
-        return;
-    }
-
-    const container = document.getElementById('top-filters-container');
-    if (!container) {
-        console.error('Top filters container not found');
-        return;
-    }
-
-    const username = container.dataset.username || '';
-
-    // Create a React root and render the TopFilters component
-    if (!window.topFiltersRoot) {
-        window.topFiltersRoot = window.ReactDOM.createRoot(container);
-    }
-
-    window.topFiltersRoot.render(
-        window.React.createElement(window.TopFilters, { username: username })
-    );
-}
 
 function initializeTimelineNav() {
     // Wait for React and TimelineNav component to be available

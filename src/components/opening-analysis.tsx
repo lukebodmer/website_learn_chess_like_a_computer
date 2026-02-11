@@ -278,11 +278,11 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
   useEffect(() => {
     const updateBoardSize = () => {
       if (window.innerWidth < 768) {
-        setBoardSize(280);
+        setBoardSize(240);
       } else if (window.innerWidth < 1024) {
-        setBoardSize(350);
+        setBoardSize(300);
       } else {
-        setBoardSize(400);
+        setBoardSize(350);
       }
     };
 
@@ -668,6 +668,32 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
     };
   }, [filteredGames, username, currentFilter, fetchedOpeningStatsData]);
 
+  // Calculate min and max error rates for normalization
+  const { minErrorRate, maxErrorRate } = useMemo(() => {
+    if (openingsData.length === 0) {
+      return { minErrorRate: 0, maxErrorRate: 1 };
+    }
+
+    const errorRates = openingsData.map(o =>
+      o.avgInaccuracies + 2 * o.avgMistakes + 3 * o.avgBlunders
+    );
+    return {
+      minErrorRate: Math.min(...errorRates),
+      maxErrorRate: Math.max(...errorRates)
+    };
+  }, [openingsData]);
+
+  // Helper function to get color based on performance percentage
+  const getPerformanceColor = (percentage: number): string => {
+    if (percentage >= 70) {
+      return '#4CAF50'; // Green for high performance
+    } else if (percentage >= 40) {
+      return '#FFA726'; // Yellow/orange for medium performance
+    } else {
+      return '#EF5350'; // Red for low performance
+    }
+  };
+
   // Sort openings based on the selected sort method and direction
   const sortedOpeningsData = useMemo(() => {
     const sorted = [...openingsData];
@@ -849,7 +875,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       // If base opening is selected, match all variations of this opening
       if (selectedVariationName === '__base__') {
         const baseName = fullOpeningName.split(':')[0].trim();
-        return baseName === selectedOpening.baseName && gameOpening.eco === selectedOpening.eco;
+        return baseName === selectedOpening.baseName;
       }
 
       // Otherwise match the specific variation
@@ -881,7 +907,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '20px',
+        marginBottom: '8px',
         padding: '10px',
         backgroundColor: 'var(--background-primary)',
         borderRadius: '8px',
@@ -897,9 +923,6 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
           fontSize: '14px',
           color: 'var(--text-secondary)'
         }}>
-          <div style={{ marginBottom: '4px' }}>
-            {gameFilterManager.getFilterDescription()}
-          </div>
           <div>
             Unique Openings: {openingsData.length}
           </div>
@@ -986,7 +1009,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
       {/* Opening Board and Mistake Chart */}
       <div style={{
         display: 'flex',
-        gap: '20px',
+        gap: '8px',
         alignItems: 'flex-start',
         justifyContent: 'center',
         flexWrap: 'wrap'
@@ -995,7 +1018,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          gap: '8px',
           minWidth: '320px',
           maxWidth: '400px',
           flex: '1'
@@ -1005,37 +1028,21 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
             backgroundColor: 'var(--background-primary)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            padding: '20px'
+            padding: '12px'
           }}>
             <h4 style={{
-              margin: '0 0 16px 0',
-              fontSize: '14px',
+              margin: '0 0 10px 0',
+              fontSize: '13px',
               fontWeight: '600',
               color: 'var(--text-primary)',
               textAlign: 'center'
             }}>
               Average Mistakes
-              <br />
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '400',
-                color: 'var(--text-secondary)',
-                fontStyle: 'italic'
-              }}>
-                {(() => {
-                  if (!selectedOpening) return '(Based on 0 games)';
-                  const currentVariation = selectedVariationName === '__base__'
-                    ? null
-                    : selectedOpening.variations.find(v => v.fullName === selectedVariationName);
-                  const stats = currentVariation || selectedOpening;
-                  return `(Based on ${stats.count} game${stats.count !== 1 ? 's' : ''})`;
-                })()}
-              </span>
             </h4>
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px'
+              gap: '8px'
             }}>
               {(() => {
                 // Calculate user's ELO and get population averages
@@ -1384,179 +1391,207 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               }}>
                 {selectedOpening ? selectedOpening.baseName : 'Opening'} Variations
               </h4>
-              {/* Percentile Bar for Selected Opening */}
-              {selectedOpening?.percentile !== undefined && selectedOpening?.percentile !== null && (
-                <div style={{
-                  marginBottom: '12px',
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}>
-                  <div style={{
-                    width: '80%',
-                    height: '12px',
-                    backgroundColor: 'var(--background-secondary)',
-                    borderRadius: '3px',
-                    overflow: 'hidden',
-                    border: '1px solid var(--border-color)'
-                  }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${selectedOpening.percentile}%`,
-                      backgroundColor: selectedOpening.percentile >= 75
-                        ? '#4CAF50'
-                        : selectedOpening.percentile >= 50
-                          ? '#FFA726'
-                          : '#F44336',
-                      transition: 'width 0.3s ease'
-                    }} />
-                  </div>
-                </div>
-              )}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px',
-                minHeight: '145px',
-                maxHeight: '145px',
+                minHeight: '120px',
+                maxHeight: '120px',
                 overflowY: 'auto',
                 paddingRight: '4px'
               }}>
                 {selectedOpening && selectedOpening.variations.length > 0 ? (
                   <>
                   {/* Base Opening - show at top if available */}
-                  {baseOpeningData && (
-                    <div
-                      onClick={() => {
-                        // Parse the PGN moves for the base opening
-                        const pgnMoves = baseOpeningData.pgn.replace(/\d+\.\s*/g, '').trim().split(/\s+/);
-                        setOpeningMoves(pgnMoves);
-                        setCurrentMoveIndex(pgnMoves.length);
-                        setSelectedVariationName('__base__');
+                  {baseOpeningData && (() => {
+                    // Calculate average performance for the base opening (all variations combined)
+                    const baseErrorRate = selectedOpening.avgInaccuracies + 2 * selectedOpening.avgMistakes + 3 * selectedOpening.avgBlunders;
+                    const range = maxErrorRate - minErrorRate;
+                    const normalizedPerformance = range > 0
+                      ? ((maxErrorRate - baseErrorRate) / range) * 100
+                      : 50;
 
-                        // Calculate FEN for the end position
-                        const chess = new Chess();
-                        for (let i = 0; i < pgnMoves.length; i++) {
-                          chess.move(pgnMoves[i]);
-                        }
-                        setSelectedOpeningFen(chess.fen());
-                      }}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px 10px',
-                        backgroundColor: selectedVariationName === '__base__' ? 'var(--primary-color)' : 'var(--background-secondary)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '6px',
-                        transition: 'all 0.2s ease',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (selectedVariationName !== '__base__') {
-                          e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
-                        }
-                        e.currentTarget.style.transform = 'translateX(4px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedVariationName !== '__base__') {
-                          e.currentTarget.style.backgroundColor = 'var(--background-secondary)';
-                        }
-                        e.currentTarget.style.transform = 'translateX(0)';
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          fontSize: '12px',
-                          color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--text-primary)',
-                          fontWeight: '600'
-                        }}>
-                          {baseOpeningData.name} (Base)
-                        </div>
-                      </div>
-
-                      <div style={{
-                        minWidth: '30px',
-                        textAlign: 'center',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--primary-color)'
-                      }}>
-                        {selectedOpening.count}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* User's variations */}
-                  {selectedOpening.variations.map((variation, index) => (
-                    <div
-                      key={`${variation.fullName}-${index}`}
-                      onClick={() => {
-                        // Parse the moves string and set opening moves for this variation
-                        if (variation.moves) {
-                          const moves = variation.moves.split(' ').filter(m => m.trim() !== '');
-                          setOpeningMoves(moves);
-                          setCurrentMoveIndex(moves.length); // Start at the end of the opening
-                          setSelectedVariationName(variation.fullName);
+                    return (
+                      <div
+                        onClick={() => {
+                          // Parse the PGN moves for the base opening
+                          const pgnMoves = baseOpeningData.pgn.replace(/\d+\.\s*/g, '').trim().split(/\s+/);
+                          setOpeningMoves(pgnMoves);
+                          setCurrentMoveIndex(pgnMoves.length);
+                          setSelectedVariationName('__base__');
 
                           // Calculate FEN for the end position
                           const chess = new Chess();
-                          for (let i = 0; i < moves.length; i++) {
-                            chess.move(moves[i]);
+                          for (let i = 0; i < pgnMoves.length; i++) {
+                            chess.move(pgnMoves[i]);
                           }
                           setSelectedOpeningFen(chess.fen());
-                        } else if (variation.fen) {
-                          setSelectedOpeningFen(variation.fen);
-                          setOpeningMoves([]);
-                          setCurrentMoveIndex(0);
-                          setSelectedVariationName(variation.fullName);
-                        }
-                      }}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px 10px',
-                        backgroundColor: selectedVariationName === variation.fullName ? 'var(--primary-color)' : 'var(--background-secondary)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '6px',
-                        transition: 'all 0.2s ease',
-                        cursor: variation.fen ? 'pointer' : 'default'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (variation.fen && selectedVariationName !== variation.fullName) {
-                          e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
-                        }
-                        if (variation.fen) {
-                          e.currentTarget.style.transform = 'translateX(4px)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedVariationName !== variation.fullName) {
-                          e.currentTarget.style.backgroundColor = 'var(--background-secondary)';
-                        }
-                        e.currentTarget.style.transform = 'translateX(0)';
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
+                        }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '6px 8px',
+                          gap: '8px',
+                          backgroundColor: selectedVariationName === '__base__' ? 'var(--primary-color)' : 'var(--background-secondary)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s ease',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedVariationName !== '__base__') {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
+                          }
+                          e.currentTarget.style.transform = 'translateX(2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedVariationName !== '__base__') {
+                            e.currentTarget.style.backgroundColor = 'var(--background-secondary)';
+                          }
+                          e.currentTarget.style.transform = 'translateX(0)';
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            fontSize: '10px',
+                            color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--text-primary)',
+                            fontWeight: '600'
+                          }}>
+                            {baseOpeningData.name} (Base)
+                          </div>
+                        </div>
+
+                        {/* Performance Bar */}
                         <div style={{
-                          fontSize: '12px',
-                          color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--text-primary)'
+                          width: '40px',
+                          height: '6px',
+                          backgroundColor: selectedVariationName === '__base__' ? 'var(--background-primary)' : 'var(--background-primary)',
+                          borderRadius: '2px',
+                          overflow: 'hidden',
+                          border: '1px solid var(--border-color)',
+                          flexShrink: 0
                         }}>
-                          {variation.fullName}
+                          <div style={{
+                            height: '100%',
+                            width: `${normalizedPerformance}%`,
+                            backgroundColor: getPerformanceColor(normalizedPerformance),
+                            transition: 'width 0.3s ease'
+                          }} />
+                        </div>
+
+                        <div style={{
+                          minWidth: '30px',
+                          textAlign: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: selectedVariationName === '__base__' ? 'var(--text-on-primary)' : 'var(--primary-color)'
+                        }}>
+                          {selectedOpening.count}
                         </div>
                       </div>
+                    );
+                  })()}
 
-                      <div style={{
-                        minWidth: '30px',
-                        textAlign: 'center',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--primary-color)'
-                      }}>
-                        {variation.count}
+                  {/* User's variations */}
+                  {selectedOpening.variations.map((variation, index) => {
+                    const variationErrorRate = variation.avgInaccuracies + 2 * variation.avgMistakes + 3 * variation.avgBlunders;
+                    const range = maxErrorRate - minErrorRate;
+                    const normalizedPerformance = range > 0
+                      ? ((maxErrorRate - variationErrorRate) / range) * 100
+                      : 50;
+
+                    return (
+                      <div
+                        key={`${variation.fullName}-${index}`}
+                        onClick={() => {
+                          // Parse the moves string and set opening moves for this variation
+                          if (variation.moves) {
+                            const moves = variation.moves.split(' ').filter(m => m.trim() !== '');
+                            setOpeningMoves(moves);
+                            setCurrentMoveIndex(moves.length); // Start at the end of the opening
+                            setSelectedVariationName(variation.fullName);
+
+                            // Calculate FEN for the end position
+                            const chess = new Chess();
+                            for (let i = 0; i < moves.length; i++) {
+                              chess.move(moves[i]);
+                            }
+                            setSelectedOpeningFen(chess.fen());
+                          } else if (variation.fen) {
+                            setSelectedOpeningFen(variation.fen);
+                            setOpeningMoves([]);
+                            setCurrentMoveIndex(0);
+                            setSelectedVariationName(variation.fullName);
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '6px 8px',
+                          gap: '8px',
+                          backgroundColor: selectedVariationName === variation.fullName ? 'var(--primary-color)' : 'var(--background-secondary)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s ease',
+                          cursor: variation.fen ? 'pointer' : 'default'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (variation.fen && selectedVariationName !== variation.fullName) {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
+                          }
+                          if (variation.fen) {
+                            e.currentTarget.style.transform = 'translateX(2px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedVariationName !== variation.fullName) {
+                            e.currentTarget.style.backgroundColor = 'var(--background-secondary)';
+                          }
+                          e.currentTarget.style.transform = 'translateX(0)';
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            fontSize: '10px',
+                            fontWeight: '600',
+                            color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--text-primary)'
+                          }}>
+                            {variation.fullName.includes(':') ? variation.fullName.split(':')[1].trim() : variation.fullName}
+                          </div>
+                        </div>
+
+                        {/* Performance Bar */}
+                        <div style={{
+                          width: '40px',
+                          height: '6px',
+                          backgroundColor: selectedVariationName === variation.fullName ? 'var(--background-primary)' : 'var(--background-primary)',
+                          borderRadius: '2px',
+                          overflow: 'hidden',
+                          border: '1px solid var(--border-color)',
+                          flexShrink: 0
+                        }}>
+                          <div style={{
+                            height: '100%',
+                            width: `${normalizedPerformance}%`,
+                            backgroundColor: getPerformanceColor(normalizedPerformance),
+                            transition: 'width 0.3s ease'
+                          }} />
+                        </div>
+
+                        <div style={{
+                          minWidth: '30px',
+                          textAlign: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: selectedVariationName === variation.fullName ? 'var(--text-on-primary)' : 'var(--primary-color)'
+                        }}>
+                          {variation.count}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   </>
                 ) : (
                   <div style={{
@@ -1760,10 +1795,10 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
         border: '1px solid var(--border-color)',
         borderRadius: '8px',
         padding: '16px',
-        marginTop: '16px'
+        marginTop: '8px'
       }}>
         <h4 style={{
-          margin: '0 0 16px 0',
+          margin: '0 0 8px 0',
           fontSize: '16px',
           fontWeight: '600',
           color: 'var(--text-primary)',
@@ -1795,9 +1830,9 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              padding: '8px 16px',
+              padding: '6px 12px',
               borderBottom: '2px solid var(--border-color)',
-              marginBottom: '8px'
+              marginBottom: '6px'
             }}>
               <div
                 style={{
@@ -1808,7 +1843,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 onClick={() => handleSortColumnClick('name')}
               >
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: '700',
                   color: sortBy === 'name' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
@@ -1818,16 +1853,16 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               </div>
               <div
                 style={{
-                  minWidth: '100px',
+                  minWidth: '80px',
                   textAlign: 'center',
                   cursor: 'pointer',
                   userSelect: 'none',
-                  marginRight: '20px'
+                  marginRight: '12px'
                 }}
                 onClick={() => handleSortColumnClick('percentile')}
               >
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: '700',
                   color: sortBy === 'percentile' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
@@ -1837,7 +1872,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
               </div>
               <div
                 style={{
-                  minWidth: '60px',
+                  minWidth: '50px',
                   textAlign: 'center',
                   cursor: 'pointer',
                   userSelect: 'none'
@@ -1845,7 +1880,7 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
                 onClick={() => handleSortColumnClick('games')}
               >
                 <span style={{
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: '700',
                   color: sortBy === 'games' ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textTransform: 'uppercase'
@@ -1858,138 +1893,139 @@ export const OpeningAnalysis: React.FC<OpeningAnalysisProps> = ({
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px',
+              gap: '4px',
               minHeight: '260px',
               maxHeight: '260px',
               overflowY: 'auto',
-              paddingRight: '8px'
+              paddingRight: '6px'
             }}>
-              {sortedOpeningsData.map((opening, index) => (
-              <div
-                key={`${opening.eco}-${index}`}
-                onClick={() => {
-                  setSelectedOpening(opening);
+              {sortedOpeningsData.map((opening, index) => {
+                const openingErrorRate = opening.avgInaccuracies + 2 * opening.avgMistakes + 3 * opening.avgBlunders;
+                const range = maxErrorRate - minErrorRate;
+                const normalizedPerformance = range > 0
+                  ? ((maxErrorRate - openingErrorRate) / range) * 100
+                  : 50;
 
-                  // Parse the moves string and set opening moves
-                  if (opening.moves) {
-                    const moves = opening.moves.split(' ').filter(m => m.trim() !== '');
-                    setOpeningMoves(moves);
-                    setCurrentMoveIndex(moves.length); // Start at the end of the opening
+                return (
+                  <div
+                    key={`${opening.eco}-${index}`}
+                    onClick={() => {
+                      setSelectedOpening(opening);
 
-                    // Calculate FEN for the end position
-                    const chess = new Chess();
-                    for (let i = 0; i < moves.length; i++) {
-                      chess.move(moves[i]);
-                    }
-                    setSelectedOpeningFen(chess.fen());
-                  } else if (opening.fen) {
-                    setSelectedOpeningFen(opening.fen);
-                    setOpeningMoves([]);
-                    setCurrentMoveIndex(0);
-                  }
-                }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  backgroundColor: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--primary-color)' : 'var(--background-secondary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '6px',
-                  transition: 'all 0.2s ease',
-                  cursor: opening.fen ? 'pointer' : 'default'
-                }}
-                onMouseEnter={(e) => {
-                  if (opening.fen && !(selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName)) {
-                    e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
-                  }
-                  if (opening.fen) {
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  const isSelected = selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName;
-                  e.currentTarget.style.backgroundColor = isSelected ? 'var(--primary-color)' : 'var(--background-secondary)';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontWeight: '600',
-                    color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--text-primary)',
-                    fontSize: '14px',
-                    marginBottom: '4px'
-                  }}>
-                    <span style={{
-                      backgroundColor: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--background-primary)' : 'var(--primary-color)',
-                      color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--primary-color)' : 'var(--text-on-primary)',
-                      padding: '2px 8px',
+                      // Parse the moves string and set opening moves
+                      if (opening.moves) {
+                        const moves = opening.moves.split(' ').filter(m => m.trim() !== '');
+                        setOpeningMoves(moves);
+                        setCurrentMoveIndex(moves.length); // Start at the end of the opening
+
+                        // Calculate FEN for the end position
+                        const chess = new Chess();
+                        for (let i = 0; i < moves.length; i++) {
+                          chess.move(moves[i]);
+                        }
+                        setSelectedOpeningFen(chess.fen());
+                      } else if (opening.fen) {
+                        setSelectedOpeningFen(opening.fen);
+                        setOpeningMoves([]);
+                        setCurrentMoveIndex(0);
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      backgroundColor: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--primary-color)' : 'var(--background-secondary)',
+                      border: '1px solid var(--border-color)',
                       borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      marginRight: '8px'
-                    }}>
-                      {opening.eco}
-                    </span>
-                    {opening.baseName}
-                  </div>
-                  {opening.variations.length > 1 && (
-                    <div style={{
-                      fontSize: '11px',
-                      color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--text-secondary)',
-                      marginTop: '2px'
-                    }}>
-                      {opening.variations.length} variations
+                      transition: 'all 0.2s ease',
+                      cursor: opening.fen ? 'pointer' : 'default'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (opening.fen && !(selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName)) {
+                        e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
+                      }
+                      if (opening.fen) {
+                        e.currentTarget.style.transform = 'translateX(2px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const isSelected = selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName;
+                      e.currentTarget.style.backgroundColor = isSelected ? 'var(--primary-color)' : 'var(--background-secondary)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        fontWeight: '600',
+                        color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--text-primary)',
+                        fontSize: '12px'
+                      }}>
+                        <span style={{
+                          backgroundColor: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--background-primary)' : 'var(--primary-color)',
+                          color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--primary-color)' : 'var(--text-on-primary)',
+                          padding: '1px 6px',
+                          borderRadius: '3px',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          marginRight: '6px'
+                        }}>
+                          {opening.eco}
+                        </span>
+                        {opening.baseName}
+                      </div>
+                      {opening.variations.length > 1 && (
+                        <div style={{
+                          fontSize: '9px',
+                          color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--text-secondary)',
+                          fontStyle: 'italic'
+                        }}>
+                          {opening.variations.length} variations
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                {/* Percentile Bar */}
-                {opening.percentile !== undefined && opening.percentile !== null && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    minWidth: '100px',
-                    marginRight: '20px'
-                  }}>
+                    {/* Performance Bar */}
                     <div style={{
-                      width: '100%',
-                      height: '12px',
-                      backgroundColor: 'var(--background-secondary)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                      border: '1px solid var(--border-color)'
+                      display: 'flex',
+                      alignItems: 'center',
+                      minWidth: '80px',
+                      marginRight: '12px'
                     }}>
                       <div style={{
-                        height: '100%',
-                        width: `${opening.percentile}%`,
-                        backgroundColor: opening.percentile >= 75
-                          ? '#4CAF50'
-                          : opening.percentile >= 50
-                            ? '#FFA726'
-                            : '#F44336',
-                        transition: 'width 0.3s ease'
-                      }} />
+                        width: '100%',
+                        height: '8px',
+                        backgroundColor: 'var(--background-secondary)',
+                        borderRadius: '3px',
+                        overflow: 'hidden',
+                        border: '1px solid var(--border-color)'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${normalizedPerformance}%`,
+                          backgroundColor: getPerformanceColor(normalizedPerformance),
+                          transition: 'width 0.3s ease'
+                        }} />
+                      </div>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      minWidth: '50px'
+                    }}>
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--primary-color)'
+                      }}>
+                        {opening.count}
+                      </span>
                     </div>
                   </div>
-                )}
-
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  minWidth: '60px'
-                }}>
-                  <span style={{
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    color: selectedOpening?.eco === opening.eco && selectedOpening?.baseName === opening.baseName ? 'var(--text-on-primary)' : 'var(--primary-color)'
-                  }}>
-                    {opening.count}
-                  </span>
-                </div>
-              </div>
-            ))}
+                );
+              })}
             </div>
           </>
         )}

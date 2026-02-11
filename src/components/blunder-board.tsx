@@ -331,7 +331,7 @@ export const BlunderBoard: React.FC<BlunderBoardProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {/* Info Display */}
       <div style={{
         padding: '12px',

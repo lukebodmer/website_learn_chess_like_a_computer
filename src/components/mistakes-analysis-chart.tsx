@@ -634,7 +634,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
               backgroundColor: 'var(--text-primary)',
               opacity: 0.5
             }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Avg ({eloBracket})</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Avg</span>
           </div>
         )}
       </div>
@@ -788,33 +788,11 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
       border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          marginBottom: '8px',
-          color: 'var(--text-primary)'
-        }}>
-          Mistakes Analysis ({gameFilterManager.getFilterDescription()})
-        </h3>
-        <div style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          marginBottom: '8px'
-        }}>
-          {noDataMessage ? (
-            <span style={{ fontStyle: 'italic' }}>{noDataMessage}</span>
-          ) : (
-            <>Analyzed Games: {totalGames} | Avg Inaccuracies: {averageStats.inaccuracies.toFixed(2)} | Avg Mistakes: {averageStats.mistakes.toFixed(2)} | Avg Blunders: {averageStats.blunders.toFixed(2)}</>
-          )}
-        </div>
-      </div>
-
       {/* Charts Container - Side by Side */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-        gap: '20px',
+        gap: '8px',
         marginTop: '16px'
       }}>
         {/* Average Mistakes Per Game Chart */}
@@ -831,7 +809,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
             color: 'var(--text-primary)',
             textAlign: 'center'
           }}>
-            Average Mistakes Per Game
+            Average Errors Per Game
           </h4>
           {totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -863,7 +841,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                 </Bar>
                 {/* Population average */}
                 {eloBracket && (
-                  <Bar dataKey="popAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Bar dataKey="popAvg" name="Avg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-pop-${index}`} fill={entry.fill} />
                     ))}
@@ -899,7 +877,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
             color: 'var(--text-primary)',
             textAlign: 'center'
           }}>
-            Opening Mistakes
+            Opening Errors
           </h4>
           {totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -929,7 +907,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                   <Cell fill={COLORS.blunders} />
                 </Bar>
                 {eloBracket && (
-                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Bar dataKey="PopAvg" name="Avg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
                     <Cell fill={COLORS.inaccuracies} />
                     <Cell fill={COLORS.mistakes} />
                     <Cell fill={COLORS.blunders} />
@@ -965,7 +943,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
             color: 'var(--text-primary)',
             textAlign: 'center'
           }}>
-            Middlegame Mistakes
+            Middlegame Errors
           </h4>
           {totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -995,7 +973,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                   <Cell fill={COLORS.blunders} />
                 </Bar>
                 {eloBracket && (
-                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Bar dataKey="PopAvg" name="Avg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
                     <Cell fill={COLORS.inaccuracies} />
                     <Cell fill={COLORS.mistakes} />
                     <Cell fill={COLORS.blunders} />
@@ -1031,7 +1009,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
             color: 'var(--text-primary)',
             textAlign: 'center'
           }}>
-            Endgame Mistakes
+            Endgame Errors
           </h4>
           {totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -1061,7 +1039,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
                   <Cell fill={COLORS.blunders} />
                 </Bar>
                 {eloBracket && (
-                  <Bar dataKey="PopAvg" name={`Avg (${eloBracket})`} radius={[4, 4, 0, 0]} fillOpacity={0.5}>
+                  <Bar dataKey="PopAvg" name="Avg" radius={[4, 4, 0, 0]} fillOpacity={0.5}>
                     <Cell fill={COLORS.inaccuracies} />
                     <Cell fill={COLORS.mistakes} />
                     <Cell fill={COLORS.blunders} />
@@ -1091,7 +1069,7 @@ export const MistakesAnalysisChart: React.FC<MistakesAnalysisChartProps> = ({
           border: '1px solid var(--border-color)',
           borderRadius: '8px',
           padding: '16px',
-          marginTop: '20px',
+          marginTop: '8px',
           minHeight: '100px',
           cursor: llmInsights ? 'pointer' : 'default'
         }}

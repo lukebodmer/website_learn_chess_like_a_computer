@@ -17,25 +17,20 @@
     flex-shrink: 0;
 }
 
-.header h1 {
-    margin: 0;
-    font-family: 'Cutive Mono', monospace;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: white;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-}
-
-.header h1 .logo-link {
-    color: white;
+.logo-link {
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
     transition: opacity 0.2s ease;
 }
 
-.header h1 .logo-link:hover {
+.logo-link:hover {
     opacity: 0.8;
-    text-decoration: none;
+}
+
+.nav-logo {
+    height: 40px;
+    width: auto;
 }
 
 .header-center {
@@ -365,9 +360,8 @@
         width: 100%;
     }
 
-    .header h1 {
-        font-size: 1rem;
-        margin: 0;
+    .nav-logo {
+        height: 32px;
     }
 
     .header-center {
@@ -428,8 +422,8 @@
         font-size: 0.9rem;
     }
 
-    .header h1 {
-        font-size: 1.05rem;
+    .nav-logo {
+        height: 36px;
     }
 
     .header {

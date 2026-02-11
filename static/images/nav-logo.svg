@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="207.91539mm"
+   height="37.427254mm"
+   viewBox="0 0 207.91539 37.427254"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   sodipodi:docname="nav-logo.svg"
+   inkscape:export-filename="nav-logo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1"
+     inkscape:cx="452"
+     inkscape:cy="96.5"
+     inkscape:window-width="1912"
+     inkscape:window-height="1050"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="207.91539"
+       height="37.427254"
+       id="page5"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(2.38125,-2.1166671)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.8784px;line-height:19.195px;font-family:'Iosevka Nerd Font';-inkscape-font-specification:'Iosevka Nerd Font, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-1.61925px;word-spacing:-0.469006px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.132291;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       x="-2.1871712"
+       y="24.572311"
+       id="text1"
+       transform="scale(0.92436726,1.0818211)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.8784px;line-height:19.195px;font-family:'Iosevka Nerd Font';-inkscape-font-specification:'Iosevka Nerd Font, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:-1.61925px;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.132292;stroke-dasharray:none;stroke-opacity:1"
+         x="-2.1871712"
+         y="24.572311"
+         id="tspan4">Le<tspan
+   style="letter-spacing:-2.2225px"
+   id="tspan6">ar</tspan>n Chess Like a Computer</tspan></text>
+  </g>
+</svg>

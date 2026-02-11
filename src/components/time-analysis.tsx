@@ -78,6 +78,8 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
   const [filteredGames, setFilteredGames] = useState<any[]>(enrichedGames);
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all');
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [showTimeRemainingTooltip, setShowTimeRemainingTooltip] = useState(false);
+  const [showCriticalMovesTooltip, setShowCriticalMovesTooltip] = useState(false);
 
   // LLM insights state
   const [llmInsights, setLlmInsights] = useState<string | null>(null);
@@ -941,7 +943,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
           <div style={{
             width: '12px',
             height: '12px',
-            backgroundColor: 'var(--text-primary)',
+            backgroundColor: 'var(--info-color)',
             opacity: 1
           }} />
           <span style={{ color: 'var(--text-secondary)' }}>You</span>
@@ -951,10 +953,10 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
             <div style={{
               width: '12px',
               height: '12px',
-              backgroundColor: 'var(--text-primary)',
+              backgroundColor: 'var(--info-color)',
               opacity: 0.5
             }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Avg ({timeUsageData.eloBracket})</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Avg</span>
           </div>
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -977,19 +979,29 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       border: '2px solid var(--primary-color)',
       boxShadow: '0 2px 6px var(--shadow-light)'
     }}>
-      <div style={{ marginBottom: '16px', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h3 style={{
-            fontSize: '1.125rem',
+      {/* Chart Container */}
+      <div style={{
+        backgroundColor: 'var(--background-primary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '8px',
+        padding: '16px',
+        minHeight: '316px'
+      }}>
+        <div style={{ position: 'relative', marginBottom: '12px' }}>
+          <h4 style={{
+            fontSize: '0.95rem',
             fontWeight: '600',
-            marginBottom: '8px',
-            color: 'var(--text-primary)'
+            margin: 0,
+            color: 'var(--text-primary)',
+            textAlign: 'center'
           }}>
-            Time Analysis ({gameFilterManager.getFilterDescription()})
-          </h3>
+            Average Time Usage Per Game Phase
+          </h4>
           <div
             style={{
-              position: 'relative',
+              position: 'absolute',
+              top: 0,
+              right: 0,
               cursor: 'pointer',
               width: '28px',
               height: '28px',
@@ -997,7 +1009,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '50%',
-              backgroundColor: 'var(--background-primary)',
+              backgroundColor: 'var(--background-secondary)',
               border: '1px solid var(--border-color)',
               color: 'var(--text-secondary)',
               fontSize: '18px',
@@ -1039,41 +1051,14 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                   <li style={{ marginBottom: '10px' }}>
                     <strong>Population Average:</strong> Semi-transparent bars show how players in your ELO bracket typically spend their time, helping you identify if you're over/under-thinking certain phases.
                   </li>
-                  <li style={{ marginBottom: '10px' }}>
-                    <strong>Win % Line:</strong> The gray line shows your average evaluation/win percentage at key transition points in the game.
-                  </li>
-                  <li style={{ marginBottom: '10px' }}>
-                    <strong>Time Remaining Distribution:</strong> Shows when your games typically end and how much time you have left by result type.
-                  </li>
                   <li>
-                    <strong>Critical Moves Scatter:</strong> Plots time spent vs. position criticality to reveal if you're investing time appropriately on important decisions.
+                    <strong>Win % Line:</strong> The gray line shows your average evaluation/win percentage at key transition points in the game.
                   </li>
                 </ul>
               </div>
             )}
           </div>
         </div>
-        <div style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          marginBottom: '8px'
-        }}>
-          {hasData ? (
-            <>Average time usage per game phase (based on {timeUsageData.totalGames} games)</>
-          ) : (
-            <span style={{ fontStyle: 'italic' }}>No games with time data available yet...</span>
-          )}
-        </div>
-      </div>
-
-      {/* Chart Container */}
-      <div style={{
-        backgroundColor: 'var(--background-primary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '8px',
-        padding: '16px',
-        minHeight: '316px'
-      }}>
         {hasData ? (
           <ResponsiveContainer width="100%" height={300}>
           <ComposedChart
@@ -1095,7 +1080,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 value: 'Time Usage (%)',
                 angle: -90,
                 position: 'insideLeft',
-                style: { fill: 'var(--text-secondary)', fontSize: 12 }
+                style: { fill: 'var(--text-secondary)', fontSize: 12, textAnchor: 'middle' }
               }}
             />
             <YAxis
@@ -1108,7 +1093,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                 value: 'Win %',
                 angle: 90,
                 position: 'insideRight',
-                style: { fill: 'var(--text-secondary)', fontSize: 12 }
+                style: { fill: 'var(--text-secondary)', fontSize: 12, textAnchor: 'middle' }
               }}
             />
             <Tooltip
@@ -1163,8 +1148,8 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
-        gap: '20px',
-        marginTop: '24px'
+        gap: '8px',
+        marginTop: '8px'
       }}>
         {/* Time Remaining Distribution */}
         <div style={{
@@ -1174,20 +1159,74 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
           padding: '16px',
           minHeight: '338px'
         }}>
-          <h4 style={{
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            marginBottom: '12px',
-            color: 'var(--text-primary)'
-          }}>
-            Time Remaining at Game End
-          </h4>
-          <div style={{
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            marginBottom: '12px'
-          }}>
-            Log-normal probability distribution of time remaining by result
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <h4 style={{
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              margin: 0,
+              color: 'var(--text-primary)',
+              textAlign: 'center'
+            }}>
+              Time Remaining at Game End
+            </h4>
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                cursor: 'pointer',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                backgroundColor: 'var(--background-secondary)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                fontSize: '18px',
+                fontWeight: 'normal',
+                transition: 'all 0.2s ease',
+                lineHeight: '1'
+              }}
+              onMouseEnter={() => setShowTimeRemainingTooltip(true)}
+              onMouseLeave={() => setShowTimeRemainingTooltip(false)}
+              onClick={() => setShowTimeRemainingTooltip(!showTimeRemainingTooltip)}
+            >
+              ⓘ
+              {showTimeRemainingTooltip && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '0',
+                  marginTop: '8px',
+                  width: '320px',
+                  maxWidth: '90vw',
+                  padding: '16px',
+                  backgroundColor: 'var(--background-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px var(--shadow-medium)',
+                  zIndex: 1000,
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  lineHeight: '1.5',
+                  textAlign: 'left'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '12px', fontSize: '14px', fontWeight: '600' }}>
+                    How to Read This Chart
+                  </h4>
+                  <ul style={{ marginBottom: 0, paddingLeft: '18px', marginTop: '8px' }}>
+                    <li style={{ marginBottom: '10px' }}>
+                      <strong>Time Remaining Distribution:</strong> Shows when your games typically end and how much time you have left by result type.
+                    </li>
+                    <li>
+                      This is a log-normal probability distribution of time remaining by result (wins, losses, draws).
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
           {hasData && timeRemainingData.totalGames > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -1214,7 +1253,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                     value: 'Probability Density',
                     angle: -90,
                     position: 'insideLeft',
-                    style: { fill: 'var(--text-secondary)', fontSize: 11 }
+                    style: { fill: 'var(--text-secondary)', fontSize: 11, textAnchor: 'middle' }
                   }}
                 />
                 <Tooltip
@@ -1245,7 +1284,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                   cursor={{ strokeDasharray: '3 3' }}
                 />
                 <Legend
-                  wrapperStyle={{ fontSize: '11px' }}
+                  wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
                   iconType="line"
                 />
                 {timeRemainingData.hasWinData && (
@@ -1312,24 +1351,74 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
           padding: '16px',
           minHeight: '338px'
         }}>
-          <h4 style={{
-            fontSize: '0.95rem',
-            fontWeight: '600',
-            marginBottom: '12px',
-            color: 'var(--text-primary)'
-          }}>
-            Time Spent on Critical Moves
-          </h4>
-          <div style={{
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            marginBottom: '12px'
-          }}>
-            {hasData && criticalMomentsData.totalMoves > 0 ? (
-              <>Time usage vs. move quality ({criticalMomentsData.totalMoves} moves analyzed)</>
-            ) : (
-              <span style={{ fontStyle: 'italic' }}>Analyzing move quality...</span>
-            )}
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <h4 style={{
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              margin: 0,
+              color: 'var(--text-primary)',
+              textAlign: 'center'
+            }}>
+              Time Spent on Critical Moves
+            </h4>
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                cursor: 'pointer',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                backgroundColor: 'var(--background-secondary)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                fontSize: '18px',
+                fontWeight: 'normal',
+                transition: 'all 0.2s ease',
+                lineHeight: '1'
+              }}
+              onMouseEnter={() => setShowCriticalMovesTooltip(true)}
+              onMouseLeave={() => setShowCriticalMovesTooltip(false)}
+              onClick={() => setShowCriticalMovesTooltip(!showCriticalMovesTooltip)}
+            >
+              ⓘ
+              {showCriticalMovesTooltip && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '0',
+                  marginTop: '8px',
+                  width: '320px',
+                  maxWidth: '90vw',
+                  padding: '16px',
+                  backgroundColor: 'var(--background-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px var(--shadow-medium)',
+                  zIndex: 1000,
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  lineHeight: '1.5',
+                  textAlign: 'left'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '12px', fontSize: '14px', fontWeight: '600' }}>
+                    How to Read This Chart
+                  </h4>
+                  <ul style={{ marginBottom: 0, paddingLeft: '18px', marginTop: '8px' }}>
+                    <li style={{ marginBottom: '10px' }}>
+                      <strong>Time Usage vs. Move Quality:</strong> {hasData && criticalMomentsData.totalMoves > 0 ? `${criticalMomentsData.totalMoves} moves analyzed` : 'Analyzing move quality...'}
+                    </li>
+                    <li>
+                      <strong>Critical Moves Scatter:</strong> Plots time spent vs. position criticality to reveal if you're investing time appropriately on important decisions.
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
           {hasData && criticalMomentsData.totalMoves > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -1361,7 +1450,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                     value: 'Win % Change',
                     angle: -90,
                     position: 'insideLeft',
-                    style: { fill: 'var(--text-secondary)', fontSize: 11 }
+                    style: { fill: 'var(--text-secondary)', fontSize: 11, textAnchor: 'middle' }
                   }}
                   domain={[0, 'auto']}
                 />
@@ -1387,7 +1476,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
                   cursor={{ strokeDasharray: '3 3' }}
                 />
                 <Legend
-                  wrapperStyle={{ fontSize: '11px' }}
+                  wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
                   iconType="circle"
                 />
                 <Scatter
@@ -1435,7 +1524,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
       {/* Time Management Metrics from Principles Analyzer */}
       {timeManagementData && (
         <div style={{
-          marginTop: '24px',
+          marginTop: '8px',
           backgroundColor: 'var(--background-primary)',
           border: '1px solid var(--border-color)',
           borderRadius: '8px',
@@ -1640,7 +1729,7 @@ export const TimeAnalysis: React.FC<TimeAnalysisProps> = ({
           border: '1px solid var(--border-color)',
           borderRadius: '8px',
           padding: '16px',
-          marginTop: '20px',
+          marginTop: '8px',
           minHeight: '100px',
           cursor: llmInsights ? 'pointer' : 'default'
         }}

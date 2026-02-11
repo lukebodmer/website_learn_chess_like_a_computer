@@ -6,7 +6,6 @@ import DailyPuzzle from './components/daily-puzzle'
 import LichessDailyPuzzle from './components/lichess-daily-puzzle'
 import BuddyBoard from './components/buddy-board'
 import FiltersButton from './components/filters-button'
-import TopFilters from './components/top-filters'
 import TimelineNav from './components/timeline-nav'
 import GameStation from './components/game-station'
 import GamesGrid from './components/games-grid'
@@ -31,7 +30,6 @@ import { eloDataManager } from './elo-data-manager'
 ;(window as any).ReactDOM = ReactDOM
 ;(window as any).gameFilterManager = gameFilterManager
 ;(window as any).eloDataManager = eloDataManager
-;(window as any).TopFilters = TopFilters
 ;(window as any).TimelineNav = TimelineNav
 
 // This is the main entry point for Vite

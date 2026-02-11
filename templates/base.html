@@ -35,7 +35,9 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <h1><a href="{% url 'analysis:home' %}" class="logo-link">Learn Chess Like a Computer</a></h1>
+            <a href="{% url 'analysis:home' %}" class="logo-link">
+                <img src="{% static 'images/nav-logo.png' %}" alt="Learn Chess Like a Computer" class="nav-logo">
+            </a>
         </div>
         <div class="header-center">
             <nav class="header-nav">

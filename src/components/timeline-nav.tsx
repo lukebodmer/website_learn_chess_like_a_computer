@@ -6,9 +6,8 @@ interface Section {
 }
 
 const sections: Section[] = [
-  { id: 'top-filters-container', title: 'Filters' },
   { id: 'game-results-chart-container', title: 'Game Results' },
-  { id: 'mistakes-analysis-chart-container', title: 'Mistakes Analysis' },
+  { id: 'mistakes-analysis-chart-container', title: 'Error Analysis' },
   { id: 'opening-analysis-container', title: 'Opening Analysis' },
   { id: 'blunder-analysis-container', title: 'Blunder Analysis' },
   { id: 'time-analysis-container', title: 'Time Analysis' },
@@ -20,7 +19,19 @@ export default function TimelineNav() {
   const [activeSection, setActiveSection] = useState<string>('');
   const [sectionPositions, setSectionPositions] = useState<Map<string, { top: number; bottom: number }>>(new Map());
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [scrollY, setScrollY] = useState<number>(0);
   const timelineRef = useRef<HTMLDivElement>(null);
+
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    handleScroll(); // Initial value
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check screen size for responsive behavior
   useEffect(() => {
@@ -38,7 +49,7 @@ export default function TimelineNav() {
           // Mobile: single column layout
           gridContainer.style.gridTemplateColumns = '1fr';
           gridContainer.style.gap = '0';
-          reportContent.style.paddingTop = '120px';
+          reportContent.style.paddingTop = '0';
           reportContent.style.width = '100%';
           if (rightColumn) rightColumn.style.display = 'none';
         } else {
@@ -152,13 +163,17 @@ export default function TimelineNav() {
     scrollToSection(sections[newIndex].id);
   };
 
-  // Mobile horizontal stepper - render to body to escape grid
+  // Mobile horizontal stepper - fixed at top when scrolling past header
   if (isMobile) {
-    return (
+    // Calculate header height (approximately 80-100px on mobile)
+    const headerHeight = 80;
+    const isScrolledPastHeader = scrollY > 20;
+
+    const mobileNav = (
       <div
         style={{
           position: 'fixed',
-          top: 0,
+          top: isScrolledPastHeader ? '0' : `${headerHeight}px`,
           left: 0,
           right: 0,
           width: '100vw',
@@ -166,7 +181,8 @@ export default function TimelineNav() {
           borderBottom: '2px solid var(--primary-color, #007bff)',
           padding: '12px 16px',
           zIndex: 1000,
-          boxShadow: '0 2px 8px var(--shadow-light, rgba(0,0,0,0.1))'
+          boxShadow: '0 2px 8px var(--shadow-light, rgba(0,0,0,0.1))',
+          transition: 'top 0.2s ease'
         }}
       >
         <div style={{
@@ -289,6 +305,8 @@ export default function TimelineNav() {
         </div>
       </div>
     );
+
+    return mobileNav;
   }
 
   // Desktop vertical timeline

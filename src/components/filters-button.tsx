@@ -30,7 +30,7 @@ const FiltersIcon: React.FC<{ size?: number }> = ({ size = 24 }) => (
 )
 
 const FiltersButton: React.FC<FiltersButtonProps> = () => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [isAnimatingOut, setIsAnimatingOut] = useState(false)
   const [currentFilter, setCurrentFilter] = useState<FilterType>('all')
   const [currentSpeedFilter, setCurrentSpeedFilter] = useState<SpeedFilter>('all')
@@ -273,24 +273,29 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             </div>
             <div style={{
               display: 'flex',
-              gap: '8px'
+              gap: '8px',
+              justifyContent: 'center'
             }}>
               {(['all', 'white', 'black'] as FilterType[]).map(filter => (
                 <button
                   key={filter}
                   onClick={() => handleColorFilterChange(filter)}
                   style={{
-                    flex: 1,
-                    padding: '8px 12px',
+                    width: '70px',
+                    height: '70px',
+                    padding: '0',
                     fontSize: '12px',
                     fontWeight: '600',
                     border: currentFilter === filter ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     backgroundColor: currentFilter === filter ? 'var(--primary-color)' : 'var(--background-primary)',
                     color: currentFilter === filter ? 'var(--text-on-primary)' : 'var(--text-primary)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    textTransform: 'capitalize'
+                    textTransform: 'capitalize',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                   onMouseEnter={(e) => {
                     if (currentFilter !== filter) {
@@ -311,7 +316,7 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
 
           {/* Speed Filter */}
           {availableSpeeds.length > 0 && (
-            <div>
+            <div style={{ marginBottom: '20px' }}>
               <div style={{
                 fontSize: '12px',
                 fontWeight: '600',
@@ -322,23 +327,28 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
               </div>
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+                flexWrap: 'wrap',
+                gap: '8px',
+                justifyContent: 'center'
               }}>
                 {/* All speeds option */}
                 <button
                   onClick={handleSpeedAllClick}
                   style={{
-                    padding: '8px 12px',
+                    width: '70px',
+                    height: '70px',
+                    padding: '0',
                     fontSize: '12px',
                     fontWeight: '600',
                     border: currentSpeedFilter === 'all' ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     backgroundColor: currentSpeedFilter === 'all' ? 'var(--primary-color)' : 'var(--background-primary)',
                     color: currentSpeedFilter === 'all' ? 'var(--text-on-primary)' : 'var(--text-primary)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    textAlign: 'left'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                   onMouseEnter={(e) => {
                     if (currentSpeedFilter !== 'all') {
@@ -361,17 +371,21 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
                     onClick={() => handleSpeedToggle(speed)}
                     onDoubleClick={() => handleSpeedDoubleClick(speed)}
                     style={{
-                      padding: '8px 12px',
+                      width: '70px',
+                      height: '70px',
+                      padding: '0',
                       fontSize: '12px',
                       fontWeight: '600',
                       border: isSpeedSelected(speed) ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                      borderRadius: '6px',
+                      borderRadius: '8px',
                       backgroundColor: isSpeedSelected(speed) ? 'var(--primary-color)' : 'var(--background-primary)',
                       color: isSpeedSelected(speed) ? 'var(--text-on-primary)' : 'var(--text-primary)',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      textAlign: 'left',
-                      textTransform: 'capitalize'
+                      textTransform: 'capitalize',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => {
                       if (!isSpeedSelected(speed)) {
@@ -403,24 +417,30 @@ const FiltersButton: React.FC<FiltersButtonProps> = () => {
             </div>
             <div style={{
               display: 'flex',
-              gap: '8px'
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center'
             }}>
               {(['all', 'win', 'loss', 'draw'] as ResultFilter[]).map(result => (
                 <button
                   key={result}
                   onClick={() => handleResultFilterChange(result)}
                   style={{
-                    flex: 1,
-                    padding: '8px 12px',
+                    width: '70px',
+                    height: '70px',
+                    padding: '0',
                     fontSize: '12px',
                     fontWeight: '600',
                     border: currentResultFilter === result ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     backgroundColor: currentResultFilter === result ? 'var(--primary-color)' : 'var(--background-primary)',
                     color: currentResultFilter === result ? 'var(--text-on-primary)' : 'var(--text-primary)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    textTransform: 'capitalize'
+                    textTransform: 'capitalize',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                   onMouseEnter={(e) => {
                     if (currentResultFilter !== result) {
